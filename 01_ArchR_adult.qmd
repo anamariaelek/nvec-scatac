@@ -1,0 +1,4835 @@
+---
+title: "Nematostella adult scATAC ArchR project"
+execute:
+  eval: false
+  message: false
+  warning: false
+output: html_notebook
+---
+
+# Setup
+
+Load packages and functions.
+
+```{r}
+#| eval:true
+#| warning: false
+#| message: false
+
+# load in-house functions
+source("metacell_downstream_functions/Downstream_functions.R")
+source("metacell_downstream_functions/utils.R")
+source("motif-analysis/mta_downstream_functions.R")
+source("scatac_helper_functions.R")
+
+# global settings
+options(stringsAsFactors = FALSE)
+
+# load packages
+library(BSgenome.jaNemVect1.1.DToL.Assembly)
+library(GenomicRanges)
+library(trackViewer)
+library(GSEABase)
+library(data.table)
+library(tidyr)
+library(stringr)
+library(ggplot2)
+library(patchwork)
+library(ggrepel)
+library(ggside)
+library(grid)
+library(ArchR)
+library(Seurat)
+library(metacell)
+library(lisi)
+
+# set ggplot2 theme
+theme_blank <- theme_minimal() + theme(
+  axis.title.x = element_blank(),
+  axis.title.y = element_blank(),
+  panel.border = element_blank(),
+  panel.grid=element_blank(),
+  axis.ticks = element_blank(),
+  text = element_text(size=20)
+)
+theme_py <- theme_light() + theme(
+  panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank(),
+  panel.border = element_rect(colour = "black", fill = NA),
+  text = element_text(size=20),
+  strip.placement = "outside", 
+  strip.text = element_text(size=20, color="black"),
+  strip.background = element_rect(fill="white")
+)
+theme_set(theme_py)
+```
+
+If you are continuing analysis, you can load existing project.
+
+```{r}
+#| eval: true
+
+# load project
+sample <- "Nvec_TSS4_frag200"
+proj <- loadArchRProject(sprintf("ArchRProj_%s",sample))
+
+# define directories
+plot_dir <- file.path(file.path(sprintf("ArchRProj_%s",sample),"Plots"))
+dir.create(plot_dir, showWarnings = FALSE)
+peak_dir <- file.path(file.path(sprintf("ArchRProj_%s",sample),"Peaks"))
+dir.create(peak_dir, showWarnings = FALSE)
+```
+
+# Inputs and QCs
+
+Input samples and files.
+
+```{r}
+# samples
+samples <- c(
+  # whole organism
+  "25m_PFA", "50m_PFA",
+  "3_FixSor", "9_F6k", "10_F6k", "11_F5k", "12_F", "13_F",
+  "16_FC",
+  "20_Fn", "21_Fn", "22_Fn", "23_Fn",
+  "24_Fn",
+  "25_Fn", "26_Fn", "27_Fn",
+  # elav
+  "18_Elav", "19_Elav",
+  "28_Elav", "29_Elav", "30_Elav",
+  # multiome
+  "Multiome_07563AAD"
+)
+
+# files
+inputFiles <- structure(
+    paste0(
+      "../scatacseq-pipeline/",
+      samples,
+      "/filtered_alignments/EmptyDrop/cell_barcodes.fragments.gz"
+    ),
+    names = samples
+)
+# change path to multiome fragments,
+# here we use initial barcode filtering from RNA
+inputFiles["Multiome_07563AAD"] <- str_replace(
+  inputFiles["Multiome_07563AAD"], "EmptyDrop", "metacell"
+)
+
+
+# assign colors
+orig_cols <- c(
+  # whole organism
+  hsv(h=c(0.08,0.1), s=1, v=1),
+  hsv(h=c(0.14,0.16,0.18,seq(0.2,0.45,length.out=3)), s=1, v=1),
+  hsv(h=0.5, s=1, v=1),
+  hsv(h=seq(0.55,0.7,length.out=4), s=1, v=1),
+  hsv(h=0.75, s=1, v=1),
+  hsv(h=seq(0.8,0.85,length.out = 3), s=1, v=1),
+  # elav
+  hsv(h=c(0.94,0.96), s=1, v=1),
+  hsv(h=c(0.98, 0.99, 1), s=1, v=1),
+  # multiome
+  "#4D4D4D"
+)
+orig_cols <- structure(orig_cols, names = samples)
+```
+
+# Create ArchR project
+
+Load Nematostella genome.
+
+```{r}
+require(BSgenome.jaNemVect1.1.DToL.Assembly)
+genome_dir <- "../genome"
+geneAnnotationFile <- file.path(genome_dir,"Nvec_v4_merged_annotation_sort.gtf.gz")
+geneAnnotationDT <- fread(geneAnnotationFile)
+geneAnnotationDT <- geneAnnotationDT[V1 %in% BSgenome.jaNemVect1.1.DToL.Assembly@seqinfo@seqnames[1:15]]
+geneAnnotationDT[,gene:=str_extract(V9,'(?<=transcript_id ").+(?="; gene_id)')]
+geneAnnotationDT[,TSS:=V4][V7=="-",TSS:=V5]
+
+# genes
+genes <- geneAnnotationDT[V3=='transcript']
+geneAnnotationGR <- GRanges(
+  seqnames=genes[[1]],
+  ranges=IRanges(genes[[4]],genes[[5]]),
+  strand=genes[[7]], 
+  symbol = genes$gene
+)
+
+# tss
+geneAnnotationTSS <- GRanges(
+  seqnames=genes[[1]],
+  ranges=IRanges(genes$TSS,genes$TSS),
+  strand=genes[[7]],
+  symbol = genes$gene
+)
+
+# exons
+exons <- geneAnnotationDT[V3=='exon']
+geneAnnotationEXON <- GRanges(
+  seqnames=exons[[1]],
+  ranges=IRanges(exons[[4]],exons[[5]]),
+  strand=exons[[7]], 
+  symbol = exons$gene
+)
+```
+
+Set up ArchR genome and gene annotations.
+
+```{r}
+require(ArchR)
+require(GenomicRanges)
+
+set.seed(1)
+addArchRThreads(threads = c(parallel::detectCores()-1))
+addArchRChrPrefix(chrPrefix = FALSE)
+
+# genome annotation
+genomeAnnotation <- createGenomeAnnotation(
+  genome = BSgenome.jaNemVect1.1.DToL.Assembly, 
+  chromSizes = GRanges(
+    seqnames = BSgenome.jaNemVect1.1.DToL.Assembly@seqinfo@seqnames[1:15], 
+    ranges = IRanges(start=1, end=BSgenome.jaNemVect1.1.DToL.Assembly@seqinfo@seqlengths)[1:15]
+  ),
+  filter = FALSE
+)
+addArchRChrPrefix(chrPrefix = FALSE)
+
+# gene annotations
+geneAnnotation <- createGeneAnnotation(
+  TSS = geneAnnotationTSS, 
+  exons = geneAnnotationEXON, 
+  genes = geneAnnotationGR
+)
+```
+
+Create Arrow files
+
+```{r}
+#| eval: false
+
+# create arrow files
+ArrowFiles <- createArrowFiles(
+  inputFiles = inputFiles,
+  sampleNames = samples,
+  minTSS = 4,  minFrags = 200, # using EmptyDrop filtering + frags thresholding 200
+  addTileMat = TRUE,
+  addGeneScoreMat = TRUE,
+  subThreading = FALSE, # as per https://github.com/GreenleafLab/ArchR/issues/352
+  geneAnnotation = geneAnnotation,
+  genomeAnnotation = genomeAnnotation,
+  force = TRUE
+)
+```
+
+Add doublet scores to arrow files.
+
+```{r}
+ArrowFiles <- list.files(".",pattern="arrow$",full.names=TRUE)
+for(ArrowFile in ArrowFiles) {
+  if (grepl("PFA",ArrowFile)) {
+    knnMethod="UMAP"
+    k = 5
+    varFeatures = 1000
+  } else {
+    knnMethod="UMAP"
+    k = 10
+    varFeatures = 5000
+  }
+  doubScores <- addDoubletScores(
+    input = ArrowFile,
+    k = k, 
+    knnMethod = "LSI",
+    LSIMethod = 1,
+    dimsToUse = 1:20,
+    nTrials = 10,
+    scaleDims = TRUE,
+    LSIParams = list(seed = 1, dimsToUse = 1:20, varFeatures = varFeatures),
+    UMAPParams = list(n_neighbors = 30, min_dist = 0.1, metric = "cosine"),
+    verbose = TRUE, force=TRUE
+  )
+}
+```
+
+Create ArchR project
+
+```{r}
+ArrowFiles <- list.files(".",pattern="arrow$",full.names=TRUE)
+sample <- "Nvec_TSS4_frag200"
+
+proj <- ArchRProject(
+  ArrowFiles = ArrowFiles,
+  outputDirectory = sprintf("output_%s",paste(sample,collapse="_")),
+  copyArrows = FALSE,
+  geneAnnotation = geneAnnotation,
+  genomeAnnotation = genomeAnnotation
+)
+
+saveArchRProject(ArchRProj = proj, outputDirectory = sprintf("ArchRProj_%s",sample), load = TRUE)
+```
+
+Filter potential doublets.
+
+```{r}
+proj <- filterDoublets(proj, filterRatio = 1)
+# Filtering 2552 cells from ArchRProject!
+#         10_F6k : 103 of 3223 (3.2%)
+#         11_F5k : 1 of 436 (0.2%)
+#         12_F : 9 of 975 (0.9%)
+#         13_F : 4 of 634 (0.6%)
+#         16_FC : 25 of 1600 (1.6%)
+#         18_Elav : 68 of 2614 (2.6%)
+#         19_Elav : 420 of 6484 (6.5%)
+#         20_Fn : 185 of 4307 (4.3%)
+#         21_Fn : 449 of 6703 (6.7%)
+#         22_Fn : 188 of 4338 (4.3%)
+#         23_Fn : 34 of 1847 (1.8%)
+#         24_Fn : 51 of 2279 (2.2%)
+#         25_Fn : 1 of 369 (0.3%)
+#         25m_PFA : 2 of 543 (0.4%)
+#         26_Fn : 437 of 6617 (6.6%)
+#         27_Fn : 151 of 3891 (3.9%)
+#         28_Elav : 18 of 1358 (1.3%)
+#         29_Elav : 3 of 578 (0.5%)
+#         3_FixSor : 79 of 2825 (2.8%)
+#         30_Elav : 2 of 474 (0.4%)
+#         50m_PFA : 11 of 1093 (1%)
+#         9_F6k : 79 of 2828 (2.8%)
+#         Multiome_07563AAD : 232 of 4822 (4.8%)
+
+saveArchRProject(ArchRProj = proj, outputDirectory = sprintf("ArchRProj_%s",sample), load = TRUE)
+```
+
+# Clustering
+
+Dimensionality reduction using iterative LSI.
+
+```{r}
+proj <- addIterativeLSI(
+    ArchRProj = proj,
+    useMatrix = "TileMatrix",
+    name = "IterativeLSI",
+    iterations = 4,
+    varFeatures = 10000,
+    selectionMethod = "var",
+    dimsToUse = 1:30,
+    clusterParams = list( # Seurat::FindClusters
+        resolution = c(0.3),
+        sampleCells = 2000,
+        n.start = 10
+    ),
+    UMAPParams = list( # uwot::umap
+      n_neighbors = 10, 
+      min_dist = 0.2, spread=1.5,
+      metric = "cosine"
+    ),
+    force = TRUE
+)
+saveArchRProject(ArchRProj = proj, outputDirectory = sprintf("ArchRProj_%s",sample), load = TRUE)
+
+# numberOfCells(1): 52690
+# medianTSS(1): 16.535
+# medianFrags(1): 872
+```
+
+We can calculate Harmony batch corrected dimensionality reduced cooordinates. We show below that this is not necessary for our dataset.
+
+```{r}
+proj <- addHarmony(
+    ArchRProj = proj,
+    reducedDims = "IterativeLSI",
+    name = "Harmony",
+    groupBy = "Sample"
+)
+```
+
+Next we do clustering and calculate UMAP/TSNE embedding for visualization. 
+
+```{r}
+# dim reduction to use, IterativeLSI or Harmony
+rdim <- "IterativeLSI"
+
+# resolution, increase for more clusters (1.5 before)
+resolution <- 1.5
+
+# clustering
+proj <- addClusters(
+    input = proj,
+    reducedDims = rdim,
+    method = "Seurat",
+    name = "Clusters",
+    resolution = resolution,
+    dimsToUse = NULL,
+    scaleDims = NULL,
+    maxClusters = 40,
+    testBias = TRUE,
+    filterBias = TRUE,
+    biasClusters = 0.01,
+    biasCol = "TSSEnrichment",
+    force = TRUE
+)
+
+# UMAP
+umap_params <- c(nNeighbors = 30, minDist = 0.2, spread = 1.8)
+proj <- addUMAP(
+    ArchRProj = proj,
+    reducedDims = rdim,
+    name = "UMAP",
+    nNeighbors = umap_params['nNeighbors'], 
+    minDist = umap_params['minDist'], # affects local spread more
+    spread = umap_params['spread'], # affects global spread more
+    metric = "cosine",
+    force = TRUE
+)
+
+# tSNE
+tsne_params <- list(perplexity = 50)
+proj <- addTSNE(
+    ArchRProj = proj, 
+    reducedDims = rdim, 
+    name = "TSNE", 
+    perplexity = tsne_params[['perplexity']],
+    force = TRUE,
+    check_duplicates = FALSE
+)
+
+# update ArchR project
+saveArchRProject(ArchRProj = proj, outputDirectory = sprintf("ArchRProj_%s",sample), load = TRUE)
+```
+
+Save embedding plots.
+
+```{r}
+# define directory
+plot_dir <- file.path(file.path(sprintf("ArchRProj_%s",sample),"Plots"))
+dir.create(plot_dir, showWarnings = FALSE)
+
+# samples
+orig <- unique(proj@cellColData$Sample)
+orig_ord <- orig[order(as.integer(stringr::str_extract(orig,"\\d+")))]
+orig_pal <- orig_cols[orig_ord]
+cdt <- as.data.table(as.data.frame(proj@cellColData))[,.(Sample)]
+cdt[,Sample:=factor(Sample,levels=samples)]
+ctab <- table(droplevels(cdt$Sample))
+
+# clusters
+cdt <- as.data.table(as.data.frame(proj@cellColData))[,.(Clusters,nFrags,ReadsInTSS,ReadsInPromoter,TSSEnrichment)]
+clusters <- paste0("C",1:length(unique(cdt$Clusters)))
+cluster_colors <- structure(paletteDiscrete(values = clusters, set = "stallion"), names=clusters)
+
+# UMAP/tSNE plots
+emb <- "TSNE"
+rdim <- "IterativeLSI"
+
+p1 <- plotEmbedding(
+  ArchRProj = proj, 
+  colorBy = "cellColData", 
+  pal = orig_pal, 
+  name = "Sample", 
+  embedding = emb, 
+  plotAs="points", 
+  size=0.1, 
+  labelSize=0
+) + 
+  theme(legend.title = element_blank(), legend.position="bottom") + 
+  guides(
+    colour = guide_legend(
+      nrow = 4, byrow = TRUE,
+      override.aes = list(size=3)
+    )
+  ) + 
+  labs(
+    title = "Sample", 
+    x = paste0(emb,1), 
+    y = paste0(emb,2)
+  )
+p1$data$color <- str_remove(p1$data$color, "\\d+-")
+p1 <- p1 +
+  scale_color_manual(
+    values = orig_pal,
+    limits = names(ctab),
+    labels = sprintf("%s (%s)",names(ctab),format(ctab, big.mark=","))
+  )
+
+p2 <- plotEmbedding(
+  ArchRProj = proj, 
+  colorBy = "cellColData", 
+  name = "nFrags", 
+  embedding = emb, 
+  plotAs = "points", 
+  size=0.1
+) + 
+  theme(legend.title=element_blank(), legend.position="bottom") + 
+  labs(title = "Unique fragments", x=paste0(emb,1), y=paste0(emb,2))
+p2$data$alpha <- 0.5
+
+p3 <- plotEmbedding(
+  ArchRProj = proj, 
+  colorBy = "cellColData", 
+  name = "Clusters", 
+  pal = cluster_colors,
+  embedding = emb, 
+  plotAs = "points", 
+  size=0.1
+) + 
+  theme(legend.position="none") +
+  labs(title="Clusters", x=paste0(emb,1), y=paste0(emb,2))
+
+p4 <- plotEmbedding(
+  ArchRProj = proj, 
+  colorBy = "cellColData", 
+  name = "DoubletEnrichment", 
+  pal = ArchRPalettes$greyMagma,
+  embedding = emb, 
+  plotAs = "points", 
+  size=0.1
+) + 
+  theme(legend.position="none") +
+  labs(title="Doublet enrichment", x=paste0(emb,1), y=paste0(emb,2))
+
+p5 <- plotEmbedding(
+  ArchRProj = proj, 
+  colorBy = "cellColData", 
+  name = "TSSEnrichment", 
+  pal = ArchRPalettes$blueYellow,
+  embedding = emb, 
+  plotAs = "points", 
+  size=0.1
+) + 
+  theme(legend.position="bottom") +
+  labs(title="TSS enrichment", x=paste0(emb,1), y=paste0(emb,2))
+  
+# save plots
+pdf(file.path(plot_dir, sprintf("Embedding-%s-%s.pdf",emb,rdim)), width=12, height=12)
+(p2 + p1) / (p3 + p5)
+dev.off()
+
+pdf(file.path(plot_dir, sprintf("Embedding-%s-Samples-%s.pdf",emb,rdim)), width=6, height=6)
+p1
+dev.off()
+
+pdf(file.path(plot_dir, sprintf("Embedding-%s-Fragments-%s.pdf",emb,rdim)), width=6, height=6)
+p2
+dev.off()
+
+pdf(file.path(plot_dir, sprintf("Embedding-%s-Clusters-%s.pdf",emb,rdim)), width=6, height=6)
+p3
+dev.off()
+
+pdf(file.path(plot_dir, sprintf("Embedding-%s-Doublets-%s.pdf",emb,rdim)), width=6, height=6)
+p4
+dev.off()
+
+pdf(file.path(plot_dir, sprintf("Embedding-%s-TSSEnrich-%s.pdf",emb,rdim)), width=6, height=6)
+p5
+dev.off()
+
+```
+
+Calculate per-cluster statistics.
+
+```{r}
+rdim <- "IterativeLSI"
+
+# number of cells per sample
+cdt <- as.data.table(as.data.frame(proj@cellColData))[,.(Clusters,nFrags,ReadsInTSS,ReadsInPromoter,TSSEnrichment)]
+clusters <- paste0("C",1:length(unique(cdt$Clusters)))
+cluster_colors <- structure(paletteDiscrete(values = clusters, set = "stallion"), names=clusters)
+cdt[,Clusters:=factor(Clusters,levels=clusters)]
+cols=c("nFrags","ReadsInPromoter","ReadsInTSS")
+cdt[,paste0("log10",cols):=lapply(.SD,log10),.SDcols=cols][,(cols):=NULL]
+mcdt <- melt.data.table(cdt,id.vars="Clusters")[!is.na(Clusters)]
+
+
+plot_w <- switch(sample, "Elav"=6, "Nvec"=14, 14)
+plot_h <- switch(sample, "Elav"=4, "Nvec"=10, 10)
+pdf(file.path(plot_dir, sprintf("Clusters-Stats-%s.pdf",rdim)), height=plot_h, width=plot_w)
+
+cgp <- ggplot(mcdt, aes(x=Clusters,y=value,fill=Clusters)) +
+    geom_violin(draw_quantiles=c(0.25,0.5,0.75), width=1.4) + 
+    facet_grid(variable~., scales = "free_y", switch="both") + 
+    scale_fill_manual(values = cluster_colors) + 
+    theme(
+        panel.grid.major = element_line(size = 0.01, colour = "grey60"),
+        panel.grid.minor = element_blank(),
+        legend.position = "none", 
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)
+    )
+
+cpgc <- ggplot(mcdt[variable=="TSSEnrichment"], aes(x=Clusters,fill=Clusters)) +
+    geom_bar(color="black") +
+    scale_fill_manual(values = cluster_colors) + 
+    scale_y_continuous(expand = c(0,200)) +
+    labs(y="cells", x="Clusters") +
+    theme(
+        panel.grid.major = element_line(size = 0.01, colour = "grey60"),
+        panel.grid.minor = element_blank(),
+        legend.position = "none", 
+        axis.ticks.x = element_blank(), 
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)
+    )
+
+sdt <- as.data.table(as.data.frame(proj@cellColData))[,.(Clusters,Sample)][!is.na(Clusters)]
+sdt[,Clusters:=factor(Clusters,levels=names(cluster_colors))]
+cgs <- ggplot(sdt, aes(x=Clusters,fill=Sample)) +
+    geom_bar(color="black") +
+    scale_fill_manual(values = orig_pal) + 
+    scale_y_continuous(expand = c(0,200)) +
+    labs(y="cells", x="") +
+    theme(
+      panel.grid.major = element_line(size = 0.01, colour = "grey60"),
+      panel.grid.minor = element_blank(),
+      legend.position = "top", 
+      axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)
+    )
+
+cgs / cpgc
+cgp 
+dev.off()
+```
+
+Clusters containing small/poor cells (TSSEnrichment < 8) need to be removed. After removing them, re-do LSI and clustering. Repeat this process until all clusters are of good quality.
+
+```{r}
+# calculate median TSS enrichment
+median_mcdt <- mcdt[,.(value=median(value)),.(variable,Clusters)][order(variable,Clusters)]
+kdt <- rbindlist(list(
+  median_mcdt,
+  sdt[,.(value=.N),Clusters][,variable:="nCells"]
+), use.names = TRUE)
+
+# clusters to remove
+kdct <- dcast.data.table(kdt, Clusters~variable, value.var = "value")
+kdct[,keep:=TRUE]
+kdct[TSSEnrichment < 8, keep:=FALSE]
+kill_clusters <- kdct[keep==FALSE]$Clusters
+
+# remove clusters and update project
+remove_clusters <- as.character(kill_clusters)
+remove_cells <- rownames(proj@cellColData[proj@cellColData$Clusters %in% remove_clusters,])
+keep_cells <- intersect(rownames(proj@embeddings$UMAP$df), setdiff(rownames(proj@cellColData),remove_cells))
+length(remove_cells); length(keep_cells)
+proj <- proj[keep_cells, ]
+saveArchRProject(ArchRProj = proj, outputDirectory = sprintf("ArchRProj_%s",sample), load = TRUE)
+proj <- loadArchRProject(sprintf("ArchRProj_%s",sample))
+```
+
+# Final QCs
+
+Save filtered fragments file for all samples.
+
+```{r}
+frag_dir <- file.path(sprintf("ArchRProj_%s",sample), "Fragments")
+dir.create(frag_dir, showWarnings = FALSE)
+
+# get all fragments and add sample ids to barcodes
+fragFiles <- structure(
+  paste0("~/cluster/aelek/proj/scATAC_nvec_v2/scatacseq-pipeline/",samples,"/alignments/",samples,".bwa.shift.fragments.gz"), 
+  names=samples
+)
+fragFiles <- fragFiles[fragNFRmedianDT$sample]
+fragDT <- rbindlist(lapply(names(fragFiles), function(x) {
+  fdt <- fread(fragFiles[x])[,V4:=paste(x,V4,sep="#")][,Sample:=x]
+  fdt[,cell:=FALSE][V4 %in% rownames(proj@cellColData),cell:=TRUE]
+}))
+setnames(fragDT, c("chr","start","end","bc","reads","sample","cell"))
+saveRDS(fragDT, file.path(frag_dir, "Fragments.all.RDS"))
+
+# subset cells only
+fragDTcell <- fragDT[cell==TRUE][,cell:=NULL]
+fwrite(fragDTcell[,1:5], file.path(frag_dir, "Fragments.tsv"), sep="\t", col.names=FALSE)
+
+# save per-sample fragment files
+for (i in samples) {
+  message(i)
+  fwrite(fragDTcell[sample==i,1:5], file.path(frag_dir, sprintf("Fragments.%s.tsv",i)), sep="\t", col.names=FALSE)
+}
+```
+
+```{bash}
+for i in Fragments*tsv
+do
+  echo ${i}
+  sort -k 1,1 -k2,2n ${i} > ${i%%tsv}sort.tsv
+  bgzip ${i%%tsv}sort.tsv
+  tabix -p bed ${i%%tsv}sort.tsv.gz
+done
+```
+
+Count cells, fragments per sample, and save stats.
+
+```{r}
+fragDT <- readRDS(file.path(frag_dir, "Fragments.all.RDS")) 
+
+# cells per sample
+cell_counts_dt <- as.data.table(cbind(table(proj@cellColData$Sample)), keep.rownames="sample")
+setnames(cell_counts_dt,"V1","nCells")
+
+# total reads per sample in cells
+reads_in_cells_dt <- fragDT[cell==TRUE][,sum(reads),sample]
+setnames(reads_in_cells_dt,"V1","nReadsCell")
+
+counts_dt <- merge.data.table(cell_counts_dt, reads_in_cells_dt, by="sample")
+
+# total fagments per sample
+tot_frag_all_dt <- fragDT[,.N,sample]
+setnames(tot_frag_all_dt, "N", "nFrags")
+tot_frag_cell_dt <- fragDT[cell==TRUE][,.N,sample]
+setnames(tot_frag_cell_dt, "N", "nFragsCell")
+tot_frag_dt <- merge.data.table(tot_frag_all_dt, tot_frag_cell_dt, by="sample")
+
+# median fragments per cell/barcode and sample
+fragnDT <- fragDT[,.N,.(sample,bc)]
+fragmedianDT <- unique(fragnDT[,':='(medianFrags=median(N),meanFrags=mean(N)),sample][,.(sample,medianFrags,meanFrags)])
+
+fragnCellDT <- fragDT[cell==TRUE][,.N,.(sample,bc)]
+fragmedianCellSampleDT <- copy(fragnCellDT)[,':='(medianFragsCell=median(N),meanFragsCell=mean(N)),sample]
+fragmedianCellDT <- copy(fragnCellDT)[,':='(medianFragsCell=median(N),meanFragsCell=mean(N))][,.(medianFragsCell,meanFragsCell)]
+fragmedianCellDT <- unique(fragmedianCellDT)
+message(sprintf("Median fragments per cell: %.0f", fragmedianCellDT$medianFragsCell))
+fragSummaryDT <- rbindlist(list(fragmedianCellSampleDT,fragmedianCellDT[,sample:="all"]), use.names = TRUE)
+fwrite(fragSummaryDT, file.path(frag_dir, "Frags-By-Sample.tsv"), sep='\t', col.names=TRUE)
+
+# combine
+frag_counts_dt <- merge.data.table(fragmedianDT, fragmedianCellSampleDT, by="sample", all=TRUE)
+
+# NFR fragments per sample
+fragNFRmedianDT <- unique(
+  as.data.table(proj@cellColData)[,':='(medianFragsCellNFR=median(nFrags),meanFragsCellNFR=mean(nFrags)),Sample][
+    ,.(Sample,medianFragsCellNFR,meanFragsCellNFR)]
+)
+setnames(fragNFRmedianDT,"Sample","sample")
+
+frag_counts_all_dt <- merge.data.table(frag_counts_dt, fragNFRmedianDT, by="sample", all=TRUE)
+
+# combine
+dt_tot_frag <- merge.data.table(cell_counts_dt, tot_frag_dt, by="sample", all=TRUE)
+dt_counts <- merge.data.table(dt_tot_frag, frag_counts_all_dt, by="sample", all=TRUE)
+
+# reads per fragments
+dt_frag <- unique(fragDT[
+  ,':='(reads_median=median(reads), reads_mean=mean(reads)),sample][
+    ,.(sample,reads_mean,reads_median)])
+dt_frag_cell <- unique(fragDT[cell==TRUE][
+  ,':='(reads_median_cells=median(reads), reads_mean_cells=mean(reads)),sample][
+    ,.(sample,reads_mean_cells,reads_median_cells)])
+dt_frags <- merge.data.table(dt_frag, dt_frag_cell, by="sample", all=TRUE)
+
+# total reads per sample in cells
+reads_in_cells_dt <- fragDT[cell==TRUE][,sum(reads),sample]
+setnames(reads_in_cells_dt,"V1","nReadsCell")
+dt_frags_reads <- merge.data.table(dt_frags, reads_in_cells_dt, by="sample")
+
+# save
+dt <- merge.data.table(dt_counts, dt_frags_reads, by="sample", all=TRUE)
+dt[,sample:=factor(sample, levels=samples)]
+setorder(dt, sample)
+setcolorder(dt, c("sample","nCells","nFrags","nFragsCell","nReadsCell","medianFrags","medianFragsCell","medianFragsCellNFR","meanFrags","meanFragsCell","meanFragsCellNFR","reads_median","reads_median_cells","reads_mean","reads_mean_cells"))
+fwrite(dt, file.path(frag_dir, "Stats-By-Sample.tsv"), sep='\t', col.names=TRUE)
+```
+
+Save per-sample plots
+
+```{r}
+orig <- unique(proj@cellColData$Sample)
+orig_ord <- orig[order(as.integer(stringr::str_extract(orig,"\\d+")))]
+orig_pal <- orig_cols[orig_ord]
+
+fragDT <- readRDS(file.path(frag_dir, "Fragments.all.RDS"))
+setnames(fragDT, c("chr","start","end","bc","reads","sample","cell"))
+fragDT[,sample:=factor(sample, levels=samples)]
+
+# reads per fragments
+pdf(file.path(plot_dir, "Plot-QC-Sample-Reads-Frags.pdf"), height=4, width=5)
+# p4.1 <- ggplot(
+#   fragDT[,reads_q:=quantile(reads,0.99),sample][reads<reads_q], 
+#   aes(sample, reads, fill=sample)) +
+#   geom_boxplot(outlier.colour = NA) +
+#   scale_fill_manual(values = orig_pal) +
+#   scale_y_continuous(limits=c(0,15), expand = c(0,0)) +
+#   labs(title = "All barcodes", x = "reads per fragment", y = "") +
+#   theme_light() +
+#   theme(legend.position="none", text = element_text(size = 10))
+p4.2 <- ggplot(
+  fragDT[cell==TRUE][,reads_q:=quantile(reads,0.99),sample][reads<reads_q], 
+  aes(sample, reads, fill=sample)) +
+  geom_boxplot(outlier.colour = NA) +
+  scale_fill_manual(values = orig_pal) +
+  scale_y_continuous(limits=c(0,15), expand = c(0,0)) +
+  labs(title = "Cells", y = "Reads per fragment", x = "") +
+  theme_light() +
+  theme(
+    legend.position="none", 
+    text = element_text(size = 10),
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)
+  )
+#p4.1
+p4.2
+dev.off()
+
+# the rest is done for cells only
+fragDT <- fragDT[cell==TRUE]
+
+# plot fragments per sampe and number of cells
+# fragnCellDT[,sample:=factor(sample, levels = samples)]
+# setorder(fragnCellDT, sample)
+# sfrp <- ggplot(fragnCellDT, aes(x=sample,y=N,fill=sample)) +
+#     geom_violin(draw_quantiles=c(0.25,0.5,0.75), width=1.4) + 
+#     scale_fill_manual(values = orig_cols) +
+#   scale_y_log10() +
+#     labs(x = "Sample", y="Fragments per cell") +
+#     theme(
+#         panel.grid.major = element_line(size = 0.01, colour = "grey60"),
+#         panel.grid.minor = element_blank(),
+#         legend.position = "none", 
+#         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)
+#     ) 
+# scp <- ggplot(fragnCellDT, aes(x=sample,fill=sample)) +
+#     geom_bar(color="black") + 
+#     scale_fill_manual(values = orig_cols) +
+#     scale_y_log10(expand = expansion(mult = c(0,0.1))) +
+#     labs(x = "", y="Cells") +
+#     theme(
+#         panel.grid.major = element_line(size = 0.01, colour = "grey60"),
+#         panel.grid.minor = element_blank(),
+#         legend.position = "none", 
+#         axis.text.x = element_blank(), axis.ticks.length.x = unit(0, "mm")
+#     ) 
+# scp / sfrp
+# ggsave(file.path(plot_dir, "Plot-QC-Sample-Statistics-1.pdf"), height = 7, width = 8)
+
+
+# insert size distribution
+fragDT[,insert:=abs(start-end)]
+p5 <- ggplot(fragDT, aes(insert, color=sample)) +
+  geom_density() + 
+  scale_color_manual(values = orig_pal) +
+  scale_y_continuous(expand = c(0,0)) +
+  scale_x_continuous(expand = c(0,0), limits = c(0,600)) +
+  labs(title = "", x = "Fragment Size (bp)", y = "") +
+  theme_light() +
+  theme(legend.position="none", text = element_text(size = 10))
+
+# TSS enrichment  
+tssDT <- plotTSSEnrichment(ArchRProj=proj, returnDF=TRUE)
+tssDT <- setDT(as.data.frame(tssDT))
+p6 <- ggplot(tssDT, aes(x, smoothValue, color=group, group=group)) + 
+  geom_line() +
+  scale_color_manual(values=orig_pal) +
+  scale_y_continuous(expand = c(0,0)) +
+  labs(title = "", x = "Distance From TSS (bp)", y = "") + 
+   theme_light() +
+  theme(legend.position="none", text = element_text(size = 10))
+
+# number of cells per sample
+cdt <- as.data.table(as.data.frame(proj@cellColData))[,.(Sample)]
+cdt[, Sample:=factor(Sample,levels=samples)]
+p7 <- ggplot(cdt, aes(Sample,fill=Sample)) + 
+  geom_bar(color="black") + 
+  scale_fill_manual(values = orig_pal) +
+  scale_y_log10(expand = expansion(mult = c(0,0.1))) +
+  labs(title = "", y = "Number of cells", x = "") + theme_light() +
+  theme(
+    legend.position = "none", 
+    text = element_text(size = 10),
+    axis.text.x = element_blank(), axis.ticks.length.x = unit(0, "mm")
+  ) 
+
+# fragments per cell per sample
+nFragDT <- fragDT[,.(frags=.N),.(sample,bc)]
+nFragDT[,sample:=factor(sample,levels=samples)]
+setorder(nFragDT, sample)
+p8 <- ggplot(nFragDT, aes(sample, frags, fill = sample)) + 
+  geom_violin(width = 1.8, draw_quantiles = c(0.5)) + 
+  scale_fill_manual(values = orig_pal) +
+  scale_y_log10(expand = expansion(mult = c(0,0.1))) +
+  labs(title = "", y = "Number of fragments", x = "") + 
+  theme_light() +
+  theme(
+    legend.position = "none", 
+    text = element_text(size = 10),
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)
+  ) 
+
+plots_stats <- ( p7 + p5 ) / ( p8 + p6 )
+
+# save
+pdf(file.path(plot_dir, "Plot-QC-Sample-Statistics.pdf"), height=6, width=7)
+plots_stats
+dev.off()
+
+```
+
+Save metadata
+
+```{r}
+meta_dt <- as.data.table(proj@cellColData, keep.rownames="Cell")
+fwrite(meta_dt, file.path(sprintf("ArchRProj_%s",sample), sprintf("%s-cellColData.tsv",sample)))
+```
+
+Save bigwigs for clusters
+
+```{r}
+groupBy <- "Clusters"
+ct_gt_num_cells <- sort(table(proj@cellColData[[groupBy]]))
+ct_gt_num_cells[ct_gt_num_cells>10]
+getGroupBW(
+  ArchRProj = proj,
+  groupBy = groupBy,
+  normMethod = "ReadsInTSS",
+  tileSize = 25,
+  maxCells = 1000,
+  ceiling = 4,
+  verbose = TRUE,
+  threads = getArchRThreads(),
+  logFile = createLogFile("getGroupBW")
+)
+fwrite(data.table(ct_gt_num_cells), file.path(sprintf("ArchRProj_%s",sample),"GroupBigWigs",groupBy,"group_sizes.tsv"), sep="\t", col.names=FALSE)
+```
+
+Combine peak-by-cell matrices
+
+```{r}
+mtxDirs <- structure(unlist(lapply(samples, function(smp)
+  sprintf("~/cluster/aelek/proj/scATAC_nvec/scatacseq-pipeline/%s/filtered_matrix/EmptyDrop",smp)
+)), names=samples)
+cells <- rownames(proj@cellColData)
+  
+# load matrices for individual samples
+mat_list <- lapply(samples, function(sample) {
+  
+  mex_dir_path <- mtxDirs[sample]
+  message("Reading matrix from ", mex_dir_path)
+  sample_cells <- grep(sample, cells, value=TRUE)
+  message("Selected cells: ", length(sample_cells))
+
+  feature_path <- file.path(mex_dir_path, "features.txt")
+  barcode_path <- file.path(mex_dir_path, "barcodes.txt")
+  mtx_path <- file.path(mex_dir_path, "matrix.mtx")
+   
+  features <- fread(feature_path, header = F)
+  barcodes <- fread(barcode_path, header = F)
+  mtx <- Matrix::readMM(mtx_path)
+  
+  rownames(mtx) <- features[[1]]
+  colnames(mtx) <- paste(sample,barcodes[[1]],sep="#")
+  
+  cid <- match(sample_cells,colnames(mtx))
+  if (any(is.na(cid))) {
+    message(sum(is.na(cid)), " cells not found in matrix")
+    cid <- cid[!is.na(cid)]
+  }
+  mtx[,cid]
+  
+})
+
+# get missing ranges for individual samples
+ranges_list <- sapply(mat_list, rownames)
+ranges <- unique(unlist(ranges_list, use.names = FALSE))
+range_gr <- makeGRangesFromDataFrame(
+  tidyr::separate(
+    data.frame(range=ranges),
+    range, c("seqnames","start","end"), sep = "-", remove = TRUE)
+)
+mat_list_full <- lapply(1:length(mat_list), function(i) {
+  message(i," out of ",length(mat_list))
+  mat <- mat_list[[i]]
+  sample_range <- rownames(mat)
+  missing_range <- setdiff(ranges,sample_range)
+  missing_mat <- matrix(0, nrow=length(missing_range), ncol=ncol(mat))
+  rownames(missing_mat) <- missing_range
+  colnames(missing_mat) <- colnames(mat)
+  full_mat <- do.call(rbind,list(mat,missing_mat))
+  full_mat[ranges,]
+})
+mat_full <- do.call(cbind,mat_list_full)
+mat_full_sparse <- Matrix(mat_full, sparse = TRUE) 
+
+# sort
+range_gr <- makeGRangesFromDataFrame(
+  tidyr::separate(
+    data.frame(range=rownames(mat_full_sparse)),
+    range, c("seqnames","start","end"), sep = "-", remove = TRUE)
+)
+sort_gr <- sort(range_gr)
+rownames <- Signac::GRangesToString(sort_gr)
+mat_full_sorted <- mat_full_sparse[rownames,]
+
+# save
+mat_dir <- file.path(sprintf("ArchRProj_%s",sample),"Matrices")
+dir.create(mat_dir,showWarnings=FALSE)
+saveRDS(mat_full_sparse, file.path(mat_dir,"Matrix-Peak-Cell.rds"))
+```
+
+Save tiles matrix
+
+```{r}
+tl_mat <- getMatrixFromProject(proj, "TileMatrix", binarize=TRUE)
+mat_dir <- file.path(sprintf("ArchRProj_%s",sample), "TileMatrix")
+dir.create(mat_dir,showWarnings=FALSE)
+Matrix::writeMM(tl_mat@assays@data$TileMatrix,file.path(mat_dir,"matrix.mtx"))
+writeLines(colnames(tl_mat),file.path(mat_dir,"cells"))
+row_gr <- GRanges(seqnames=rowData(tl_mat)$seqnames,ranges=IRanges(start=rowData(tl_mat)$start,width=500))
+rows <- Signac::GRangesToString(row_gr)
+writeLines(rows,file.path(mat_dir,"tiles"))
+rownames(tl_mat) <- rows
+saveRDS(tl_mat, file.path(mat_dir, "Matrix-Tiles.rds"))
+```
+
+# Peak calling
+
+Calling peaks per cluster.
+
+```{r}
+groupBy <- "Clusters"
+proj <- addGroupCoverages(
+  ArchRProj=proj, 
+  groupBy=groupBy,
+  minCells = 200,
+  maxCells = 1000,
+  minReplicates = 2,
+  maxReplicates = 2,
+  sampleRatio = 1,
+  force=TRUE
+)
+
+proj <- addReproduciblePeakSet(
+  ArchRProj=proj, 
+  groupBy=groupBy, 
+  genomeSize=204927134, 
+  extsize=200, shift=-100,
+  method = "q", 
+  cutOff = 0.001, 
+  extendSummits = 125,
+  promoterRegion = c(200, 50),
+  reproducibility = "1",
+  plot = FALSE,
+  force = TRUE
+)
+
+proj <- addPeakMatrix(proj)
+
+# update project
+saveArchRProject(ArchRProj=proj, outputDirectory=sprintf("ArchRProj_%s",sample), load=TRUE)
+
+# get all peaks
+fs <- list.files(file.path(sprintf("ArchRProj_%s",sample),"PeakCalls"),pattern="*.gr.rds",full.names=TRUE)
+groups <- str_extract(basename(fs),"C\\d+")
+names(fs) <- groups
+gl <- lapply(groups,function(grp) {
+  gr <- readRDS(fs[[grp]])
+  gr$Group <- grp
+  gr
+})
+names(gl) <- groups
+
+# save peaks per cluster
+peaks_subdir <- file.path(sprintf("ArchRProj_%s",sample),"Peaks",groupBy)
+dir.create(peaks_subdir, showWarnings = FALSE, recursive=TRUE)
+
+for (cluster in names(gl)) {
+  print(cluster)
+  dt <- as.data.table(gl[[cluster]])[,c("seqnames","start","end","Group","score","strand")]
+  dt[,Group:=paste0("peak",.I)]
+  fwrite(dt, file.path(peaks_subdir,sprintf("Peaks-%s.bed",cluster)), sep="\t", col.names=FALSE)
+}
+
+# save all peaks
+gL <- GRangesList(gl); gr <- unlist(gL)
+gr <- sortSeqlevels(gr)
+gr <- sort(gr)
+dt <- as.data.table(gr)[,c("seqnames","start","end","Group","score","strand")]
+dt[,Group:=sprintf("peak%s.%s",.I,Group)]
+fwrite(dt, file.path(peaks_subdir,sprintf("Peaks.bed")), sep="\t", col.names=FALSE)
+
+# save iteratively reduced peakset
+red_gr <- proj@peakSet
+red_dt <-as.data.table(red_gr)[,c("seqnames","start","end","GroupReplicate","score","strand")]
+fwrite(red_dt, file.path(peaks_subdir,sprintf("Peaks-iterative-reduced.bed")), sep="\t", col.names=FALSE)
+
+# filter peaks
+peaks_subdir_filt <- file.path(sprintf("ArchRProj_%s",sample),"Peaks",sprintf("%s_filtered",groupBy))
+dir.create(peaks_subdir_filt, showWarnings = FALSE)
+bed_files <- list.files(peaks_subdir)
+bed_cols <- c("seqnames","start","end","peak","score","strand")
+lapply(bed_files, function(bedf) {
+  message(bedf)
+  dt <- fread(file.path(peaks_subdir, bedf))
+  setnames(dt, bed_cols)
+  dts <- dt[score>10]
+  fwrite(dts, file.path(peaks_subdir_filt,bedf), sep="\t", col.names=FALSE)
+  # xlsx::write.xlsx2(dts, file.path(peaks_subdir_filt,sprintf("Peaks_%s_filtered.xlsx",groupBy)), sheetName = str_remove(bedf,"\\.bed"), col.names = TRUE, row.names = TRUE, append = TRUE)
+})
+
+
+```
+
+Combine cluster peaks with bulk and pseudo-bulk consensus peaks.
+
+```{r}
+bed_cols <- c("seqnames","start","end","peak","score","strand")
+
+consensus_peaks_file <- "~/cluster/aelek/proj/scATAC_nvec_v2/consensus_peaks/Aug22/consensusSeekeR-peaks-Aug22.bed"
+consensus_peaks <- fread(consensus_peaks_file)[,1:3] # 250bp
+setnames(consensus_peaks, bed_cols[1:3])
+consensus_gr <- makeGRangesFromDataFrame(consensus_peaks)
+
+groupBy <- "Clusters"
+cluster_peaks_file <- file.path(sprintf("ArchRProj_%s",sample),"Peaks", groupBy,"Peaks-iterative-reduced.bed")
+cluster_peaks <- fread(cluster_peaks_file)[,1:3] # 250bp
+setnames(cluster_peaks, bed_cols[1:3])
+cluster_gr <- makeGRangesFromDataFrame(cluster_peaks)
+
+# select consensus peaks that don't overlap with per cluster peaks
+ovl <- findOverlaps(query=consensus_gr, subject=cluster_gr, minoverlap=100)
+ovl_gr <- consensus_gr[queryHits(ovl)]
+nonovl <- setdiff(seq_along(consensus_gr), queryHits(ovl))
+nonovl_gr <- consensus_gr[nonovl]
+all_gr <- sort(c(cluster_gr, nonovl_gr))
+
+# save all peaks
+comb_peaks <- as.data.table(all_gr)
+setnames(comb_peaks, c(bed_cols[1:4],"strand"))
+comb_peaks[,peak:=paste0("peak",.I)]
+comb_peaks[,score:="."]
+setcolorder(comb_peaks,bed_cols)
+fwrite(comb_peaks, file.path(sprintf("ArchRProj_%s",sample),"Peaks",sprintf("Peaks-consensus-%s.bed",groupBy)), sep="\t", col.names=FALSE)
+
+# plot some numbers
+ovldt <- rbindlist(list(
+  as.data.table(cluster_gr[unique(subjectHits(ovl))])[,c("set","ovl"):=list("cluster","overlapping")],
+  as.data.table(cluster_gr[unique(setdiff(seq_along(cluster_gr), subjectHits(ovl)))])[,c("set","ovl"):=list("cluster","non-overlapping")],
+  as.data.table(consensus_gr[unique(queryHits(ovl))])[,c("set","ovl"):=list("consensus","overlapping")],
+  as.data.table(consensus_gr[unique(setdiff(seq_along(consensus_gr), queryHits(ovl)))])[,c("set","ovl"):=list("consensus","non-overlapping")]
+))
+ovldt[,set:=factor(set,levels=c("consensus","cluster"))]
+ovldt[,ovl:=factor(ovl,levels=c("non-overlapping","overlapping"))]
+ovldts <- ovldt[,.N,.(set,ovl)]
+gp <- ggplot(ovldts, aes(set, N, fill = ovl,  label = N)) +
+  geom_bar(stat = "identity", position = "stack") +
+  geom_text(position = position_stack(vjust = 0.5)) +
+  scale_y_continuous( 
+    expand = c(0,0),
+    labels = scales::unit_format(unit = "K", scale = 1e-3, accuracy=1)
+  ) + 
+  scale_fill_manual("sets overlap",values=c("red","orange")) +
+  labs(y="number of peaks")
+ggsave(file.path(plot_dir,"Peak-Calls-overlap.pdf"), height=6, width=6)
+
+```
+
+Add all peaks to ArchR project.
+
+```{r}
+# integrated consensus + per cluster peaks 
+bed_cols <- c("seqnames","start","end","peak","score","strand")
+groupBy <- "Clusters"
+peaks <- fread(file.path(sprintf("ArchRProj_%s",sample),"Peaks",sprintf("Peaks-consensus-%s.bed",groupBy)))
+setnames(peaks, bed_cols)
+peaks$name <- peaks$peak
+peaks_gr <- makeGRangesFromDataFrame(
+  peaks[seqnames %in% BSgenome.jaNemVect1.1.DToL.Assembly@seqinfo@seqnames[1:15]], 
+  keep.extra.columns=TRUE
+)
+
+# add peaks to ArchR project
+proj <- addPeakSet(proj, peakSet=peaks_gr, force=TRUE)
+proj <- addPeakMatrix(proj, force=TRUE)
+saveArchRProject(ArchRProj = proj, outputDirectory = sprintf("ArchRProj_%s",sample), load = TRUE)
+
+```
+
+Save peaks matrix
+
+```{r}
+pmat <- getMatrixFromProject(proj, "PeakMatrix", binarize=FALSE)
+mat_dir <- file.path(sprintf("ArchRProj_%s",sample), "PeakMatrix")
+dir.create(mat_dir,showWarnings=FALSE)
+pmat_mat <- pmat@assays@data$PeakMatrix
+Matrix::writeMM(pmat_mat,file.path(mat_dir,"matrix.mtx"))
+writeLines(colnames(pmat),file.path(mat_dir,"cells"))
+row_names <- rowData(pmat)$name
+writeLines(row_names,file.path(mat_dir,"peaks"))
+rownames(pmat_mat) <- row_names
+saveRDS(proj@peakSet, file.path(mat_dir,"peaks.rds"))
+saveRDS(pmat_mat, file.path(mat_dir, "Matrix-Peaks.rds"))
+```
+
+## Compare to liftovered old peaks
+
+Load peaks
+
+```{r}
+# load peaks
+peak_dir <- file.path(sprintf("ArchRProj_%s",sample),"Peaks")
+new_peaks <- read_gtf(file.path(peak_dir, "Peaks-consensus-Clusters.gtf"))
+old_peaks <- read_gtf(file.path(peak_dir, "Peaks-consensus-Clusters-old-liftover.gtf"))
+
+# how many old peaks were not lifted over
+missing_peaks <- fread(file.path(peak_dir,"Peaks-consensus-Clusterrs-old-unmapped.txt"), header=FALSE)
+nrow(missing_peaks) # 805
+
+# gtf conversion looses peak names, retrieve them
+new_peaks_ann <- fread(file.path(peak_dir,"Peaks-consensus-Clusters.bed"))
+new_peaks_ann[,loc:=sprintf("%s_%s_%s",V1,V2,V3)]
+new_peaks$feature <- "peak"
+new_peaks$loc <- str_extract(new_peaks$attribute, "(N[WC]|ENA).+_\\d+_\\d+")
+peak_ids <- new_peaks_ann[match(new_peaks$loc, loc)]$V4
+new_peaks$attribute <- sprintf('peak_id "%s";', peak_ids)
+new_peaks$loc <- NULL
+write_gtf(new_peaks, filename = file.path(peak_dir, "Peaks-consensus-Clusters-ann.gtf"))
+
+# for old peaks too
+old_peaks_ann_f <- "../../../scATAC_nvec/clustering/ArchR/ArchRProj_Nvec_filtered_3/Peaks/Peaks-consensus-Clusters.bed"
+old_peaks_ann <- fread(old_peaks_ann_f)
+old_peaks_ann[,loc:=sprintf("%s_%s_%s",V1,V2,V3)]
+old_peaks$feature <- "peak"
+old_peaks$loc <- str_extract(old_peaks$attribute, "chr_1_\\d+_\\d+")
+peak_ids <- old_peaks_ann[match(old_peaks$loc, loc)]$V4
+old_peaks$attribute <- sprintf('peak_id "%s"; Parent ""; ID "%s";', peak_ids, peak_ids)
+old_peaks$loc <- NULL
+write_gtf(old_peaks, filename = file.path(peak_dir, "Peaks-consensus-Clusters-old-liftover-ann.gtf"))
+
+# overlap
+all_seqlv <- unique(c(seqlevels(new_peaks),seqlevels(old_peaks)))
+seqlevels(new_peaks) <- all_seqlv
+seqlevels(old_peaks) <- all_seqlv
+ovl <- GenomicRanges::findOverlaps(query = old_peaks, subject = new_peaks, ignore.strand = TRUE)
+
+# count ovl and non-ovl peaks
+old_ovl <- unique(queryHits(ovl)); length(old_ovl) # 76493
+old_uniq <- setdiff(1:length(old_peaks), queryHits(ovl)); length(old_uniq) # 32589
+new_ovl <- unique(subjectHits(ovl)); length(new_ovl) # 74387
+new_uniq <- setdiff(1:length(new_peaks), subjectHits(ovl)); length(new_uniq) # 24412
+ovl_mat <- matrix(
+  data = c(length(old_ovl), length(old_uniq), length(new_uniq), length(new_ovl)),
+  byrow = TRUE, nrow = 2, ncol = 2
+)
+colnames(ovl_mat) <- c("ovl", "uniq")
+rownames(ovl_mat) <- c("old", "new")
+```
+
+Where are overlapping and non-overlapping peaks coming from (i.e. pseudobulk consensus or per-cluster peak calling)
+
+```{r}
+# match overlapping peaks
+old_peaks$peak_id <- str_extract(old_peaks$attribute, "peak\\d+")
+old_ovl_peaks <- old_peaks[queryHits(ovl)]$peak_id
+new_peaks$peak_id <- str_extract(new_peaks$attribute, "peak\\d+")
+new_ovl_peaks <- new_peaks[subjectHits(ovl)]$peak_id
+peaks_mapping <- data.table(old = old_ovl_peaks, new = new_ovl_peaks)
+fwrite(peaks_mapping, file.path(peak_dir, "peak.compara.mapping.tsv"), sep="\t", col.names = TRUE)
+
+# check non-overlapping peaks
+old_peaks[old_uniq]
+new_peaks[new_uniq]
+
+# where are new peaks coming from
+cons_fn <- "../../consensus_peaks/Aug22/consensusSeekeR-peaks-Aug22.bed"
+cons <- read_bed(cons_fn)
+
+clus_fn <- file.path(peak_dir, "Clusters", "Peaks-iterative-reduced.bed")
+clus <- read_bed(clus_fn)
+
+ovl_cons <- GenomicRanges::findOverlaps(query = new_peaks, subject = cons)
+new_peaks$overlaps_consensus <- FALSE
+new_peaks$overlaps_consensus[queryHits(ovl_cons)] <- TRUE
+
+ovl_clus <- GenomicRanges::findOverlaps(query = new_peaks, subject = clus)
+new_peaks$overlaps_Clusters <- FALSE
+new_peaks$overlaps_Clusters[queryHits(ovl_clus)] <- TRUE
+
+# where are old peaks coming from
+cons_fn <- "../../../scATAC_nvec/consensus_peaks/Jul21/consensusSeekeR-peaks-Jul21.bed"
+cons <- read_bed(cons_fn)
+
+clus_fn <- "../../../scATAC_nvec/clustering/ArchR/ArchRProj_Nvec_filtered_3/Peaks/Clusters/Peaks-iterative-reduced.bed"
+clus <- read_bed(clus_fn)
+
+old_peaks_ann <- read_bed(old_peaks_ann_f)
+
+ovl_cons <- GenomicRanges::findOverlaps(query = old_peaks_ann, subject = cons)
+old_peaks_ann$overlaps_consensus <- FALSE
+old_peaks_ann$overlaps_consensus[queryHits(ovl_cons)] <- TRUE
+
+ovl_clus <- GenomicRanges::findOverlaps(query = old_peaks_ann, subject = clus)
+old_peaks_ann$overlaps_Clusters <- FALSE
+old_peaks_ann$overlaps_Clusters[queryHits(ovl_clus)] <- TRUE
+
+# save table of peaks 
+old_peaks_dt <- as.data.table(old_peaks_ann)
+setnames(old_peaks_dt, c("score"), c("peak_id"))
+colnames <- colnames(old_peaks_dt)
+new_peaks_dt <- as.data.table(new_peaks)[,..colnames]
+dt <- rbindlist(list(
+  old = old_peaks_dt,
+  new = new_peaks_dt
+), idcol = "set")
+
+# peaks overlaps info
+dt[,overlaps:="none"]
+dt[overlaps_consensus==TRUE & overlaps_Clusters==FALSE, overlaps:="consensus"]
+dt[overlaps_consensus==FALSE & overlaps_Clusters==TRUE, overlaps:="Clusters"]
+dt[overlaps_consensus==TRUE & overlaps_Clusters==TRUE, overlaps:="consensus+Clusters"]
+dt[,overlaps:=factor(overlaps,levels=c("none","consensus","Clusters","consensus+Clusters"))]
+dt[,.N,.(set,overlaps)]
+
+dt[,overlaps_set:="overlaping"]
+dt[set=="old" & peak_id %in% old_peaks[old_uniq]$peak_id, overlaps_set:="non-overlaping"]
+dt[set=="new" & peak_id %in% new_peaks[new_uniq]$peak_id, overlaps_set:="non-overlaping"]
+  
+setnames(dt, c("peak_id","seqnames","start","end"), c("peak","peak_chr","peak_start","peak_end"))
+dt[,strand:=NULL]
+
+# add new coordinates for old peaks
+old_peak_liftoff <- as.data.table(old_peaks)[,.(seqnames,start,end,peak_id)]
+old_peak_liftoff[, set:="old"]
+setnames(old_peak_liftoff, c("peak_id","seqnames","start","end"), c("peak","peak_chr_liftoff","peak_start_liftoff","peak_end_liftoff"))
+dt <- merge.data.table(dt, old_peak_liftoff, by=c("set","peak"), all.x=TRUE)
+
+# save
+fwrite(dt, file.path(peak_dir, "peak.compara.tsv"), sep="\t")
+
+uniq_dt <- dt[overlaps_set==FALSE]
+fwrite(uniq_dt, file.path(peak_dir, "peak.compara.uniq.tsv"), sep="\t")
+
+gp_ovl <- ggplot(dt, aes(overlaps, fill=overlaps)) +
+  geom_bar() +
+  scale_fill_viridis_d() +
+  facet_grid(set~overlaps_set) +
+  theme(legend.position = "none") +
+  labs(title = "Peaks")
+ggsave(file.path(plot_dir, "peaks_compara_ovl.pdf"), width = 10)
+  
+```
+
+Peak matrices
+
+```{r}
+# load peak matrices
+pmat_fn <- file.path(sprintf("ArchRProj_%s",sample), "PeakMatrix", "Matrix-Peaks.rds")
+pmat <- readRDS(pmat_fn)
+pmat_old_fn <- "../../../scATAC_nvec/clustering/ArchR/ArchRProj_Nvec_filtered_3/Matrices/Matrix-Peaks.rds"
+pmat_old <- readRDS(pmat_old_fn)
+
+# subset for overlapping peaks
+peaks_mapping <- fread(file.path(peak_dir, "peak.compara.mapping.tsv"))
+peaks_mapping <- peaks_mapping[old %in% rownames(pmat_old) & new %in% rownames(pmat)]
+cells <- intersect(colnames(pmat),colnames(pmat_old))
+pmat <- pmat[peaks_mapping$new,cells]
+pmat_old <- pmat_old[peaks_mapping$old,cells]
+
+# peak_cors <- Rfast::corpairs(t(pmat),t(pmat_old))
+# Cholmod error 'problem too large'
+```
+
+Group by cell types
+
+```{r}
+# group by cell type
+proj_old <- loadArchRProject("../../../scATAC_nvec/clustering/ArchR/ArchRProj_Nvec_filtered_3")
+old_ann <- unique(as.data.table(proj_old@cellColData, keep.rownames="cell")[,.(cell,cell_type)])
+old_ann[grepl("neuron",cell_type) & cell_type!="neuron_gland", cell_type:="neuron"]
+old_ann[grepl("gland",cell_type), cell_type:="neuron"]
+old_ann_v <- structure(old_ann$cell_type, names=old_ann$cell)
+
+new_ann <- unique(as.data.table(proj@cellColData, keep.rownames="cell")[,.(cell,cell_type)])
+new_ann[grepl("neuron",cell_type), cell_type:="neuron"]
+new_ann[grepl("gland",cell_type), cell_type:="neuron"]
+new_ann_v <- structure(new_ann$cell_type, names=new_ann$cell)
+
+shared_ann <- intersect(unique(old_ann_v),unique(new_ann_v))
+old_ann_v <- old_ann_v[old_ann_v %in% shared_ann]
+new_ann_v <- new_ann_v[new_ann_v %in% shared_ann]
+
+# sum peak accessibility per cell type
+pmat_ct <- accessibility_summary(pmat, new_ann_v[colnames(pmat)], sum)
+saveRDS(pmat_ct, str_replace(pmat_fn,".rds","-ovl-cell_type_shared_sum.rds"))
+pmat_old_ct <- accessibility_summary(pmat_old, old_ann_v[colnames(pmat_old)], sum)
+saveRDS(pmat_old_ct,  str_replace(pmat_old_fn,".rds","-ovl-cell_type_shaed_sum.rds"))
+
+# footprint summary of accessibility per cell type
+pmat_ct_fp <- accessibility_footprint(pmat, new_ann_v[colnames(pmat)])
+saveRDS(pmat_ct_fp, str_replace(pmat_fn,".rds","-ovl-cell_type_shared.rds"))
+pmat_old_ct_fp <- accessibility_footprint(pmat_old, old_ann_v[colnames(pmat_old)])
+saveRDS(pmat_old_ct_fp, str_replace(pmat_old_fn,".rds","-ovl-cell_type_shared.rds"))
+```
+
+Peaks correlations
+
+```{r}
+pmat_ct <- readRDS(str_replace(pmat_fn,".rds","-ovl-cell_type_shared_sum.rds"))
+pmat_old_ct <- readRDS(str_replace(pmat_old_fn,".rds","-ovl-cell_type_shared_sum.rds"))
+pmat_ct_fp <- readRDS(str_replace(pmat_fn,".rds","-ovl-cell_type_shared.rds"))
+pmat_old_ct_fp <- readRDS(str_replace(pmat_old_fn,".rds","-ovl-cell_type_shared.rds"))
+
+peaks_fp_cor <- Rfast::corpairs(t(pmat_ct_fp),t(pmat_old_ct_fp))
+peaks_cor <- Rfast::corpairs(t(pmat_ct),t(pmat_old_ct))
+peak_cor_dt <- data.table(
+  peak_new = rownames(pmat_ct_fp), 
+  peak_old = rownames(pmat_old_ct_fp),
+  cor = peaks_cor,
+  cor_fp = peaks_fp_cor
+)
+peak_cor_dt_m <- melt.data.table(peak_cor_dt, measure.vars = c("cor","cor_fp"))
+gpp_cor <- ggplot(peak_cor_dt_m, aes(value)) +
+  geom_histogram(color="white") +
+  scale_x_continuous() +
+  facet_grid(variable~., scales="free_y") +
+  labs(x="correlation", y="peaks")
+ggsave(file.path(plot_dir,"peaks.ovl.compara.cor.pdf"))
+```
+
+# Gene activity scores
+
+Assign peaks to genes
+
+```{r}
+source("../../../motif-analysis/mta_downstream_functions.R")
+
+# peaks
+peaks_gr <- proj@peakSet
+
+# genes
+genes_gr <- proj@geneAnnotation$genes
+genes_gr$name <- genes_gr$symbol 
+genes_gr$type <- "gene" 
+
+# TSS
+tss_gr <- proj@geneAnnotation$TSS
+
+# promotes
+promoters_gr <- promoters(tss_gr, upstream=200, downstream=50)
+promoters_gr$name <- promoters_gr$symbol
+promoters_gr$type <- "gene" 
+
+# genome
+chrom_sizes <- as.data.table(proj@genomeAnnotation$chromSizes)[,.(seqnames,end)]
+setnames(chrom_sizes, c("chr","length"))
+
+# map peaks to genes
+max_tss_dist <- 50000
+genes_peaks_table <- mta_match_peaks_to_genes(
+    gff_object = genes_gr,
+    peak_object = peaks_gr,
+    index_object = chrom_sizes, 
+    list_genes = NULL, 
+    feature_to_match = "gene", 
+    feature_field = "symbol", 
+    exclude_genes = NULL,
+    max_tss_dist = max_tss_dist,
+    min_overlap = 0,
+    promoter_upstream = 100, 
+    promoter_downstream = 50,
+    promoter_object = promoters_gr
+)
+setDT(genes_peaks_table)
+
+
+# some peaks are overlapping promoters and yet get assigned to other genes too,
+# e.g. genes_peaks_table[peak=="peak23175"]
+
+# similarly, problem are head to head genes which have separate promoter peaks 
+# but are too close so both peaks get assigned to both genes
+# genes_peaks_table[peak=="peak51617"] (NC_064040.1:11,294,940..11,299,568)
+# we will keep only assignment of peak to gene which promoter it is closest to,
+# keeping all if the distance is the same (e.g. overlapping both TSS)
+
+# some peaks are assigned across promoters
+# e.g. genes_peaks_table[peak=="peak51618"] (NC_064040.1:11,294,940..11,299,568)
+
+```
+
+Add weights to peaks and create gene activity score matrix.
+
+```{r}
+# peaks matrix
+peaks_mat <- readRDS(file.path(sprintf("ArchRProj_%s",sample), "PeakMatrix", "Matrix-Peaks.rds"))
+
+# cell groups (clusters)
+cells <- rownames(proj@cellColData)
+groups <- proj@cellColData[cells,"Clusters"]
+cells_groups <- data.table(cells = cells, Clusters=groups)
+
+# calculate gene scores
+gene_scores <- mta_gene_scores(
+  genes_peaks_table = genes_peaks_table, 
+  gff_object = genes_gr, 
+  peak_object = peaks_gr, 
+  peaks_mat = peaks_mat,
+  cells_groups = cells_groups
+)
+
+# save
+fwrite(
+  gene_scores$genes_peaks_table, 
+  file.path(sprintf("ArchRProj_%s",sample),"Peaks",sprintf("Peaks-to-Gene-assignment-%skb.tsv",max_tss_dist/1000)),
+  sep="\t", 
+  col.names=TRUE
+)
+
+# save matrix
+mat_dir <- file.path(sprintf("ArchRProj_%s",sample), "GeneScoreMatrix")
+dir.create(mat_dir,showWarnings=FALSE)
+
+# gs_mat <- as("dgCMatrix", gene_scores$genes_scores_matrix)
+# Matrix::writeMM(gs_mat,file.path(mat_dir,"matrix.mtx"))
+# writeLines(colnames(gs_mat),file.path(mat_dir,"cells"))
+# writeLines(rownames(gs_mat),file.path(mat_dir,"genes"))
+# rownames(pmat_mat) <- row_names
+
+saveRDS(
+  gene_scores$genes_scores_matrix,
+  file.path(mat_dir,sprintf("Matrix-Gene-Scores-Dist-Var-Weighted-%skb.rds",max_tss_dist/1000))
+)
+
+# add to project
+# not possible!
+
+```
+
+Inspect weights distribution.
+
+```{r}
+max_tss_dist <- 50000
+DT <- fread(file.path(sprintf("ArchRProj_%s",sample),"Peaks",sprintf("Peaks-to-Gene-assignment-%skb.tsv",max_tss_dist/1000)), sep="\t", header=TRUE)
+
+# weights dist
+gp_d <- ggplot(DT, aes(x=rel_dist_to_tss)) + geom_density() + 
+  scale_x_continuous(expand = c(0,0), labels = scales::unit_format(unit = "kb", scale = 1e-3, accuracy=1)) +
+  scale_y_continuous(expand = c(0,0), labels = scales::unit_format(unit = "", scale = 1e4, accuracy=1.1)) +
+  labs(x = "distance to TSS", y = "density x 1e4")
+gp_d2 <- ggplot(DT, aes(x=abs(rel_dist_to_tss))) + 
+  stat_ecdf(geom = "step") +
+  scale_x_continuous(expand = c(0,0), labels = scales::unit_format(unit = "kb", scale = 1e-3, accuracy=1)) +
+  scale_y_continuous(expand = c(0,0)) +
+  labs(x = "absolute distance to TSS", y = "cdf")
+gp_p <- gp_d + gp_d2
+ggsave(file.path(sprintf("ArchRProj_%s",sample),"Plots",sprintf("Peaks-to-Gene-weights-%skb-dist.pdf",max_tss_dist/1000)), plot = gp_p, width = 9, height = 4)
+
+# weights by distance from TSS
+mdt <- melt.data.table(DT, measure.vars = c("w_dist","w_var","weight"))
+mdt[,peak_location_annotation:=factor(peak_location_annotation,levels=c("promoter","gene_body","intergenic","other"))]
+bin_size <- 2000
+mdt[,bin:=cut(rel_dist_to_tss,breaks=seq(-max_tss_dist,max_tss_dist,bin_size))]
+gp_w <- ggplot(mdt, aes(x=bin, y=value, color=variable) ) +
+  geom_boxplot() + facet_grid(variable~., scales = "free_y") + 
+  theme(axis.text.x = element_text(size = 8, angle = 90, vjust = 0.5, hjust=1)) +
+  labs(x=sprintf("distance to TSS (%s kb bins)",bin_size/1000))
+ggsave(file.path(sprintf("ArchRProj_%s",sample),"Plots",sprintf("Peaks-to-Gene-weights-%skb-bin.pdf",max_tss_dist/1000)), width = 8, height = 8)
+
+bin2_size <- 100
+mdt[,bin2:=cut(rel_dist_to_tss,breaks=seq(-1100,1100,100))]
+gp_w2 <- ggplot(mdt[abs(rel_dist_to_tss)<1e3][variable=="w_var"], aes(x=bin2, y=value, color=variable) ) +
+  geom_boxplot() + facet_grid(variable~., scales = "free_y") + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  labs(x=sprintf("distance to TSS (%s bp bins)",bin2_size))
+ggsave(file.path(sprintf("ArchRProj_%s",sample),"Plots",sprintf("Peaks-to-Gene-weights-var-%skb-bin.pdf",max_tss_dist/1000)), width = 8, height = 5)
+
+# weights by class
+stat_box_data <- function(x, upper_limit = max(mdt$value)) {
+  data.frame(
+    y = 0.95 * upper_limit,
+    label = format(length(x), big.mark = ",", decimal.mark = ".", scientific = FALSE)
+  )
+}
+gp_l <- ggplot(mdt, aes(x=peak_location_annotation, y=value) ) + 
+  geom_boxplot() + facet_grid(.~variable, scales = "free_y") + 
+  stat_summary(
+    fun.data = stat_box_data, 
+    geom = "text"
+  ) + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+ggsave(file.path(sprintf("ArchRProj_%s",sample),"Plots",sprintf("Peaks-to-Gene-weights-%skb-location.pdf",max_tss_dist/1000)), width = 8, height = 8)
+
+```
+
+Plot weights for peaks assigned to selected genes.
+
+```{r}
+require(ggrepel)
+setorder(DT,gene,start)
+gene_list <- c("Elav"="Nvec_vc1.1_XM_048724864.1")
+gene_id <- gene_list[1]
+DT[grep(gene_id,gene),.(peak,w_dist,w_var,weight,peak_location_annotation)]
+sdt <- mdt[grep(gene_id,gene)]
+gp_p <- ggplot(sdt, aes(x=peak_midpoint, y=value, color=variable, group=variable, label=peak)) +
+  geom_point() +
+  geom_line() +
+  geom_text(data=sdt[variable=="w_var"&value>1.5],color="black") +
+  scale_x_continuous(expand = c(0,0), labels = scales::unit_format(suffix = "", big.mark = ","))  +
+  geom_vline(xintercept = sdt$gene_start)
+ggsave(file.path(sprintf("ArchRProj_%s",sample),"Plots",sprintf("peaks_weights_%skb_%s.pdf",max_tss_dist/1000,gene_id)), width = 12, height = 4)
+```
+
+Plot gene scores on UMAP
+
+```{r}
+# load saved gene scores
+gene_scores <- readRDS(file.path(
+  sprintf("ArchRProj_%s",sample),
+  "GeneScoreMatrix",
+  "Matrix-Gene-Scores-Dist-Var-Weighted-50kb.rds"
+))
+
+# 2d proj coords
+emb <- "TSNE"
+tsne_df <- proj@embeddings[[emb]]$df
+
+# markers
+mark_files <- list.files("annotation", pattern="marks.tsv", full.names=TRUE)
+names(mark_files) <- str_remove(basename(mark_files),".marks.tsv")
+mark_list <- sapply(mark_files, function(x) {
+  dt <- fread(x)
+  structure(dt[[1]], names=dt[[2]])
+}, simplify=FALSE, USE.NAMES=TRUE)
+
+# plots
+ct <- "neuron"
+for (ct in names(mark_list)) {
+
+message(ct)
+  
+plot_list <- lapply(names(mark_list[[ct]]), function(gn) {
+  gene <- mark_list[[ct]][[gn]]
+  gene_vals <- gene_scores[gene,rownames(tsne_df)]
+  plot_2d_proj_gene(
+    tsne_df, 
+    gene_vals,
+    title = sprintf("%s (%s)", gn, gene),
+    xlabel = paste0(emb,1), ylabel = paste0(emb,2),
+    legend.position = c(0.85, 0.05),
+    randomize = FALSE
+  )
+})
+pdf(file.path(plot_dir, sprintf("markers.%s.%s.pdf",emb,ct)))
+print(plot_list)
+dev.off()
+
+}
+```
+
+## Compare peak assignments with liftovered old peaks
+
+```{r}
+peak_assign <- fread(file.path(peak_dir,"Peaks-to-Gene-assignment-50kb.tsv"), sep="\t", header=TRUE)
+
+peak_assign_old <- fread("../../../scATAC_nvec/clustering/ArchR/ArchRProj_Nvec_filtered_3/Peaks/Peaks-to-Gene-assignment-50kb.tsv", sep="\t", header=TRUE)
+
+peaks_mapping <- fread(file.path(peak_dir, "peak.compara.mapping.tsv"), sep="\t")
+gene_mapping <- unique(fread("../../annotation/Nvec_annotation_v3_2020-10-23_ID_JGI_Vienna_matched_DToL_names")[,.(gene,ID_JGI_Vienna)])
+
+```
+
+Load assigned and weighted peaks
+
+```{r}
+dt <- fread(file.path(peak_dir, "peak.compara.tsv"))
+dt_assign <- merge.data.table(
+  dt, 
+  rbindlist(list(new=peak_assign, old=peak_assign_old), idcol="set"), 
+  by = c("set","peak","peak_chr","peak_start","peak_end"), 
+  all = TRUE
+)
+dt_assign[,overlaps:=factor(overlaps,levels=c("none","consensus","Clusters","consensus+Clusters"))]
+dt_assign[,gene:=str_replace(gene,"-","_")]
+
+gp_ovl <- ggplot(dt_assign, aes(overlaps, weight, fill=overlaps)) +
+  geom_boxplot() +
+  scale_fill_viridis_d() +
+  facet_grid(set~overlaps_set) +
+  scale_y_log10() +
+  theme(legend.position = "none") +
+  labs(title = "Weights")
+ggsave(file.path(plot_dir, "peaks_compara_weight.pdf"), width=10)
+
+```
+
+Correlation of weights for overlapping peaks
+
+```{r}
+dt_assign_ovl <- dt_assign[overlaps_set=="overlaping"]
+
+gbp <- ggplot(dt_assign_ovl[,.N,.(set,gene)], aes(set, N)) + 
+  geom_boxplot(fill = "gray") +
+  scale_y_log10() +
+  labs(title="Overlapping peaks", y="peaks per gene")
+ggsave(file.path(plot_dir, "peaks_compara_assign.pdf"), width=4)
+
+matched_old_peaks <- peaks_mapping[match(dt_assign_ovl[set=="old"]$peak, old)]$new
+mdt <- rbindlist(list(
+  dt_assign_ovl[set=="old"][,matched_peak:=matched_old_peaks],
+  dt_assign_ovl[set=="new"][,matched_peak:=peak]
+))
+mdt <- mdt[!is.na(matched_peak)]
+mdt[is.na(weight), weight:=0]
+funs <- c(max, min, mean, sum)
+labs <- c("max", "min", "mean", "sum")
+gp_cor <- lapply(1:4, function(x) {
+  mdtc <- dcast.data.table(
+    unique(mdt[,.(set,peak,matched_peak,weight)]), 
+    matched_peak~set, 
+    value.var="weight", 
+    fun.aggregate=funs[x]
+  )
+  mdtc <- mdtc[!(is.na(new)|is.na(old))]
+  ggplot(mdtc, aes(new, old)) +
+    geom_point(alpha=0.5) +
+    theme(legend.position = "none") +
+    #scale_y_log10() + scale_x_log10() +
+    labs(title = sprintf("%s weight per peak",labs[x]))
+})
+gp_cor_patch <- patchwork::wrap_plots(gp_cor, ncol = 2, nrow = 2)
+ggsave(file.path(plot_dir, "peaks_compara_cor_agg.pdf"), width=10, height=10)
+
+
+```
+
+Look at correlation of weights for overlapping peaks and genes they are assigned to
+
+```{r}
+mets <- c("w_dist","peak_gini","w_var","weight")
+genes <- intersect(dt_assign_ovl$gene, gene_mapping$gene)
+
+mlist <- lapply(genes, function(g) {
+
+  # print(g)
+  
+  gs <- gene_mapping[gene==g]
+  
+  rbindlist(lapply(1:nrow(gs), function(i) {
+  
+    if (gs$gene[i] != gs$ID_JGI_Vienna[i]) {
+      gene_name <- paste(gs$gene[i], gs$ID_JGI_Vienna[i], sep = ",")    
+    } else {
+      gene_name <- gs$gene[i]
+    }
+  
+    pm_new <- mdt[set=="new" & gene == gs$gene[i], .(peak, w_dist, peak_gini, peak_gini_scaled, w_var, weight)]
+    pm_old <- mdt[set=="old" & gene == gs$ID_JGI_Vienna[i], .(matched_peak, w_dist, peak_gini, peak_gini_scaled, w_var, weight)]
+    
+    # rely on peak mapping
+    setnames(pm_old, "matched_peak", "peak")
+    gdt <- rbindlist(list(old = pm_old, new = pm_new), idcol = "set")[,gene:=gene_name]
+    
+    # # don't rely on peak mapping but map peaks by correlation
+    # setnames(pm_old, "peak", "matched_peak")
+    # cm <- cor(t(gdt[set=="old",..mets]), t(gdt[set=="new",..mets]))
+    # colnames(cm) <- gdt[set=="new"]$peak
+    # rownames(cm) <- gdt[set=="old"]$peak
+    # matching <- structure(colnames(cm)[(apply(cm, 1, which.max))], names=rownames(cm))
+    # gdt[set=="old", peak:=str_replace_all(peak, matching)]
+    
+    mapped_peaks <-intersect(gdt[set=="old"]$peak, gdt[set=="new"]$peak)
+    if (length(mapped_peaks) > 0) {
+      gdt <- gdt[peak %in% mapped_peaks]
+      if (length(gdt[set=="old"]$peak) < length(gdt[set=="new"]$peak)) {
+        gdt <- rbindlist(list(
+          gdt[set=="old"][match(gdt[set=="new"]$peak, peak)][,peak:=paste(peak,1:.N,sep="."),peak],
+          gdt[set=="new"][,peak:=paste(peak,1:.N,sep="."),peak]
+        ))
+      } else if (length(gdt[set=="old"]$peak) > length(gdt[set=="new"]$peak)) {
+        gdt <- rbindlist(list(
+          gdt[set=="old"][,peak:=paste(peak,1:.N,sep="."),peak],
+          gdt[set=="new"][match(gdt[set=="old"]$peak, peak)][,peak:=paste(peak,1:.N,sep="."),peak]
+        ))
+      }
+      gdtm <- unique( melt.data.table(gdt, id.vars = c("set", "peak", "gene"), measure.vars = mets) )
+      dcast.data.table(gdtm, peak+gene+variable~set)
+    }
+      
+  }))
+  
+})
+mg <- rbindlist(mlist)
+fwrite(mg, file.path(peak_dir,"peak.compara.ovl.weights.tsv"), sep="\t")
+
+gp_cor_g <- ggplot(mg, aes(new, old)) +
+  geom_point(alpha=0.5) +
+  facet_wrap("variable", scales = "free") +
+  theme(legend.position = "none")
+ggsave(file.path(plot_dir, "peaks_compara_cor.pdf"), width=10, height=10)
+
+mg[variable=="w_dist"][, .N, (new!=1&old==1) | (new==1&old!=1)]
+#      new     N
+# 1: FALSE 55775
+# 2:  TRUE 14514
+
+g <- "Nvec_v1g139887"
+g <- "Nvec_v1g244269"
+
+# pdf(file.path(plot_dir, "peaks_compara_cor_genes.pdf"))
+# gs <- gann[match(grep("Nvec_v1g",rownames(genes_table_fp),value=TRUE),V1)]
+# for (g in gs) {
+  
+gp_cor_g <- ggplot(mg[grep(g,gene)], aes(new, old, label=peak)) +
+  geom_point(size=2) + 
+  geom_text_repel(color="grey") +
+  geom_abline(slope = 1, intercept = 0) +
+  facet_wrap("variable", scales = "free") +
+  theme(legend.position = "none") +
+  labs(title=sprintf("%s",g))
+
+# print(gp_cor_g)
+# }
+# dev.off()
+
+ggsave(file.path(plot_dir, sprintf("peaks_compara_cor_%s.pdf",g)), width=8, height=8)
+
+```
+
+Peaks scores per cell type
+
+```{r}
+# load peak matrices
+pmat_fn <- file.path(sprintf("ArchRProj_%s",sample), "PeakMatrix", "Matrix-Peaks.rds")
+pmat <- readRDS(pmat_fn)
+pmat_old_fn <- "../../../scATAC_nvec/clustering/ArchR/ArchRProj_Nvec_filtered_3/Matrices/Matrix-Peaks.rds"
+pmat_old <- readRDS(pmat_old_fn)
+
+# sum peak accessibility per cell type
+proj_old <- loadArchRProject("../../../scATAC_nvec/clustering/ArchR/ArchRProj_Nvec_filtered_3")
+old_ann <- unique(as.data.table(proj_old@cellColData, keep.rownames="cell")[,.(cell,cell_type)])
+old_ann[grepl("neuron",cell_type) & cell_type!="neuron_gland", cell_type:="neuron"]
+old_ann[grepl("gland",cell_type), cell_type:="neuron"]
+old_ann_v <- structure(old_ann$cell_type, names=old_ann$cell)
+
+new_ann <- unique(as.data.table(proj@cellColData, keep.rownames="cell")[,.(cell,cell_type)])
+new_ann[grepl("neuron",cell_type), cell_type:="neuron"]
+new_ann[grepl("gland",cell_type), cell_type:="neuron"]
+new_ann_v <- structure(new_ann$cell_type, names=new_ann$cell)
+
+shared_ann <- intersect(unique(old_ann_v),unique(new_ann_v))
+old_ann_v <- old_ann_v[old_ann_v %in% shared_ann]
+new_ann_v <- new_ann_v[new_ann_v %in% shared_ann]
+
+pmat_ct <- accessibility_summary(pmat, new_ann_v[colnames(pmat)], sum)
+saveRDS(pmat_ct, str_replace(pmat_fn,".rds","-cell_type_shared_sum.rds"))
+pmat_old_ct <- accessibility_summary(pmat_old, old_ann_v[colnames(pmat_old)], sum)
+saveRDS(pmat_old_ct,  str_replace(pmat_old_fn,".rds","-cell_type_shared_sum.rds"))
+```
+
+Non-overlapping peaks scores
+
+```{r}
+pmat_ct <- readRDS(str_replace(pmat_fn,".rds","-cell_type_shared_sum.rds"))
+pmat_old_ct <- readRDS(str_replace(pmat_old_fn,".rds","-cell_type_shared_sum.rds"))
+
+# all peak scores per cell type
+peak_scores_dt <- rbindlist(list(
+  new = melt.data.table(as.data.table(pmat_ct,keep.rownames="peak"), id.vars="peak", value.name="peak_score", variable.name="cell_type"),
+  old = melt.data.table(as.data.table(pmat_old_ct,keep.rownames="peak"), id.vars="peak", value.name="peak_score", variable.name="cell_type")
+), idcol = "set")
+
+# combine peak assignments and peak scores
+dt_peak_scores <- merge.data.table(dt_assign, peak_scores_dt, by=c("set","peak"), all.x=TRUE, sort=FALSE, allow.cartesian=TRUE)
+
+ggplot(dt_peak_scores[!is.na(cell_type)], aes(cell_type,peak_score,fill=overlaps_set)) +
+  geom_boxplot(outlier.colour = NA) +
+  scale_y_log10() +
+  coord_flip() 
+ggsave(file.path(plot_dir,"peaks.ovl.nonovl.score.cell_type.pdf"), width = 8, height = 8)
+
+dt_peaks_sum <- dt_peak_scores[,sum(peak_score), .(peak,overlaps_set)]
+
+ggplot(dt_peaks_sum, aes(overlaps_set, V1)) +
+  geom_boxplot(fill="grey") +
+  scale_y_log10() +
+  labs(y="score")
+ggsave(file.path(plot_dir,"peaks.ovl.nonovl.score.pdf"), width = 5, height = 8)
+
+```
+
+
+## Compare gene scores with old gene scores
+
+Compare to old scores
+
+```{r}
+gene_scores_fn <- file.path(sprintf("ArchRProj_%s",sample), "GeneScoreMatrix","Matrix-Gene-Scores-Dist-Var-Weighted-50kb.rds")
+  gene_scores <- readRDS(gene_scores_fn)
+gene_scores_old_fn <- "../../../scATAC_nvec/clustering/ArchR/ArchRProj_Nvec_filtered_3/Matrices/Matrix-Gene-Scores-Dist-Var-Weighted-50kb.rds"
+gene_scores_old <- readRDS(gene_scores_old_fn)
+rownames(gene_scores_old) <- str_replace(rownames(gene_scores_old),"-","_")
+
+gann_matched <- fread("annotation/Nvec_annotation_v3_2020-10-23_ID_JGI_Vienna_matched_DToL_names")
+gene_scores_old <- gene_scores_old[rownames(gene_scores_old) %in% gann_matched$ID_JGI_Vienna,]
+rownames(gene_scores_old) <- gann_matched[match(rownames(gene_scores_old), ID_JGI_Vienna)]$gene
+
+genes <- intersect(rownames(gene_scores_old), rownames(gene_scores))
+cells <- intersect(colnames(gene_scores_old), colnames(gene_scores))
+gene_scores_old <- gene_scores_old[genes,cells]
+gene_scores_new <- gene_scores[genes,cells]
+
+gene_scores_old_dt <- melt.data.table(as.data.table(gene_scores_old, keep.rownames="gene"), id.vars="gene", variable.name="cell", value.name="score_old")
+gene_scores_new_dt <- melt.data.table(as.data.table(gene_scores_new, keep.rownames="gene"), id.vars="gene", variable.name="cell", value.name="score_new")
+
+set.seed(1950)
+sample_cells <- sample(cells, 1e4, replace=FALSE)
+gene_scores_dt <- merge.data.table(gene_scores_old_dt[cell %in% sample_cells], gene_scores_new_dt[cell %in% sample_cells], by=c("gene","cell"))
+gene_scores_dt <- gene_scores_dt[score_new + score_old > 0]
+
+# add cell type annots
+proj_old <- loadArchRProject("../../../scATAC_nvec/clustering/ArchR/ArchRProj_Nvec_filtered_3")
+old_ann <- unique(as.data.table(proj_old@cellColData, keep.rownames="cell")[,.(cell,cell_type)])
+old_ann_v <- structure(old_ann$cell_type, names=old_ann$cell)
+
+new_ann <- unique(as.data.table(proj@cellColData, keep.rownames="cell")[,.(cell,cell_type)])
+new_ann_v <- structure(new_ann$cell_type, names=new_ann$cell)
+
+ann_col_dt <- unique(as.data.table(proj@cellColData)[,.(cell_type,cell_type_color)])
+ann_col <- structure(ann_col_dt$cell_type_color, names=ann_col_dt$cell_type)
+
+gene_scores_dt[,ann_old:=old_ann_v[as.character(cell)]]
+gene_scores_dt[,ann_new:=new_ann_v[as.character(cell)]]
+
+gene_scores_dt[grepl("neuron",ann_old) & ann_old!="neuron_gland", ann_old:="neuron"]
+gene_scores_dt[grepl("gland",ann_old), ann_old:="neuron"]
+
+gene_scores_dt[grepl("neuron",ann_new), ann_new:="neuron"]
+gene_scores_dt[grepl("gland",ann_new), ann_new:="neuron"]
+
+shared_ann <- intersect(gene_scores_dt$ann_new, gene_scores_dt$ann_old)
+gene_scores_dt <- gene_scores_dt[ann_new %in% shared_ann & ann_old %in% shared_ann]
+gene_scores_dt[,ann_match:=ann_old==ann_new]
+ 
+ann_col["neuron"] <- "#2B07DE"
+ann_col["gland"] <- "#E84900"
+ann_col <- ann_col[shared_ann]
+
+gene_scores_dt_mean <- gene_scores_dt[,lapply(.SD,mean),by=.(ann_new,gene),.SDcols=c("score_old","score_new")] 
+```
+
+Compare individual genes.
+
+```{r}
+g <- "Nvec_v1g139887"
+g <- "Nvec_vc1.1_XM_048724864.1"
+g <- "Nvec_v1g244269"
+g <- "Nvec_vc1.1_XM_032371996.2"
+ggp <- ggplot(gene_scores_dt[gene==g], aes(x=score_new+0.1, y=score_old+0.1, color=ann_old)) +
+  geom_jitter(alpha = 0.5, width = 0.05, height = 0.05) +
+  geom_abline(intercept = 0, slope = 1) +
+  # geom_xsidedensity(aes(y=stat(density))) +
+  # geom_ysidedensity(aes(x=stat(density))) +
+  scale_color_manual(values=ann_col) +
+  scale_y_log10() + scale_x_log10() +
+  labs(title=g) +
+  theme(
+    ggside.panel.scale.x = 0.4,
+    ggside.panel.scale.y = 0.4
+  )
+ggsave(file.path(plot_dir, sprintf("GeneScore.comparison.%s.pdf",g)), width=7, height=4)
+```
+
+Group by cell types
+
+```{r}
+# group by cell type
+proj_old <- loadArchRProject("../../../scATAC_nvec/clustering/ArchR/ArchRProj_Nvec_filtered_3")
+old_ann <- unique(as.data.table(proj_old@cellColData, keep.rownames="cell")[,.(cell,cell_type)])
+old_ann[grepl("neuron",cell_type) & cell_type!="neuron_gland", cell_type:="neuron"]
+old_ann[grepl("gland",cell_type), cell_type:="neuron"]
+old_ann_v <- structure(old_ann$cell_type, names=old_ann$cell)
+
+new_ann <- unique(as.data.table(proj@cellColData, keep.rownames="cell")[,.(cell,cell_type)])
+new_ann[grepl("neuron",cell_type), cell_type:="neuron"]
+new_ann[grepl("gland",cell_type), cell_type:="neuron"]
+new_ann_v <- structure(new_ann$cell_type, names=new_ann$cell)
+
+shared_ann <- intersect(unique(old_ann_v),unique(new_ann_v))
+old_ann_v <- old_ann_v[old_ann_v %in% shared_ann]
+new_ann_v <- new_ann_v[new_ann_v %in% shared_ann]
+
+# sum gene scores per cell type
+gene_scores_ct <- accessibility_summary(gene_scores_new, new_ann_v[colnames(gene_scores_new)], mean)
+saveRDS(gene_scores_ct, str_replace(gene_scores_fn,".rds","-cell_type_shared_sum.rds"))
+gene_scores_old_ct <- accessibility_summary(gene_scores_old, old_ann_v[colnames(gene_scores_old)], mean)
+saveRDS(gene_scores_old_ct,  str_replace(gene_scores_old_fn,".rds","-cell_type_shared_sum.rds"))
+
+# footprint summary of accessibility per cell type
+gene_scores_ct_fp <- accessibility_footprint(gene_scores_new, new_ann_v[colnames(gene_scores_new)])
+saveRDS(gene_scores_ct_fp, str_replace(gene_scores_fn,".rds","-cell_type_shared.rds"))
+gene_scores_old_ct_fp <- accessibility_footprint(gene_scores_old, old_ann_v[colnames(gene_scores_old)])
+saveRDS(gene_scores_old_ct_fp, str_replace(gene_scores_old_fn,".rds","-cell_type_shared.rds"))
+```
+
+Gene scores correlations
+
+```{r}
+gene_scores_ct <- readRDS(str_replace(gene_scores_fn,".rds","-cell_type_shared_sum.rds"))
+gene_scores_old_ct <- readRDS(str_replace(gene_scores_old_fn,".rds","-cell_type_shared_sum.rds"))
+gene_scores_ct_fp <- readRDS(str_replace(gene_scores_fn,".rds","-cell_type_shared.rds"))
+gene_scores_old_ct_fp <- readRDS(str_replace(gene_scores_old_fn,".rds","-cell_type_shared.rds"))
+
+gene_scores_fp_cor <- Rfast::corpairs(t(gene_scores_ct_fp),t(gene_scores_old_ct_fp))
+gene_scores_cor <- Rfast::corpairs(t(gene_scores_ct),t(gene_scores_old_ct))
+gene_scores_comp_dt <- data.table(
+  gene_new = rownames(gene_scores_ct_fp), 
+  gene_old = gann_matched[match(rownames(gene_scores_ct_fp), gene)]$ID_JGI_Vienna,
+  cor = gene_scores_cor,
+  cor_fp = gene_scores_fp_cor
+)
+gene_scores_comp_dt_m <- melt.data.table(gene_scores_comp_dt, measure.vars = c("cor","cor_fp"))
+gpp_cor <- ggplot(gene_scores_comp_dt_m, aes(value)) +
+  geom_histogram(color="white") +
+  scale_x_continuous() +
+  facet_grid(variable~., scales="free_y") +
+  labs(x="correlation", y="genes")
+ggsave(file.path(plot_dir,"genes.ovl.compara.cor.pdf"))
+```
+
+Compare individual genes
+
+```{r}
+g <- "Nvec_v1g139887"
+g <- "Nvec_vc1.1_XM_048724864.1"
+g <- "Nvec_v1g244269"
+g <- "Nvec_vc1.1_XM_032371996.2"
+gdt_new <- melt.data.table(as.data.table(gene_scores_ct, keep.rownames = "gene"), id.vars = "gene", variable.name = "cell_type", value = "score_new")
+gdt_old <- melt.data.table(as.data.table(gene_scores_old_ct, keep.rownames = "gene"), id.vars = "gene", variable.name = "cell_type", value = "score_old")
+gdt <- merge.data.table(gdt_new,gdt_old,by=c("gene","cell_type"))
+ggp <- ggplot(gdt[gene==g], aes(x=score_new+0.1, y=score_old+0.1, color=cell_type)) +
+  geom_jitter(alpha = 0.9, size = 4, width = 0.05, height = 0.05) +
+  geom_abline(intercept = 0, slope = 1) +
+  scale_color_manual(values=ann_col) +
+  labs(title=g) 
+ggsave(file.path(plot_dir, sprintf("GeneScore.comparison.cell_type.%s.pdf",g)), width=6, height=3.5)
+```
+
+***
+
+Summary plots for all genes
+
+```{r}
+# density plot
+gdens <- ggplot(gene_scores_dt_mean, aes(score_old+0.1, score_new+0.1)) +
+  geom_hex(bins = 100) +
+  scale_y_log10() + scale_x_log10() +
+  scale_fill_gradientn(colours = c("#ffffb2","#fed976","#feb24c","#fd8d3c","#f03b20","#bd0026","#960000")) +
+  facet_wrap(.~ann_new) +
+  theme_bw()
+gdens2 <- ggplot(gene_scores_dt_mean[score_new>0 & score_old>0], aes(score_old, score_new)) +
+  geom_hex(bins = 100) +
+  scale_y_log10() + scale_x_log10() +
+  scale_fill_gradientn(colours = c("#ffffb2","#fed976","#feb24c","#fd8d3c","#f03b20","#bd0026","#960000")) +
+  facet_wrap(.~ann_new) +
+  theme_bw()
+pdf(file.path(plot_dir, "GeneScore.comparison.dens.oldassign.pdf"), height=8, width=8)
+gdens
+gdens2
+dev.off()
+
+# correlations
+gene_cors_dt <- gene_scores_dt_mean[, .SD[,stats::cor(score_old, score_new)], gene]
+setnames(gene_cors_dt, "V1", "cor")
+gene_n_dt <- unique(gann_matched[,.(gene,ID_JGI_Vienna)])[,.N,gene]
+gene_cors_dt <- merge.data.table(gene_cors_dt,gene_n_dt,by="gene",sort=FALSE,all.x=TRUE)
+gene_cors_dt[,num_genes:=ifelse(N<11,as.character(N),">10")]
+gene_cors_dt[,num_genes:=factor(num_genes,levels=c(1:10,">10"))]
+
+gp <- ggplot(gene_cors_dt, aes(num_genes, cor)) + 
+  # geom_histogram(position = "stack", bins = 60, color = "white") +
+  geom_boxplot(fill = "grey", outlier.size = 0.5) +
+  scale_y_continuous(expand = c(0,0)) +
+  geom_hline(yintercept = 0, color="red") +
+  # facet_grid(num_genes~., scales = "free_y") +
+  labs(x = "number of mapped old genes per new gene", y = "gene score correlation") + theme_light()
+ggsave(file.path(plot_dir, "GeneScore.comparison.cor.oldassign.pdf"), height = 3, width = 6)
+
+gene_cors_map_dt <- merge.data.table(gene_cors_dt, unique(gann_matched[,.(gene,ID_JGI_Vienna)]), by = "gene", allow.cartesian = TRUE)
+
+```
+
+Compare peak assignment
+
+```{r}
+peak_assign_old <- fread("../../../scATAC_nvec/clustering/ArchR/ArchRProj_Nvec_filtered_3/Peaks/Peaks-to-Gene-assignment-50kb.tsv")
+peak_assign_old[,gene:=str_replace(gene,"-","_")]
+peak_assign_old <- unique(peak_assign_old[,.(gene,peak)])
+peak_assign <- fread("ArchRProj_Nvec_TSS4_frag200/Peaks/Peaks-to-Gene-assignment-50kb.tsv")
+peak_assign <- unique(peak_assign[,.(gene,peak)])
+
+for (i in 1:nrow(gene_cors_map_dt)) {
+  gene_new = gene_cors_map_dt[i]$gene
+  gene_old = gene_cors_map_dt[i]$ID_JGI_Vienna
+  gene_cors_map_dt[gene == gene_new, N_peaks := length(peak_assign[gene==gene_new]$peak) ]
+  gene_cors_map_dt[ID_JGI_Vienna == gene_old, N_peaks_JGI_Vienna := length(peak_assign_old[gene==gene_old]$peak) ]
+}
+
+gene_scores_map_dt <- merge.data.table(gene_scores_dt_mean, gene_cors_map_dt, by="gene", allow.cartesian = TRUE)
+gene_scores_map_dt[,N_peaks_old_bin:=cut(N_peaks_JGI_Vienna, breaks=c(-Inf,0,1,2,seq(10,max(gene_scores_map_dt$N_peaks_JGI_Vienna)+10,10)))]
+gene_scores_map_dt[,N_peaks_new_bin:=cut(N_peaks, breaks=c(-Inf,0,1,2,seq(10,max(gene_scores_map_dt$N_peaks)+10,10)))]
+
+gpbp1 <- ggplot(gene_scores_map_dt, aes(N_peaks_old_bin, cor)) +
+  geom_boxplot(fill = "grey", outlier.size = 0.5) +
+  theme_bw() +
+  # facet_grid(ann_new~.) +
+  geom_hline(yintercept = 0, color="red") +
+  labs(x = "peaks per old gene", y = "gene score correlation")
+gpbp2 <- ggplot(gene_scores_map_dt, aes(N_peaks_new_bin, cor)) +
+  geom_boxplot(fill = "grey", outlier.size = 0.5) +
+  theme_bw() +
+  # facet_grid(ann_new~.) +
+  geom_hline(yintercept = 0, color="red") +
+  labs(x = "peaks per new gene", y = "gene score correlation")
+gpbp1/gpbp2
+ggsave(file.path(plot_dir, "GeneScore.comparison.peakassing.oldassign.pdf"), height=6, width=6)
+
+```
+
+How do score change per gene across matched cell types?
+
+```{r}
+gene_scores_dt_mean[, change := score_new - score_old]
+pdf(file.path(plot_dir, "GeneScore.comparison.change.oldassign.pdf"), height=26, width=4)
+for (ct in shared_ann) {
+  candidate_genes <- gene_scores_dt_mean[score_old==0][score_new>0][ann_new==ct][order(-score_new)]$gene
+  cpb <- ggplot(gene_scores_dt_mean[gene %in% candidate_genes[1:20]], aes(ann_new, change)) +
+    geom_bar(stat = "identity") +
+    facet_grid(gene ~ .) +
+    theme_bw() + 
+    labs(title=ct)
+  print(cpb)
+}
+dev.off()
+```
+
+Compare peak weighting
+
+```{r}
+gene_scores_dt_mean[score_old==0][score_new>0][order(-score_new)]
+
+peak_assign <- fread("ArchRProj_Nvec_TSS4_frag200/Peaks/Peaks-to-Gene-assignment-50kb-old.tsv")
+peak_assign <- peak_assign[,.(gene,peak,is_promoter,is_gene_body,peak_gini,peak_gini_scaled,w_var,w_dist,weight,peak_location_annotation)]
+setnames(peak_assign, paste0(colnames(peak_assign),"_new"))
+setnames(peak_assign, "gene_new","gene")
+
+peak_assign_old <- fread("../../../scATAC_nvec/clustering/ArchR/ArchRProj_Nvec_filtered_3/Peaks/Peaks-to-Gene-assignment-50kb.tsv")
+peak_assign_old[,gene:=str_replace(gene,"-","_")]
+peak_assign_old <- peak_assign_old[,.(gene,peak,is_promoter,is_gene_body,peak_gini,peak_gini_scaled,w_var,w_dist,weight,peak_location_annotation)]
+setnames(peak_assign_old, paste0(colnames(peak_assign_old),"_old"))
+setnames(peak_assign_old, "gene_old","ID_JGI_Vienna")
+
+pa1 <- merge.data.table(peak_assign, unique(gene_cors_map_dt[,.(gene,cor,N_peaks,N)]), by = "gene")
+pa2 <- merge.data.table(peak_assign_old, unique(gene_cors_map_dt[,.(gene,ID_JGI_Vienna,N_peaks_JGI_Vienna)]))
+
+candidate_genes <- gene_scores_dt_mean[score_old==0][score_new>0][order(-score_new)]$gene
+
+loc_cols <- c(
+  "gene_body" = "#1b9e77",
+  "intergenic" = "#d95f02",
+  "promoter" = "#7570b3",
+  "other" = "#e7298a"
+)
+```
+
+```{r}
+# Gini
+pdf(file.path(plot_dir, "GeneScore.comparison.gini.oldassign.pdf"), height=6, width=8)
+for (i in 1:50) {
+  
+  new_gene <- candidate_genes[i]
+  pa1_subset <- pa1[gene %in% new_gene][order(peak_gini_new)]
+  pa1_subset[,peak_new:=factor(peak_new,levels=unique(pa1_subset$peak_new))]
+  pa2_subset <- pa2[gene %in% new_gene][order(peak_gini_old)]
+  pa2_subset[,peak_old:=factor(peak_old,levels=unique(pa2_subset$peak_old))]
+  old_gene <- unique(pa2_subset$ID_JGI_Vienna)
+
+  cp_1 <- ggplot(pa1_subset, aes(peak_new, peak_gini_new, fill=peak_location_annotation_new)) +
+    geom_bar(stat = "identity", position = "dodge2") + theme_bw() + coord_flip() + 
+    theme(legend.position = "none", legend.title = element_blank()) +
+    scale_y_continuous(limits = c(0,1)) +
+    scale_fill_manual(values = loc_cols) +
+    labs(title = paste(new_gene))
+  cp_2 <- ggplot(pa2_subset, aes(peak_old, peak_gini_old, fill=peak_location_annotation_old)) +
+    geom_bar(stat = "identity", position = "dodge2") + theme_bw() + coord_flip() +
+    guides(fill=guide_legend(title="location")) +
+    scale_y_continuous(limits = c(0,1)) +
+    scale_fill_manual(values = loc_cols) +
+    labs(title = paste(old_gene, collapse = ","))
+  cp <- (cp_1 + cp_2) # + plot_layout(guides = "collect") & theme(legend.position = 'bottom')
+  print(cp)
+  
+}
+dev.off()
+
+```
+
+```{r}
+# distance
+pdf(file.path(plot_dir, "GeneScore.comparison.weightdist.oldassign.pdf"), height=6, width=8)
+for (i in 1:50) {
+  
+  new_gene <- candidate_genes[i]
+  pa1_subset <- pa1[gene %in% new_gene][order(w_dist_new)]
+  pa1_subset[,peak_new:=factor(peak_new,levels=unique(pa1_subset$peak_new))]
+  pa2_subset <- pa2[gene %in% new_gene][order(w_dist_old)]
+  pa2_subset[,peak_old:=factor(peak_old,levels=unique(pa2_subset$peak_old))]
+  old_gene <- unique(pa2_subset$ID_JGI_Vienna)
+
+  cp_1 <- ggplot(pa1_subset, aes(peak_new, w_dist_new, fill=peak_location_annotation_new)) +
+    geom_bar(stat = "identity", position = "dodge2") + theme_bw() + coord_flip() + 
+    theme(legend.position = "none", legend.title = element_blank()) +
+    scale_fill_manual(values = loc_cols) +
+    labs(title = paste(new_gene))
+  cp_2 <- ggplot(pa2_subset, aes(peak_old, w_dist_old, fill=peak_location_annotation_old)) +
+    geom_bar(stat = "identity", position = "dodge2") + theme_bw() + coord_flip() +
+    guides(fill=guide_legend(title="location")) +
+    scale_fill_manual(values = loc_cols) +
+    labs(title = paste(old_gene, collapse = ","))
+  cp <- (cp_1 + cp_2) # + plot_layout(guides = "collect") & theme(legend.position = 'bottom')
+  print(cp)
+  
+}
+dev.off()
+
+```
+
+Compare cell types cell assignment
+
+```{r}
+old_ann[grepl("neuron",cell_type) & cell_type!="neuron_gland", cell_type:="neuron"]
+old_ann[grepl("gland",cell_type), cell_type:="neuron"]
+
+new_ann[grepl("neuron",cell_type), cell_type:="neuron"]
+new_ann[grepl("gland",cell_type), cell_type:="neuron"]
+
+ncols <- length(shared_ann)
+nrows <- length(shared_ann)
+outmat <- matrix(ncol=ncols, nrow=nrows)
+colnames(outmat) <- shared_ann
+rownames(outmat) <- shared_ann
+for (i in 1:nrows) {
+  for (j in 1:ncols) {
+    x <- old_ann[cell_type==shared_ann[i]]$cell
+    y <- new_ann[cell_type==shared_ann[j]]$cell
+    outmat[i,j] <- length(intersect(y, x)) / length(union(y, x))
+  }
+}
+
+hm_nnls <- Heatmap(
+  outmat, 
+  name = "jaccard",
+  border = TRUE,
+  col=colorRampPalette(ArchR::ArchRPalettes$greyMagma)(10),
+  # bottom_annotation = col_ann, left_annotation = row_ann,
+  row_title = "old annotation",
+  column_title = "new annotation",
+  # column_names_gp = gpar(fontsize = 6),
+  row_names_side = "left",
+  cluster_rows = FALSE, cluster_columns = FALSE, 
+  show_row_dend = FALSE, show_column_dend = FALSE
+)
+
+pdf(file.path(plot_dir, "Cell.assign.comparison.heatmap.pdf"), width=6,height=5)
+draw(hm_nnls)
+dev.off()
+
+```
+
+# Cell type annotation
+
+## Multiome annotation
+
+Add multiome-based annotations.
+
+```{r}
+sc_ann <- fread("../../../10x_multiome_nvec_v2/scdb/annotation.single_cell.07563AAD_GEX_K30_reord_rm_ord.tsv")
+sc_ann[,cell:=str_replace(cell,"07563AAD_GEX_","Multiome_07563AAD#")]
+multiome_annot_v <- structure(
+  sc_ann$cell_type, 
+  names=sc_ann$cell
+)
+col_ann <- unique(sc_ann[,.(cell_type,color)])
+multiome_annot_pal <- structure(
+  col_ann$color, 
+  names=col_ann$cell_type
+)
+multiome_annot_pal <- c(multiome_annot_pal, "none" = "#fcf2e3")
+col_ann[,broad_cell_type:=str_extract(cell_type,"cnidocyte|gastrodermis_muscle|gastrodermis|muscle|digestive_filaments|epidermis|neuron|gland|precursors")]
+col_ann_broad <- col_ann[,.SD[.N],broad_cell_type][,cell_type:=NULL]
+multiome_annot_pal_broad <- structure(
+  col_ann_broad$color, 
+  names=col_ann_broad$broad_cell_type
+)
+multiome_annot_pal_broad <- c(multiome_annot_pal_broad, "none" = "#FCF2E3")
+
+# add annotation to project
+proj@cellColData$cell_type_multiome <- multiome_annot_v[rownames(proj@cellColData)]
+proj@cellColData$cell_type_multiome[is.na(proj@cellColData$cell_type_multiome)] <- "none"
+proj@cellColData$cell_type_multiome_color <- unname(multiome_annot_pal[proj@cellColData$cell_type_multiome])
+proj@cellColData$broad_cell_type_multiome <- str_extract(proj@cellColData$cell_type_multiome,"cnidocyte|gastrodermis_muscle|gastrodermis|muscle|digestive_filaments|epidermis|neuron|gland|precursors|none")
+proj@cellColData$broad_cell_type_multiome_color <- unname(multiome_annot_pal_broad[proj@cellColData$broad_cell_type_multiome])
+
+# update project
+saveArchRProject(ArchRProj=proj, outputDirectory=sprintf("ArchRProj_%s",sample), load=TRUE)
+
+```
+
+Plot
+
+```{r}
+rdim <- "IterativeLSI"
+emb <- "TSNE"
+df <- proj@embeddings[[emb]]$df
+
+cdt <- as.data.table(as.data.frame(proj@cellColData))[,.(cell_type_multiome)]
+cttab <- table(cdt$cell_type_multiome)
+cols <- proj@cellColData[rownames(df),"cell_type_multiome_color"]
+names(cols) <-  proj@cellColData[rownames(df),"cell_type_multiome"]
+gp_multiome <- plot_2d_proj(
+  df = df, 
+  color = cols, defaultColor = "#fcf2e3",
+  highlightPoints = grep("Multiome",rownames(df)),
+  xlabel = paste0(emb,"1"), ylabel = paste0(emb,"2"),
+  showLegend = TRUE, showLabels = FALSE,
+  legendRows = 6
+) + scale_color_manual(
+    values = multiome_annot_pal,
+    limits = names(cttab),
+    labels = sprintf("%s (%s)",names(cttab),format(cttab, big.mark=",", trim=TRUE))
+)
+
+
+cdt <- as.data.table(as.data.frame(proj@cellColData))[,.(broad_cell_type_multiome)]
+cttab <- table(cdt$broad_cell_type_multiome)
+cols <- proj@cellColData[rownames(df),"broad_cell_type_multiome_color"]
+names(cols) <-  proj@cellColData[rownames(df),"broad_cell_type_multiome"]
+gp_multiome_broad <- plot_2d_proj(
+  df = df, 
+  color = cols, defaultColor = "#fcf2e3",
+  highlightPoints = grep("Multiome",rownames(df)),
+  xlabel = paste0(emb,"1"), ylabel = paste0(emb,"2"),
+  showLegend = TRUE, showLabels = FALSE,
+  legendRows = 5
+) + scale_color_manual(
+    values = multiome_annot_pal_broad,
+    limits = names(cttab),
+    labels = sprintf("%s (%s)",names(cttab),format(cttab, big.mark=",", trim=TRUE))
+)
+
+gp_multiome_all <- gp_multiome + gp_multiome_broad
+ggsave(file.path(plot_dir, sprintf("Plot-%s-%s-Multiome-Cell-Type-ggplot2.pdf",emb,rdim)), width=16, height=10)
+```
+
+LISI
+
+```{r}
+clusters <- paste0("C",1:length(unique(proj@cellColData$Clusters)))
+cluster_colors <- structure(paletteDiscrete(values = clusters, set = "stallion"), names=clusters)
+
+require(lisi)
+X = as.matrix(proj@embeddings$TSNE$df)
+X = X[grep("Multiome",rownames(X)),]
+meta_data = as.data.table(as.data.frame(proj@cellColData)[rownames(X),], keep.rownames = "Cell")
+setnames(meta_data, c("cell_type_multiome","broad_cell_type_multiome"), c("cell_type","broad_cell_type"))
+class(meta_data) <- "data.frame"
+rownames(meta_data) <- meta_data$Cell
+perp = 100
+lisi = compute_lisi(X, meta_data, label_colnames = c("cell_type","broad_cell_type"), perplexity = perp)
+setDT(lisi, keep.rownames = "Cell")
+# setnames(lisi, colnames(lisi)[-1], paste0("LISI_",colnames(lisi)[-1]))
+
+lisi_melt <- melt.data.table(lisi, id.vars = "Cell")
+lp <- ggplot(lisi_melt, aes(variable,value)) + geom_violin() + scale_y_log10()
+
+cdt <- as.data.table(as.data.frame(proj@cellColData), keep.rownames = "Cell")[,.(Cell,Clusters,Sample)]
+ldt <- merge.data.table(cdt, lisi, by="Cell", all=FALSE)
+ldmt <- melt.data.table(ldt, id.vars=c("Cell","Clusters","Sample"), variable.name="group",value.name="LISI")
+ldmt[,Clusters:=factor(Clusters,levels=names(cluster_colors))]
+ldmt[,Clusters:=factor(Clusters,levels=ldt[,median(broad_cell_type),Clusters][order(V1)]$Clusters)]
+
+# plot
+ggplot(ldmt, aes(Clusters,LISI,fill=Clusters)) + 
+  geom_boxplot() +
+  facet_grid(group~., scales = "free_y") +
+  scale_fill_manual(values = cluster_colors) + 
+  theme_set(theme_py) +
+  theme(
+    panel.grid.major = element_line(size = 0.01, colour = "grey60"),
+    panel.grid.minor = element_blank(),
+    legend.position = "none", 
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)
+  )
+ggsave(file.path(plot_dir, sprintf("Multiome-Cell-Type-Clusters-LISI.pdf")), width=12, height=6)
+
+```
+
+Plot barplots of annotations for clusters.
+
+```{r}
+scdt <- as.data.table(proj@cellColData)
+cdt <- scdt[,.N,.(Clusters,cell_type_multiome)][order(Clusters,-N)][cell_type_multiome!="none"][,perc:=N/sum(N),Clusters]
+cdt_tot <- cdt[,.(N=sum(N)),Clusters]
+cdt_sum <- cdt[,.SD[1],Clusters]
+
+clusters <- paste0("C",1:length(unique(proj@cellColData$Clusters)))
+scdt[,Clusters:=factor(Clusters,levels=clusters)]
+setorder(scdt, Clusters)
+
+bar_ct_1 <- ggplot(scdt[cell_type_multiome!="none"]) +
+    geom_bar(aes(x=Clusters,fill=cell_type_multiome), color="black") +
+    geom_text(data = cdt_tot, aes(Clusters, N+50, label=N)) +
+    scale_fill_manual(values = multiome_annot_pal) + 
+    scale_y_continuous(expand=expansion(mult = c(0,0.1))) +
+    labs(y="cells", x="Clusters") +
+    theme(
+        panel.grid.major = element_line(size = 0.01, colour = "grey60"),
+        panel.grid.minor = element_blank(),
+        legend.position = "none", 
+        axis.ticks.x = element_blank(), 
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)
+    )
+bar_ct_2 <- ggplot(scdt[cell_type_multiome!="none"], aes(x=Clusters,fill=cell_type_multiome)) +
+    geom_bar(color="black", position="fill") +
+    scale_fill_manual(values = multiome_annot_pal) + 
+    scale_y_continuous(expand = expansion(mult = c(0,0.1))) +
+    labs(y="cells", x="Clusters") +
+    theme(
+        panel.grid.major = element_line(size = 0.01, colour = "grey60"),
+        panel.grid.minor = element_blank(),
+        legend.position = "none", 
+        axis.ticks.x = element_blank(), 
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)
+    )
+bar_ct <- bar_ct_1 / bar_ct_2
+ggsave(file.path(plot_dir, "Multiome-Cell-Type-Clusters-barplot.pdf"), width=14, height=8)
+```
+
+Same but for broad cell types.
+
+```{r}
+scdt <- as.data.table(proj@cellColData)
+cdt_broad <- scdt[,.N,.(Clusters,broad_cell_type_multiome)][order(Clusters,-N)][broad_cell_type_multiome!="none"][,perc:=N/sum(N),Clusters]
+cdt_tot <- cdt_broad[,.(N=sum(N)),Clusters]
+cdt_sum <- cdt_broad[,.SD[1],Clusters]
+
+clusters <- paste0("C",1:length(unique(proj@cellColData$Clusters)))
+scdt[,Clusters:=factor(Clusters,levels=clusters)]
+setorder(scdt, Clusters)
+
+bar_bct_1 <- ggplot(scdt[cell_type_multiome!="none"]) +
+    geom_bar(aes(x=Clusters,fill=broad_cell_type_multiome), color="black") +
+    geom_text(data = cdt_tot, aes(Clusters, N+50, label=N)) +
+    scale_fill_manual(values = multiome_annot_pal_broad) + 
+    scale_y_continuous(expand=expansion(mult = c(0,0.1))) +
+    labs(y="cells", x="Clusters") +
+    theme(
+        panel.grid.major = element_line(size = 0.01, colour = "grey60"),
+        panel.grid.minor = element_blank(),
+        legend.position = "none", 
+        axis.ticks.x = element_blank(), 
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)
+    )
+bar_bct_2 <- ggplot(scdt[cell_type_multiome!="none"], aes(x=Clusters,fill=broad_cell_type_multiome)) +
+    geom_bar(color="black", position="fill") +
+    scale_fill_manual(values = multiome_annot_pal_broad) + 
+    scale_y_continuous(expand = expansion(mult = c(0,0.1))) +
+    labs(y="cells", x="Clusters") +
+    theme(
+        panel.grid.major = element_line(size = 0.01, colour = "grey60"),
+        panel.grid.minor = element_blank(),
+        legend.position = "bottom", 
+        axis.ticks.x = element_blank(), 
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)
+    )
+bar_bct <- bar_bct_1 / bar_bct_2
+ggsave(file.path(plot_dir, "Multiome-Broad-Cell-Type-Clusters-barplot.pdf"), width=14, height=8)
+
+```
+
+Same but ordered by LISI score
+
+```{r}
+scdt[,Clusters:=factor(Clusters,levels=levels(ldmt$Clusters))]
+setorder(scdt, Clusters)
+
+cpgc1 <- ggplot(scdt[cell_type_multiome!="none"]) +
+    geom_bar(aes(x=Clusters,fill=broad_cell_type_multiome), color="black") +
+    geom_text(data = cdt_tot, aes(Clusters, N+50, label=N)) +
+    scale_fill_manual(values = multiome_annot_pal_broad) + 
+    scale_y_continuous(expand=expansion(mult = c(0,0.1))) +
+    labs(y="cells", x="Clusters") +
+    theme(
+        panel.grid.major = element_line(size = 0.01, colour = "grey60"),
+        panel.grid.minor = element_blank(),
+        legend.position = "none", 
+        axis.ticks.x = element_blank(), 
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)
+    )
+cpgc2 <- ggplot(scdt[cell_type_multiome!="none"], aes(x=Clusters,fill=broad_cell_type_multiome)) +
+    geom_bar(color="black", position="fill") +
+    scale_fill_manual(values = multiome_annot_pal_broad) + 
+    scale_y_continuous(expand = expansion(mult = c(0,0.1))) +
+    labs(y="cells", x="Clusters") +
+    theme(
+        panel.grid.major = element_line(size = 0.01, colour = "grey60"),
+        panel.grid.minor = element_blank(),
+        legend.position = "bottom", 
+        axis.ticks.x = element_blank(), 
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)
+    )
+gp <- cpgc1 / cpgc2
+ggsave(file.path(plot_dir, "Multiome-Broad-Cell-Type-Clusters-barplot-LISI-ord.pdf"), width=14, height=8)
+
+```
+
+Summarize top annotations for clusters.
+
+```{r}
+cols <- c("N","perc") 
+setnames(cdt, cols, paste0(cols,"_cell_type"))
+setnames(cdt_broad, cols, paste0(cols,"_broad_cell_type"))
+cdt[,"broad_cell_type_multiome":=str_extract(cell_type_multiome,"cnidocyte|gastrodermis_muscle|gastrodermis|muscle|digestive_filaments|epidermis|neuron|gland|precursors|none")]
+dt <- merge.data.table(cdt, cdt_broad, by=c("Clusters","broad_cell_type_multiome"), sort=FALSE)
+
+# add median LISI scores per cluster
+ldtm <- ldt[,lapply(.SD,median),by=Clusters,.SDcols=c("cell_type","broad_cell_type")]
+setnames(ldtm, c("cell_type","broad_cell_type"), c("LISI_cell_type","LISI_broad_cell_type"))
+mdt <- merge.data.table(dt, ldtm, by="Clusters", sort=FALSE)
+
+# order
+clusters <- paste0("C",1:length(unique(proj@cellColData$Clusters)))
+mdt[,Clusters:=factor(Clusters,levels=clusters)]
+setorder(mdt, Clusters, -perc_cell_type, -perc_broad_cell_type)
+setcolorder(mdt, c("Clusters","cell_type_multiome","cell_type_multiome_color","N_cell_type","perc_cell_type","LISI_cell_type","broad_cell_type_multiome","broad_cell_type_multiome_color","N_broad_cell_type","perc_broad_cell_type","LISI_broad_cell_type"))
+
+# assign top annotation per cluster 
+mdt_top <- mdt[,.SD[1],Clusters]
+
+# manually assign some clusters
+mdt_ambig <- rbindlist(list(
+  # precursors are likely at disadvantage b/c small number of cells
+  mdt[Clusters %in% c("C23","C31")][grep("precursors",cell_type_multiome)]
+))
+
+# final annotations
+mdt_ann <- rbindlist(list(
+  mdt_top[!Clusters %in% mdt_ambig$Clusters],
+  mdt_ambig
+))
+setorder(mdt_ann, Clusters)
+
+# save 
+fwrite(mdt, file.path(sprintf("ArchRProj_%s",sample), "annotation.all.multiome.tsv"), sep="\t", col.names=TRUE)
+colnames(mdt_ann) <- str_replace(colnames(mdt_ann),"_multiome","_majority")
+fwrite(mdt_ann, file.path(sprintf("ArchRProj_%s",sample), "annotation.top.multiome.tsv"), sep="\t", col.names=TRUE)
+
+```
+
+Update ArchR object.
+
+```{r}
+# add to project
+colnames(mdt_ann) <- str_replace(colnames(mdt_ann),"_multiome","_majority")
+for (i in colnames(mdt_ann)[-1]) {
+  vec <- structure(mdt_ann[[i]], names=as.character(mdt_ann$Clusters))
+  proj@cellColData[,i] <- vec[proj@cellColData$Clusters]
+}
+
+# also add cluster colors
+clusters <- paste0("C",1:length(unique(proj@cellColData$Clusters)))
+cluster_cols <- structure(paletteDiscrete(values = clusters, set = "stallion"), names=clusters)
+proj@cellColData$Clusters_color <- cluster_cols[proj@cellColData$Clusters]
+
+# also add sample colors
+if (is.null(proj@cellColData$Sample_color)) {
+  proj@cellColData$Sample_color <- orig_cols[as.character(proj@cellColData$Sample)] 
+}
+
+# update project
+saveArchRProject(ArchRProj=proj, outputDirectory=sprintf("ArchRProj_%s",sample), load=TRUE)
+```
+
+Embedding plots summarizing annotation
+
+```{r}
+# plot annotation
+cdt <- as.data.table(as.data.frame(proj@cellColData))[,.(cell_type)]
+cttab <- table(cdt$cell_type)
+pct <- plotEmbedding(
+    ArchRProj = proj, 
+    colorBy = "cellColData", 
+    pal = multiome_annot_pal, 
+    name = "cell_type", 
+    embedding = emb, 
+    plotAs = "points", 
+    size = 1, 
+    labelSize = 0
+) + 
+    theme(legend.title = element_blank(), legend.position="bottom") + 
+    guides(
+        colour = guide_legend(
+            nrow = 8, byrow = TRUE,
+            override.aes = list(size=3)
+        )
+    ) + 
+    labs(
+        title = "Cell type", 
+        x = paste0(emb,1), 
+        y = paste0(emb,2)
+    )
+pct$data$color <- str_remove(pct$data$color, "\\d+-")
+pct <- pct +
+    scale_color_manual(
+        values = multiome_annot_pal,
+        limits = names(cttab),
+        labels = sprintf("%s (%s)",names(cttab),format(cttab, big.mark=",", trim=TRUE))
+    )
+
+
+# plot broad annotation
+cdt <- as.data.table(as.data.frame(proj@cellColData))[,.(broad_cell_type)]
+cttab <- table(cdt$broad_cell_type)
+pbct <- plotEmbedding(
+    ArchRProj = proj, 
+    colorBy = "cellColData", 
+    pal = multiome_annot_pal_broad, 
+    name = "broad_cell_type", 
+    embedding = emb, 
+    plotAs = "points", 
+    size = 1, 
+    labelSize = 0
+) + 
+    theme(legend.title = element_blank(), legend.position="bottom") + 
+    guides(
+        colour = guide_legend(
+            nrow = 8, byrow = TRUE,
+            override.aes = list(size=3)
+        )
+    ) + 
+    labs(
+        title = "Broad cell type", 
+        x = paste0(emb,1), 
+        y = paste0(emb,2)
+    )
+pbct$data$color <- str_remove(pbct$data$color, "\\d+-")
+pbct <- pbct +
+    scale_color_manual(
+        values = multiome_annot_pal_broad,
+        limits = names(cttab),
+        labels = sprintf("%s (%s)",names(cttab),format(cttab, big.mark=",", trim=TRUE))
+    )
+
+
+# plot annotation LISI score
+pls <- plotEmbedding(
+  ArchRProj = proj, 
+  colorBy = "cellColData", 
+  name = "LISI_broad_cell_type", 
+  pal = rev(ArchRPalettes$greyMagma[-1]),
+  embedding = emb, 
+  plotAs = "points", 
+  size=0.1
+) + labs(title="LISI median score", x=paste0(emb,1), y=paste0(emb,2))
+
+
+pdf(file.path(plot_dir, sprintf("Plot-%s-%s-Cell-Type.pdf",emb,rdim)), width=18, height=8)
+pct + pbct + pls
+dev.off()
+```
+
+## Multiome annotation Seurat
+
+Add Seurat predicted cell types to ArchR project.
+
+```{r}
+seurat_pred <- fread("../Seurat/Data/ATAC.predicted_cell_type.tsv")
+setnames(
+  seurat_pred, 
+  c("predicted.color", "predicted.color.score" ),
+  c("predicted.cell_type_color","predicted.cell_type_color.score")
+)
+seurat_pred[,predicted.cell_type_color.score:=NULL] # same as predicted.cell_type.score
+
+# add broad cell type
+seurat_pred[, predicted.broad_cell_type:=str_extract(predicted.cell_type, "cnidocyte|gastrodermis_muscle|gastrodermis|muscle|digestive_filaments|epidermis|neuron|gland|precursors")]
+
+# colors
+ann_dt <- unique(seurat_pred[,.(predicted.cell_type,predicted.cell_type_color,predicted.broad_cell_type)])
+ann_pal <- structure(ann_dt$predicted.cell_type_color, names=ann_dt$predicted.cell_type)
+
+# broad cell type colors
+ann_broad_dt <- ann_dt[order(predicted.cell_type)][,.SD[.N],predicted.broad_cell_type][,predicted.cell_type:=NULL]
+ann_broad_dt <- fread( file.path(sprintf("ArchRProj_%s",sample), "annotation.top.multiome.tsv") )
+ann_broad_dt <- unique(ann_broad_dt[,.(broad_cell_type_multiome,broad_cell_type_multiome_color)])
+ann_pal_broad <- structure(
+  ann_broad_dt$broad_cell_type_multiome_color, 
+  names=ann_broad_dt$broad_cell_type_multiome
+)
+
+# add broad cell type color
+seurat_pred[,predicted.broad_cell_type_color:=ann_pal_broad[predicted.broad_cell_type]]
+
+# add to ArchR proj
+cols <- c("cell",grep("predicted",colnames(seurat_pred),value=TRUE))
+seurat_pred <- seurat_pred[,..cols]
+for (i in colnames(seurat_pred)[-1]) {
+  message(i)
+  vec <- structure(seurat_pred[[i]], names=as.character(seurat_pred$cell))
+  proj@cellColData[,i] <- vec[rownames(proj@cellColData)]
+}
+
+```
+
+Embedding plots summarizing annotation
+
+```{r}
+# plot cell type annotation
+cdt <- as.data.table(as.data.frame(proj@cellColData))[,.(predicted.cell_type)]
+cttab <- table(cdt$predicted.cell_type)
+pct <- plotEmbedding(
+    ArchRProj = proj, 
+    colorBy = "cellColData", 
+    pal = ann_pal, 
+    name = "predicted.cell_type", 
+    embedding = emb, 
+    plotAs = "points", 
+    size = 1, 
+    labelSize = 0
+) + 
+    theme(legend.title = element_blank(), legend.position="bottom") + 
+    guides(
+        colour = guide_legend(
+            nrow = 8, byrow = TRUE,
+            override.aes = list(size=3)
+        )
+    ) + 
+    labs(
+        title = "Cell type", 
+        x = paste0(emb,1), 
+        y = paste0(emb,2)
+    )
+pct$data$color <- str_remove(pct$data$color, "\\d+-")
+pct <- pct +
+    scale_color_manual(
+        values = ann_pal,
+        limits = names(cttab),
+        labels = sprintf("%s (%s)",names(cttab),format(cttab, big.mark=",", trim=TRUE))
+    )
+
+# plot broad cell type annotation
+cdt <- as.data.table(as.data.frame(proj@cellColData))[,.(predicted.broad_cell_type)]
+cttab <- table(cdt$predicted.broad_cell_type)
+pbct <- plotEmbedding(
+    ArchRProj = proj, 
+    colorBy = "cellColData", 
+    pal = ann_pal_broad, 
+    name = "predicted.broad_cell_type", 
+    embedding = emb, 
+    plotAs = "points", 
+    size = 1, 
+    labelSize = 0
+) + 
+    theme(legend.title = element_blank(), legend.position="bottom") + 
+    guides(
+        colour = guide_legend(
+            nrow = 8, byrow = TRUE,
+            override.aes = list(size=3)
+        )
+    ) + 
+    labs(
+        title = "Broad cell type", 
+        x = paste0(emb,1), 
+        y = paste0(emb,2)
+    )
+pbct$data$color <- str_remove(pbct$data$color, "\\d+-")
+pbct <- pbct +
+    scale_color_manual(
+        values = ann_pal_broad,
+        limits = names(cttab),
+        labels = sprintf("%s (%s)",names(cttab),format(cttab, big.mark=",", trim=TRUE))
+    )
+
+
+# plot prediction score
+pls <- plotEmbedding(
+  ArchRProj = proj, 
+  colorBy = "cellColData", 
+  name = "predicted.cell_type.score", 
+  pal = ArchRPalettes$greyMagma[-1],
+  embedding = emb, 
+  plotAs = "points", 
+  size=0.1
+) + labs(title="Prediction score", x=paste0(emb,1), y=paste0(emb,2))
+
+
+pdf(file.path(plot_dir, sprintf("Plot-%s-%s-Cell-Type-Seurat.pdf",emb,rdim)), width=18, height=8)
+pct + pbct + pls
+dev.off()
+```
+
+Plot barplots of annotations for clusters.
+
+```{r}
+scdt <- as.data.table(proj@cellColData)
+cdt <- scdt[,.N,.(Clusters,predicted.cell_type)][order(Clusters,-N)][predicted.cell_type!="none"][,perc:=N/sum(N),Clusters]
+cdt_tot <- cdt[,.(N=sum(N)),Clusters]
+cdt_sum <- cdt[,.SD[1],Clusters]
+
+clusters <- paste0("C",1:length(unique(proj@cellColData$Clusters)))
+scdt[,Clusters:=factor(Clusters,levels=clusters)]
+setorder(scdt, Clusters)
+
+cpgc1 <- ggplot(scdt) +
+    geom_bar(aes(x=Clusters,fill=predicted.cell_type), color="black") +
+    geom_text(data = cdt_tot, aes(Clusters, N+100, label=N)) +
+    scale_fill_manual(values = ann_pal) + 
+    scale_y_continuous(expand=expansion(mult = c(0,0.1))) +
+    labs(y="cells", x="Clusters") +
+    theme(
+        panel.grid.major = element_line(size = 0.01, colour = "grey60"),
+        panel.grid.minor = element_blank(),
+        legend.position = "none", 
+        axis.ticks.x = element_blank(), 
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)
+    )
+cpgc2 <- ggplot(scdt, aes(x=Clusters,fill=predicted.cell_type)) +
+    geom_bar(color="black", position="fill") +
+    scale_fill_manual(values = ann_pal) + 
+    scale_y_continuous(expand = expansion(mult = c(0,0.1))) +
+    labs(y="cells", x="Clusters") +
+    theme(
+        panel.grid.major = element_line(size = 0.01, colour = "grey60"),
+        panel.grid.minor = element_blank(),
+        legend.position = "bottom", 
+        axis.ticks.x = element_blank(), 
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)
+    )
+gp <- cpgc1/cpgc2
+ggsave(file.path(plot_dir, "Multiome-Cell-Type-Clusters-Seurat-barplot.pdf"), width=14, height=8)
+```
+
+Same but for broad cell types.
+
+```{r}
+scdt <- as.data.table(proj@cellColData)
+cdt_broad <- scdt[,.N,.(Clusters,predicted.broad_cell_type)][order(Clusters,-N)][predicted.broad_cell_type!="none"][,perc:=N/sum(N),Clusters]
+cdt_tot <- cdt_broad[,.(N=sum(N)),Clusters]
+cdt_sum <- cdt_broad[,.SD[1],Clusters]
+
+clusters <- paste0("C",1:length(unique(proj@cellColData$Clusters)))
+scdt[,Clusters:=factor(Clusters,levels=clusters)]
+setorder(scdt, Clusters)
+
+cpgbc1 <- ggplot(scdt) +
+    geom_bar(aes(x=Clusters,fill=predicted.broad_cell_type), color="black") +
+    geom_text(data = cdt_tot, aes(Clusters, N+100, label=N)) +
+    scale_fill_manual(values = ann_pal_broad) + 
+    scale_y_continuous(expand=expansion(mult = c(0,0.1))) +
+    labs(y="cells", x="Clusters") +
+    theme(
+        panel.grid.major = element_line(size = 0.01, colour = "grey60"),
+        panel.grid.minor = element_blank(),
+        legend.position = "none", 
+        axis.ticks.x = element_blank(), 
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)
+    )
+cpgbc2 <- ggplot(scdt, aes(x=Clusters,fill=predicted.broad_cell_type)) +
+    geom_bar(color="black", position="fill") +
+    scale_fill_manual(values = ann_pal_broad) + 
+    scale_y_continuous(expand = expansion(mult = c(0,0.1))) +
+    labs(y="cells", x="Clusters") +
+    theme(
+        panel.grid.major = element_line(size = 0.01, colour = "grey60"),
+        panel.grid.minor = element_blank(),
+        legend.position = "bottom", 
+        axis.ticks.x = element_blank(), 
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)
+    )
+gp <- cpgbc1/cpgbc2
+ggsave(file.path(plot_dir, "Multiome-Broad-Cell-Type-Clusters-Seurat-barplot.pdf"), width=14, height=8)
+```
+
+Embedding plots summarizing annotation
+
+```{r}
+# plot annotation
+cdt <- as.data.table(as.data.frame(proj@cellColData))[,.(cell_type_seurat)]
+cttab <- table(cdt$cell_type_seurat)
+pct <- plotEmbedding(
+    ArchRProj = proj, 
+    colorBy = "cellColData", 
+    pal = ann_pal, 
+    name = "cell_type_seurat", 
+    embedding = emb, 
+    plotAs = "points", 
+    size = 1, 
+    labelSize = 0
+) + 
+    theme(legend.title = element_blank(), legend.position="bottom") + 
+    guides(
+        colour = guide_legend(
+            nrow = 8, byrow = TRUE,
+            override.aes = list(size=3)
+        )
+    ) + 
+    labs(
+        title = "Cell type", 
+        x = paste0(emb,1), 
+        y = paste0(emb,2)
+    )
+pct$data$color <- str_remove(pct$data$color, "\\d+-")
+pct <- pct +
+    scale_color_manual(
+        values = ann_pal,
+        limits = names(cttab),
+        labels = sprintf("%s (%s)",names(cttab),format(cttab, big.mark=",", trim=TRUE))
+    )
+
+
+# plot broad annotation
+cdt <- as.data.table(as.data.frame(proj@cellColData))[,.(broad_cell_type_seurat)]
+cttab <- table(cdt$broad_cell_type_seurat)
+pbct <- plotEmbedding(
+    ArchRProj = proj, 
+    colorBy = "cellColData", 
+    pal = ann_pal_broad, 
+    name = "broad_cell_type_seurat", 
+    embedding = emb, 
+    plotAs = "points", 
+    size = 1, 
+    labelSize = 0
+) + 
+    theme(legend.title = element_blank(), legend.position="bottom") + 
+    guides(
+        colour = guide_legend(
+            nrow = 8, byrow = TRUE,
+            override.aes = list(size=3)
+        )
+    ) + 
+    labs(
+        title = "Broad cell type", 
+        x = paste0(emb,1), 
+        y = paste0(emb,2)
+    )
+pbct$data$color <- str_remove(pbct$data$color, "\\d+-")
+pbct <- pbct +
+    scale_color_manual(
+        values = ann_pal_broad,
+        limits = names(cttab),
+        labels = sprintf("%s (%s)",names(cttab),format(cttab, big.mark=",", trim=TRUE))
+    )
+
+
+# plot annotation LISI score
+pls <- plotEmbedding(
+  ArchRProj = proj, 
+  colorBy = "cellColData", 
+  name = "predicted.cell_type.score", 
+  pal = ArchRPalettes$greyMagma[-1],
+  embedding = emb, 
+  plotAs = "points", 
+  size=0.1
+) + labs(title="Prediction score", x=paste0(emb,1), y=paste0(emb,2))
+
+
+pdf(file.path(plot_dir, sprintf("Plot-%s-%s-Cell-Type-Seurat.pdf",emb,rdim)), width=18, height=8)
+pct + pbct + pls
+dev.off()
+```
+
+Does Seurat annotate multiome cells well (i.e. same as metacell)?
+
+```{r}
+# load cell type annotations
+mc_ann <- fread("../../../scRNAseq_nvec_v4/scdb/annotation.Nvec_K30_reord_rm_ord.tsv", select=1:3)
+mc_ann[,broad_cell_type:=str_extract(cell_type, "cnidocyte|gastrodermis_muscle|gastrodermis|muscle|digestive_filaments|epidermis|neuron|gland|precursors")]
+# load multiome metacell nnotatioins ('true' labels)
+sc_ann <- fread("../../../10x_multiome_nvec_v2/scdb/annotation.single_cell.07563AAD_GEX_K30_reord_rm_ord.tsv")
+sc_ann[,cell:=str_replace(cell,"07563AAD_GEX_","Multiome_07563AAD#")]
+sc_ann[,broad_cell_type:=str_extract(cell_type,"cnidocyte|gastrodermis_muscle|gastrodermis|muscle|digestive_filaments|epidermis|neuron|gland|precursors")]
+# merge true labels with seurat predictions       
+dt <- merge.data.table(sc_ann, seurat_pred[grep("Multiome",cell)], by="cell", sort=FALSE)
+
+# function to calculate classification stats
+pred_stats <- function(dt, cts, predicted_col, expected_col) {
+  ct_confu <- lapply(cts, function(ct) {
+    predicted_value <- factor(dt[[predicted_col]] == ct, levels = c(FALSE,TRUE))
+    expected_value <- factor(dt[[expected_col]] == ct, levels = c(FALSE,TRUE))
+    if (nlevels(expected_value)>1) {
+      caret::confusionMatrix(predicted_value, expected_value)
+    } else {
+      NULL
+    }
+  })
+  names(ct_confu) <- cts
+  sens <- sapply(ct_confu, function(x) x$byClass['Sensitivity'])
+  spec <- sapply(ct_confu, function(x) x$byClass['Specificity'])
+  cdt <- data.table(
+    category = cts,
+    sensitivity = sens,
+    specificity = spec
+  )
+  cdt[,category:=factor(category,levels=cts)]
+  setorder(cdt)
+  cdt
+}
+
+# stats per cell type
+predicted_col <- "predicted.cell_type"
+expected_col <- "cell_type"
+cts <- unique(mc_ann$cell_type)
+ct_stats <- pred_stats(dt, cts, predicted_col, expected_col)
+ct_stats[is.na(ct_stats)] <- 0
+gp_ct <- ggplot(ct_stats, aes(sensitivity, specificity, color=category, label=category)) +
+  geom_point(size=2) +
+  geom_text_repel() +
+  coord_fixed() +
+  scale_x_continuous(limits = c(0,1)) +
+  scale_y_continuous(limits = c(0,1)) +
+  scale_color_manual(values=ann_pal) +
+  theme(legend.position = "none")
+
+# stats per broad cell type
+predicted_col <- "predicted.broad_cell_type"
+expected_col <- "broad_cell_type"
+bcts <- unique(mc_ann$broad_cell_type)
+bct_stats <- pred_stats(dt, bcts, predicted_col, expected_col)
+bct_stats[is.na(bct_stats)] <- 0
+gp_bct <- ggplot(bct_stats, aes(sensitivity, specificity, color=category, label=category)) +
+  geom_point(size=2) +
+  geom_text_repel() +
+  coord_fixed() +
+  scale_x_continuous(limits = c(0,1)) +
+  scale_y_continuous(limits = c(0,1)) +
+  scale_color_manual(values=ann_pal_broad) +
+  theme(legend.position = "none")
+
+gp_ct + gp_bct
+ggsave(file.path(plot_dir, "Multiome-Seurat-Cell-Type-CV.pdf"), height = 6, width = 12)
+
+```
+
+Save project
+
+```{r}
+saveArchRProject(ArchRProj=proj, outputDirectory=sprintf("ArchRProj_%s",sample), load=TRUE)
+```
+
+## Annotatioin transfer
+
+Cell type annotation from scATAC point-of-view.
+
+Data for integration
+
+```{r}
+# summarize gene scores per ATAC clusters
+gsmat <- readRDS(file.path(sprintf("ArchRProj_%s",sample),"GeneScoreMatrix","Matrix-Gene-Scores-Dist-Var-Weighted-50kb.rds"))
+gs_clusters <- tapply(colnames(gsmat), proj@cellColData[colnames(gsmat),]$Clusters, function(x) rowMeans(gsmat[,x,drop=FALSE]))
+gs_clust_mat <- do.call(cbind, gs_clusters)
+clusters <- paste0('C',1:length(gs_clusters))
+
+# use footprints?
+shiny_dir <- file.path(sprintf("ArchRProj_%s",sample), "Shiny")
+gs_clust_mat <- readRDS(file.path(shiny_dir, "Footprint_Clusters.rds"))
+
+# ATAC annotations
+acdt <- unique(as.data.table(proj@cellColData)[,.(Clusters,cell_type_majority,cell_type_seurat)])
+
+# RNA metacell data 
+scdb_dir <- "../../../scRNAseq_nvec_v4/scdb"
+scdb_init(scdb_dir, force_reinit=TRUE)
+mat_id <- "Nvec"
+mc_id <- "Nvec_K30_atlas"
+mat <- scdb_mat(mat_id)
+mc <- scdb_mc(mc_id)
+mcfp <- mc@mc_fp
+ann_file <- file.path(scdb_dir,sprintf("annotation.%s.tsv",mc_id))
+ann <- fread(ann_file)
+cdt <- unique(ann[,cell_type,color])
+ct_cols <- structure(cdt$color, names=as.character(cdt$cell_type))
+
+# gene sets - RNA - not used
+require(GSEABase)
+selected_cell_types <- colnames(mcfp)
+gsets <- unlist(lapply(selected_cell_types, function(ct) {
+  x <- rownames(mcfp)[mcfp[,ct]>2] # & apply(mcfp[,setdiff(colnames(mcfp),ct)], 1, max)<2
+  x <- grep("orphan", x, invert = TRUE, value = TRUE)
+  message(ct, ": ", length(x), " genes")
+  GeneSet(x, setName=ct)
+}))
+names(gsets) <- selected_cell_types
+gsetscol <- GeneSetCollection(gsets)
+
+```
+
+### AUCell
+
+```{r}
+library(AUCell)
+
+# gene sets - ATAC
+require(GSEABase)
+gsets <- unlist(lapply(clusters, function(ct) {
+  x <- rownames(gs_clust_mat)[gs_clust_mat[,ct]>0.5] 
+  message(ct, ": ", length(x), " genes")
+  GeneSet(x, setName=ct)
+}))
+names(gsets) <- clusters
+gsetscol <- GeneSetCollection(gsets)
+
+# rankings
+ranks <- AUCell_buildRankings(mcfp)
+clust_AUC <- AUCell_calcAUC(gsetscol, ranks)
+
+# cluster assignment
+clust_assignment <- AUCell_exploreThresholds(clust_AUC, plotHist=FALSE, assign=TRUE) 
+pdf(file.path(plot_dir, "AUCell-hist.pdf"), width=6,height=3)
+for(geneSetName in rownames(clust_AUC)) {
+  print(AUCell_plotHist(clust_AUC[geneSetName,]))
+  abline(v = clust_assignment[[geneSetName]]$aucThr$thresholds[1])
+}
+dev.off()
+
+# get AUCell matrix
+auc_mat <- getAUC(clust_AUC)
+auc_mat_scale <- t(apply(auc_mat, 1, function(x) x/max(x, na.rm = TRUE)))
+
+# order
+outmat <- auc_mat_scale
+outmat <- outmat[order(apply(outmat,1,which.max)),]
+
+# heatmap
+col_ann <- HeatmapAnnotation(
+    which = "column", 
+    "cell type" = as.character(ann[match(colnames(outmat),metacell)]$cell_type), 
+    col = list("cell type" = ct_cols)
+)
+row_ann <- HeatmapAnnotation(
+    which = "row", 
+    "transfer" = as.character(ann[match(colnames(outmat)[apply(outmat,1,which.max)], metacell)]$cell_type), 
+    "majority voting" = as.character(acdt[match(rownames(outmat), Clusters)]$cell_type_majority), 
+    "Seurat bridge" = as.character(acdt[match(rownames(outmat), Clusters)]$cell_type_seurat), 
+    col = list("transfer" = ct_cols, "majority voting" = ct_cols, "Seurat bridge" = ct_cols),
+    show_legend = FALSE
+)
+
+hm_auc <- Heatmap(
+  outmat, 
+  name = "scaled AUC",
+  col=colorRampPalette(ArchR::ArchRPalettes$greyMagma)(10),
+  bottom_annotation = col_ann, left_annotation = row_ann,
+  row_title = sprintf("%s clusters", nrow(outmat)),
+  column_title = sprintf("%s metacells", ncol(outmat)),
+  column_names_gp = gpar(fontsize = 6),
+  row_names_side = "left",
+  cluster_rows = FALSE, cluster_columns = FALSE, 
+  show_row_dend = FALSE, show_column_dend = FALSE
+)
+
+pdf(file.path(plot_dir, "AUCell-heatmap.pdf"), width=21,height=7)
+draw(hm_auc)
+dev.off()
+```
+
+Summarize AUCell annotations
+
+```{r}
+aucell_dt <- data.table(
+  Clusters=rownames(outmat),
+  AUCell_annotation= ann[match(colnames(outmat)[apply(outmat,1,which.max)], metacell)]$cell_type
+)
+
+# manually fix some things
+aucell_dt[Clusters == "C27", AUCell_annotation:="unknown"]
+aucell_dt[Clusters == "C23", AUCell_annotation:="precursors"]
+aucell_dt[Clusters == "C31", AUCell_annotation:="neuron_2_precursors"]
+aucell_dt[Clusters == "C32", AUCell_annotation:="precursors"]
+
+# save
+fwrite(aucell_dt, file.path(sprintf("ArchRProj_%s",sample),"annotation.aucell.tsv"), sep="\t")
+```
+
+### NNLS
+
+```{r}
+# gene sets - ATAC
+require(GSEABase)
+gsets <- unlist(lapply(clusters, function(ct) {
+  x <- rownames(gs_clust_mat)[gs_clust_mat[,ct]>1.5] 
+  message(ct, ": ", length(x), " genes")
+  GeneSet(x, setName=ct)
+}))
+names(gsets) <- clusters
+gsetscol <- GeneSetCollection(gsets)
+
+# NNLS
+library(nnls)
+genes <- intersect(rownames(mcfp),rownames(gs_clust_mat))
+top_genes <- intersect(genes, unlist(sapply(gsets, function(x) x@geneIds), use.names=FALSE))
+ncols <- ncol(gs_clust_mat)
+nrows <- ncol(mcfp)
+nnlsmat <- matrix(ncol=ncols, nrow=nrows)
+colnames(nnlsmat) <- colnames(gs_clust_mat)
+rownames(nnlsmat) <- colnames(mcfp)
+for (i in 1:nrows) {
+  for (j in 1:ncols) {
+    x <- mcfp[top_genes,i,drop=FALSE]
+    y <- gs_clust_mat[top_genes,j,drop=FALSE]
+    mod1 <- nnls(x, y)
+    nnlsmat[i,j] <- mod1$x 
+  }
+}
+outmat <- nnlsmat/rowSums(nnlsmat) * 100
+outmat <- t(outmat)
+
+# order
+outmat <- outmat[order(apply(outmat,1,which.max)),]
+
+# heatmap
+col_ann <- HeatmapAnnotation(
+    which = "column", 
+    "cell type" = as.character(ann[match(colnames(outmat),metacell)]$cell_type), 
+    col = list("cell type" = ct_cols)
+)
+row_ann <- HeatmapAnnotation(
+    which = "row", 
+    "transfer" = as.character(ann[match(colnames(outmat)[apply(outmat,1,which.max)], metacell)]$cell_type), 
+    "majority voting" = as.character(acdt[match(rownames(outmat), Clusters)]$cell_type_majority), 
+    "Seurat bridge" = as.character(acdt[match(rownames(outmat), Clusters)]$cell_type_seurat), 
+    col = list("transfer" = ct_cols, "majority voting" = ct_cols, "Seurat bridge" = ct_cols),
+    show_legend = FALSE
+)
+
+
+hm_nnls <- Heatmap(
+  pmin(outmat,quantile(outmat,0.99)), 
+  name = "scaled NNLS",
+  col=colorRampPalette(ArchR::ArchRPalettes$greyMagma)(10),
+  bottom_annotation = col_ann, left_annotation = row_ann,
+  row_title = sprintf("%s clusters", nrow(outmat)),
+  column_title = sprintf("%s metacells", ncol(outmat)),
+  column_names_gp = gpar(fontsize = 6),
+  row_names_side = "left",
+  cluster_rows = FALSE, cluster_columns = FALSE, 
+  show_row_dend = FALSE, show_column_dend = FALSE
+)
+
+pdf(file.path(plot_dir, "NNLS-heatmap.pdf"), width=21,height=7)
+draw(hm_nnls)
+dev.off()
+```
+
+Summarize NNLS annotations
+
+```{r}
+# save
+nnls_dt <- data.table(
+  Clusters = rownames(outmat),
+  NNLS_annotation = ann[match(colnames(outmat)[apply(outmat,1,which.max)], metacell)]$cell_type
+)
+
+# manually fix some things
+nnls_dt[Clusters == "C27", NNLS_annotation := "unknown"]
+nnls_dt[Clusters == "C23", NNLS_annotation := "precursors"]
+nnls_dt[Clusters == "C32", NNLS_annotation := "precursors"]
+
+# save
+fwrite(nnls_dt, file.path(sprintf("ArchRProj_%s",sample),"annotation.nnls.tsv"), sep="\t")
+```
+
+### Combine annotations
+
+All annotations together
+
+```{r}
+majority_dt <- fread(file.path(sprintf("ArchRProj_%s",sample),"annotation.top.multiome.tsv"))
+seurat_dt <- fread(file.path(sprintf("ArchRProj_%s",sample),"annotation.top.seurat.tsv"))
+aucell_dt <- fread(file.path(sprintf("ArchRProj_%s",sample),"annotation.aucell.tsv"))
+nnls_dt <- fread(file.path(sprintf("ArchRProj_%s",sample),"annotation.nnls.tsv"))
+
+dt1 <- merge.data.table(
+  majority_dt[,.(Clusters, cell_type_multiome)],
+  seurat_dt[,.(Clusters, predicted.cell_type)],
+  by = "Clusters"
+)
+dt2 <- merge.data.table(
+  aucell_dt[,.(Clusters, AUCell_annotation)],
+  dt1,
+  by = "Clusters", 
+  sort = FALSE
+)
+dt3 <- merge.data.table(
+  dt2, nnls_dt[,.(Clusters, NNLS_annotation)], 
+  by = "Clusters", 
+  sort = FALSE
+)
+dt <- melt.data.table(dt3, id.vars = "Clusters", variable.name = "method", value.name = "cell_type")
+setorder(dt, "cell_type")
+```
+
+Summarize annotations
+
+```{r}
+dts <- dt[,.N,.(Clusters,cell_type)]
+dts_4 <- dts[N==4][order(Clusters)]
+dts_3 <- dts[!Clusters %in% dts_4$Clusters][N==3][order(Clusters)]
+dts_2 <- dts[!Clusters %in% c(dts_4$Clusters,dts_3$Clusters)][N==2][order(Clusters)]
+dts_2 <- rbindlist(list(
+  dts_2[Clusters %in% dts_2[,.N,Clusters][N==1]$Clusters],
+  dts_2[Clusters %in% dts_2[,.N,Clusters][N>1]$Clusters][,.SD[2],Clusters]
+))[order(Clusters)]
+dts_1 <- dts[!Clusters %in% c(dts_4$Clusters,dts_3$Clusters,dts_2$Clusters)][order(Clusters)]
+dts_1 <- dt[Clusters %in% unique(dts_1$Clusters) & method=="AUCell_annotation"][,method:=NULL][,N:=1]
+
+final_dt <- rbindlist(list(dts_1,dts_2,dts_3,dts_4))
+final_dt[, Clusters:=factor(Clusters, levels=clusters)]
+setorder(final_dt, "Clusters")
+
+# still some fixes
+final_dt[Clusters=="C7", cell_type:="unknown_2"]
+final_dt[Clusters=="C27", cell_type:="unknown_1"]
+final_dt[Clusters %in% "C33", cell_type:="neuron_12"]
+
+# add colors
+ct_cols <- c(ct_cols, "unknown_1" = "#E7F0D5", "unknown_2" = "#F0E6E6")
+final_dt[,color:=ct_cols[cell_type]]
+
+# add broad annots
+cts <- c("cnidocyte","muscle","gastrodermis","digestive_filaments","precursors","epidermis","neuron","gland","unknown_1","unknown_2")
+final_dt[,broad_cell_type:=str_extract(cell_type, paste(cts,collapse = "|"))]
+bct_cols_dt <- final_dt[,.SD[1],broad_cell_type]
+bct_cols <- structure(bct_cols_dt$color, names=bct_cols_dt$broad_cell_type)
+final_dt[,broad_cell_type_color:=ct_cols[cell_type]]
+
+#save
+fwrite(final_dt, file.path(sprintf("ArchRProj_%s",sample),"annotation.final.tsv"), sep="\t")
+
+# add to project
+final_dt[,Clusters:=as.character(Clusters)]
+final_cts <- structure(final_dt$cell_type, names=final_dt$Clusters)
+proj@cellColData$cell_type <- final_cts[proj@cellColData$Clusters]
+proj@cellColData$cell_type_color <- ct_cols[proj@cellColData$cell_type]
+final_bcts <- structure(final_dt$broad_cell_type, names=final_dt$Clusters)
+proj@cellColData$broad_cell_type <- final_bcts[proj@cellColData$Clusters]
+proj@cellColData$broad_cell_type_color <- bct_cols[proj@cellColData$broad_cell_type]
+
+# save
+saveArchRProject(ArchRProj = proj, outputDirectory = sprintf("ArchRProj_%s",sample), load = TRUE)
+```
+
+Plot annotations summary
+
+```{r}
+all_cts <- c(
+  "cnidocyte_spirocytes",
+  "gastrodermis", "gastrodermis_muscle_parietal_circular_prog", "gastrodermis_muscle_X1","gastrodermis_muscle_somatic_gonad",
+  "muscle", 
+  "digestive_filaments",
+  "precursors",
+  "epidermis",
+  "neuron_2_precursors", "neuron_12", "neuron_28_motor", "neuron_30_peptidergic", "neuron_34", 
+  "gland_2",
+  "unknown_1", "unknown_2"
+)
+
+dtp <- copy(dt)[,annotation:="annotation"]
+fdt <- copy(final_dt)[,.(Clusters,cell_type)][,annotation:=""][,method:="cell_type"]
+fdt[,cell_type:=factor(cell_type,levels=final_cts)]
+setorder(fdt,cell_type)
+
+all_ann_dt <- rbindlist(list(fdt,dtp),use.names=TRUE)
+all_ann_dt[,cell_type:=factor(cell_type, levels=unique(all_ann_dt$cell_type))]
+all_ann_dt[,method:=factor(method, levels=c("AUCell_annotation","NNLS_annotation","cell_type_multiome","predicted.cell_type","cell_type"))]
+setorder(all_ann_dt,"cell_type","method")
+all_ann_dt[,Clusters:=factor(Clusters, levels=rev(unique(all_ann_dt$Clusters)))]
+
+gt <- ggplot(all_ann_dt, aes(method,Clusters,fill=cell_type)) +
+  geom_tile() +
+  scale_fill_manual(values = ct_cols) +
+  facet_grid(.~annotation, scales = "free_x", space = "free", drop = TRUE) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+ggsave(file.path(plot_dir, "all_annots_summary.pdf"), width = 15, height = 10)
+```
+
+Plot embedding
+
+```{r}
+emb = "TSNE"
+rdim = "LSI"
+cdt <- as.data.table(proj@cellColData)[,.(cell_type)]
+cttab <- table(cdt$cell_type)
+coldt <- as.data.table(proj@cellColData)[,.(cell_type,cell_type_color)]
+ctpal <- structure(coldt$cell_type_color, names=coldt$cell_type)
+pct <- plotEmbedding(
+    ArchRProj = proj, 
+    colorBy = "cellColData", 
+    pal = ctpal, 
+    name = "cell_type", 
+    embedding = emb, 
+    plotAs = "points", 
+    size = 1, 
+    labelSize = 0
+) + 
+    theme(legend.title = element_blank(), legend.position="bottom") + 
+    guides(
+        colour = guide_legend(
+            nrow = 8, byrow = TRUE,
+            override.aes = list(size=3)
+        )
+    ) + 
+    labs(
+        title = "Cell type", 
+        x = paste0(emb,1), 
+        y = paste0(emb,2)
+    )
+pct$data$color <- str_remove(pct$data$color, "\\d+-")
+pct <- pct +
+    scale_color_manual(
+        values = ctpal,
+        limits = names(cttab),
+        labels = sprintf("%s (%s)",names(cttab),format(cttab, big.mark=",", trim=TRUE))
+    )
+
+
+ggsave(file.path(plot_dir, sprintf("Plot-%s-%s-Cell-Type-Final.pdf",emb,rdim)), width=8, height=8)
+
+```
+
+## Save bigwigs for cell types
+
+```{r}
+groupBy <- "cell_type"
+ct_gt_num_cells <- sort(table(proj@cellColData[[groupBy]]))
+ct_gt_num_cells[ct_gt_num_cells>10]
+getGroupBW(
+  ArchRProj = proj,
+  groupBy = groupBy,
+  normMethod = "ReadsInTSS",
+  tileSize = 25,
+  maxCells = 1000,
+  ceiling = 4,
+  verbose = TRUE,
+  threads = getArchRThreads(),
+  logFile = createLogFile("getGroupBW")
+)
+fwrite(data.table(ct_gt_num_cells), file.path(sprintf("ArchRProj_%s",sample),"GroupBigWigs",groupBy,"group_sizes.tsv"), sep="\t", col.names=FALSE)
+```
+
+# Differential peaks
+
+```{r}
+peaks_dir <- file.path(sprintf("ArchRProj_%s",sample),"PeakDifferential")
+dir.create(peaks_dir)
+```
+
+## Custer specific peaks
+
+```{r}
+# cell type annotations
+clusters <- paste0("C",seq_along(unique(proj@cellColData$Clusters)))
+
+# to save results to excel
+wb_cluster <- createWorkbook()
+```
+
+Differential peak calling
+
+```{r}
+groupBy = "Clusters"
+dir.create(file.path(peaks_dir,groupBy), showWarnings = FALSE)
+for ( i in clusters) {
+  useGroups = i
+  bgdGroups = setdiff(clusters, i)
+  bg = "others" # paste(bgdGroups, collapse = "__")
+  message(" ")
+  message(Sys.time(),"----------------------------------------------------------------------------------------------------------------")
+  message ("Starting comparison between ", i, " and other clusters (", paste(bgdGroups, collapse = ", "), ")")
+  markersDiff <- getMarkerFeatures(
+    ArchRProj = proj, 
+    useMatrix = "PeakMatrix",
+    groupBy = groupBy,
+    testMethod = "wilcoxon",
+    bias = c("TSSEnrichment", "log10(nFrags)"),
+    useGroups = useGroups,
+    bgdGroups = bgdGroups
+  )
+  pma <- markerPlot(seMarker = markersDiff, name = i, cutOff = "FDR <= 0.1 & abs(Log2FC) >= 1", plotAs = "MA")
+  pma
+  pv <- markerPlot(seMarker = markersDiff, name = i, cutOff = "FDR <= 0.1 & abs(Log2FC) >= 1", plotAs = "Volcano")
+  pv
+  plotPDF(pma, pv, name = sprintf("%s-vs-%s-Markers-MA-Volcano",i,bg), width = 5, height = 5, ArchRProj = proj, addDOC = FALSE)
+  
+  # parse results
+  fields <- names(assays(markersDiff))
+  dt_list <- lapply(fields, function(x) assays(markersDiff)[[x]])
+  assay_list <- lapply(1:length(useGroups), function(i) {
+    df <- do.call("cbind", lapply(dt_list, function(j) j[,i]))
+    dt <- as.data.table(df)
+    setnames(dt, fields)
+    all_peaks_dt <- cbind(rowData(markersDiff), dt)[,c("seqnames","start","end","idx","Log2FC","Pval","FDR")]
+    all_peaks_dt <- as.data.table(as.data.frame(all_peaks_dt))
+  })
+  names(assay_list) <- useGroups
+  diff_peaks <- assay_list[[useGroups]]
+  diff_peaks[order(-Log2FC)]
+  
+  # add peak annots
+  bed_cols <- c("seqnames","start","end","peak","score","strand")
+  peaks <- fread(file.path(sprintf("ArchRProj_%s",sample),"Peaks",sprintf("Peaks-consensus-Clusters.bed")))
+  setnames(peaks, bed_cols)
+  diff_peaks_ann <- merge.data.table(peaks, diff_peaks, by=c("seqnames","start","end"), all.y=TRUE)[,idx:=NULL]
+  diff_peaks_ann
+  
+  # add gene annots
+  peaks_to_genes <- fread(file.path(sprintf("ArchRProj_%s",sample),"Peaks","Peaks-to-Gene-assignment-50kb.tsv"))
+  peaks_to_genes <- unique(peaks_to_genes[,.(peak,chr,peak_start,peak_end,gene)])
+  setnames(peaks_to_genes,c("chr","peak_start","peak_end"), c("seqnames","start","end"))
+  peaks_to_genes_combined <- unique(peaks_to_genes[,gene:=paste(gene,collapse=","),peak])
+  diff_peaks_ann_gene <- merge.data.table(diff_peaks_ann, peaks_to_genes_combined, by=c("seqnames","start","end","peak"), all.x=TRUE)
+  diff_peaks_ann_gene[is.na(FDR), FDR:=1]
+  
+  # save
+  fwrite(
+    diff_peaks_ann_gene, 
+    file.path(peaks_dir,groupBy, sprintf("Peaks-%s-%s-vs-%s.tsv",groupBy,useGroups,bg)),
+    sep="\t", col.names=TRUE
+  )
+  sheetName = substr(sprintf("%s-vs-%s",useGroups,bg), 1, 31)
+  addWorksheet(wb_cluster, sheetName = sheetName)
+  writeData(wb_cluster, sheet = sheetName, diff_peaks_ann_gene)
+}
+```
+
+Save all to excel.
+
+```{r}
+# results to excel
+saveWorkbook(wb_cluster, file.path(peaks_dir,"Peaks-Clusters.xlsx"), overwrite = TRUE)
+```
+
+## Cell type specific peaks
+
+```{r}
+# cell type annotations
+cell_types <- sort(unique(proj@cellColData$cell_type))
+
+# to save results to excel
+wb_cluster <- createWorkbook()
+```
+
+Differential peak calling
+
+```{r}
+groupBy = "cell_type"
+dir.create(file.path(peaks_dir,groupBy), showWarnings = FALSE)
+for ( i in cell_types) {
+  useGroups = i
+  bgdGroups = setdiff(cell_types, i)
+  bg = "others" # paste(bgdGroups, collapse = "__")
+  message(" ")
+  message(Sys.time(),"----------------------------------------------------------------------------------------------------------------")
+  message ("Starting comparison between ", i, " and other clusters (", paste(bgdGroups, collapse = ", "), ")")
+  markersDiff <- getMarkerFeatures(
+    ArchRProj = proj, 
+    useMatrix = "PeakMatrix",
+    groupBy = groupBy,
+    testMethod = "wilcoxon",
+    bias = c("TSSEnrichment", "log10(nFrags)"),
+    useGroups = useGroups,
+    bgdGroups = bgdGroups
+  )
+  pma <- markerPlot(seMarker = markersDiff, name = i, cutOff = "FDR <= 0.1 & abs(Log2FC) >= 1", plotAs = "MA")
+  pma
+  pv <- markerPlot(seMarker = markersDiff, name = i, cutOff = "FDR <= 0.1 & abs(Log2FC) >= 1", plotAs = "Volcano")
+  pv
+  plotPDF(pma, pv, name = sprintf("%s-vs-%s-Markers-MA-Volcano",i,bg), width = 5, height = 5, ArchRProj = proj, addDOC = FALSE)
+  
+  # parse results
+  fields <- names(assays(markersDiff))
+  dt_list <- lapply(fields, function(x) assays(markersDiff)[[x]])
+  assay_list <- lapply(1:length(useGroups), function(i) {
+    df <- do.call("cbind", lapply(dt_list, function(j) j[,i]))
+    dt <- as.data.table(df)
+    setnames(dt, fields)
+    all_peaks_dt <- cbind(rowData(markersDiff), dt)[,c("seqnames","start","end","idx","Log2FC","Pval","FDR")]
+    all_peaks_dt <- as.data.table(as.data.frame(all_peaks_dt))
+  })
+  names(assay_list) <- useGroups
+  diff_peaks <- assay_list[[useGroups]]
+  diff_peaks[order(-Log2FC)]
+  
+  # add peak annots
+  bed_cols <- c("seqnames","start","end","peak","score","strand")
+  peaks <- fread(file.path(sprintf("ArchRProj_%s",sample),"Peaks",sprintf("Peaks-consensus-Clusters.bed")))
+  setnames(peaks, bed_cols)
+  diff_peaks_ann <- merge.data.table(peaks, diff_peaks, by=c("seqnames","start","end"), all.y=TRUE)[,idx:=NULL]
+  diff_peaks_ann
+  
+  # add gene annots
+  peaks_to_genes <- fread(file.path(sprintf("ArchRProj_%s",sample),"Peaks","Peaks-to-Gene-assignment-50kb.tsv"))
+  peaks_to_genes <- unique(peaks_to_genes[,.(peak,chr,peak_start,peak_end,gene)])
+  setnames(peaks_to_genes,c("chr","peak_start","peak_end"), c("seqnames","start","end"))
+  peaks_to_genes_combined <- unique(peaks_to_genes[,gene:=paste(gene,collapse=","),peak])
+  diff_peaks_ann_gene <- merge.data.table(diff_peaks_ann, peaks_to_genes_combined, by=c("seqnames","start","end","peak"), all.x=TRUE)
+  diff_peaks_ann_gene[is.na(FDR), FDR:=1]
+  
+  # save
+  fwrite(
+    diff_peaks_ann_gene, 
+    file.path(peaks_dir,groupBy,sprintf("Peaks-%s-%s-vs-%s.tsv",groupBy,useGroups,bg)),
+    sep="\t", col.names=TRUE
+  )
+  sheetName = substr(sprintf("%s-vs-%s",useGroups,bg), 1, 31)
+  addWorksheet(wb_cluster, sheetName = sheetName)
+  writeData(wb_cluster, sheet = sheetName, diff_peaks_ann_gene)
+}
+```
+
+Save all to excel.
+
+```{r}
+# results to excel
+saveWorkbook(wb_cluster, file.path(peaks_dir,"Peaks-cell_type.xlsx"), overwrite = TRUE)
+```
+
+Save input files for Homer
+
+```{r}
+groupBy <- "cell_type"
+cellColData <- as.data.table(proj@cellColData, keep.rownames="cell")
+cell_types <- unique(sort(cellColData[[groupBy]]))
+RPM <- 1
+bed_cols <- c("seqnames","start","end","strand")
+peaks_master_dt <- fread(file.path(sprintf("ArchRProj_%s",sample),"Peaks",sprintf("Peaks-Master-Table-%s.tsv",groupBy)))
+
+for (i in seq_along(cell_types)) {
+
+  ct <- cell_types[i]
+  message(sprintf("%s (%s/%s)",ct,i,length(cell_types)))
+  dt <- fread(file.path(sprintf("ArchRProj_%s",sample),"Peaks",sprintf("DiffPeaks-%s-%s-norm-fisher-BH-%sRPMs.tsv",groupBy,ct,RPM)))
+  dt[,enr:="none"]
+  dt[Log2FC >= 1.5 & FDR <= 0.05, enr:="up"]
+  dt[Log2FC <= -1.5 & FDR <= 0.05, enr:="down"]
+  peak_list <- list(
+    UP = dt[enr=="up"]$Peak,
+    DOWN = dt[enr=="down"]$Peak,
+    ALL = dt[FGcounts>10]$Peak
+  )
+  for (j in names(peak_list)) {
+    selected_peaks <- peak_list[[j]]
+    message(sprintf("%s %s peaks",length(selected_peaks),j))
+    peaks_subdir <- file.path(sprintf("ArchRProj_%s",sample),"Homer",sprintf("%s-%s-Peaks",ct,j))
+    dir.create(peaks_subdir, showWarnings = FALSE, recursive = TRUE)
+    fwrite(
+      unique(peaks_master_dt[peak %in% selected_peaks, ..bed_cols]), 
+      file.path(peaks_subdir,"Peaks-FG.bed"), 
+      sep="\t", 
+      col.names=FALSE
+    )
+    fwrite(
+      unique(peaks_master_dt[!peak %in% selected_peaks, ..bed_cols]), 
+      file.path(peaks_subdir,"Peaks-BG.bed"), 
+      sep="\t", 
+      col.names=FALSE
+    )
+    message("Saved to ", file.path(peaks_subdir,"Peaks-FG.bed"))
+  }
+
+}
+```
+
+## Unique peaks
+
+Overlap per-cluster peaks and consensus peak to be able to say which consensus is present in which cluster.
+
+```{r}
+bed_cols <- c("seqnames","start","end","peak","score","strand")
+
+# integrated consensus + iterativelly reduced per cluster peaks 
+groupBy <- "Clusters"
+peaks <- fread(file.path(sprintf("ArchRProj_%s",sample),"Peaks",sprintf("Peaks-consensus-%s.bed",groupBy)))
+setnames(peaks, bed_cols)
+peaks_gr <- makeGRangesFromDataFrame(peaks, keep.extra.columns=TRUE)
+
+# per cluster peaks
+peaks_subdir <- file.path(sprintf("ArchRProj_%s",sample),"Peaks",sprintf("%s_filtered",groupBy))
+bed_files <- list.files(peaks_subdir, pattern="Peaks-C")
+cluster_peaks <- rbindlist(lapply(bed_files, function(bed_file) {
+  fread(file.path(peaks_subdir,bed_file))[,Clusters:=str_extract(bed_file,"C\\d+")]
+}))
+setnames(cluster_peaks,c(bed_cols,"Clusters"))
+setnames(cluster_peaks, "peak", "cluster_peak")
+cluster_peaks_gr <- makeGRangesFromDataFrame(cluster_peaks, keep.extra.columns=TRUE)
+
+# overlap two sets of peaks
+ovl <- findOverlaps(query = cluster_peaks_gr, subject = peaks_gr)
+peaks_ovl <- peaks_gr[subjectHits(ovl)]$peak
+cluster_peaks_hits_gr <- cluster_peaks_gr[queryHits(ovl)]
+cluster_peaks_hits_gr$peak <- peaks_ovl
+```
+
+From differential analysis of cell type peaks, get FC and p values for peaks.
+
+```{r}
+# get cell type FC for peaks
+peaks_diff_dir <- file.path(sprintf("ArchRProj_%s",sample),"PeakDifferential")
+bed_files <- list.files(file.path(peaks_diff_dir,"cell_type"), pattern="Peaks-cell_type*")
+bed_files <- grep("-vs-others.tsv",bed_files,value=TRUE)
+cell_type_peaks <- rbindlist(lapply(bed_files, function(bed_file) {
+  fread(file.path(peaks_diff_dir,"cell_type",bed_file))[
+    ,cell_type:=str_remove(
+      str_remove(bed_file,"Peaks-cell_type-"),
+      "-vs-others.tsv"
+    )]
+}))
+
+# map cell types to clusters
+cell_type_peaks <- unique(cell_type_peaks[,.(seqnames,start,end,peak,score,strand,Log2FC,Pval,FDR,cell_type)])
+clust_map <- unique(as.data.table(proj@cellColData)[,.(Clusters,cell_type)])
+cluster_cell_type_peaks <- merge.data.table(cell_type_peaks,clust_map,by="cell_type",allow.cartesian=TRUE)
+cluster_cell_type_peaks[,score:=NULL]
+
+```
+
+Find peaks unique for each cell type
+
+```{r}
+# add cell type annotation to clusters
+peaks_ovl_dt <- as.data.table(cluster_peaks_hits_gr)
+cdt <- unique(as.data.table(proj@cellColData)[,.(Clusters,cell_type)])
+peaks_ovl_dt <- merge.data.table(peaks_ovl_dt, cdt, by="Clusters", sort = FALSE)
+cell_types <- sort(unique(peaks_ovl_dt$cell_type))
+
+# peaks that are only in one cell type
+cluster_unique_peaks <- peaks_ovl_dt[,.N,.(cell_type,peak)][,.N,peak][N==1]$peak
+peaks_unique_dt <- peaks_ovl_dt[peak %in% cluster_unique_peaks]
+setnames(
+  peaks_unique_dt,
+  c("cluster_peak","seqnames","start","end"),
+  c("peak_cluster","peak_seqnames_cluster","peak_start_cluster","peak_end_cluster")
+)
+peaks_unique_dt <- peaks_unique_dt[,.(peak,score,cell_type,Clusters,peak_cluster,peak_seqnames_cluster,peak_start_cluster,peak_end_cluster)]
+
+# add gene annots
+peaks_to_genes <- fread(file.path(sprintf("ArchRProj_%s",sample),"Peaks","Peaks-to-Gene-assignment-50kb.tsv"))
+peaks_to_genes <- unique(peaks_to_genes[,.(peak,chr,peak_start,peak_end,rel_dist_to_tss,gene)])
+setnames(peaks_to_genes,c("chr","peak_start","peak_end"), c("seqnames","start","end"))
+peaks_to_genes_combined <- unique(peaks_to_genes[,gene:=paste(gene,collapse=","),peak])
+peaks_unique_ann_dt <- merge.data.table(peaks_unique_dt, peaks_to_genes_combined, by="peak", all.x=TRUE)
+
+# keep distance to nearest TSS only
+peaks_unique_ann_dt <- peaks_unique_ann_dt[order(abs(rel_dist_to_tss))][,.SD[1],.(peak,seqnames,start,end)]
+
+# add cell type fc to cluster specific peaks
+peaks_unique_ann_dt <- merge.data.table(peaks_unique_ann_dt, cluster_cell_type_peaks, by=c("seqnames","start","end","peak","Clusters","cell_type"), all.x=TRUE, all.y=FALSE)
+
+# order
+peaks_unique_ann_dt[,cell_type:=factor(cell_type, levels=cell_types)]
+setorder(peaks_unique_ann_dt, cell_type, -Log2FC, na.last=TRUE)
+peaks_unique_ann_dt <- peaks_unique_ann_dt[!is.na(rel_dist_to_tss)]  
+
+# save
+fwrite(
+  peaks_unique_ann_dt, 
+  file.path(sprintf("ArchRProj_%s",sample),"PeakDifferential","Peaks-cell_type-unique.tsv"),
+  sep="\t", col.names=TRUE
+)
+# save to excel
+wb_target <- createWorkbook()
+for ( i in cell_types) {
+  sn <- substr(i,1,31)
+  addWorksheet(wb_target, sheetName = sn)
+  writeData(wb_target, sheet = sn, peaks_unique_ann_dt[cell_type==i])
+}
+saveWorkbook(wb_target, file.path(sprintf("ArchRProj_%s",sample),"PeakDifferential","Peaks-cell_type-unique.xlsx"), overwrite = TRUE)
+
+```
+
+Find peaks unique for each of the two broad neuronal classes.
+
+```{r}
+# add cell type annotation to clusters
+peaks_ovl_dt <- as.data.table(cluster_peaks_hits_gr)
+cdt <- unique(as.data.table(proj@cellColData)[,.(Clusters,cell_type)])
+peaks_ovl_dt <- merge.data.table(peaks_ovl_dt, cdt, by="Clusters", sort = FALSE)
+
+# add broad neuronal info to clusters
+peaks_ovl_dt[Clusters %in% paste0("C",c(15:18,20)),neuro_class:="Pou4_FoxL2"]
+peaks_ovl_dt[Clusters %in% paste0("C",c(33,31)),neuro_class:="GATA_Islet"]
+peaks_ovl_dt <- peaks_ovl_dt[!is.na(neuro_class)]
+neuro_class <- c("Pou4_FoxL2", "GATA_Islet")
+
+# peaks that are only in one broad neuronal class 
+cluster_unique_peaks <- peaks_ovl_dt[,.N,.(neuro_class,peak)][,.N,peak][N==1]$peak
+peaks_unique_dt <- peaks_ovl_dt[peak %in% cluster_unique_peaks]
+setnames(
+  peaks_unique_dt,
+  c("cluster_peak","seqnames","start","end"),
+  c("peak_cluster","peak_seqnames_cluster","peak_start_cluster","peak_end_cluster")
+)
+peaks_unique_dt <- peaks_unique_dt[,.(peak,score,cell_type,neuro_class,Clusters,peak_cluster,peak_seqnames_cluster,peak_start_cluster,peak_end_cluster)]
+
+# add gene annots
+peaks_to_genes <- fread(file.path(sprintf("ArchRProj_%s",sample),"Peaks","Peaks-to-Gene-assignment-50kb.tsv"))
+peaks_to_genes <- unique(peaks_to_genes[,.(peak,chr,peak_start,peak_end,rel_dist_to_tss,gene)])
+setnames(peaks_to_genes,c("chr","peak_start","peak_end"), c("seqnames","start","end"))
+peaks_to_genes_combined <- unique(peaks_to_genes[,gene:=paste(gene,collapse=","),peak])
+peaks_unique_ann_dt <- merge.data.table(peaks_unique_dt, peaks_to_genes_combined, by="peak", all.x=TRUE)
+
+# keep distance to nearest TSS only
+peaks_unique_ann_dt <- peaks_unique_ann_dt[order(abs(rel_dist_to_tss))][,.SD[1],.(peak,score,cell_type,seqnames,start,end)]
+
+# add cell type fc to cluster specific peaks
+peaks_unique_ann_dt <- merge.data.table(peaks_unique_ann_dt, cluster_cell_type_peaks, by=c("seqnames","start","end","peak","Clusters","cell_type"), all.x=TRUE, all.y=FALSE)
+
+# order
+setorder(peaks_unique_ann_dt, neuro_class, -Log2FC, na.last=TRUE)
+peaks_unique_ann_dt <- peaks_unique_ann_dt[!is.na(rel_dist_to_tss)]  
+
+# save
+fwrite(
+  peaks_unique_ann_dt, 
+  file.path(sprintf("ArchRProj_%s",sample),"PeakDifferential","Peaks-neuro_class-unique.tsv"),
+  sep="\t", col.names=TRUE
+)
+# save to excel
+wb_target <- createWorkbook()
+for (i in neuro_class) {
+  sn <- substr(i,1,31)
+  addWorksheet(wb_target, sheetName = sn)
+  writeData(wb_target, sheet = sn, peaks_unique_ann_dt[neuro_class==i])
+}
+saveWorkbook(wb_target, file.path(sprintf("ArchRProj_%s",sample),"PeakDifferential","Peaks-neuro_class-unique.xlsx"), overwrite = TRUE)
+
+```
+
+Find peaks unique for each cluster
+
+```{r}
+# peaks that are only in one cluster
+peaks_ovl_dt <- as.data.table(cluster_peaks_hits_gr)
+cluster_unique_peaks <- peaks_ovl_dt[,.N,.(Clusters,peak)][,.N,peak][N==1]$peak
+peaks_unique_dt <- peaks_ovl_dt[peak %in% cluster_unique_peaks]
+setnames(
+    peaks_unique_dt,
+    c("cluster_peak","seqnames","start","end"),
+    c("peak_cluster","peak_seqnames_cluster","peak_start_cluster","peak_end_cluster")
+)
+peaks_unique_dt <- peaks_unique_dt[,.(peak,score,Clusters,peak_cluster,peak_seqnames_cluster,peak_start_cluster,peak_end_cluster)]
+
+# add gene annots
+peaks_to_genes <- fread(file.path(sprintf("ArchRProj_%s",sample),"Peaks","Peaks-to-Gene-assignment-50kb.tsv"))
+peaks_to_genes <- unique(peaks_to_genes[,.(peak,chr,peak_start,peak_end,rel_dist_to_tss,gene)])
+setnames(peaks_to_genes,c("chr","peak_start","peak_end"), c("seqnames","start","end"))
+peaks_to_genes_combined <- unique(peaks_to_genes[,gene:=paste(gene,collapse=","),peak])
+peaks_unique_ann_dt <- merge.data.table(peaks_unique_dt, peaks_to_genes_combined, by="peak", all.x=TRUE)
+
+# keep distance to nearest TSS only
+peaks_unique_ann_dt <- peaks_unique_ann_dt[order(abs(rel_dist_to_tss))][,.SD[1],.(peak,seqnames,start,end)]
+
+# add cell type fc to cluster specific peaks
+peaks_unique_ann_dt <- merge.data.table(peaks_unique_ann_dt, cluster_cell_type_peaks, by=c("seqnames","start","end","peak","Clusters"), all.x=TRUE, all.y=FALSE)
+
+# order
+clusters <- paste0("C",1:length(unique(proj@cellColData$Clusters)))
+peaks_unique_ann_dt[,Clusters:=factor(Clusters,levels=clusters)]
+setorder(peaks_unique_ann_dt, Clusters, -Log2FC, na.last=TRUE)
+peaks_unique_ann_dt <- peaks_unique_ann_dt[!is.na(rel_dist_to_tss)]
+
+# save
+fwrite(
+  peaks_unique_ann_dt, 
+  file.path(sprintf("ArchRProj_%s",sample),"PeakDifferential","Peaks-Clusters-unique.tsv"),
+  sep="\t", col.names=TRUE
+)
+# save to excel
+wb_target <- createWorkbook()
+for ( i in clusters) {
+  addWorksheet(wb_target, sheetName = i)
+  writeData(wb_target, sheet = i, peaks_unique_ann_dt[Clusters==i])
+}
+saveWorkbook(wb_target, file.path(sprintf("ArchRProj_%s",sample),"PeakDifferential","Peaks-Clusters-unique.xlsx"), overwrite = TRUE)
+
+```
+
+## Targeted comparison
+
+Differential peak calling between neuronal types.
+
+```{r}
+cdt <- as.data.table(proj@cellColData)
+cdt[,.N,.(Clusters,cell_type)][grep("neuron",cell_type)][order(cell_type)][,.N,cell_type]
+neuro_types <- c("neuron_2_precursors", "neuron_12", "neuron_28_motor", "neuron_30_peptidergic", "neuron_34")
+
+# to save to excel
+wb_target <- createWorkbook()
+
+# loop
+for ( i in neuro_types) {
+  groupBy = "cell_type"
+  useGroups = i
+  bgdGroups = setdiff(neuro_types, i)
+  bg = "neurons_other" # paste(bgdGroups, collapse = "__")
+  message(" ")
+  message(Sys.time(),"----------------------------------------------------------------------------------------------------------------")
+  message ("Starting comparison between ", i, " and other clusters (", paste(bgdGroups, collapse = ", "), ")")
+  markersDiff <- getMarkerFeatures(
+    ArchRProj = proj, 
+    useMatrix = "PeakMatrix",
+    groupBy = groupBy,
+    testMethod = "wilcoxon",
+    bias = c("TSSEnrichment", "log10(nFrags)"),
+    useGroups = useGroups,
+    bgdGroups = bgdGroups
+  )
+  pma <- markerPlot(seMarker = markersDiff, name = i, cutOff = "FDR <= 0.1 & abs(Log2FC) >= 1", plotAs = "MA")
+  pma
+  pv <- markerPlot(seMarker = markersDiff, name = i, cutOff = "FDR <= 0.1 & abs(Log2FC) >= 1", plotAs = "Volcano")
+  pv
+  plotPDF(pma, pv, name = sprintf("%s-vs-%s-Markers-MA-Volcano",i,bg), width = 5, height = 5, ArchRProj = proj, addDOC = FALSE)
+  
+  # parse results
+  fields <- names(assays(markersDiff))
+  dt_list <- lapply(fields, function(x) assays(markersDiff)[[x]])
+  assay_list <- lapply(1:length(useGroups), function(i) {
+    df <- do.call("cbind", lapply(dt_list, function(j) j[,i]))
+    dt <- as.data.table(df)
+    setnames(dt, fields)
+    all_peaks_dt <- cbind(rowData(markersDiff), dt)[,c("seqnames","start","end","idx","Log2FC","Pval","FDR")]
+    all_peaks_dt <- as.data.table(as.data.frame(all_peaks_dt))
+  })
+  names(assay_list) <- useGroups
+  diff_peaks <- assay_list[[useGroups]]
+  diff_peaks[order(-Log2FC)]
+  
+  # add peak annots
+  bed_cols <- c("seqnames","start","end","peak","score","strand")
+  peaks <- fread(file.path(sprintf("ArchRProj_%s",sample),"Peaks",sprintf("Peaks-consensus-Clusters.bed")))
+  setnames(peaks, bed_cols)
+  diff_peaks_ann <- merge.data.table(peaks, diff_peaks, by=c("seqnames","start","end"), all.y=TRUE)[,idx:=NULL]
+  diff_peaks_ann
+  
+  # add gene annots
+  peaks_to_genes <- fread(file.path(sprintf("ArchRProj_%s",sample),"Peaks","Peaks-to-Gene-assignment-50kb.tsv"))
+  peaks_to_genes <- unique(peaks_to_genes[,.(peak,chr,peak_start,peak_end,gene)])
+  setnames(peaks_to_genes,c("chr","peak_start","peak_end"), c("seqnames","start","end"))
+  peaks_to_genes_combined <- unique(peaks_to_genes[,gene:=paste(gene,collapse=","),peak])
+  diff_peaks_ann_gene <- merge.data.table(diff_peaks_ann, peaks_to_genes_combined, by=c("seqnames","start","end","peak"), all.x=TRUE)
+  diff_peaks_ann_gene[is.na(FDR), FDR:=1]
+  
+  # save
+  fwrite(
+    diff_peaks_ann_gene, 
+    file.path(sprintf("ArchRProj_%s",sample),"PeakDifferential",sprintf("Peaks-%s-%s-vs-%s.tsv",groupBy,useGroups,bg)),
+    sep="\t", col.names=TRUE
+  )
+  sheetName = substr(sprintf("%s-vs-%s",useGroups,bg), 1, 31)
+  addWorksheet(wb_target, sheetName = sheetName)
+  writeData(wb_target, sheet = sheetName, diff_peaks_ann_gene)
+}
+
+# save excel
+saveWorkbook(wb_target, file.path(sprintf("ArchRProj_%s",sample),"PeakDifferential","Differential_Peaks_neurons.xlsx"), overwrite = TRUE)
+```
+
+Differential peak calling between two retractor muscle clusters (C14 and C29).
+
+```{r}
+groupBy = "Clusters"
+useGroups = "C14"
+bgdGroups = "C29"
+markersDiff <- getMarkerFeatures(
+  ArchRProj = proj, 
+  useMatrix = "PeakMatrix",
+  groupBy = groupBy,
+  testMethod = "wilcoxon",
+  bias = c("TSSEnrichment", "log10(nFrags)"),
+  useGroups = useGroups,
+  bgdGroups = bgdGroups
+)
+pma <- markerPlot(seMarker = markersDiff, name = useGroups, cutOff = "FDR <= 0.1 & abs(Log2FC) >= 1", plotAs = "MA")
+pma
+pv <- markerPlot(seMarker = markersDiff, name = useGroups, cutOff = "FDR <= 0.1 & abs(Log2FC) >= 1", plotAs = "Volcano")
+pv
+plotPDF(pma, pv, name = sprintf("%s-vs-%s-Markers-MA-Volcano",useGroups,bgdGroups), width = 5, height = 5, ArchRProj = proj, addDOC = FALSE)
+
+# parse results
+fields <- names(assays(markersDiff))
+dt_list <- lapply(fields, function(x) assays(markersDiff)[[x]])
+assay_list <- lapply(1:length(useGroups), function(i) {
+  df <- do.call("cbind", lapply(dt_list, function(j) j[,i]))
+  dt <- as.data.table(df)
+  setnames(dt, fields)
+  all_peaks_dt <- cbind(rowData(markersDiff), dt)[,c("seqnames","start","end","idx","Log2FC","Pval","FDR")]
+  all_peaks_dt <- as.data.table(as.data.frame(all_peaks_dt))
+})
+names(assay_list) <- useGroups
+diff_peaks <- assay_list[[useGroups]]
+diff_peaks[order(-Log2FC)]
+
+# add peak annots
+bed_cols <- c("seqnames","start","end","peak","score","strand")
+peaks <- fread(file.path(sprintf("ArchRProj_%s",sample),"Peaks","Peaks-consensus-Clusters.bed"))
+setnames(peaks, bed_cols)
+diff_peaks_ann <- merge.data.table(peaks, diff_peaks, by=c("seqnames","start","end"), all.y=TRUE)[,idx:=NULL]
+diff_peaks_ann
+
+# add gene annots
+peaks_to_genes <- fread(file.path(sprintf("ArchRProj_%s",sample),"Peaks","Peaks-to-Gene-assignment-50kb.tsv"))
+peaks_to_genes <- unique(peaks_to_genes[,.(peak,chr,peak_start,peak_end,gene)])
+setnames(peaks_to_genes,c("chr","peak_start","peak_end"), c("seqnames","start","end"))
+peaks_to_genes_combined <- unique(peaks_to_genes[,gene:=paste(gene,collapse=","),peak])
+diff_peaks_ann_gene <- merge.data.table(diff_peaks_ann, peaks_to_genes_combined, by=c("seqnames","start","end","peak"), all.x=TRUE)
+diff_peaks_ann_gene[is.na(FDR), FDR:=1]
+
+# save
+fwrite(
+  diff_peaks_ann_gene, 
+  file.path(sprintf("ArchRProj_%s",sample),"PeakDifferential",sprintf("Peaks-%s-%s-vs-%s.tsv",groupBy,useGroups,bgdGroups)),
+  sep="\t", col.names=TRUE
+)
+# save to excel
+wb_target <- createWorkbook()
+sheetName = substr(sprintf("%s-vs-%s",useGroups,bgdGroups), 1, 31)
+addWorksheet(wb_target, sheetName = sheetName)
+writeData(wb_target, sheet = sheetName, diff_peaks_ann_gene)
+saveWorkbook(wb_target, file.path(sprintf("ArchRProj_%s",sample),"PeakDifferential",sprintf("Differential_Peaks_%s-vs-%s.xlsx",useGroups,bgdGroups)), overwrite = TRUE)
+```
+
+Differential peak calling between two retractor muscle clusters and all neurons.
+
+```{r}
+proj@cellColData$Annotation[proj@cellColData$Clusters %in% c("C14","C29")] <- "retractor_muscle"
+proj@cellColData$Annotation[grep("neuron", proj@cellColData$cell_type)] <- "neurons"
+groupBy = "Annotation"
+useGroups = "retractor_muscle"
+bgdGroups = "neurons"
+markersDiff <- getMarkerFeatures(
+  ArchRProj = proj, 
+  useMatrix = "PeakMatrix",
+  groupBy = groupBy,
+  testMethod = "wilcoxon",
+  bias = c("TSSEnrichment", "log10(nFrags)"),
+  useGroups = useGroups,
+  bgdGroups = bgdGroups
+)
+pma <- markerPlot(seMarker = markersDiff, name = useGroups, cutOff = "FDR <= 0.1 & abs(Log2FC) >= 1", plotAs = "MA")
+pma
+pv <- markerPlot(seMarker = markersDiff, name = useGroups, cutOff = "FDR <= 0.1 & abs(Log2FC) >= 1", plotAs = "Volcano")
+pv
+plotPDF(pma, pv, name = sprintf("%s-vs-%s-Markers-MA-Volcano",useGroups,bgdGroups), width = 5, height = 5, ArchRProj = proj, addDOC = FALSE)
+
+# parse results
+fields <- names(assays(markersDiff))
+dt_list <- lapply(fields, function(x) assays(markersDiff)[[x]])
+assay_list <- lapply(1:length(useGroups), function(i) {
+  df <- do.call("cbind", lapply(dt_list, function(j) j[,i]))
+  dt <- as.data.table(df)
+  setnames(dt, fields)
+  all_peaks_dt <- cbind(rowData(markersDiff), dt)[,c("seqnames","start","end","idx","Log2FC","Pval","FDR")]
+  all_peaks_dt <- as.data.table(as.data.frame(all_peaks_dt))
+})
+names(assay_list) <- useGroups
+diff_peaks <- assay_list[[useGroups]]
+diff_peaks[order(-Log2FC)]
+
+# add peak annots
+bed_cols <- c("seqnames","start","end","peak","score","strand")
+peaks <- fread(file.path(sprintf("ArchRProj_%s",sample),"Peaks","Peaks-consensus-Clusters.bed"))
+setnames(peaks, bed_cols)
+diff_peaks_ann <- merge.data.table(peaks, diff_peaks, by=c("seqnames","start","end"), all.y=TRUE)[,idx:=NULL]
+diff_peaks_ann
+
+# add gene annots
+peaks_to_genes <- fread(file.path(sprintf("ArchRProj_%s",sample),"Peaks","Peaks-to-Gene-assignment-50kb.tsv"))
+peaks_to_genes <- unique(peaks_to_genes[,.(peak,chr,peak_start,peak_end,gene)])
+setnames(peaks_to_genes,c("chr","peak_start","peak_end"), c("seqnames","start","end"))
+peaks_to_genes_combined <- unique(peaks_to_genes[,gene:=paste(gene,collapse=","),peak])
+diff_peaks_ann_gene <- merge.data.table(diff_peaks_ann, peaks_to_genes_combined, by=c("seqnames","start","end","peak"), all.x=TRUE)
+diff_peaks_ann_gene[is.na(FDR), FDR:=1]
+
+# save
+fwrite(
+  diff_peaks_ann_gene, 
+  file.path(sprintf("ArchRProj_%s",sample),"PeakDifferential",sprintf("Peaks-%s-%s-vs-%s.tsv",groupBy,useGroups,bgdGroups)),
+  sep="\t", col.names=TRUE
+)
+# save to excel
+wb_target <- createWorkbook()
+sheetName = substr(sprintf("%s-vs-%s",useGroups,bgdGroups), 1, 31)
+addWorksheet(wb_target, sheetName = sheetName)
+writeData(wb_target, sheet = sheetName, diff_peaks_ann_gene)
+saveWorkbook(wb_target, file.path(sprintf("ArchRProj_%s",sample),"PeakDifferential",sprintf("Differential_Peaks_%s-vs-%s.xlsx",useGroups,bgdGroups)), overwrite = TRUE)
+```
+
+Differential peak calling between two retractor muscle clusters and motor neuron (C36).
+
+```{r}
+proj@cellColData$Annotation[proj@cellColData$Clusters %in% c("C14","C29")] <- "retractor_muscle"
+proj@cellColData$Annotation[proj@cellColData$cell_type == "neuron_28_motor"] <- "neuron_28_motor"
+groupBy = "Annotation"
+useGroups = "retractor_muscle"
+bgdGroups = "neuron_3_motor"
+markersDiff <- getMarkerFeatures(
+  ArchRProj = proj, 
+  useMatrix = "PeakMatrix",
+  groupBy = groupBy,
+  testMethod = "wilcoxon",
+  bias = c("TSSEnrichment", "log10(nFrags)"),
+  useGroups = useGroups,
+  bgdGroups = bgdGroups
+)
+pma <- markerPlot(seMarker = markersDiff, name = useGroups, cutOff = "FDR <= 0.1 & abs(Log2FC) >= 1", plotAs = "MA")
+pma
+pv <- markerPlot(seMarker = markersDiff, name = useGroups, cutOff = "FDR <= 0.1 & abs(Log2FC) >= 1", plotAs = "Volcano")
+pv
+plotPDF(pma, pv, name = sprintf("%s-vs-%s-Markers-MA-Volcano",useGroups,bgdGroups), width = 5, height = 5, ArchRProj = proj, addDOC = FALSE)
+
+# parse results
+fields <- names(assays(markersDiff))
+dt_list <- lapply(fields, function(x) assays(markersDiff)[[x]])
+assay_list <- lapply(1:length(useGroups), function(i) {
+  df <- do.call("cbind", lapply(dt_list, function(j) j[,i]))
+  dt <- as.data.table(df)
+  setnames(dt, fields)
+  all_peaks_dt <- cbind(rowData(markersDiff), dt)[,c("seqnames","start","end","idx","Log2FC","Pval","FDR")]
+  all_peaks_dt <- as.data.table(as.data.frame(all_peaks_dt))
+})
+names(assay_list) <- useGroups
+diff_peaks <- assay_list[[useGroups]]
+diff_peaks[order(-Log2FC)]
+
+# add peak annots
+bed_cols <- c("seqnames","start","end","peak","score","strand")
+peaks <- fread(file.path(sprintf("ArchRProj_%s",sample),"Peaks","Peaks-consensus-Clusters.bed"))
+setnames(peaks, bed_cols)
+diff_peaks_ann <- merge.data.table(peaks, diff_peaks, by=c("seqnames","start","end"), all.y=TRUE)[,idx:=NULL]
+diff_peaks_ann
+
+# add gene annots
+peaks_to_genes <- fread(file.path(sprintf("ArchRProj_%s",sample),"Peaks","Peaks-to-Gene-assignment-50kb.tsv"))
+peaks_to_genes <- unique(peaks_to_genes[,.(peak,chr,peak_start,peak_end,gene)])
+setnames(peaks_to_genes,c("chr","peak_start","peak_end"), c("seqnames","start","end"))
+peaks_to_genes_combined <- unique(peaks_to_genes[,gene:=paste(gene,collapse=","),peak])
+diff_peaks_ann_gene <- merge.data.table(diff_peaks_ann, peaks_to_genes_combined, by=c("seqnames","start","end","peak"), all.x=TRUE)
+diff_peaks_ann_gene[is.na(FDR), FDR:=1]
+
+# save
+fwrite(
+  diff_peaks_ann_gene, 
+  file.path(sprintf("ArchRProj_%s",sample),"PeakDifferential",sprintf("Peaks-%s-%s-vs-%s.tsv",groupBy,useGroups,bgdGroups)),
+  sep="\t", col.names=TRUE
+)
+# save to excel
+sheetName = substr(sprintf("%s-vs-%s",useGroups,bgdGroups), 1, 31)
+addWorksheet(wb_target, sheetName = sheetName)
+writeData(wb_target, sheet = sheetName, diff_peaks_ann_gene)
+saveWorkbook(wb_target, file.path(sprintf("ArchRProj_%s",sample),"PeakDifferential",sprintf("Differential_Peaks_%s-vs-%s.xlsx",useGroups,bgdGroups)), overwrite = TRUE)
+
+```
+
+# Plot marker peaks
+
+## Clusters
+
+Select top markers in all clusters.
+
+```{r}
+peaks_dir <- file.path(sprintf("ArchRProj_%s",sample),"PeakDifferential")
+
+# combine top markers for each cell type
+cluster_peaks_files <- list.files(peaks_dir, pattern="Peaks-Clusters-.*vs-others.tsv", full.names=TRUE)
+marker_peaks <- rbindlist(lapply(1:length(cluster_peaks_files), function(i) {
+  peak_file <- cluster_peaks_files[i]
+  # cell type
+  ct <- str_remove(
+    str_remove(basename(peak_file), "Peaks-Clusters-"),
+    "-vs-others.tsv"
+  )
+  # peaks
+  fread(peak_file)[,cell_type:=ct][]
+}))
+
+# get FC and FDR tables for all peaks in all clusters
+marker_peaks_FC <- dcast.data.table(marker_peaks, seqnames+start+end+peak+gene~cell_type, value.var="Log2FC")
+marker_peaks_FDR <- dcast.data.table(marker_peaks, seqnames+start+end+peak+gene~cell_type, value.var="FDR")
+
+# select top marker peaks
+fc_thrs = 2.5
+fdr_thrs = 0.01
+top_peaks <- unique(marker_peaks[Log2FC>fc_thrs & FDR<fdr_thrs]$peak)
+top_marker_peaks <- marker_peaks[peak %in% top_peaks]
+
+# cluster and cell type annotations
+cdt <- unique(as.data.table(proj@cellColData)[,.(Clusters,cell_type,cell_type_color)])
+cts_order <- unique(fread("../../../scRNAseq_nvec_v4/scdb/annotation.Nvec_K30_atlas.tsv")$cell_type)
+cts_order <- cts_order[cts_order %in% cdt$cell_type]
+cts_order <- c(cts_order, "unknown_1", "unknown_2")
+cdt[,cell_type:=factor(cell_type, levels=cts_order)]
+cdt[,Clusters:=factor(Clusters, levels=paste0("C",1:length(unique(cdt$Clusters))))]
+setorder(cdt, "cell_type", "Clusters")
+ct_cols <- structure(cdt$cell_type_color, names=as.character(cdt$cell_type))
+cell_types <- unique(names(ct_cols))
+clust_order <- as.character(cdt$Clusters)
+```
+
+Plot markers peaks heatmap.
+
+```{r}
+# select top marker peaks
+fc_table <- as.matrix(marker_peaks_FC[peak %in% top_peaks,6:ncol(marker_peaks_FC)])
+fdr_table <- as.matrix(marker_peaks_FDR[peak %in% top_peaks,6:ncol(marker_peaks_FDR)])
+
+# order clusters by cell types
+fc_table <- fc_table[,as.character(cdt$Clusters)]
+fdr_table <- fdr_table[,as.character(cdt$Clusters)]
+
+# cluster genes
+peak_order <- order(apply(fc_table, 1, which.max))
+fc_table <- fc_table[peak_order,]
+fdr_table <- fdr_table[peak_order,]
+
+# limits
+fc_table <- pmin(fc_table,10)
+fc_table <- pmax(fc_table,-10)
+fdr_table <- pmax(fdr_table, 1e-10)
+
+# heatmap
+require(ComplexHeatmap)
+
+col_ann <- HeatmapAnnotation(
+    which = "column", 
+    "cell type" = as.character(cdt[match(colnames(fc_table),Clusters)]$cell_type), 
+    col = list("cell type" = structure(cdt$cell_type_color, names=as.character(cdt$cell_type)))
+)
+row_ann <- HeatmapAnnotation(
+    which = "row", 
+    "cell type" = as.character(cdt[match(colnames(fc_table)[apply(fc_table,1,which.max)], Clusters)]$cell_type), 
+    col = list("cell type" = structure(cdt$cell_type_color, names=as.character(cdt$cell_type))),
+    show_legend = FALSE
+)
+
+col_vec_fc = c("#2166ac","#67a9cf","#d1e5f0","#ffffff","#fddbc7","#ef8a62","#b2182b")
+col_fun_fc = circlize::colorRamp2(seq(-10, 10, length.out = length(col_vec_fc)), col_vec_fc)
+hm_fc <- Heatmap(
+  fc_table, name = "FC",
+  col = col_fun_fc, border = TRUE, use_raster = TRUE,
+  cluster_rows = FALSE, cluster_columns = FALSE, 
+  bottom_annotation = col_ann, left_annotation = row_ann,
+  show_row_dend = FALSE, show_column_dend = FALSE,
+  show_row_names = FALSE, show_column_names = TRUE, 
+  row_title = sprintf("%i peaks (FC>%.1f & FDR<%.2f)", length(top_peaks), fc_thrs, fdr_thrs)
+)
+
+col_vec_fdr = c("#810f7c","#8856a7","#8c96c6","#b3cde3","#edf8fb","#ffffff")
+col_fun_fdr = circlize::colorRamp2(seq(1e-10, 1, length.out = length(col_vec_fdr)), col_vec_fdr)
+hm_fdr <- Heatmap(
+  fdr_table, name = "FDR",
+  col = col_fun_fdr, border = TRUE, use_raster = TRUE,
+  cluster_rows = FALSE, cluster_columns = FALSE, 
+  bottom_annotation = col_ann, 
+  show_row_dend = FALSE, show_column_dend = FALSE,
+  show_row_names = FALSE, show_column_names = TRUE
+)
+
+pdf(file.path(plot_dir, "Clusters-marker-peaks.pdf"), width=14, height=14)
+hm_fc + hm_fdr
+dev.off()
+```
+
+## Cell types
+
+Select top marker peaks in all cell types.
+
+```{r}
+peaks_dir <- file.path(sprintf("ArchRProj_%s",sample),"PeakDifferential", "cell_type")
+
+# combine top markers for each cell type
+cell_type_peaks_files <- list.files(peaks_dir, pattern="Peaks-cell_type-.*vs-others.tsv", full.names=TRUE)
+marker_peaks <- rbindlist(lapply(1:length(cell_type_peaks_files), function(i) {
+  peak_file <- cell_type_peaks_files[i]
+  # cell type
+  ct <- str_remove(
+    str_remove(basename(peak_file), "Peaks-cell_type-"),
+    "-vs-others.tsv"
+  )
+  # peaks
+  fread(peak_file)[,cell_type:=ct][]
+}))
+
+# get FC and FDR tables for all peaks in all cell types
+marker_peaks_FC <- dcast.data.table(marker_peaks, seqnames+start+end+peak+gene~cell_type, value.var="Log2FC")
+marker_peaks_FDR <- dcast.data.table(marker_peaks, seqnames+start+end+peak+gene~cell_type, value.var="FDR")
+
+# select top marker peaks
+fc_thrs = 2.5
+fdr_thrs = 0.01
+top_peaks <- unique(marker_peaks[Log2FC>fc_thrs & FDR<fdr_thrs]$peak)
+top_marker_peaks <- marker_peaks[peak %in% top_peaks]
+```
+
+Plot markers peaks heatmap
+
+```{r}
+# select top marker peaks
+fc_table <- as.matrix(marker_peaks_FC[peak %in% top_peaks,6:ncol(marker_peaks_FC)])
+fdr_table <- as.matrix(marker_peaks_FDR[peak %in% top_peaks,6:ncol(marker_peaks_FDR)])
+
+# order cell types
+clust_order <- c("cnidocyte_spirocytes","gastrodermis","gastrodermis_muscle_parietal_circular_prog","muscle","digestive_filaments","epidermis","neuron_2_precursors","neuron_16_peptidergic","neuron_28_motor","neuron_30_peptidergic","neuron_36_peptidergic","gland_17")
+fc_table <- fc_table[,clust_order]
+fdr_table <- fdr_table[,clust_order]
+
+# cluster peaks
+peak_order <- order(apply(fc_table, 1, which.max))
+fc_table <- fc_table[peak_order,]
+fdr_table <- fdr_table[peak_order,]
+
+# limits
+fc_table <- pmin(fc_table,10)
+fc_table <- pmax(fc_table,-10)
+fdr_table <- pmax(fdr_table, 1e-10)
+
+# heatmap
+require(ComplexHeatmap)
+col_vec_fc = c("#2166ac","#67a9cf","#d1e5f0","#ffffff","#fddbc7","#ef8a62","#b2182b")
+col_fun_fc = circlize::colorRamp2(seq(-10, 10, length.out = length(col_vec_fc)), col_vec_fc)
+hm_fc <- Heatmap(
+  fc_table, name = "FC",
+  col = col_fun_fc, border = TRUE, use_raster = TRUE,
+  cluster_rows = FALSE, cluster_columns = FALSE, 
+  show_row_dend = FALSE, show_column_dend = FALSE,
+  show_row_names = FALSE, show_column_names = TRUE, 
+  row_title = sprintf("%i peaks (FC>%.1f & FDR<%.2f)", length(top_peaks), fc_thrs, fdr_thrs)
+)
+col_vec_fdr = c("#810f7c","#8856a7","#8c96c6","#b3cde3","#edf8fb","#ffffff")
+col_fun_fdr = circlize::colorRamp2(seq(1e-10, 1, length.out = length(col_vec_fdr)), col_vec_fdr)
+hm_fdr <- Heatmap(
+  fdr_table, name = "FDR",
+  col = col_fun_fdr, border = TRUE, use_raster = TRUE,
+  cluster_rows = FALSE, cluster_columns = FALSE, 
+  show_row_dend = FALSE, show_column_dend = FALSE,
+  show_row_names = FALSE, show_column_names = TRUE
+)
+
+pdf(file.path(plot_dir, "Cell-type-marker-peaks.pdf"), width=12, height=14)
+hm_fc + hm_fdr
+dev.off()
+```
+
+# Plot marker genes
+
+Load gene and cluster/cell type annotations for project.
+
+```{r}
+# gene annotations
+gann <- fread("annotation/Nvec_annotation_v3_2020-10-23_DToL_names",header=FALSE)
+tfann <- fread("annotation/curated_TFh_Nvec_DToL_names.tsv",header=FALSE)
+
+# cluster and cell type annotations
+cdt <- unique(as.data.table(proj@cellColData)[,.(Clusters,cell_type,cell_type_color)])
+cts_order <- unique(fread("../../../scRNAseq_nvec_v4/scdb/annotation.Nvec_K30_atlas.tsv")$cell_type)
+if ("neuron_35_peptidergic" %in% cdt$cell_type)
+  cts_order[cts_order=="neuron_35"] <- "neuron_35_peptidergic"
+cts_order <- c(cts_order,"neuron_gland")
+cts_order <- c(cts_order, "unknown_1", "unknown_2")
+cts_order <- cts_order[cts_order %in% cdt$cell_type]
+cdt[,cell_type:=factor(cell_type, levels=cts_order)]
+cdt[,Clusters:=factor(Clusters, levels=paste0("C",1:length(unique(cdt$Clusters))))]
+setorder(cdt, "cell_type", "Clusters")
+ct_cols <- structure(cdt$cell_type_color, names=as.character(cdt$cell_type))
+cell_types <- unique(names(ct_cols))
+clust_order <- as.character(cdt$Clusters)
+```
+
+Gene scores in single cells
+
+```{r}
+gene_scores <- readRDS(file.path(
+  sprintf("ArchRProj_%s",sample),
+  "GeneScoreMatrix",
+  "Matrix-Gene-Scores-Dist-Var-Weighted-50kb.rds"
+))
+```
+
+Summarize gene sores per cell type and per cluster (this is also used in shiny app).
+
+```{r}
+shiny_dir <- file.path(sprintf("ArchRProj_%s",sample), "Shiny")
+dir.create(shiny_dir, showWarnings = FALSE, recursive = TRUE)
+```
+
+Calculate per-cluster and per-cell type gene score matrices.
+
+```{r}
+clusters_vector <- structure(proj@cellColData$Clusters, names=rownames(proj@cellColData))
+clusters_vector <- clusters_vector[colnames(gene_scores)]
+
+fp_clusters <- accessibility_footprint(gene_scores, clusters_vector)
+saveRDS(fp_clusters, file.path(shiny_dir, "Footprint_Clusters.rds"))
+sum_clusters <- accessibility_summary(gene_scores, clusters_vector, sum)
+saveRDS(sum_clusters, file.path(shiny_dir, "Sum_Clusters.rds"))
+
+cell_type_vector <- structure(proj@cellColData$cell_type, names=rownames(proj@cellColData))
+cell_type_vector <- cell_type_vector[colnames(gene_scores)]
+
+fp_cell_type <- accessibility_footprint(gene_scores, cell_type_vector)
+saveRDS(fp_cell_type, file.path(shiny_dir, sprintf("Footprint_Annotation.rds")))
+sum_cell_type <- accessibility_summary(gene_scores, cell_type_vector, sum)
+saveRDS(sum_cell_type, file.path(shiny_dir, sprintf("Sum_Annotation.rds")))
+
+```
+
+Alternatively, load previously calculated summarized matrices.
+
+```{r}
+fp_clusters <- readRDS(file.path(shiny_dir, "Footprint_Clusters.rds"))
+sum_clusters <- readRDS(file.path(shiny_dir, "Sum_Clusters.rds"))
+
+fp_cell_type <- readRDS(file.path(shiny_dir, sprintf("Footprint_Annotation.rds")))
+sum_cell_type <- readRDS(file.path(shiny_dir, sprintf("Sum_Annotation.rds")))
+```
+
+Fraction matrices
+
+```{r}
+sum_clusters_norm <- sum_clusters/rowSums(sum_clusters)
+sum_clusters_frac <- t(t(sum_clusters_norm)/colSums(sum_clusters_norm,na.rm=TRUE))*10000
+sum_cell_type_norm <- sum_cell_type/rowSums(sum_cell_type)
+sum_cell_type_frac <- t(t(sum_cell_type_norm)/colSums(sum_cell_type_norm,na.rm=TRUE))*10000
+```
+
+Heatmap of marker genes in cell types
+
+```{r}
+# # summarize per cell type
+# gs_cell_type <- tapply(
+#   colnames(gene_scores), 
+#   proj@cellColData[colnames(gene_scores),]$cell_type, 
+#   function(x) rowMeans(gene_scores[,x,drop=FALSE])
+# )
+# gs_cell_type_mat <- do.call(cbind, gs_cell_type)
+# 
+# # gene sets for cell types
+# fc_thrs = 1.8
+# genes <- unique(unlist(lapply(cell_types, function(ct) {
+#     x <- sort(gs_cell_type_mat[,ct], decreasing = TRUE)[1:40] # top genes
+#     x <- x[x > fc_thrs] # above threshold
+#     message(ct, ": ", length(x), " genes")
+#     names(x)
+# })))
+# genes_select <- genes[genes %in% rownames(fp_cell_type)]
+```
+```{r}
+# subset matrices
+genes_table_gs <- gs_cell_type_mat[genes_select,]
+genes_table_fp <- fp_cell_type[genes_select,]
+genes_table_sum <- sum_cell_type_frac[genes_select,]
+
+# order cell types
+genes_table_gs <- genes_table_gs[,cts_order]
+genes_table_fp <- genes_table_fp[,cts_order]
+genes_table_sum <- genes_table_sum[,cts_order]
+
+# limits and scaling
+genes_table_fp <- pmin(genes_table_fp, 6)
+
+# cluster genes
+gene_order <- order(apply(genes_table_fp, 1, which.max))
+genes_table_gs <- genes_table_gs[gene_order,]
+genes_table_fp <- genes_table_fp[gene_order,]
+genes_table_sum <- genes_table_sum[gene_order,]
+
+# label TFs
+tfann[,label:=ifelse(V2!="",paste(V1,V2),NA)]
+row_labels_tfs <- tfann[match(rownames(genes_table_gs),V1)]$label
+row_labels_tfs_ids <- which(!is.na(row_labels_tfs))
+row_labels_tfs <- row_labels_tfs[row_labels_tfs_ids]
+
+# heatmap
+require(ComplexHeatmap)
+col_vec_genes = c("#ffffff","#fddbc7","#ef8a62","#b2182b","#520c52")
+col_fun_genes = circlize::colorRamp2(seq(0, max(genes_table_fp), length.out = length(col_vec_genes)), col_vec_genes)
+
+col_ann <- HeatmapAnnotation(
+  which = "column", 
+  "cell type" = as.character(cdt[match(colnames(genes_table_fp),cell_type)]$cell_type), 
+  col = list("cell type" = structure(cdt$cell_type_color, names=as.character(cdt$cell_type))),
+  show_legend = FALSE
+)
+row_ann <- HeatmapAnnotation(
+  which = "row", 
+  "cell type" = as.character(cdt[match(colnames(genes_table_fp)[apply(genes_table_fp,1,which.max)], cell_type)]$cell_type),
+  col = list("cell type" = ct_cols),
+  show_legend = FALSE
+)
+gene_ann <- HeatmapAnnotation(
+  which = "row", 
+  tf = anno_mark(at = row_labels_tfs_ids, labels = row_labels_tfs),
+  col = list("tf" = ct_cols),
+  show_legend = FALSE
+)
+
+hm_genes_fp <- Heatmap(
+  genes_table_fp, name = "FC",
+  col = col_fun_genes, border = TRUE, use_raster = TRUE,
+  cluster_rows = FALSE, cluster_columns = FALSE, 
+  show_row_dend = FALSE, show_column_dend = FALSE,
+  show_row_names = FALSE, show_column_names = TRUE, 
+  row_title = sprintf("%i marker genes FC>%.1f", nrow(genes_table_fp), fc_thrs),
+  bottom_annotation = col_ann, left_annotation = row_ann
+)
+
+col_vec_acces_genes = c("#ffffff","#d0d1e6","#a6bddb","#74a9cf","#2b8cbe","#045a8d","#003e85","#00214a")
+col_fun_acces_genes = circlize::colorRamp2(seq(0, max(genes_table_sum), length.out = length(col_vec_acces_genes)), col_vec_acces_genes)
+
+hm_genes_sum <- Heatmap(
+  genes_table_sum, name = "accessible fraction",
+  col = col_fun_acces_genes, border = TRUE, use_raster = TRUE,
+  cluster_rows = FALSE, cluster_columns = FALSE, 
+  show_row_dend = FALSE, show_column_dend = FALSE,
+  show_row_names = FALSE, show_column_names = TRUE,
+  bottom_annotation = col_ann, right_annotation = gene_ann
+)
+
+# col_vec_score_genes = c("#ffffff","#feebe2","#fcc5c0","#fa9fb5","#f768a1","#c51b8a","#7a0177")
+# col_fun_score_genes = circlize::colorRamp2(seq(0, max(genes_table_gs), length.out = length(col_vec_score_genes)), col_vec_score_genes)
+# 
+# hm_genes_gs <- Heatmap(
+#   genes_table_gs, name = "average\nscore",
+#   col = col_fun_score_genes, border = TRUE, use_raster = TRUE,
+#   cluster_rows = FALSE, cluster_columns = FALSE, 
+#   show_row_dend = FALSE, show_column_dend = FALSE,
+#   show_row_names = FALSE, show_column_names = TRUE,
+#   bottom_annotation = col_ann, right_annotation = gene_ann
+# )
+
+pdf(file.path(plot_dir, "Cell-type-marker-genes.pdf"), width=18, height=24)
+hm_genes_fp + hm_genes_sum 
+dev.off()
+```
+
+Heatmap of marker genes in clusters.
+
+```{r}
+# # summarize per cluster
+# gs_clusters <- tapply(
+#   colnames(gene_scores), 
+#   proj@cellColData[colnames(gene_scores),]$Clusters, 
+#   function(x) rowMeans(gene_scores[,x,drop=FALSE])
+# )
+# gs_clust_mat <- do.call(cbind, gs_clusters)
+# clusters <- paste0('C',1:length(gs_clusters))
+# 
+# # top genes for clusters
+# fc_thrs = 1.8
+# genes <- unique(unlist(lapply(clusters, function(ct) {
+#     x <- sort(gs_clust_mat[,ct], decreasing = TRUE)[1:40] # top genes
+#     x <- x[x > fc_thrs] # above threshold
+#     message(ct, ": ", length(x), " genes")
+#     names(x)
+# })))
+```
+```{r}
+# footprint top genes
+fc_thrs = 2.5
+genes <- names(which(apply(fp_clusters,1,max)>fc_thrs))
+
+# selected genes
+genes_select <- intersect(genes, rownames(fp_clusters))
+
+# subset matrices
+genes_table_fp <- fp_clusters[genes_select,]
+genes_table_sum <- sum_clusters_frac[genes_select,]
+
+# limits
+genes_table_fp <- pmin(genes_table_fp,6)
+
+# order clusters by cell types
+genes_table_fp <- genes_table_fp[,as.character(cdt$Clusters)]
+genes_table_sum <- genes_table_sum[,as.character(cdt$Clusters)]
+
+# cluster genes
+gene_order <- order(apply(genes_table_fp, 1, which.max))
+genes_table_fp <- genes_table_fp[gene_order,]
+genes_table_sum <- genes_table_sum[gene_order,]
+
+# label TFs
+tfann[,label:=ifelse(V2!="",paste(V1,V2),NA)]
+row_labels_tfs <- tfann[match(rownames(genes_table_fp),V1)]$label
+row_labels_tfs_ids <- which(!is.na(row_labels_tfs))
+row_labels_tfs <- row_labels_tfs[row_labels_tfs_ids]
+row_labels_tfs <- substr(row_labels_tfs,1,60)
+
+# heatmap
+require(ComplexHeatmap)
+col_vec_genes = c("#ffffff","#fddbc7","#ef8a62","#b2182b","#520c52")
+col_fun_genes = circlize::colorRamp2(seq(0, max(genes_table_fp), length.out = length(col_vec_genes)), col_vec_genes)
+
+col_ann <- HeatmapAnnotation(
+  which = "column", 
+  "cell type" = as.character(cdt[match(colnames(genes_table_fp),Clusters)]$cell_type), 
+  col = list("cell type" = structure(cdt$cell_type_color, names=as.character(cdt$cell_type)))
+)
+row_ann <- HeatmapAnnotation(
+  which = "row", 
+  "cell type" = as.character(cdt[match(colnames(genes_table_fp)[apply(genes_table_fp,1,which.max)], Clusters)]$cell_type), 
+  col = list("cell type" = structure(cdt$cell_type_color, names=as.character(cdt$cell_type))),
+  show_legend = FALSE
+)
+
+gene_ann <- HeatmapAnnotation(
+  which = "row", 
+  tf = anno_mark(at = row_labels_tfs_ids, labels = row_labels_tfs),
+  col = list("tf" = ct_cols),
+  show_legend = FALSE
+)
+
+hm_genes_fp <- Heatmap(
+  genes_table_fp, name = "FC",
+  col = col_fun_genes, border = TRUE, use_raster = TRUE,
+  cluster_rows = FALSE, cluster_columns = FALSE, 
+  show_row_dend = FALSE, show_column_dend = FALSE,
+  show_row_names = FALSE, show_column_names = TRUE, 
+  row_title = sprintf("%i marker genes FC>%.1f", nrow(genes_table_fp), fc_thrs),
+  bottom_annotation = col_ann, left_annotation = row_ann,
+)
+
+col_vec_acces_genes = c("#ffffff","#d0d1e6","#a6bddb","#74a9cf","#2b8cbe","#045a8d","#003e85","#00214a")
+col_fun_acces_genes = circlize::colorRamp2(seq(0, max(genes_table_sum), length.out = length(col_vec_acces_genes)), col_vec_acces_genes)
+
+hm_genes_sum <- Heatmap(
+  genes_table_sum, name = "accessible fraction",
+  col = col_fun_acces_genes, border = TRUE, use_raster = TRUE,
+  cluster_rows = FALSE, cluster_columns = FALSE, 
+  show_row_dend = FALSE, show_column_dend = FALSE,
+  show_row_names = FALSE, show_column_names = TRUE,
+  bottom_annotation = col_ann, right_annotation = gene_ann,
+)
+
+pdf(file.path(plot_dir, "Clusters-marker-genes-fp.pdf"), width=20, height=14)
+hm_genes_fp + hm_genes_sum
+dev.off()
+```
+
+# Alternative promoters
+
+```{r}
+ap_dir <- file.path(file.path(sprintf("ArchRProj_%s",sample),"AltPromoters"))
+dir.create(ap_dir, showWarnings = FALSE)
+```
+
+A) For each gene, link the most-upstream upstream 5' scRNAseq peak in each cell type (allow ~4-5Kb non-colliding with another gene model in the same strand upstream). Then, from this we derive a list of genes with a non-overlapping 5' in (at least) one cell type.  
+
+B) Cross A) with DARs, to get a reduced list of alternative promoter DARs. If A) is very short, then we can also check them directly.  
+
+C) For the DARs, could we add the following metadata: distance of the peak to each gene and whether or not the peak is cell type-specific (ie. called only in that cell type, I guess this will be very few, if any). The idea is to look for very-far-away regulatory elements (whether cell type unique or not) and also in genes with relatively few REs to be validated as distal enhancers (impossible to clone a huge landscape with dozens of sites like GATA or Islet).
+
+## A) Link genes to 5' peaks
+
+Get 5' scRNA-seq peaks
+
+```{r}
+fp_dir <- "../../../scRNAseq_nvec_v5_5prime/scdb/ct.Nv5prime_K30_reord_rm/macs2"
+fp_ct_dir <- grep("\\.(plus|minus)", list.dirs(fp_dir), value = TRUE)
+fp_cts <- unique(str_remove(basename(fp_ct_dir), "\\.(plus|minus)"))
+fp_peaks_list <- sapply(fp_cts, function(x) {
+  dirs <- file.path(fp_dir, sprintf("%s.%s", x, c("plus","minus")))
+  peak_files <- list.files(dirs, pattern = "macs_peaks.narrowPeak", full.names = TRUE)
+  peak_list <- lapply(peak_files, read_bed, format = "narrowPeak")
+  peak_gr <- unlist(GRangesList(peak_list))
+  strand(peak_gr) <- ifelse(grepl("plus",peak_gr$name),"+","-")
+  peak_gr
+}, simplify = FALSE, USE.NAMES = TRUE)
+fp_peaks_list
+saveRDS(fp_peaks_list, file.path(ap_dir, "5prime_peaks_cell_type.RDS"))
+
+```
+
+Reduce set of per-cell type 5' peaks
+
+```{r}
+fp_peaks_list <- readRDS(file.path(ap_dir, "5prime_peaks_cell_type.RDS"))
+fp_peaks <- unlist(GRangesList(fp_peaks_list))
+GenomicRanges::reduce(fp_peaks, min.gapwidth=1L, with.revmap=TRUE, ignore.strand=FALSE)
+```
+
+
+For each TSS, get closest 5' peak per cell type
+
+```{r}
+tss_gr <- proj@geneAnnotation$TSS
+for (ct in names(fp_peaks_list)) {
+  message(ct)
+  fp_peaks_ct <- fp_peaks_list[[ct]]
+  prom_hits <- precede(x = tss_gr, subject = fp_peaks_ct, select="all", ignore.strand=FALSE)
+  elementMetadata(tss_gr)[,ct] <- ""
+  elementMetadata(tss_gr)[queryHits(prom_hits),ct] <- fp_peaks_ct[subjectHits(prom_hits)]$name
+}
+saveRDS(tss_gr, file.path(ap_dir, "5prime_peaks_cell_type_tss_assign.RDS"))
+```
+
+## B) 
+
+```{r}
+tss_gr <- readRDS(file.path(ap_dir, "5prime_peaks_cell_type_tss_assign.RDS"))
+tss_dt <- setDT(as.data.frame(tss_gr))
+tss_dt
+```
+
+
+# Files for shiny app
+
+Save loom file and metacell-like footprint
+
+```{r}
+library(loomR)
+source("scatac_helper_functions.R")
+shiny_dir <- "../../shiny/Data/"
+
+# matrix
+gs_mat <- readRDS(file.path(sprintf("ArchRProj_%s",sample),"GeneScoreMatrix","Matrix-Gene-Scores-Dist-Var-Weighted-50kb.rds"))
+rownames(gs_mat) <- str_replace(rownames(gs_mat),"-","_")
+
+# metadata
+cellColData <- as.data.table(proj@cellColData, keep.rownames="Cell")
+
+# cell types and colors 
+# annData <- unique(cellColData[,.(Clusters,cell_type,cell_type_color)])
+# ct_clusts <- structure(annData$cell_type, names=annData$Clusters)
+# ct_cols <- structure(annData$cell_type_color, names=annData$cell_type)
+
+# annotation
+colnames(cellColData) <- str_replace_all(
+    colnames(cellColData), c("cell_type"="Annotation","cell_type_color"="Annotation_color")
+)
+class(cellColData) <- "data.frame"
+rownames(cellColData) <- cellColData$Cell
+
+clusters <- paste0("C",1:length(unique(cellColData$Clusters)))
+if (is.null(cellColData$Clusters_color)) {
+  cluster_cols <- structure(paletteDiscrete(values = clusters, set = "stallion"), names=clusters)
+  cellColData$Clusters_color <- cluster_cols[cellColData$Clusters]
+}
+
+if (is.null(cellColData$Sample_color)) {
+  cellColData$Sample_color <- orig_cols[as.character(cellColData$Sample)] 
+}
+
+# subset for common cells and order 
+cells <- intersect(colnames(gs_mat), rownames(cellColData))
+if (length(cells) != ncol(gs_mat) | length(cells) != nrow(cellColData))
+  message("I will subset cells")
+gs_mat <- gs_mat[,cells]
+cellColData <- cellColData[cells,]
+cellColCols <-  c("Cell","Clusters","Clusters_color","Annotation","Annotation_color","Sample","Sample_color")
+cellColData <- cellColData[cells,cellColCols]
+
+# dim reductions
+umap <- proj@embeddings$UMAP$df
+umap <- umap[cells,]
+tsne <- proj@embeddings$TSNE$df
+tsne <- tsne[cells,]
+
+# gene annotations
+gene_ann <- fread("annotation/Nvec_annotation_v3_2020-10-23_clean_names")
+setnames(gene_ann,c("gene","pfam","name"))
+gene_ann <- rbindlist(list(
+    gene_ann,
+    data.table(gene = rownames(gs_mat)[!rownames(gs_mat) %in% gene_ann$gene])[,pfam:=""][,name:=""]
+))
+class(gene_ann) <- "data.frame"
+rownames(gene_ann) <- gene_ann$gene
+geneData <- gene_ann[rownames(gs_mat),]
+
+# save loom file
+loom_file <- file.path(shiny_dir, sprintf("%s.loom",sample))
+loomR::create(
+    filename = loom_file, 
+    data = gs_mat, 
+    cell.attrs = as.list(cellColData), 
+    gene.attrs = as.list(geneData), 
+    do.transpose = TRUE
+)
+
+lfile <- loomR::connect(loom_file, mode="r+")
+lfile$add.graph.matrix(mat=as.matrix(tsne), MARGIN = 1, name = "TSNE")
+lfile$close_all()
+
+# save cluster and annotation footprints
+ann_dt <- as.data.table(cellColData,keep.rownames="Cell")[,.(Cell,Clusters,Annotation)]
+
+cells_Clusters <- structure(cellColData$Clusters, names=cellColData$Cell)
+cells_Clusters <- cells_Clusters[colnames(gs_mat)]
+fp_Clusters <- accessibility_footprint(gs_mat, cells_Clusters)
+saveRDS(fp_Clusters, file.path(shiny_dir, sprintf("Footprint_Clusters.rds")))
+sum_Clusters <- accessibility_summary(gs_mat, cells_Clusters, sum)
+saveRDS(sum_Clusters, file.path(shiny_dir, sprintf("Sum_Clusters.rds")))
+
+cells_Annotation <- structure(cellColData$Annotation, names=cellColData$Cell)
+cells_Annotation <- cells_Annotation[colnames(gs_mat)]
+fp_Annotation <- accessibility_footprint(gs_mat, cells_Annotation)
+saveRDS(fp_Annotation, file.path(shiny_dir, sprintf("Footprint_Annotation.rds")))
+sum_Annotation <- accessibility_summary(gs_mat, cells_Annotation, sum)
+saveRDS(sum_Annotation, file.path(shiny_dir, sprintf("Sum_Annotation.rds")))
+
+```
+
+# Files for SEACells
+
+Output folder
+
+```{r}
+export_dir <- file.path("..","SEACells","Data",sprintf("ArchRProj_%s",sample))
+dir.create(export_dir,showWarnings=FALSE)
+```
+
+Metadata
+
+```{r}
+meta <- getCellColData(proj)
+cells <- rownames(meta)
+write.csv(meta, file.path(export_dir, 'cell_metadata.csv'), quote=FALSE)
+
+svd <- getReducedDims(proj)
+svd <- svd[cells,]
+write.csv(svd, file.path(export_dir, 'svd.csv'), quote=FALSE)
+```
+
+Save peaks matrix
+
+```{r}
+# export dir
+mat_dir <- file.path(export_dir, "PeakMatrix")
+dir.create(mat_dir,showWarnings=FALSE)
+
+# get matrix
+pmat <- getMatrixFromProject(proj, "PeakMatrix", binarize=FALSE)
+pmat_mat <- pmat@assays@data$PeakMatrix
+pmat_mat <- pmat_mat[,cells]
+peaks <- rowData(pmat)$name
+
+# get peaks
+peaks_gr <- proj@peakSet
+names(peaks_gr) <- peaks_gr$name
+peaks_df <- as.data.frame(peaks_gr)[peaks,]
+
+ # save
+Matrix::writeMM(pmat_mat,file.path(mat_dir,"matrix.mtx"))
+writeLines(cells,file.path(mat_dir,"cells"))
+write.csv(peaks_df,file.path(mat_dir,"peaks.csv"))
+```
+
+Save gene score matrix
+
+```{r}
+# export dir
+mat_dir <- file.path(export_dir, "GeneScoreMatrix")
+dir.create(mat_dir,showWarnings=FALSE)
+
+# get matrix
+genes_scores_matrix <- readRDS(file.path(
+  sprintf("ArchRProj_%s",sample), "GeneScoreMatrix", "Matrix-Gene-Scores-Dist-Var-Weighted-50kb.rds")
+)
+gscore_mat <- as(genes_scores_matrix[,cells],"dgCMatrix")
+genes <- rownames(gscore_mat)
+
+# save
+Matrix::writeMM(gscore_mat,file.path(mat_dir,"matrix.mtx"))
+writeLines(cells,file.path(mat_dir,"cells"))
+writeLines(genes,file.path(mat_dir,"genes"))
+```
