@@ -867,7 +867,7 @@ arc_sco <- arc_sco[, .SD[1], .(motif, peak)][
 setnames(
   arc_sco,
   c("motif", "motif_score", "motif_score_norm"),
-  c("archetype_name", "archetype_score", "archetype_score_norm")
+  c("archetype_name_short", "archetype_score", "archetype_score_norm")
 )
 
 #  max scores for motif per peak
@@ -880,13 +880,13 @@ setorder(mta_sco, -motif_score_norm)
 mta_sco <- mta_sco[, .SD[1], .(motif, peak)][
   , .(motif, peak, motif_score, motif_score_norm)]
 mta_sco <- merge.data.table(
-  mta_sco, unique(dict[, .(archetype_name, motif)]),
+  mta_sco, unique(dict[, .(archetype_name_short, motif)]),
   by = "motif", all.x = TRUE, sort = FALSE, allow.cartesian = TRUE
 )
 
 # combine motifs and archetypes
 all_sco <- merge.data.table(
-  mta_sco, arc_sco, by = c("archetype_name", "peak"),
+  mta_sco, arc_sco, by = c("archetype_name_short", "peak"),
   all = TRUE, sort = FALSE, allow.cartesian = TRUE
 )
 setorder(all_sco, archetype_name, -motif_score_norm)
@@ -924,6 +924,692 @@ ggsave(
 )
 ```
 
+## Motif enrichment in cell type peaks
+
+Calculate motif enrichment in  cell type specific peaks
+
+```{r}
+# archetype scores
+arc_scores_mona <- readRDS(
+  file.path(arc_dir, "motif-scores-archetypes-mona.rds")
+)
+arc_gr <- arc_scores_mona$gw_scan
+names(mcols(arc_gr))[1] <- str_replace(names(mcols(arc_gr))[1], "motif", "name")
+
+# motif scores
+mta_scores_mona <- readRDS(
+  file.path(arc_dir, "motif-scores-input-motifs-mona.rds")
+)
+mta_gr <- mta_scores_mona$gw_scan
+names(mcols(mta_gr))[1] <- str_replace(names(mcols(mta_gr))[1], "motif", "name")
+
+# all peaks
+peaks <- fread(file.path(pks_dir, "Peaks_cell_type_mapped.bed"))
+setnames(peaks, c("seqnames", "start", "end", "peak", "score", "strand"))
+peaks <- unique(peaks[, .(seqnames, start, end, strand, peak)])
+
+# enrichment per cell type
+enr_list <- vector("list", length = length(cell_types))
+names(enr_list) <- cell_types
+for(ct in cell_types) {
+
+  message(sprintf("\nCalculating enrichment for %s", ct))
+  
+  # cell type peaks
+  stg_dir <- ifelse(ct %in% adult_cell_types, adult_dir, gastr_dir)
+  pks_fn <- file.path(
+    stg_dir, "ArchRProj", "PeakDifferential", "cell_type_filtered",
+    sprintf("Peaks-%s-vs-others.tsv", ct)
+  )
+  pks_dt <- fread(pks_fn, select = 1:6)
+  setnames(pks_dt, c("seqnames", "start", "end", "peak", "score", "strand"))
+  pks_gr <- makeGRangesFromDataFrame(pks_dt, keep.extra.columns = TRUE)
+
+  # background peaks
+  pks_bg <- peaks_gr[!peaks_gr$peak %in% pks_gr$peak]
+
+  # enrichment archetypes
+  arc_dt <- mta_motif_enrichment_test(
+    sites_object = arc_gr,
+    fg_object = pks_gr,
+    bg_object = pks_bg,
+    thresholds_vector = NULL,
+    label = ct,
+    nthreads = 2,
+    pval_adjust = "fdr"
+  )
+
+  # enrichment motifs
+  mta_dt <- mta_motif_enrichment_test(
+    sites_object = mta_gr,
+    fg_object = pks_gr,
+    bg_object = pks_bg,
+    thresholds_vector = NULL,
+    label = ct,
+    nthreads = 2,
+    pval_adjust = "fdr"
+  )
+
+  # all enrichment results
+  enr_list[[ct]] <- rbindlist(list(
+    "archetype" = arc_dt, 
+    "motif" = mta_dt
+  ), idcol = "group")
+
+}
+
+# combine results from all cell types
+enr_dt <- rbindlist(enr_list, idcol = "cell_type")
+
+# save results
+fwrite(
+  enr_dt[group == "archetype"][, group := NULL],
+  file.path(arc_dir, "motif-enrichment-cell-type-archetypes.tsv"),
+  sep = "\t"
+)
+fwrite(
+  enr_dt[group == "motif"][, group := NULL],
+  file.path(arc_dir, "motif-enrichment-cell-type-input-motifs.tsv"),
+  sep = "\t"
+)
+```
+
+Enrichment in all peaks
+
+```{r}
+# archetype scores
+arc_scores_mona <- readRDS(
+  file.path(arc_dir, "motif-scores-archetypes-mona.rds")
+)
+arc_gr <- arc_scores_mona$gw_scan
+names(mcols(arc_gr))[1] <- str_replace(names(mcols(arc_gr))[1], "motif", "name")
+
+# all peaks
+peaks <- fread(file.path(
+  res_dir_atac, "ArchRProj", "Promoters",
+  "scATAC_reduced_peaks_gene_assignment_coaccess.tsv"
+))
+peaks <- unique(peaks[, .(seqnames, start, end, strand, peak)])
+peaks_gr <- makeGRangesFromDataFrame(peaks, keep.extra.columns = TRUE)
+
+# peaks with fold changes
+ann_peaks <- fread(
+  file.path(pro_dir, "annotation_all_peaks_cell_types.tsv"),
+  select = c(
+    "seqnames", "start", "end", "peak",
+    "cell_type", "Log2FC", "Log2FC_like"
+  )
+)
+peaks_gr <- makeGRangesFromDataFrame(
+  unique(ann_peaks[, 1:4]), keep.extra.columns = TRUE
+)
+
+# distribution of peaks fold change values
+gp_fc_dist <- ggplot(
+  melt.data.table(ann_peaks, measure.vars = c("Log2FC", "Log2FC_like")),
+  aes(value, linetype = variable, color = cell_type)) +
+  geom_density() +
+  geom_vline(xintercept = 0) +
+  scale_x_continuous(breaks = seq(-5, 5, 1)) +
+  scale_color_manual(values = ct_cols, guide = "none") +
+  facet_wrap(. ~ cell_type, scales = "free_y") +
+  theme(
+    panel.grid.major = element_line(size = 0.2),
+    legend.position = "bottom"
+  )
+ggsave(
+  file.path(fig_dir, "peaks_fc_dist_cell_type.pdf"),
+  gp_fc_dist,
+  width = 14, height = 8
+)
+
+# enrichment per cell type
+match_gc <- TRUE
+genome <- Biostrings::readDNAStringSet("../../genome/Nvec_vc1.1_gDNA.fasta")
+enr_dt <- rbindlist(lapply(cell_types, function(ct) {
+
+  message("\nCalculating enrichment for ", ct)
+
+  # cell type peaks
+  #pks_fn <- file.path(
+  #  res_dir_atac, "ArchRProj", "Peaks", "cell_type_filtered",
+  #  sprintf("Peaks-%s.bed", ct)
+  #)
+  #pks_dt <- fread(pks_fn)
+  #setnames(pks_dt, c("seqnames", "start", "end", "peak", "score", "strand"))
+  #pks_gr <- makeGRangesFromDataFrame(pks_dt, keep.extra.columns = TRUE)
+  
+  # cell type peaks
+  pks_dt <- ann_peaks[cell_type == ct][Log2FC > 1]
+  pks_gr <- makeGRangesFromDataFrame(pks_dt, keep.extra.columns = TRUE)
+
+  # background peaks
+  pks_bg <- peaks_gr[!peaks_gr$peak %in% pks_gr$peak]
+
+  # mach by GC content
+  if (match_gc == TRUE) {
+    message("Matching background peaks for GC content")
+    dna_fg <- genome[pks_gr]
+    gcc_fg <- apply(
+      letterFrequency(dna_fg, letters = c("G", "C"), as.prob = TRUE),
+      1, mean
+    )
+    dna_bg <- genome[pks_bg]
+    gcc_bg <- apply(
+      letterFrequency(dna_bg, letters = c("G", "C"), as.prob = TRUE),
+      1, mean
+    )
+    density_estimate <- density(
+      x = gcc_fg, kernel = "gaussian", bw = 1
+    )
+    weights <- approx(
+      x = density_estimate$x,
+      y = density_estimate$y,
+      xout = gcc_bg,
+      yright = 0.0001,
+      yleft = 0.0001
+    )$y
+    gcc_select <- sample.int(
+      n = length(gcc_bg),
+      size = min(length(gcc_fg), length(gcc_bg)),
+      prob = weights
+    )
+    pks_bg_gcc <- pks_bg[gcc_select]
+    dna_bg_gcc <- genome[pks_bg_gcc]
+    gcc_bg_gcc <- apply(
+      letterFrequency(dna_bg_gcc, letters = c("G", "C"), as.prob = TRUE),
+      1, mean
+    )
+    gc_dt <- rbindlist(list(
+      "fg" =  data.table("GC" = gcc_fg),
+      "bg" =  data.table("GC" = gcc_bg),
+      "bg_matched" =  data.table("GC" = gcc_bg_gcc)
+    ), idcol = "group")[, cell_type := ct]
+    gc_gp <- ggplot(gc_dt, aes(GC, color = group)) +
+        geom_density() +
+        labs(title = ct)
+    ggsave(
+      file.path(fig_dir, sprintf("peaks_GC_cell_type_%s.pdf", ct)),
+      width = 6, height = 4
+    )
+    pks_bg <- pks_bg_gcc
+  }
+
+  # enrichment archetypes
+  arc_dt <- mta_motif_enrichment_test(
+    sites_object = arc_gr,
+    fg_object = pks_gr,
+    bg_object = pks_bg,
+    thresholds_vector = NULL,
+    label = ct,
+    nthreads = 2,
+    pval_adjust = "fdr"
+  )
+}))
+
+fwrite(
+  enr_dt,
+  file.path(arc_dir, "motif-enrichment-cell-type-archetypes-Log2FC-1.tsv"),
+  sep = "\t"
+)
+```
+
+Reduce redundant i.e. correlated enrichments
+
+```{r}
+enr_fn <- file.path(
+  arc_dir,
+  "motif-enrichment-cell-type-archetypes-Log2FC-1.tsv"
+)
+enr_dt <- fread(enr_fn)
+
+# sumarize enrichments
+enr_dt_sm <- enr_dt[, .(motif, label, fc, padj)][
+  , .SD[1], .(motif, label)
+]
+
+# cast enrichments
+enr_ct_dt <- dcast.data.table(
+  enr_dt_sm,
+  motif ~ label, value.var = "fc"
+)
+enr_ct_dt[is.na(enr_ct_dt)] <- 0
+enr_ct_mt <- as.matrix(enr_ct_dt[, -1])
+rownames(enr_ct_mt) <- enr_ct_dt[[1]]
+
+# clustering motifs by enrichments
+mt_cors <- cor(t(enr_ct_mt))
+mt_hclu <- hclust(dist(enr_ct_mt))
+
+# number of clusters
+ks_init <- 400:600
+ks <- sapply(ks_init, function(k) {
+  # cut tree into clusters
+  mt_clus <- cutree(tree = mt_hclu, k = k)
+  mt_clus_rto <- sapply(unique(mt_clus), function(cl) {
+    mts <- names(which(mt_clus == cl))
+    nts <- names(which(mt_clus != cl))
+    # mean within cluster correlations
+    cin <- apply(
+      cor(t(enr_ct_mt[mts, , drop = FALSE])), 1, mean
+    )
+    # mean outside of cluster correlation
+    cou <- apply(
+      cor(
+        t(enr_ct_mt[mts, , drop = FALSE]),
+        t(enr_ct_mt[nts, , drop = FALSE])
+      ), 1, mean, na.rm = TRUE
+    )
+    # ratio
+    mean(cin / cou) 
+  })
+  mean(mt_clus_rto, na.rm = TRUE)
+})
+names(ks) <- ks_init
+k <- ks_init[which.min(ks)]
+mt_clus <- cutree(tree = mt_hclu, k = k)
+
+# plot
+#pdf(file.path(fig_dir, "arch_enrichment_hclust.pdf"), width = 10, height = 4)
+#plot(mt_hclu)
+#rect.hclust(tree = mt_hclu, k = k, cluster = mt_clus)
+#dev.off()
+
+# final clusters stats
+mt_clus_dt <- rbindlist(lapply(unique(mt_clus), function(cl) {
+  mts <- names(which(mt_clus == cl))
+  nts <- names(which(mt_clus != cl))
+  # mean within cluster correlations
+  cin <- apply(
+    cor(t(enr_ct_mt[mts, , drop = FALSE])), 1, mean
+  )
+  # mean outside of cluster correlation
+  cou <- apply(
+    cor(
+      t(enr_ct_mt[mts, , drop = FALSE]),
+      t(enr_ct_mt[nts, , drop = FALSE])
+    ), 1, mean, na.rm = TRUE
+  )
+  # ratio
+  data.table("incor" = cin, "outcor" = cou)[, cluster := cl]
+}))
+
+# add to metadata
+dict <- fread(file.path(
+  arc_dir, "motif-archetypes-PPM-PCCnorm-0.8-IC0.5-8bp.dict"
+))
+dict[, enrichment_cluster := mt_clus[archetype_name]]
+
+# add to enrichment data
+enr_dt[, enrichment_cluster := mt_clus[motif]]
+setnames(enr_dt, "label", "cell_type")
+enr_dt[is.na(fc), fc := 0]
+fwrite(enr_dt, enr_fn, sep = "\t")
+
+# select top motif per cluster
+setorder(enr_dt, enrichment_cluster, -fc)
+enr_mots <- enr_dt[padj < 0.05][, .SD[1], .(enrichment_cluster)]$motif
+enr_top <- enr_dt[motif %in% enr_mots]
+
+# cluster for plotting
+top_enr_fc <- dcast.data.table(
+  enr_top, motif ~ cell_type, value.var = "fc"
+)
+top_enr_fc[is.na(top_enr_fc)] <- 0
+top_enr_fc_mat <- as.matrix(top_enr_fc[, -1])
+top_enr_fc_mat <- top_enr_fc_mat[, cell_types[
+  cell_types %in% colnames(top_enr_fc_mat)
+]]
+rownames(top_enr_fc_mat) <- top_enr_fc[[1]]
+hc <- hclust(dist(top_enr_fc_mat))
+top_enr_ord <- rownames(top_enr_fc_mat)[hc$order]
+mo <- order(apply(top_enr_fc_mat, 1, which.max))
+top_enr_ord <- rownames(top_enr_fc_mat)[mo]
+
+# order data
+enr_top[, cell_type := factor(cell_type, levels = cell_types)]
+enr_top[, motif := factor(motif, levels = top_enr_ord)]
+setorder(enr_top, motif)
+enr_top[, motif_short := substr(motif, 1, 60)]
+enr_top[, motif_short := factor(
+  motif_short,
+  levels = unique(enr_top$motif_short)
+)]
+
+# plot
+enr_top[, padj_scaled := -1 * log10(padj)]
+enr_top[, padj_scaled := pmin(padj_scaled, 80)]
+enr_top[, fc_scaled := pmin(fc, 6)]
+gp_enr <- ggplot(
+    enr_top,
+    aes(motif_short, cell_type)
+  ) +
+  geom_point(
+    aes(size = padj_scaled, fill = fc_scaled),
+    shape = 21
+  ) +
+  scale_fill_gradientn(
+    name = "enrichmnet\nfold change",
+    breaks = c(0, 2, 4, 6, 8),
+    colours = c(
+      "white", "#fee5d9", "#fcae91", "#fb6a4a", "#de2d26", "#a50f15", "#7a0105"
+    )
+  ) +
+  scale_size_continuous(
+    name = "-log10 adj pval",
+  ) +
+  theme(
+    panel.grid.major = element_line(size = 0.2),
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+    axis.text.y = element_text(size = 6),
+  ) +
+  coord_flip() +
+  labs(x = sprintf("%s motifs", nrow(top_enr_fc)))
+
+ggsave(
+  file.path(fig_dir, "motifs-enrichment-archetype-Log2FC_like-0.5-peaks.pdf"),
+  gp_enr,
+  width = 12, height = 32
+)
+
+```
+
+```{r}
+enr_dt_fc <- fread(
+  file.path(
+    arc_dir,
+    "motif-enrichment-cell-type-archetypes-Log2FC-1.tsv"
+  )
+)
+enr_dt_fc_like <- fread(
+  file.path(
+    arc_dir,
+    "motif-enrichment-cell-type-archetypes-Log2FC_like-0.5.tsv"
+  )
+)
+
+enr_dt_fc[motif %in% enr_dt_fc[padj < 0.05 & fc > 2]$motif]
+enr_dt_fc_like[motif %in% enr_dt_fc_like[padj < 0.05 & fc > 2]$motif]
+
+setnames(
+  enr_dt_fc,
+  colnames(enr_dt_fc),
+  paste("Log2FC", colnames(enr_dt_fc), sep = "_")
+)
+setnames(
+  enr_dt_fc,
+  c("Log2FC_motif", "Log2FC_cell_type"),
+  c("motif", "cell_type")
+)
+setnames(
+  enr_dt_fc_like,
+  colnames(enr_dt_fc_like),
+  paste("Log2FC_like", colnames(enr_dt_fc_like), sep = "_")
+)
+setnames(
+  enr_dt_fc_like,
+  c("Log2FC_like_motif", "Log2FC_like_cell_type"),
+  c("motif", "cell_type")
+)
+enr_dt <- merge.data.table(
+  enr_dt_fc, enr_dt_fc_like, by = c("motif", "cell_type"), all = TRUE
+)
+fc_thr <- 8
+enr_dt[Log2FC_fc > fc_thr, Log2FC_fc := fc_thr]
+enr_dt[Log2FC_like_fc > fc_thr, Log2FC_like_fc := fc_thr]
+enr_dt[, label := substr(motif, 1, 25)]
+require(ggrastr)
+enr_dt_1 <- enr_dt[!(Log2FC_padj < 0.05 | Log2FC_like_padj < 0.05)]
+enr_dt_2 <- enr_dt[Log2FC_padj < 0.05 & Log2FC_like_padj < 0.05]
+enr_dt_3 <- enr_dt[Log2FC_padj < 0.05 & Log2FC_like_padj >= 0.05]
+enr_dt_4 <- enr_dt[Log2FC_padj >= 0.05 & Log2FC_like_padj < 0.05]
+gp_fc <- ggplot(enr_dt_1, aes(
+  x = Log2FC_fc, y = Log2FC_like_fc, label = label
+)) +
+  geom_point_rast(
+    data = enr_dt_1, shape = 20, alpha = 0.5, color = "grey",
+    inherit.aes = TRUE
+  ) +
+  geom_point_rast(
+    data = enr_dt_2, shape = 20, alpha = 0.5, color = "orange",
+    inherit.aes = TRUE
+  ) +
+  geom_point_rast(
+    data = enr_dt_3, shape = 21, fill = "orange", color = "black",
+    inherit.aes = TRUE
+  ) +
+  geom_point_rast(
+    data = enr_dt_4, shape = 24, fill = "orange", color = "black",
+    inherit.aes = TRUE
+  ) +
+  facet_wrap("cell_type") +
+  coord_fixed() +
+  geom_abline() +
+  geom_text_repel(
+    data = rbindlist(list(
+      enr_dt_3, enr_dt_4
+    ))[abs(Log2FC_fc -  Log2FC_like_fc) > 1],
+    inherit.aes = TRUE, max.overlaps = Inf, size = 2
+  ) +
+  theme(
+    legend.position = "bottom",
+    text = element_text(size = 12)
+  )
+ggsave(
+  file.path(fig_dir, "motifs-enrichment-archetype-Log2FC-comparison.pdf"),
+  gp_fc,
+  width = 12, height = 14
+)
+```
+
+Compare enrichment in specific peaks for archetypes and motifs
+
+```{r}
+arc_dt <- fread(
+  file.path(arc_dir, "motif-enrichment-cell-type-archetypes.tsv")
+)
+mta_dt <- fread(
+  file.path(arc_dir, "motif-enrichment-cell-type-input-motifs.tsv")
+)
+dict <- fread(file.path(
+  arc_dir, "motif-archetypes-PPM-PCCnorm-0.8-IC0.5-8bp.dict"
+))
+
+# add archetype info to motifs and combine max (?) scores per peak
+setnames(arc_dt, colnames(arc_dt), paste0(colnames(arc_dt), "_archetype"))
+setnames(
+  arc_dt,
+  c("motif_archetype", "label_archetype"),
+  c("archetype_name_short", "label")
+)
+
+setnames(mta_dt, colnames(mta_dt), paste0(colnames(mta_dt), "_motif"))
+setnames(
+  mta_dt,
+  c("motif_motif", "label_motif"),
+  c("motif", "label")
+)
+
+# add archetypes to motifs
+mta_dt <- merge.data.table(
+  mta_dt, unique(dict[, .(archetype_name_short, motif)]),
+  by = "motif", all = FALSE, sort = FALSE
+)
+all_enr <- merge.data.table(
+  mta_dt, arc_dt, 
+  by = c("archetype_name_short", "label"), all = TRUE, sort = FALSE
+)
+setnames(all_enr, "label", "cell_type")
+
+# select top motif per archetype per cell type
+setorder(all_enr, archetype_name_short, -fc_motif)
+top_enr <- all_enr[, .SD[1], .(archetype_name_short, cell_type)]
+
+# plot scatterplots for fc and padj for all motifs-archetypes
+require(ggrastr)
+gp_enr_fc <- ggplot(
+    top_enr,
+    aes(fc_motif, fc_archetype)
+  ) +
+  geom_point_rast(aes(color = cell_type), alpha = 0.1) +
+  scale_color_manual(values = ct_cols) +
+  scale_x_continuous(
+    trans = "log10", limits = c(0.05, 10), breaks = c(0.1, 1, 10)
+  ) +
+  scale_y_continuous(
+    trans = "log10", limits = c(0.05, 10), breaks = c(0.1, 1, 10)
+  ) +
+  stat_density_2d(color = "white") +
+  geom_abline(color = "grey") +
+  coord_fixed() +
+  theme(legend.position = "none")
+gp_enr_padj <- ggplot(
+    top_enr,
+    aes(-1 * log10(padj_motif), -1 * log10(padj_archetype))
+  ) +
+  geom_point_rast(aes(color = cell_type), alpha = 0.1) +
+  scale_color_manual(values = ct_cols) +
+  scale_x_continuous(
+    trans = "log10", limits = c(1e-2, NA), breaks = c(1e-1, 1, 1e1, 1e2)
+  ) +
+  scale_y_continuous(
+    trans = "log10", limits = c(1e-2, NA), breaks = c(1e-1, 1, 1e1, 1e2)
+  ) +
+  stat_density_2d(color = "white") +
+  geom_abline(color = "grey") +
+  coord_fixed() +
+  theme(legend.position = "none")
+ggsave(
+  file.path(fig_dir, "motifs-enrichment-compara-archetype.pdf"),
+  gp_enr_fc + gp_enr_padj,
+  width = 12, height = 6
+)
+
+```
+
+Plot motif enrichments for archetypes and best corresponding motif from archetyping cluster
+
+```{r}
+# subset archetypes
+top_enr_sig <- top_enr[(padj_archetype < 0.001 & fc_archetype > 2) | (padj_motif < 0.001 & fc_motif > 2)]
+
+# transform values for plotting
+top_enr_sig[, padj_motif_scaled := -1 * log10(padj_motif)]
+top_enr_sig[, padj_archetype_scaled := -1 * log10(padj_archetype)]
+
+# trim values for plotting
+top_enr_sig[, padj_motif_scaled := pmin(padj_motif_scaled, 80)]
+top_enr_sig[, fc_motif_scaled := pmin(fc_motif, 8)]
+top_enr_sig[, padj_archetype_scaled := pmin(padj_archetype_scaled, 80)]
+top_enr_sig[, fc_archetype_scaled := pmin(fc_archetype, 8)]
+
+# construct more informative motif names
+top_enr_sig <- merge.data.table(
+  top_enr_sig, unique(dict[,.(motif, tf_cisbp_name)]), 
+  by = "motif", all.x = TRUE, sort = FALSE
+)
+top_enr_sig[is.na(tf_cisbp_name), tf_cisbp_name := motif]
+top_enr_sig[tf_cisbp_name == "", tf_cisbp_name := motif]
+top_enr_sig[, archetype_num := str_extract(archetype_name_short, "ARCH\\d+")]
+top_enr_sig[, archetype_name_motif := sprintf("%s (%s)", tf_cisbp_name, archetype_num), by = .I]
+
+# cluster archetypes
+top_enr_sig[, cell_type := factor(cell_type, levels = cell_types)]
+top_arc_fc <- dcast.data.table(
+  unique(top_enr_sig[, .(archetype_name_short, cell_type, padj_archetype_scaled)]), 
+  archetype_name_short ~ cell_type, value.var = "padj_archetype_scaled"
+)
+top_arc_fc[is.na(top_arc_fc)] <- 0
+top_arc_fc_mat <- as.matrix(top_arc_fc[, -1])
+rownames(top_arc_fc_mat) <- top_arc_fc[[1]]
+hc <- hclust(dist(top_arc_fc_mat))
+top_arc_ord <- rownames(top_arc_fc_mat)[hc$order]
+mo <- order(apply(top_arc_fc_mat, 1, which.max))
+top_arc_ord <- rownames(top_arc_fc_mat)[mo]
+
+# order data
+top_enr_sig[, cell_type := factor(cell_type, levels = cell_types)]
+top_enr_sig[, archetype_name_short := factor(archetype_name_short, levels = top_arc_ord)]
+setorder(top_enr_sig, archetype_name_short)
+top_enr_sig[, archetype_name_motif := factor(
+  archetype_name_motif,
+  levels = unique(top_enr_sig$archetype_name_motif)
+)]
+
+# archetypes data
+top_enr_arc <- unique(top_enr_sig[, .(
+  archetype_name_short, cell_type, padj_archetype_scaled, fc_archetype_scaled
+)])
+
+# motifs data
+mots <- top_enr_sig[
+  order(-fc_motif), .SD[1], .(archetype_name_short, cell_type)
+]$motif
+top_enr_mot <- unique(top_enr_sig[motif %in% mots][, .(
+  archetype_name_motif, cell_type, padj_motif_scaled, fc_motif_scaled
+)])
+top_enr_mot[, archetype_name_motif := factor(archetype_name_motif, levels = unique(top_enr_mot$archetype_name_motif))]
+
+# plot archetypes
+gp_enr_arc <- ggplot(
+    top_enr_arc,
+    aes(cell_type, archetype_name_short)
+  ) +
+  geom_point(
+    aes(size = padj_archetype_scaled, fill = fc_archetype_scaled),
+    shape = 21
+  ) +
+  scale_fill_gradientn(
+    name = "enrichmnet\nfold change",
+    breaks = c(0, 2, 4, 6),
+    limits = c(0, 8),
+    colours = c(
+      "white", "#fee5d9", "#fcae91", "#fb6a4a", "#de2d26", "#a50f15", "#7a0105"
+    )
+  ) +
+  scale_size_continuous(
+    name = "-log10 adj pval",
+  ) +
+  labs(x = "archetype") +
+  theme(
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+    axis.text.y = element_text(size = 10),
+    panel.grid.major = element_line(size = 0.5, color = "grey")
+  )
+
+# plot motifs
+gp_enr_mta <- ggplot(
+    top_enr_mot,
+    aes(cell_type, archetype_name_motif)
+  ) +
+  geom_point(
+    aes(size = padj_motif_scaled, fill = fc_motif_scaled),
+    shape = 21
+  ) +
+  scale_fill_gradientn(
+    name = "enrichmnet\nfold change",
+    breaks = c(0, 2, 4, 6),
+    limits = c(0, 8),
+    colours = c(
+      "white", "#fee5d9", "#fcae91", "#fb6a4a", "#de2d26", "#a50f15", "#7a0105"
+    )
+  ) +
+  scale_size_continuous(
+    name = "-log10 adj pval",
+  ) +
+  labs(x = "best motif from archetyping cluster") +
+  theme(
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+    axis.text.y = element_text(size = 10),
+    panel.grid.major = element_line(size = 0.5, color = "grey")
+  )
+
+ggsave(
+  file.path(fig_dir, "motifs-enrichment-dotplot-archetype.pdf"),
+  gp_enr_mta + gp_enr_arc + plot_layout(guides = "collect"),
+  width = 20, height = 86, limitsize = FALSE
+)
+```
 
 ## Session info
 
