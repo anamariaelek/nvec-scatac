@@ -1,0 +1,117 @@
+Ptx1 	Nvec_vc1.1_XM_032366098.2	progenitors
+Myc2	Nvec_vc1.1_XM_001640809.3	progenitors
+Hes2	Nvec_vc1.1_XM_032384889.2	progenitors
+Nanos1	Nvec_vc1.1_XM_001637125.3	progenitors
+Nanos2	Nvec_vc1.1_XM_001641165.3	progenitors
+Ath-like	Nvec_vc1.1_XM_032376421.2	progenitors
+FoxQ2d	Nvec_vc1.1_XM_032385706.2 	progenitors
+Elav1	Nvec_vc1.1_XM_048724864.1	neurons
+AshA	Nvec_vc1.1_XM_032370984.2	neurons
+Pou4	Nvec_vc1.1_XM_032363992.2	neurons
+FoxL2	Nvec_vc1.1_XM_032364887.2	neurons
+Lwamide	Nvec_vc1.1_XM_001634346.3	neurons
+Rpamide	Nvec_vc1.1_XM_048724673.1	neurons
+RFamide	Nvec_vc1.1_XM_001638751.3	neurons
+Pea3/Ets	Nvec_vc1.1_XM_032377897.2	neurons
+Islet	Nvec_vc1.1_XM_032362713.2	neurons
+Zic-C	Nvec_vc1.1_XM_048728976.1	neurons
+Shak1 ion channel	Nvec_vc1.1_XM_048728569.1	neurons
+Shak4 ion channel	Nvec_vc1.1_XM_032377132.2	neurons
+Nav2.5 ion channel	Nvec_vc1.1_XM_032375468.2	neurons
+GABA transporter	Nvec_vc1.1_XM_001641617.3	neurons
+GATA	Nvec_vc1.1_XM_032367288.2	neurons
+ZNF845	Nvec_vc1.1_XM_001641129.3	cnidocytes
+NR12	Nvec_vc1.1_XM_001634328.3	cnidocytes
+PaxA	Nvec_vc1.1_XM_001631763.3	cnidocytes
+Nematogalectin-like	Nvec_vc1.1_XM_048721133.1	cnidocytes
+Calmodulin 	Nvec_vc1.1_XM_048730215.1	cnidocytes
+Peptidase M13 	Nvec_vc1.1_XM_001637223.3	cnidocytes
+Spinalin	Nvec_vc1.1_XM_048723042.1	cnidocytes
+Minicollagen-1/Ncol-1	Nvec_vc1.1_XM_001629300.3	cnidocytes
+Minicollagen-3/Ncol-3	Nvec_vc1.1_XM_032363026.2	cnidocytes
+Cnido-Fos1	Nvec_vc1.1_XM_048730161.1	cnidocytes
+Cnido-Jun	Nvec_vc1.1_XM_032385896.2	cnidocytes
+Klf13	Nvec_v1g19278	cnidocytes
+BHMG1	Nvec_vc1.1_XM_001633819.3	cnidocytes
+XBP1	Nvec_vc1.1_XM_001629694.3	cnidocytes
+trypsinA 	Nvec_vc1.1_XM_001629096.2	secretory
+trypsinB 	Nvec_vc1.1_XM_048725793.1	secretory
+trypsinC 	Nvec_vc1.1_XM_048725380.1	secretory
+ChitinaseA	Nvec_vc1.1_XM_032381575.2	secretory
+ChitinaseB	Nvec_vc1.1_XM_001641756.3	secretory
+ChitinaseC 	Nvec_vc1.1_XM_001641640.3	secretory
+Nvpl1 	Nvec_vc1.1_XM_048730249.1	secretory
+Nvpl2 	Nvec_vc1.1_XM_048726793.1	secretory
+Nvilp1	Nvec_vc1.1_XM_048722346.1	secretory
+Nvilp2	Nvec_vc1.1_XM_048721144.1	secretory
+Nvilp3 	Nvec_NVE3796	secretory
+NvinsR 	Nvec_vc1.1_XM_048727799.1	secretory
+Mucin	Nvec_vc1.1_XM_048723457.1	secretory
+Ptx1 	Nvec_v1g239401	secretory
+Nv1	Nvec_v1g113139 	secretory
+Lysin1b	Nvec_vc1.1_XM_001639869.3	secretory
+MuscleLIM1.1 	Nvec_vc1.1_XM_032375152.2	gastrodermis
+Hand2	Nvec_vc1.1_XM_032381908.2	gastrodermis
+FoxC	Nvec_vc1.1_XM_001625950.3	gastrodermis
+Cdh1	Nvec_vc1.1_XM_032380092.2	gastrodermis
+Cdh3	Nvec_vc1.1_XM_048720774.1	gastrodermis
+FoxJ1	Nvec_vc1.1_XM_001636889.3	ciliary
+Rfx4/6/8	Nvec_vc1.1_XM_032365096.2	ciliary
+Nem64	Nvec_vc1.1_XM_001634938.2	muscle
+Nem24	Nvec_vc1.1_XM_032385184.2	muscle
+Nem7	Nvec_vc1.1_XM_032385185.2	muscle
+MyHC-st	Nvec_vc1.1_XM_001636908.3	muscle
+BarH-Like3	Nvec_vc1.1_XM_032384965.2	muscle
+VAx-EMX-Like	Nvec_vc1.1_XM_032377358.2	muscle
+TBX20	Nvec_vc1.1_XM_001629218.3	muscle
+EP2A	Nvec_vc1.1_XM_048725105.1	ectoderm
+SoxB2/Sox3	Nvec_NVE23841	ectoderm
+Anthox1/Ax1  	Nvec_vc1.1_XM_032366733.2	patterning
+Anthox6/Ax6	Nvec_vc1.1_XM_001634202.3	patterning
+Insm1	Nvec_vc1.1_XM_032375602.2	neuro-secretory
+Prdm14d	Nvec_vc1.1_XM_032385745.2	neurons endodermal
+Nkx-2.2a	Nvec_vc1.1_XM_032373618.2	NPC endo and endo neurons
+LMX	Nvec_vc1.1_XM_048731137.1	ecto_pharynx
+FoxA	Nvec_vc1.1_XM_001634505.3	ecto_pharynx
+FoxB	Nvec_vc1.1_XM_048728028.1	ecto_pharynx
+Brachyury	Nvec_vc1.1_XM_032378021.2	ecto_pharynx
+Wnt1	Nvec_vc1.1_XM_001641444.3	ecto_pharynx
+Wnt4	Nvec_vc1.1_XM_001623050.3	ecto_pharynx
+Wnt2	Nvec_vc1.1_XM_032383075.2	boundaries gastrula
+Sp6-9	Nvec_vc1.1_XM_032384420.2	boundaries gastrula
+FGFa1	Nvec_vc1.1_XM_032367336.2	aboral_ectoderm
+Six3/6	Nvec_vc1.1_XM_001625109.3	aboral_ectoderm
+Grainyhead	Nvec_vc1.1_XM_032386243.2	ectoderm
+FoxQ2a	Nvec_vc1.1_XM_032386947.2	aboral_ectoderm
+Tbx1/10-1	Nvec_vc1.1_XM_032374843.2	EMS
+Tbx1/10-2 	Nvec_vc1.1_XM_001627136.3	EMS
+Tbx20-1	Nvec_vc1.1_XM_032377450.2	EMS
+OtxB	Nvec_vc1.1_XM_032375635.2	EMS
+OtxC	Nvec_vc1.1_XM_001647471.3	EMS
+Lbx	Nvec_vc1.1_XM_001634715.3	EMS
+NVHD033-ANTP	Nvec_vc1.1_XM_032379688.2	EMS
+SnailA	Nvec_vc1.1_XM_032387186.2	EMS
+Hh1	Nvec_vc1.1_XM_048724087.1	EMS_ecto_boundary
+Six4/5	Nvec_vc1.1_XM_001623084.3	EMS
+FoxA/D	Nvec_vc1.1_XM_032387167.2	other FoxA
+TEAD	Nvec_vc1.1_XM_032364331.2	
+NvSox1	Nvec_vc1.1_XM_001624716.3	
+NvSox2	Nvec_vc1.1_XM_001639701.3	``
+NvSoxC	Nvec_vc1.1_XM_032372264.2	neurons
+NvSoxB1	Nvec_vc1.1_XM_001632947.3	
+NvSoxB(2)	Nvec_vc1.1_XM_001632568.3	progenitors
+NvSoxA	Nvec_vc1.1_XM_032380374.2	neurons
+NvSoxE1	Nvec_vc1.1_XM_001629987.3	
+NvSoxF1	Nvec_vc1.1_XM_001636155.3	
+NOTO	Nvec_vc1.1_XM_032364773.2	gland
+CREB3	Nvec_vc1.1_XM_032378881.2	gland
+PAX3/7	Nvec_vc1.1_XM_001628635.3	epidermis
+ETV6/7	Nvec_vc1.1_XM_032384221.2	epidermis
+Hhex	Nvec_vc1.1_XM_032364784.2	
+IRF1-2c	Nvec_vc1.1_XM_001622271.3	
+HSF-like	Nvec_vc1.1_XM_001633014.3	
+Prdm9-like	Nvec_vc1.1_XM_032379044.2	
+TUDOR/STK31	Nvec_vc1.1_XM_032376059.2	
+PTF1a	Nvec_vc1.1_XM_032385496.2	
+Rfx4	Nvec_vc1.1_XM_032375228.2	
+RFX1/2/3	Nvec_vc1.1_XM_032385647.2	
