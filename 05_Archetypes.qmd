@@ -2604,10 +2604,10 @@ ggsave(
 )
 ```
 
-## Combine motif scores, gene expression and accessibility
+## Combine motif metrics with other gene metrics
 
-Next we will combine accessibility and expression for TF genes with motif 
-deviation Z scores from chromAR.
+Here we will combine and compare motif scores with motif enrichment, gene 
+expression and accessibility.
 
 ```{r}
 # TF annotation
@@ -2621,16 +2621,16 @@ class_top_all <- fread(file.path(
   "assignment-archetype-motif-gene.tsv.gz"
 ))
 
+# motif enrichments
+arc_dt <- fread(file.path(
+  arc_dir, "motif-enrichment-cell-type-archetypes.tsv"
+))
+
 # motif scores
 chromvar_mat <- readRDS(file.path(
   "Results", "ChromVAR", "ArchetypesSEACellsMatrix",
   "Matrix-Archetypes-SEACells.rds"
 ))
-
-# map motifs to genes
-dev_tfs <- chromvar_mat[rownames(chromvar_mat) %in% class_top_all$archetype_name, ]
-dev_tfs <- dev_tfs[class_top_all$archetype_name, ]
-rownames(dev_tfs) <- class_top_all$gene
 
 # gene expression
 exp_mt <- readRDS(file.path(
@@ -2643,6 +2643,120 @@ acc_mt <- readRDS(file.path(
     "Results", "GeneScoreMatrix",
     "Matrix-Gene-Scores-SEACell-FC.rds"
 ))
+```
+
+Plot motif enrichment, indicating assigned TFs
+
+```{r}
+# gene info for archetypes
+agn_dt <- class_top_all[,.(gene, archetype_name)]
+
+# add TF gene info to motif enrichment
+setnames(arc_dt, "motif", "archetype_name")
+arc_ann_dt <- merge.data.table(
+  arc_dt, agn_dt,
+  by = "archetype_name", 
+  all.x = TRUE, sort = FALSE, allow.cartesian = TRUE
+)
+
+# add gene info
+arc_ann_dt <- merge.data.table(
+  arc_ann_dt, tfan, 
+  by = "gene",
+  all.x = TRUE, sort = FALSE
+)
+arc_ann_dt[is.na(gene), gene := ""]
+arc_ann_dt[is.na(common_name), common_name := ""]
+arc_ann_dt[is.na(og), og := ""]
+arc_ann_dt[is.na(pfam), pfam := ""]
+
+
+# # construct gene labels
+# arc_ann_dt[, gene_label := ""]
+# arc_ann_dt[gene != "", gene_label := str_remove(gene, "Nvec_(vc1.1_)*")]
+# arc_ann_dt[pfam != "", gene_label := sprintf("%s | %s", ifelse(nchar(pfam)>25, paste0(substr(pfam, 1, 22), "..."), pfam), gene_label)]
+# arc_ann_dt[og != "", gene_label := sprintf("%s | %s", ifelse(nchar(og)>25, paste0(substr(og, 1, 22), "..."), og), gene_label)]
+# arc_ann_dt[common_name != "", gene_label := sprintf("%s | %s", common_name, gene_label)]
+
+# cluster motifs
+arc_ann_dt[, cell_type := factor(cell_type, levels = cell_types)]
+arc_ann_dt[, minuslog10padj := -1 * log10(padj)]
+padj_dt <- unique(arc_ann_dt[, .(archetype_name, cell_type, minuslog10padj)])
+padj_dt <- dcast.data.table(padj_dt, archetype_name ~ cell_type, value.var = "minuslog10padj")
+padj_mt <- as.matrix(padj_dt[, -1])
+rownames(padj_mt) <- padj_dt[[1]]
+arc_ord <- order(apply(padj_mt, 1, which.max))
+arc_lvl <- rownames(padj_mt)[arc_ord]
+arc_ann_dt[, archetype_name := factor(archetype_name, levels = arc_lvl)]
+setorder(arc_ann_dt, archetype_name)
+
+# data to plot
+arc_plt_dt <- arc_ann_dt[, .(cell_type, archetype_name, minuslog10padj, fc, gene, common_name, og, pfam)]
+arc_plt_dt[, fc_scaled := pmin(fc, 6)]
+arc_plt_dt[, minuslog10padj_scaled := pmin(minuslog10padj, 80)]
+arc_plt_dt[, gene_label := ""]
+arc_plt_dt[gene != "", gene_label := str_remove(gene, "Nvec_(vc1.1_)*")]
+arc_plt_dt[gene != "" & common_name != "", gene_label := common_name]
+arc_plt_dt[gene != "" & common_name == "" & og != "", gene_label := ifelse(nchar(og)>25, paste0(substr(og, 1, 22), "..."), og)]
+arc_plt_dt[gene != "" & common_name == "" & og == "" & pfam != "", gene_label := ifelse(nchar(pfam)>25, paste0(substr(pfam, 1, 22), "..."), pfam)]
+arc_plt_dt[, gene_label := paste(
+  c( 
+    sort(unique(.SD[gene_label != "" & common_name != ""]$gene_label)),
+    sort(unique(.SD[gene_label != "" & common_name == ""]$gene_label))
+  ), 
+  collapse = ", "
+), archetype_name]
+arc_plt_dt[nchar(gene_label) > 80, gene_label := paste0(substr(gene_label, 1, 77), "...")]
+arc_plt_dt[, c("gene", "og", "pfam", "common_name") := NULL]
+arc_plt_dt <- unique(arc_plt_dt)
+
+# motif enrichment dotmap
+arc_ann_gp <- ggplot(
+  arc_plt_dt, 
+  aes(cell_type, archetype_name)
+  ) +
+  geom_point(
+    aes(size = minuslog10padj_scaled, fill = fc_scaled),
+    shape = 21
+  ) +
+  scale_y_discrete(
+    breaks = arc_plt_dt$archetype_name,
+    labels = arc_plt_dt$gene_label
+  ) +
+  scale_fill_gradientn(
+    name = "motif enrichment\nfold change",
+    breaks = c(0, 2, 4, 6, 8),
+    colours = c(
+      "gray99", "#ffd195", "orange", "orangered2", "#a71414", "#68093d", "#470447"
+    )
+  ) +
+  scale_size_continuous(
+    name = "-log10(padj)",
+    range = c(0, 5)
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 8),
+    axis.text.y = element_text(size = 8),
+    panel.grid.major = element_line(linewidth = 0.25),
+    axis.title = element_blank()
+  )
+
+# save
+ggsave(
+  file.path(fig_dir, "motif-enrichment.pdf"),
+  arc_ann_gp,
+  height = 54, width = 14, limitsize = FALSE
+)
+```
+
+Next we will combine accessibility and expression for TF genes with motif 
+deviation Z scores from chromAR.
+
+```{r}
+# map motifs to genes
+dev_tfs <- chromvar_mat[rownames(chromvar_mat) %in% class_top_all$archetype_name, ]
+dev_tfs <- dev_tfs[class_top_all$archetype_name, ]
+rownames(dev_tfs) <- class_top_all$gene
 
 # how many of TFs with assigned motifs are expressed genes
 mean(tfan[gene %in% rownames(exp_mt)]$gene %in% unique(class_top_all$gene))
@@ -2845,12 +2959,6 @@ for (i in seq_along(iters)) {
   print(patch)
 }
 dev.off()
-
-```
-
-Plot motif enrichment
-
-```{r}
 
 ```
 
