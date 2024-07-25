@@ -184,12 +184,184 @@ bct_maps <- setDT(cbind.data.frame(
 ))
 ```
 
-## Motifs similarity and archetyping
+## Parse CisBP motifs
 
-Load all input motifs.
+Load info for Nematostella Direct and Inferred motifs from CisBP
 
 ```{r}
-#| label: inputs
+cisbp_dir <- "CisBP"
+
+# all CisBP motifs
+cisbp <- fread(file.path(
+  cisbp_dir, "TF_Information_all_motifs.txt"
+))
+
+# CisBP motifs for Nematostella
+cisbp_dt <- cisbp[TF_Species == "Nematostella_vectensis"][Motif_ID != "."]
+
+# fix gene names
+cisbp_dt[, TF_Name := str_replace(TF_Name, "NEMVEDRAFT_", "Nvec_")]
+
+# keep unique motifs
+cisbp_dt <- unique(
+  cisbp_dt[, .(
+    Motif_ID, TF_Name, TF_Status, Family_Name, Motif_Type, SR_Model
+  )]
+)
+cisbp_dt[, .N, .(TF_Name, TF_Status)][order(-N)]
+cisbp_dt[, .N, .(TF_Name, TF_Status)][, .N, TF_Status,]
+
+# add species source for inferred motifs
+cisbp_direct <- cisbp[TF_Status == "D"][, .(Motif_ID, TF_Species)]
+setnames(cisbp_direct, "TF_Species", "Motif_Species")
+
+# merge all direct and all Nematostella motifs
+cisbp_dt <- merge.data.table(
+  cisbp_dt, cisbp_direct, by = "Motif_ID",
+  all.x = TRUE, sort = FALSE
+)
+
+# keep motifs infered from favourite species
+favo_sps <- c(
+  "Homo_sapiens",
+  "Mus_musculus",
+  "Rattus_norvegicus",
+  "Caenorhabditis_elegans",
+  "Xenopus_laevis",
+  "Xenopus_tropicalis",
+  "Danio_rerio",
+  "Drosophila_melanogaster",
+  "Nematostella_vectensis",
+  "Trichoplax_adhaerens",
+  "Hydra_magnipapillata",
+  "Acropora_formosa",
+  "Acropora_millepora"
+)
+cisbp_fav <- cisbp_dt[Motif_Species %in% favo_sps]
+
+# for TFs with no hit among those, keep all species
+cisbp_oth <- cisbp_dt[!TF_Name %in% cisbp_fav$TF_Name]
+
+# combine
+cisbp_all <- rbindlist(list(
+  cisbp_fav, cisbp_oth
+))
+cisbp_all[, .N, TF_Name][order(-N)]
+```
+
+We additionally assigned motifs to some Nematostella TFs by reducing the DBD 
+sequence identitiy threshold.
+
+```{r}
+# motifs we additionally assigned based on "extended" DBD similarity identity
+cisbp_add <- fread(file.path(cisbp_dir, "motifs_missing_in_cisbp.tsv"))
+setnames(cisbp_add, c("gene", "Evidence"), c("TF_Name", "TF_Status"))
+cisbp_add[, TF_ID := str_extract(hit_identity, "T\\d+_2.00")]
+cisbp_add <- merge.data.table(
+  cisbp_add,
+  cisbp[, Motif_Species := TF_Species][, .(
+    TF_ID, Motif_ID, Family_Name, Motif_Type, SR_Model, Motif_Species
+  )],
+  by = "TF_ID", all.x = TRUE, sort = FALSE
+)
+cols <- colnames(cisbp_all)
+cisbp_add <- cisbp_add[, ..cols][, SR_Model := "SequenceIdentity"]
+
+# all CisBP motifs now
+cisbp_dta <- rbindlist(list(cisbp_all, cisbp_add))
+
+# save
+fwrite(
+  cisbp_dta,
+  file.path(cisbp_dir, "cisbp_nvec_motifs.tsv"),
+  sep = "\t"
+)
+```
+
+Convert TF gene IDs from old IDs to DToL gene IDs
+
+```{r}
+cisbp_dta <- fread(file.path(cisbp_dir, "cisbp_nvec_motifs.tsv"))
+setnames(cisbp_dta, "TF_Name", "ID_JGI_Vienna")
+annot_dta <- fread(file.path(
+  ann_dir, "Nvec_annotation_v3_2020-10-23_ID_JGI_Vienna_matched_DToL_names"
+))[, 1:5]
+cisbp_dta <- merge.data.table(
+  cisbp_dta, annot_dta, by = "ID_JGI_Vienna",
+  all.x = TRUE, sort = FALSE
+)
+setcolorder(
+  cisbp_dta, c(
+    "gene",
+    setdiff(colnames(cisbp_dta), c("gene", "ID_JGI_Vienna", "ID_DToL")),
+    "ID_JGI_Vienna", "ID_DToL"
+  )
+)
+setnames(cisbp_dta, "gene", "TF_Name")
+
+# save
+fwrite(
+  cisbp_dta,
+  file.path(cisbp_dir, "cisbp_nvec_motifs.tsv"),
+  sep = "\t"
+)
+```
+
+Load PWMs for CisBP motifs
+
+```{r}
+# load CisBP motifs assignments
+cisbp_dta <- fread(
+  file.path(cisbp_dir, "cisbp_nvec_motifs.tsv")
+)
+
+# paths to all CisBP motifs PWMs
+fn_cisbp <- list.files(file.path(
+  cisbp_dir, "pwms"
+), full.names = TRUE)
+names(fn_cisbp) <- str_remove(basename(fn_cisbp), ".txt")
+
+# load Nematostella ones only
+mt_cisbp <- lapply(
+  cisbp_dta$Motif_ID,
+  function(x) mta_read_cisbp_mod(fn_cisbp[x])
+)
+
+# remove empty and duplicated entries
+mt_cisbp <- mt_cisbp[which(!sapply(mt_cisbp, is.null))]
+mt_cisbp <- unique(mt_cisbp)
+cisbp_dta <- cisbp_dta[Motif_ID %in% sapply(mt_cisbp, function(m) m@name)]
+
+# save
+fwrite(
+  cisbp_dta,
+  file.path(cisbp_dir, "cisbp_nvec_motifs.tsv"),
+  sep = "\t"
+)
+saveRDS(
+  mt_cisbp,
+  file.path(cisbp_dir, "cisbp_nvec_motifs.rds"),
+)
+```
+
+## Motifs similarity and archetyping
+
+Load CisBP input motifs.
+
+```{r}
+#| label: CisBP_inputs
+
+mt_cisbp <- readRDS(file.path(
+  "CisBP", "cisbp_nvec_motifs.rds"
+))
+length(mt_cisbp)
+# 3564
+```
+
+Load Homer input motifs.
+
+```{r}
+#| label: Homer_inputs
 
 # Homer motifs adult
 mt_homer_adult <- readRDS(file.path(
@@ -234,14 +406,13 @@ mt_homer_uniq <- sapply(unique(homer_names), function(nm) {
 }, simplify = FALSE, USE.NAMES = TRUE)
 length(mt_homer_uniq)
 # 1479
+```
 
-# CisBP motifs
-mt_cisbp <- readRDS(file.path(
-  "..", "cisbp", "cisbp_nvec_motifs.rds"
-))
-length(mt_cisbp)
-# 3564
+### Archetypes
 
+Metadata for input motifs.
+
+```{r}
 # all motifs
 pwms <- c(mt_cisbp, mt_homer_adult, mt_homer_gastr)
 length(pwms)
@@ -284,6 +455,20 @@ mt_meta <- merge.data.table(mt_meta, dt_homer_all, by = "motif_name", all.x = TR
 mt_meta[source == "Homer", source := paste(source, set, sep = "_")]
 mt_meta[, set := NULL]
 
+# keep track of CisBP motif metadata
+cisbp_dta <- fread(
+  file.path(cisbp_dir, "cisbp_nvec_motifs.tsv")
+)
+cisbp_sta <- unique(cisbp_dta[, .(Motif_ID, TF_Status)])
+cisbp_sta[, TF_Status := factor(TF_Status, levels = c("D", "I", "N"))]
+setorder(cisbp_sta, TF_Status)
+cisbp_sta <- cisbp_sta[, .SD[1], Motif_ID]
+cisbp_vec <- structure(
+  paste0("CisBP_", cisbp_sta$TF_Status),
+  names = cisbp_sta$Motif_ID
+)
+mt_meta[source == "CisBP", source := cisbp_vec[motif_name]]
+
 # save metadata
 fwrite(mt_meta, file.path(arc_dir, "input-pwms-meta.tsv"))
 ```
@@ -294,19 +479,13 @@ Parameters for similarity calculation and archetyping.
 # motif similarity
 similarity <- "PPM"
 method <- "PCC"
-normalise_scores <- TRUE
-if (normalise_scores == TRUE) {
-  normalization  <- "norm"
-} else {
-  normalization  <- ""
-}
 # clustering for archetyping
 min_cluster_similarity <- 0.8
 hclust_method <- "complete"
 dist_method <- "euclidean"
 # archetyping threshold
 ic_threshold <- 0.5
-len_threshold <- 8
+len_threshold <- 5
 ```
 
 Calculate pairwise similarities between input motifs.
@@ -322,10 +501,13 @@ sim_mat <- compare_motifs(
   min.mean.ic = 0,
   nthreads = 0
 )
-rownames(sim_mat) <- colnames(sim_mat) <- mt_homer_uniq$motif_name
-saveRDS(sim_mat, file.path(arc_dir, sprintf(
-  "motifs-similarity-%s-%s%s.rds", similarity, method, normalization
-)))
+rownames(sim_mat) <- colnames(sim_mat) <- names(pwms_uniq)
+saveRDS(
+  sim_mat, 
+  file.path(arc_dir, sprintf(
+    "motifs-similarity-%s-%s.rds", similarity, method
+  ))
+)
 ```
 
 Cluster and order similarity matrix, then choose the minimum cluster similarity 
@@ -335,7 +517,7 @@ values these get split).
 
 ```{r}
 sim_mat <- readRDS(file.path(arc_dir, sprintf(
-  "motifs-similarity-%s-%s%s.rds", similarity, method, normalization
+  "motifs-similarity-%s-%s.rds", similarity, method
 )))
 
 # ordering
@@ -345,9 +527,12 @@ hc <- hclust(
 ), method = hclust_method)
 ord <- hc$labels[hc$order]
 sim_mat <- sim_mat[ord, ord]
-saveRDS(sim_mat, file.path(arc_dir, sprintf(
-  "motifs-similarity-%s-%s%s.rds", similarity, method, normalization
-)))
+saveRDS(
+  sim_mat, 
+  file.path(arc_dir, sprintf(
+    "motifs-similarity-%s-%s.rds", similarity, method
+  ))
+)
 
 # clusters
 cuts <- seq(200, 300, 10)
@@ -367,12 +552,15 @@ cuts_scores <- sapply(cuts, function(h) {
   mean(cl_scores, na.rm = TRUE)
 })
 k <- cuts[which.max(cuts_scores)]
+k <- 300
+pdf(file.path(fig_dir, "motif-input-archetypes-clusters.pdf"))
 plot(cuts, cuts_scores)
 abline(v = k)
+dev.off()
 ctr <- cutree(hc, k = k)
 
 # add cluster info to metadata
-mt_meta[, cluster := ctr[motif_name]]
+mt_meta[, cluster := ctr[motif]]
 fwrite(
   mt_meta,
   file.path(arc_dir, "input-motifs-meta.tsv"),
@@ -399,18 +587,32 @@ arch <- mta_merge_archetype(
   occupancy_threshold = 1,
   verbose = TRUE
 )
+# len_threshold = 8
 # list of 1644 archetypes including 5168 motifs (201 archetype(s) fail filters)
+# len_threshold = 5
+# list of 1829 archetypes including 6908 motifs (16 archetype(s) fail filters)
+# len_threshold = 3
+# list of 1845 archetypes including 6976 motifs (0 archetype(s) fail filters)
 
 arch <- arch[sapply(arch, function(x) length(x) > 0)]
 length(arch)
 # 1292
+# 1727
+# 1744
 
+# save
 arch_file <- file.path(arc_dir, sprintf(
-  "motif-archetypes-%s-%s%s-%s-IC%s-%sbp.rds",
-  similarity, method, normalization,
-  min_cluster_similarity, ic_threshold, len_threshold
+  "motif-archetypes-%s-%s-%s-IC%s-%sbp.rds",
+  similarity, method, min_cluster_similarity, ic_threshold, len_threshold
 ))
 saveRDS(arch, arch_file)
+
+# quickly check how many direct motifs survived
+direct_mta <- cisbp_dta[TF_Status=="D"]$Motif_ID
+nms_l <- lapply(arch, function(x) tryCatch(sapply(x$ppms, function(y) y@name), error=function(e) x$ppms@name))
+nms_v <- unname(unlist(nms_l))
+direct_mta[direct_mta %in% nms_v]
+
 ```
 
 Annotate archetype motifs i.e. create a dictionary with motif-to-archetype 
@@ -420,31 +622,31 @@ mappings and other metadata.
 # archetype motifs
 arch_file <- file.path(
   arc_dir,
-  "motif-archetypes-PPM-PCCnorm-0.8-IC0.5-8bp.rds"
+  "motif-archetypes-PPM-PCC-0.8-IC0.5-8bp.rds"
 )
 arch <- readRDS(arch_file)
 
 # cisbp direct and inferred motifs for nematostella assigned to genes
 tf_motifs_file <- file.path(
-  "..", "CisBP", "cisbp_nvec_motifs.tsv"
+  "CisBP", "cisbp_nvec_motifs.tsv"
 )
 
 # cisbp family annotation for all direct TFs
 cisbp_family_annotation_file <- file.path(
-  "..", "CisBP", "cisbp_nvec_motifs.tsv"
+  "CisBP", "cisbp_nvec_motifs.tsv"
 )
 
 # tf annotations
 tf_annotation_file <- file.path(
-  "..", "annotation", "Nematostella_DToL_TFs_FINAL.tsv"
+  "annotation", "Nematostella_DToL_TFs_FINAL.tsv"
 )
 tf_family_annotation_file <- file.path(
-  "..", "annotation", "gene_families_searchinfo.csv"
+  "annotation", "gene_families_searchinfo.csv"
 )
 
 # mapping between CisBP and our TF family annotations
 cisbp_tf_family_mapping_file <- file.path(
-  "..", "annotation", "CisBP_TF_mapping.tsv"
+  "annotation", "CisBP_TF_mapping.tsv"
 )
 
 # make dictionary
@@ -458,7 +660,7 @@ dict <- mta_archetype_dictionary(
 )
 
 # add TF names from cisbp
-all_cisbp_info <- fread("../../clustering/CisBP/motifs_cisbp_all_2022-03-09/TF_Information_all_motifs.txt")
+all_cisbp_info <- fread("CisBP/TF_Information_all_motifs.txt")
 all_cisbp_info <- all_cisbp_info[TF_Status=="D"][,.(Motif_ID, TF_Name)]
 setnames(all_cisbp_info, c("Motif_ID", "TF_Name"), c("motif", "tf_cisbp_name"))
 dict <- merge.data.table(dict, all_cisbp_info, by = "motif", all.x = TRUE, sort = FALSE)
@@ -493,18 +695,17 @@ dict[archetype_num %in% arch_wo_gene, archetype_name := paste(
   sep = "_"
 ), by = .I]
 
-dict[, archetype_name_short := archetype_name]
-dict[nchar(archetype_name) > 30, archetype_name_short := paste0(substr(archetype_name, 1, 27), "...")]
+dict[nchar(archetype_name) > 30, archetype_name := paste0(substr(archetype_name, 1, 27), "...")]
 
 # add motif (cisbp/homer set) info
 mt_meta <- fread(file.path(arc_dir, "input-pwms-meta.tsv"))
 mt_meta[, cluster := NULL]
-setnames(mt_meta, "motif_name", "motif")
+setnames(mt_meta, "motif_name", "motif", skip_absent=TRUE)
 dict <- merge.data.table(dict, mt_meta, by = "motif", all.x = TRUE, sort = FALSE)
 
 # save dictonary
 setcolorder(dict, c(
-  "archetype", "archetype_num", "archetype_name", "archetype_name_short",
+  "archetype", "archetype_num", "archetype_name",
   "archetype_length", "archetype_num_motifs",
   "motif", "source", 
   "gene", "og", "pfam", "gene_name",
@@ -528,7 +729,7 @@ Plot number of motifs per archetype.
 
 arch_file <- file.path(
   arc_dir,
-  "motif-archetypes-PPM-PCCnorm-0.8-IC0.5-8bp.rds"
+  "motif-archetypes-PPM-PCC-0.8-IC0.5-8bp.rds"
 )
 arch <- readRDS(arch_file)
 
@@ -552,6 +753,43 @@ ggsave(
 )
 ```
 
+Save archetype motifs.
+
+```{r}
+# load archetyping results
+arch <- readRDS(arch_file)
+arch <- unique(arch)
+arch_list <- lapply(arch, function(x) x$ppm_consensus)
+
+# add archetype names to motifs
+dict <- fread(str_replace(arch_file, ".rds$", ".dict"))
+arch_nms <- dict[match(
+  sapply(arch_list, function(x) x@name),
+  archetype
+)]$archetype_name
+names(arch_list) <- arch_nms
+arch_list_nm <- lapply(seq_along(arch_list), function(i) {
+  x <- arch_list[[i]]
+  x@name <- arch_nms[i]
+  x@alphabet <- "DNA"
+  x
+})
+names(arch_list_nm) <- arch_nms
+saveRDS(arch_list_nm, str_replace(arch_file, ".rds$", "-pwms.rds"))
+
+universalmotif::write_homer(
+  motifs = arch_list_nm,
+  file = str_replace(arch_file, ".rds$", "-pwms.homer"),
+  overwrite = TRUE
+)
+
+universalmotif::write_meme(
+  motifs = arch_list_nm,
+  file = str_replace(arch_file, ".rds$", "-pwms.meme"),
+  overwrite = TRUE
+)
+```
+
 Plot archetyping clusters.
 
 ```{r message=FALSE, warning=FALSE}
@@ -560,12 +798,11 @@ archetyping_file <- file.path(
   fig_dir,
   basename(file.path(str_replace(arch_file, "\\.rds$", "-archetyping.pdf")))
 )
-
 # plot archetypes clusters
 mta_plot_archetype(
   arch = arch,
   dict = dict,
-	dict_archetype_name = "archetype_name_short",
+	dict_archetype_name = "archetype_name",
 	dict_motif_name = "tf_cisbp_name",
   type = "PWM",
   output_file = archetyping_file,
@@ -576,13 +813,13 @@ mta_plot_archetype(
 pdf(file.path(
   fig_dir, basename(str_replace(arch_file, "\\.rds$", "-archetypes.pdf"))
 ), width = 8, height = 3)
-for (x in seq_along(arch_list)) {
-  motif <- arch[[x]]$ppm_consensus
+for (x in seq_along(arch_list_nm)) {
+  motif <- arch_list_nm[[x]]
   motif@alphabet <- "DNA"
   mn <- motif@name
   print(mn)
   motif_dict <- dict[archetype==mn]
-  motif_name <- motif_dict$archetype_name_short[1]
+  motif_name <- motif_dict$archetype_name[1]
   motif_fami <- motif_dict$tf_family[1]
   motif_titl <- sprintf("%s (%s)", motif_name, motif_fami)
   nvect_gens <- sapply(
@@ -609,43 +846,6 @@ for (x in seq_along(arch_list)) {
   )
 }
 dev.off()
-```
-
-Save archetype motifs.
-
-```{r}
-# load archetyping results
-arch <- readRDS(arch_file)
-arch <- unique(arch)
-arch_list <- lapply(arch, function(x) x$ppm_consensus)
-
-# add archetype names to motifs
-dict <- fread(str_replace(arch_file, ".rds$", ".dict"))
-arch_nms <- dict[match(
-  sapply(arch_list, function(x) x@name),
-  archetype
-)]$archetype_name_short
-names(arch_list) <- arch_nms
-arch_list_nm <- lapply(seq_along(arch_list), function(i) {
-  x <- arch_list[[i]]
-  x@name <- arch_nms[i]
-  x@alphabet <- "DNA"
-  x
-})
-names(arch_list_nm) <- arch_nms
-saveRDS(arch_list_nm, str_replace(arch_file, ".rds$", "-pwms.rds"))
-
-universalmotif::write_homer(
-  motifs = arch_list_nm,
-  file = str_replace(arch_file, ".rds$", "-pwms.homer"),
-  overwrite = TRUE
-)
-
-universalmotif::write_meme(
-  motifs = arch_list_nm,
-  file = str_replace(arch_file, ".rds$", "-pwms.meme"),
-  overwrite = TRUE
-)
 ```
 
 Plot heatmap of similarity of all motifs used in archetyping (i.e. motifs after 
@@ -692,16 +892,22 @@ Summarize motif source for archetypes.
 dict <- fread(str_replace(arch_file, ".rds$", ".dict"))
 
 # colors for motif source category
-category_cols <- c("Homer_known"="#ff7f00", "Homer_denovo"="#e41a1c", "CisBP"="#a65628")
+category_cols <- c(
+  "Homer_known" = "#ff7f00", 
+  "Homer_denovo" = "#e41a1c", 
+  "CisBP_D" = "#4daf4a",
+  "CisBP_I" = "#377eb8",
+  "CisBP_N" = "#6a3d9a"
+)
 
 # motif source category
-dict[, source := factor(source, levels = c("CisBP", "Homer_known", "Homer_denovo"))]
+dict[, source := factor(source, levels = names(category_cols))]
 setorder(dict, source)
 dict_arch <- unique(dict[, .SD[1], archetype][, .(archetype_name_short, source)])
 dict_mots <- unique(dict[, .(motif, source)])
 setnames(dict_arch, "archetype_name_short", "motif")
 dict_sour <- rbindlist(list("archetypes" = dict_arch, "motifs" = dict_mots), idcol = "group")
-dict_sour[, source := factor(source, levels = c("CisBP", "Homer_known", "Homer_denovo"))]
+dict_sour[, source := factor(source, levels = names(category_cols))]
 dict_sour[, group := factor(group, levels = c("motifs", "archetypes"))]
 
 # plot
@@ -742,7 +948,7 @@ saveRDS(
   sim_mat,
   file.path(
     "Results", "Archetypes",
-    "motif-similarity-archetypes-PPM-PCCnorm-0.8-IC0.5-8bp.rds"
+    "motif-similarity-archetypes-PPM-PCC.rds"
   )
 )
 ```
@@ -960,6 +1166,12 @@ arc_scores_mona <- readRDS(
 arc_gr <- arc_scores_mona$gw_scan
 names(mcols(arc_gr))[1] <- str_replace(names(mcols(arc_gr))[1], "motif", "name")
 
+# archetypes dictionary
+dict <- fread(file.path(
+  arc_dir,
+  "motif-archetypes-PPM-PCCnorm-0.8-IC0.5-8bp.dict"
+))
+
 # motif scores
 mta_scores_mona <- readRDS(
   file.path(arc_dir, "motif-scores-input-motifs-mona.rds")
@@ -968,14 +1180,15 @@ mta_gr <- mta_scores_mona$gw_scan
 names(mcols(mta_gr))[1] <- str_replace(names(mcols(mta_gr))[1], "motif", "name")
 
 # all peaks
-peaks <- fread(file.path(pks_dir, "Peaks_cell_type_mapped.bed"))
-setnames(peaks, c("seqnames", "start", "end", "peak", "score", "strand"))
-peaks <- unique(peaks[, .(seqnames, start, end, strand, peak)])
-
+peaks <- fread(file.path(pks_dir, "Peaks_cell_type_mapped.bed"), select = 1:3)
+setnames(peaks, c("seqnames", "start", "end"))
+peaks <- unique(peaks)
+peaks_gr <- makeGRangesFromDataFrame(peaks)
+  
 # enrichment per cell type
 enr_list <- vector("list", length = length(cell_types))
 names(enr_list) <- cell_types
-for(ct in cell_types) {
+for (ct in cell_types) {
 
   message(sprintf("\nCalculating enrichment for %s", ct))
   
@@ -985,12 +1198,14 @@ for(ct in cell_types) {
     stg_dir, "ArchRProj", "PeakDifferential", "cell_type_filtered",
     sprintf("Peaks-%s-vs-others.tsv", ct)
   )
-  pks_dt <- fread(pks_fn, select = 1:6)
-  setnames(pks_dt, c("seqnames", "start", "end", "peak", "score", "strand"))
-  pks_gr <- makeGRangesFromDataFrame(pks_dt, keep.extra.columns = TRUE)
+  pks_dt <- fread(pks_fn, select = 1:3)
+  setnames(pks_dt, c("seqnames", "start", "end"))
+  pks_gr <- makeGRangesFromDataFrame(pks_dt)
 
   # background peaks
-  pks_bg <- peaks_gr[!peaks_gr$peak %in% pks_gr$peak]
+  pks_ovl <- findOverlaps(peaks_gr, pks_gr)
+  pks_nov <- setdiff(seq_len(length(peaks_gr)), queryHits(pks_ovl))
+  pks_bg <- peaks_gr[pks_nov]
 
   # enrichment archetypes
   arc_dt <- mta_motif_enrichment_test(
@@ -1658,6 +1873,21 @@ saveRDS(
 ```
 
 Calculate correlation of gene expression and motif deviation Z scores
+
+```{r}
+# calculate correlation
+all.equal(colnames(ctfp_mat), colnames(chromvar_mat))
+mot_exp_cor <- cor(t(ctfp_mat), t(chromvar_mat))
+saveRDS(
+  mot_exp_cor,
+  file.path(
+    "Results", "ChromVAR",
+    "correlation-seacells-archetype-motif-score-gene-expression-metacell.rds"
+  )
+)
+```
+
+Calculate correlation of gene expression and motif enrichment
 
 ```{r}
 # calculate correlation
@@ -2610,6 +2840,168 @@ ggsave(
   gp_class_tf + gp_class_archetype,
   width = 12, height = 5
 )
+```
+
+## Experimentally determined motifs
+
+```{r}
+#| label: exp_motifs
+
+mta_dir <- file.path("Results", "Motifs")
+motifs <- c(
+  "FoxQ2d" = file.path(mta_dir, "FoxQ2d.motif1.motif")
+)
+
+# load motifs
+mots_mta_lst <- sapply(names(motifs), function(x) {
+  mfn <- motifs[x]
+  mta <- mta_read_homer_mod(mfn)
+  mta@name <- x
+  mta
+}, simplify = FALSE, USE.NAMES = TRUE)
+
+# convert to monaLisa format
+mona_mta_lst <- mta_convert_umot_to_monalisa(mots_mta_lst)
+
+```
+
+- motif scores in peaks
+
+```{r}
+# load peaks
+peaks <- fread(file.path(pks_dir, "Peaks_cell_type_mapped.bed"))
+setnames(peaks, c("seqnames", "start", "end", "peak", "score", "strand"))
+peaks <- unique(peaks[, .(seqnames, start, end, strand, peak)])
+
+# remove MT peaks
+peaks <- peaks[seqnames != "ENA|OW052000|OW052000.1"]
+peaks_gr <- makeGRangesFromDataFrame(peaks, keep.extra.columns = TRUE)
+
+# load genome
+genome <- Biostrings::readDNAStringSet("genome/Nvec_vc1.1_gDNA.fasta")
+seqdt <- fread("genome/Nvec_vc1.1_gDNA.fasta.fai")[, 1:2]
+seqlvl <- seqdt[[1]]
+
+# trim out-of-range peaks
+peaks_gr <- mta_trim_granges(peaks_gr, seqdt)
+
+# scanning motifs
+mta_scores_mona <- mta_gw_motif_score_monalisa(
+  motifs = mona_mta_lst,
+  genome_object = genome,
+  index_object = seqdt,
+  bin_width = 250,
+  subsample_fraction = 0.10,
+  score_quantiles = c(0, 0.25, 0.5, 0.75, 0.95, 0.98, 0.99, 0.995, 0.999, 1.0),
+  score_quantile_thr = 0.95,
+  do_gw_scan = TRUE,
+  given_gr = peaks_gr,
+  nthreads = 16
+)
+
+# save
+saveRDS(
+  mta_scores_mona,
+  file.path(mta_dir, "motif-scores-mona.rds")
+)
+
+# map motifs back to peaks
+mta_hits <- mta_scores_mona$gw_scan
+mta_cent <- narrow(mta_hits, start = width(mta_hits) / 2, width = 1)
+mta_ovls <- findOverlaps(query = mta_hits, subject = peaks_gr)
+mta_scor <- mta_hits[queryHits(mta_ovls)]
+pmt_scor <- peaks_gr[subjectHits(mta_ovls)]
+mcols(mta_scor) <- cbind(mcols(mta_scor), mcols(pmt_scor))
+mta_data <- as.data.table(mta_scor)
+
+# get max possible score for each motif
+maxs_mta <- sapply(
+  names(mots_mta_lst),
+  function(x) maxScore(convert_type(mots_mta_lst[[x]], "PWM")@motif),
+  USE.NAMES = TRUE, simplify = TRUE
+)
+mta_data[, max_motif_score := maxs_mta[motif]]
+mta_data[, max_motif_score := pmax(.SD$max_motif_score, .SD$motif_score), motif]
+
+# save
+fwrite(
+  mta_data,
+  file.path(mta_dir, "motif-scores-mona.tsv.gz"),
+  sep = "\t"
+)
+```
+
+- motif enrichment in cell type specific peaks
+
+```{r}
+# motif scores in peaks
+mta_scores_mona <- readRDS(
+  file.path(mta_dir, "motif-scores-mona.rds")
+)
+mta_gr <- mta_scores_mona$gw_scan
+names(mcols(mta_gr))[1] <- str_replace(names(mcols(mta_gr))[1], "motif", "name")
+
+# all peaks
+peaks <- fread(file.path(pks_dir, "Peaks_cell_type_mapped.bed"), select = 1:3)
+setnames(peaks, c("seqnames", "start", "end"))
+peaks <- unique(peaks)
+peaks_gr <- makeGRangesFromDataFrame(unique(peaks))
+
+# enrichment per cell type
+enr_list <- vector("list", length = length(cell_types))
+names(enr_list) <- cell_types
+for (ct in cell_types) {
+
+  message(sprintf("\nCalculating enrichment for %s", ct))
+  
+  # cell type peaks
+  stg_dir <- ifelse(ct %in% adult_cell_types, adult_dir, gastr_dir)
+  pks_fn <- file.path(
+    stg_dir, "ArchRProj", "PeakDifferential", "cell_type_filtered",
+    sprintf("Peaks-%s-vs-others.tsv", ct)
+  )
+  pks_dt <- fread(pks_fn, select = 1:3)
+  setnames(pks_dt, c("seqnames", "start", "end"))
+  pks_gr <- makeGRangesFromDataFrame(pks_dt)
+
+  # background peaks
+  pks_ovl <- findOverlaps(peaks_gr, pks_gr)
+  pks_nov <- setdiff(seq_len(length(peaks_gr)), queryHits(pks_ovl))
+  pks_bg <- peaks_gr[pks_nov]
+  
+  # enrichment motifs
+  mta_dt <- mta_motif_enrichment_test(
+    sites_object = mta_gr,
+    fg_object = pks_gr,
+    bg_object = pks_bg,
+    thresholds_vector = NULL,
+    label = ct,
+    nthreads = 2,
+    pval_adjust = "fdr"
+  )
+
+  # all enrichment results
+  enr_list[[ct]] <- mta_dt
+
+}
+
+# combine results from all cell types
+enr_dt <- rbindlist(enr_list, idcol = "cell_type")
+
+# save results
+fwrite(
+  enr_dt,
+  file.path(mta_dir, "motif-enrichment-cell-type.tsv"),
+  sep = "\t"
+)
+```
+
+```{r}
+# motif deviation score
+
+# gene assignment
+
+
 ```
 
 ## Combine motif metrics with other gene metrics

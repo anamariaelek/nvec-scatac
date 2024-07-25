@@ -1,0 +1,63 @@
+cisbp_family	tf_family	tf_class
+ABF1	ABF1	BAF1_ABF1
+AP-2	AP-2	TF_AP-2
+ARID/BRIGHT	ARID_BRIGHT	ARID
+AT hook	AT_hook	AT_hook
+BED ZF	zf-BED	zf-BED
+Brinker	Brinker	BrkDBD
+C2H2 ZF	zf-C2H2	FLYWCH,MYT1,WT1,zf-C2H2,zf-C2H2_11,zf-C2H2_2,zf-C2H2_4,zf-C2H2_6,zf-C2HC,Zfx_Zfy_act
+C2H2 ZF,Homeodomain		
+C2H2 ZF,MADF		
+C2H2 ZF,Myb/SANT		
+C2HC ZF	zf-C2H2	FLYWCH,MYT1,WT1,zf-C2H2,zf-C2H2_11,zf-C2H2_2,zf-C2H2_4,zf-C2H2_6,zf-C2HC,Zfx_Zfy_act
+CBF/NF-Y	NFYA	CBFB_NFYA
+CCCH ZF		
+CENPB		
+CSD	CSD	CSD
+CSL		
+CUT,Homeodomain	Homeodomains	CUT
+CxxC	zf-CXXC	zf-CXXC
+DM	Doublesex_DM	DM,Dmrt1
+E2F	E2F_TDP	DP,E2F_CC-MB,E2F_TDP
+EBF1		
+Ets	Ets	Ets,ETS_PEA3_N
+Forkhead	Forkhead	Forkhead
+GATA	GATA	GATA
+GCM	GCM	GCM
+GTF2I-like	GTF2-like	GTF2I
+Grainyhead	Grainyhead_LSF	CP2
+HSF	HSF	HSF_DNA-bind
+Homeodomain	Homeodomains	Homeobox_KN,Homeodomain,HPD,HNF-1_N,Pou,CUT,PAX,OAR
+Homeodomain,POU		
+Homeodomain,Paired box		
+IRF	IRF	IRF
+MADF	Myb	MADF_DNA_bdg
+MADS box	MADS-box_SRF	SRF-TF
+MBD	MBD	MBD
+Myb/SANT	Myb	Myb_DNA-bind_2,Myb_DNA-bind_3,Myb_DNA-bind_4,Myb_DNA-bind_5,Myb_DNA-bind_6,Myb_DNA-bind_7,Myb_DNA-binding,SANT_DAMP1_like
+NFX	NFX1_ZF	zf-NF-X1
+Ndt80/PhoG	Ndt80_PhoG	NDT80_PhoG
+Nuclear receptor	zf-C4_Nuclear_receptors	zf-C4
+POU	Homeodomains	Pou
+Paired box	Homeodomains	PAX
+Pipsqueak	Pipsqueak	HTH_psq
+Prospero		
+RFX	RFX	RFX_DNA_binding
+Rel	RHD_Rel	RHD_DNA_bind
+Runt	Runt_Runx	Runt
+SAND	SAND	SAND
+SMAD	SMAD_MH1	MH1
+STAT	STAT	Dict-STAT-coil,STAT_bind
+Sox	HMGbox_Sox	HMG_box,HMG_box_2,HMG_box_5,MATalpha_HMGbox
+T-box	T-box	T-box
+TBP	TBP	TBP
+TCR/CxC	Tesmin_TSO1-like	TCR
+TEA	TEA	TEA
+THAP finger	THAP_finger	THAP
+Unknown		
+bHLH	HLH	COE1_DBD,COE1_HLH,Hairy_orange,HLH,Neuro_bHLH
+bHLH,T-box		
+bZIP	bZIP	bZIP_1,bZIP_2,bZIP_Maf,Jun,PAP1
+bZIP,C2H2 ZF		
+mTERF	mTERF	mTERF
+p53	P53	CEP1-DNA_bind,P53

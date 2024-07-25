@@ -1,9 +1,12 @@
-ArchRLogs
 *.nb.html
-genome/Nvec_vc1.1_gDNA.fasta*
+ArchRLogs
 ArchRProj_Nvec_TSS4_frag200/ArchRProj/GeneScoreMatrix/Matrix-Gene-Scores-Dist-Var-Coacces-SEACell-FC.rds
+CisBP/TF_Information_all_motifs.txt
+CisBP/pwms
+genome/Nvec_vc1.1_gDNA.fasta*
 Results/Archetypes/motif-scores-archetypes-mona*
 Results/Archetypes/motif-scores-input-motifs-mona*
+Results/Archetypes/motifs-similarity-PPM-PCC.rds
 Results/ChromVAR/ArchetypesSEACellsMatrix
 Results/ChromVAR/correlation-seacells-archetype-motif-score-gene-expression-metacell.rds
 Results/ChromVAR/correlation-seacells-archetype-motif-score-gene-score.rds
@@ -12,3 +15,5 @@ Results/Metacells/metacell/gene_expression_fc_genes_exp_FC2_acc_FC4_spearman.rds
 Results/Metacells/metacell/gene_expression_seacells_fc_genes_exp_FC2_acc_FC4_spearman.rds
 Results/Peaks/Matrix-Adult-Gastrula-Peaks-mapped-qnormalized.rds
 Results/Peaks/Sum_Adult_Gastrula_Peaks_SEACell_qnorm.rds
+Plots/Archetypes/norm/
+Results/Archetypes/norm/
