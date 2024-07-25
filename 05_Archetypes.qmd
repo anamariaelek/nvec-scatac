@@ -309,7 +309,7 @@ ic_threshold <- 0.5
 len_threshold <- 8
 ```
 
-Calculate pairwise similarity between input motifs
+Calculate pairwise similarities between input motifs.
 
 ```{r}
 # similarity
@@ -328,7 +328,10 @@ saveRDS(sim_mat, file.path(arc_dir, sprintf(
 )))
 ```
 
-Cluster and order similarity matrix, then choose the minimum cluster similarity so that clusters of motifs to archetype contain only similar motifs (e.g. when using a higher value of 0.8, many cluster contain outlier motifs, with lower values these get split).
+Cluster and order similarity matrix, then choose the minimum cluster similarity 
+so that clusters of motifs to archetype contain only similar motifs (e.g. when 
+using a higher value of 0.8, many cluster contain outlier motifs, with lower 
+values these get split).
 
 ```{r}
 sim_mat <- readRDS(file.path(arc_dir, sprintf(
@@ -378,7 +381,7 @@ fwrite(
 ```
 
 To construct archetypes, we use `mta_merge_archetype()` function (from 
-`motif-analysis/mta_downstream_functions.R`)
+`motif-analysis/mta_downstream_functions.R`).
 
 ```{r message=FALSE}
 # archetyping
@@ -517,7 +520,7 @@ fwrite(
 
 ```
 
-Plot number of motifs per archetype
+Plot number of motifs per archetype.
 
 ```{r}
 #| warning: false
@@ -683,7 +686,7 @@ saveRDS(
 )
 ```
 
-Summarize motif source for archetypes
+Summarize motif source for archetypes.
 
 ```{r}
 dict <- fread(str_replace(arch_file, ".rds$", ".dict"))
@@ -716,7 +719,7 @@ gp_file <- file.path(
 ggsave(gp_file, gp_source, width = 5, height = 5)
 ```
 
-Similarities between archetypes
+Calculate pairwise similarities between archetypes.
 
 ```{r}
 similarity <- "PPM"
@@ -730,6 +733,11 @@ sim_mat <- compare_motifs(
   min.mean.ic = 0,
   nthreads = 0
 )
+hc <- hclust(
+  tgs_dist(sim_mat), method = "complete"
+)
+ord <- hc$labels[hc$order]
+sim_mat <- sim_mat[ord, ord]
 saveRDS(
   sim_mat,
   file.path(
@@ -2621,6 +2629,14 @@ class_top_all <- fread(file.path(
   "assignment-archetype-motif-gene.tsv.gz"
 ))
 
+# archetype similarities
+sim_mat <- readRDS(
+  file.path(
+    "Results", "Archetypes",
+    "motif-similarity-archetypes-PPM-PCCnorm-0.8-IC0.5-8bp.rds"
+  )
+)
+
 # motif enrichments
 arc_dt <- fread(file.path(
   arc_dir, "motif-enrichment-cell-type-archetypes.tsv"
@@ -2670,28 +2686,67 @@ arc_ann_dt[is.na(common_name), common_name := ""]
 arc_ann_dt[is.na(og), og := ""]
 arc_ann_dt[is.na(pfam), pfam := ""]
 
+# clusters of archetypes based on pairwise similarities
+cuts <- seq(200, 1200, 10)
+cuts_scores <- sapply(cuts, function(h) {
+  ctr <- cutree(hc, k = h)
+  cl_scores <- sapply(unique(ctr), function(x) {
+    ms <- names(ctr[ctr == x])
+    within_cl <- median(sim_mat[ms, ms], na.rm = TRUE)
+    between_cl <- median(
+      unlist(sim_mat[!(rownames(sim_mat) %in% ms), ms]),
+      unlist(sim_mat[ms, !(colnames(sim_mat) %in% ms)]),
+      na.rm = TRUE
+    )
+    if (is.na(between_cl)) between_cl <- 1
+    within_cl / between_cl
+  })
+  mean(cl_scores, na.rm = TRUE)
+})
+k <- cuts[which.max(cuts_scores)]
+k <- 600
+pdf(file.path(fig_dir, "motif-enrichment-archetypes-clusters.pdf"))
+plot(cuts, cuts_scores)
+abline(v = k)
+dev.off()
+ctr <- cutree(hc, k = k)
 
-# # construct gene labels
-# arc_ann_dt[, gene_label := ""]
-# arc_ann_dt[gene != "", gene_label := str_remove(gene, "Nvec_(vc1.1_)*")]
-# arc_ann_dt[pfam != "", gene_label := sprintf("%s | %s", ifelse(nchar(pfam)>25, paste0(substr(pfam, 1, 22), "..."), pfam), gene_label)]
-# arc_ann_dt[og != "", gene_label := sprintf("%s | %s", ifelse(nchar(og)>25, paste0(substr(og, 1, 22), "..."), og), gene_label)]
-# arc_ann_dt[common_name != "", gene_label := sprintf("%s | %s", common_name, gene_label)]
+# add cluster info to datatable and select best archetype per cluster
+arc_ann_dt[, cluster := ctr[archetype_name]]
+# first take those archetypes that are assigned to marker genes
+arc_rep_1 <- unique(arc_ann_dt[common_name != "", .(archetype_name, cluster)])[order(cluster)]
+# for the rest of clusters, take the archetype with highest FC
+arc_rep_2 <- unique(arc_ann_dt[!cluster %in% arc_rep_1$cluster][order(-fc), .SD[1], cluster][, .(archetype_name, cluster)][order(cluster)])
+arc_rep <- rbindlist(list(arc_rep_1, arc_rep_2))
+stopifnot(length(unique(arc_rep$cluster)) == k)
+arc_clu_dt <- arc_ann_dt[archetype_name %in% arc_rep$archetype_name]
 
-# cluster motifs
-arc_ann_dt[, cell_type := factor(cell_type, levels = cell_types)]
-arc_ann_dt[, minuslog10padj := -1 * log10(padj)]
-padj_dt <- unique(arc_ann_dt[, .(archetype_name, cell_type, minuslog10padj)])
+# cluster motifs for plot
+arc_clu_dt[, cell_type := factor(cell_type, levels = cell_types)]
+arc_clu_dt[, minuslog10padj := -1 * log10(padj)]
+padj_dt <- unique(arc_clu_dt[, .(archetype_name, cell_type, minuslog10padj)])
 padj_dt <- dcast.data.table(padj_dt, archetype_name ~ cell_type, value.var = "minuslog10padj")
 padj_mt <- as.matrix(padj_dt[, -1])
 rownames(padj_mt) <- padj_dt[[1]]
 arc_ord <- order(apply(padj_mt, 1, which.max))
 arc_lvl <- rownames(padj_mt)[arc_ord]
-arc_ann_dt[, archetype_name := factor(archetype_name, levels = arc_lvl)]
-setorder(arc_ann_dt, archetype_name)
+arc_clu_dt[, archetype_name := factor(archetype_name, levels = arc_lvl)]
+setorder(arc_clu_dt, archetype_name)
 
-# data to plot
-arc_plt_dt <- arc_ann_dt[, .(cell_type, archetype_name, minuslog10padj, fc, gene, common_name, og, pfam)]
+# significant archetypes
+fc_thr <- 1
+pa_thr <- 0.001
+arc_sig <- unique(arc_clu_dt[fc>fc_thr & padj<pa_thr]$archetype_name)
+length(arc_sig)
+
+# non-significant archetypes assigned to marker genes
+arc_non_sig <- unique(arc_clu_dt[!archetype_name %in% arc_sig][,.(archetype_name,common_name)])
+arc_mks <- arc_non_sig[common_name != ""]$archetype_name
+
+# subset data
+arc_plt_dt <- arc_clu_dt[archetype_name %in% c(arc_sig, arc_mks)]
+
+# transform data to plot
 arc_plt_dt[, fc_scaled := pmin(fc, 6)]
 arc_plt_dt[, minuslog10padj_scaled := pmin(minuslog10padj, 80)]
 arc_plt_dt[, gene_label := ""]
@@ -2719,9 +2774,20 @@ arc_ann_gp <- ggplot(
     aes(size = minuslog10padj_scaled, fill = fc_scaled),
     shape = 21
   ) +
+  geom_text(
+    data = unique(arc_plt_dt[,.(archetype_name, gene_label)]),
+    aes(y = archetype_name, label = archetype_name),
+    x = length(unique(arc_plt_dt$cell_type)) + 1, 
+    hjust = 0, 
+    size = 2,
+    inherit.aes = FALSE
+  ) +
   scale_y_discrete(
-    breaks = arc_plt_dt$archetype_name,
-    labels = arc_plt_dt$gene_label
+    breaks = arc_plt_dt$archetype_name[arc_plt_dt$gene_label != ""],
+    labels = arc_plt_dt$gene_label[arc_plt_dt$gene_label != ""]
+  ) +
+  scale_x_discrete(
+    expand = expansion(mult = c(0.02, 0.3))
   ) +
   scale_fill_gradientn(
     name = "motif enrichment\nfold change",
@@ -2736,16 +2802,17 @@ arc_ann_gp <- ggplot(
   ) +
   theme(
     axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 8),
-    axis.text.y = element_text(size = 8),
+    axis.text.y = element_text(size = 6),
     panel.grid.major = element_line(linewidth = 0.25),
-    axis.title = element_blank()
+    axis.title = element_blank(),
+    plot.margin = margin(5.5, 40, 5.5, 40)
   )
 
 # save
 ggsave(
-  file.path(fig_dir, "motif-enrichment.pdf"),
+  file.path(fig_dir, sprintf("motif-enrichment-FC-%s-padj-%s.pdf", fc_thr, pa_thr)),
   arc_ann_gp,
-  height = 54, width = 14, limitsize = FALSE
+  height = 32, width = 14, limitsize = FALSE
 )
 ```
 
@@ -2960,6 +3027,95 @@ for (i in seq_along(iters)) {
 }
 dev.off()
 
+```
+
+Plot dotmap of TF expression vs activity (deviation Z score).
+
+```{r}
+# combined data
+acc_exp_ct <- fread(file.path(
+  "Results", "ChromVAR",
+  "gene-expression-accessibility-archetype-motif-deviation-cell-type.tsv.gz"
+))
+
+# add TF annotations
+acc_exp_ct <- merge.data.table(
+  acc_exp_ct, tfan, by = "gene", all.x = TRUE, sort = FALSE
+)
+
+# cluster motifs
+acc_exp_ct[, cell_type := factor(cell_type, levels = cell_types)]
+zscore_dt <- unique(acc_exp_ct[, .(gene, cell_type, motif_deviation)])
+zscore_dt <- dcast.data.table(zscore_dt, gene ~ cell_type, value.var = "motif_deviation")
+zscore_mt <- as.matrix(zscore_dt[, -1])
+rownames(zscore_mt) <- zscore_dt[[1]]
+gen_ord <- order(apply(zscore_mt, 1, which.max))
+gen_lvl <- rownames(zscore_mt)[gen_ord]
+acc_exp_ct[, gene := factor(gene, levels = gen_lvl)]
+setorder(acc_exp_ct, gene)
+
+# significant archetypes
+zs_thr <- 2
+fc_thr <- 1.5
+gen_sig <- unique(acc_exp_ct[expression>fc_thr & motif_deviation>zs_thr]$gene)
+length(gen_sig)
+
+# non-significant archetypes assigned to marker genes
+gen_non_sig <- unique(acc_exp_ct[!gene %in% gen_sig][,.(gene,common_name)])
+gen_mks <- unique(acc_exp_ct[common_name != ""]$gene)
+
+# subset data
+gen_plt_dt <- acc_exp_ct[gene %in% c(gen_sig, gen_mks)]
+
+# transform data to plot
+gen_plt_dt[, expression_scaled := pmin(expression, 8)]
+gen_plt_dt[, motif_deviation_scaled := pmax(pmin(motif_deviation, 20), 0)]
+gen_plt_dt[, gene_label := ""]
+gen_plt_dt[, gene_label := str_remove(gene, "Nvec_(vc1.1_)*")]
+gen_plt_dt[common_name != "", gene_label := common_name]
+gen_plt_dt[common_name == "" & og != "", gene_label := ifelse(nchar(og)>40, paste0(substr(og, 1, 37), "..."), og)]
+gen_plt_dt[gene != "" & common_name == "" & og == "" & pfam != "", gene_label := ifelse(nchar(pfam)>40, paste0(substr(pfam, 1, 37), "..."), pfam)]
+
+# motif enrichment dotmap
+gen_plt_gp <- ggplot(
+  gen_plt_dt, 
+  aes(cell_type, gene)
+  ) +
+  geom_point(
+    aes(size = motif_deviation_scaled, fill = expression_scaled),
+    shape = 21
+  ) +
+  scale_y_discrete(
+    breaks = gen_plt_dt$gene,
+    labels = gen_plt_dt$gene_label,
+    expand = expansion(mult = c(0.005, 0.005))
+  ) +
+  scale_x_discrete(expand = expansion(mult = c(0.02, 0.02))) +
+  scale_fill_gradientn(
+    name = "TF expression\nfold change",
+    breaks = c(0, 2, 4, 6, 8),
+    colours = c(
+      "gray99", "#ffd195", "orange", "orangered2", "#a71414", "#68093d", "#470447"
+    )
+  ) +
+  scale_size_continuous(
+    name = "TF motif activity",
+    range = c(0, 4)
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 8),
+    axis.text.y = element_text(size = 6),
+    panel.grid.major = element_line(linewidth = 0.25),
+    axis.title = element_blank(),
+    plot.margin = margin(5.5, 40, 5.5, 40)
+  )
+
+# save
+ggsave(
+  file.path(fig_dir, sprintf("motif-deviation-z-score-%s-tf-expression-%s.pdf", zs_thr, fc_thr)),
+  gen_plt_gp,
+  height = 16, width = 10, limitsize = FALSE
+)
 ```
 
 ## Session info
