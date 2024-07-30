@@ -3396,6 +3396,13 @@ assign_dt <- fread(file.path(
   sprintf("motif-assignment-archetypes-%s.tsv", arc_id)
 ))
 
+# gene-archetype correlations
+cor_dt <- fread(file.path(
+  "Results", 
+  sprintf("ChromVAR-%s", arc_id),
+  "correlation-seacells-archetype-motif-score-gene.tsv.gz"
+))
+
 # archetype similarities
 sim_mat <- readRDS(
   file.path(
@@ -3455,6 +3462,14 @@ arc_ann_dt <- merge.data.table(
   all.x = TRUE, sort = FALSE, allow.cartesian = TRUE
 )
 
+# add archetype info
+arc_fam_dt <- unique(cor_dt[, .(archetype_name, archetype_family)])
+arc_ann_dt <- merge.data.table(
+  arc_ann_dt, arc_fam_dt,
+  by = "archetype_name", 
+  all.x = TRUE, sort = FALSE, allow.cartesian = TRUE
+)
+
 # add gene info
 arc_ann_dt <- merge.data.table(
   arc_ann_dt, tfan, 
@@ -3472,17 +3487,18 @@ hc <- hclust(
 )
 ord <- hc$labels[hc$order]
 sim_mat <- sim_mat[ord, ord]
-k <- 200
+k <- 400
 ctr <- cutree(hc, k = k)
 
-# add cluster info to datatable and select best archetype per cluster
+# add cluster info to datatable and select representative archetype for each cluster
 arc_ann_dt[, cluster := ctr[archetype_name]]
 # first take those archetypes that are assigned to marker genes
 arc_rep_1 <- unique(arc_ann_dt[common_name != "", .(archetype_name, cluster)])[order(cluster)]
-# for the rest of clusters, take the archetype with highest FC
-arc_rep_2 <- unique(arc_ann_dt[!cluster %in% arc_rep_1$cluster][order(-fc), .SD[1], cluster][, .(archetype_name, cluster)][order(cluster)])
+# for the rest of clusters, take the archetype with highest FC and cluster family assigned
+arc_rep_2 <- unique(arc_ann_dt[!cluster %in% arc_rep_1$cluster][archetype_family != ""][order(-fc), .SD[1], cluster][, .(archetype_name, cluster)][order(cluster)])
 arc_rep <- rbindlist(list(arc_rep_1, arc_rep_2))
-stopifnot(length(unique(arc_rep$cluster)) == k)
+arc_ann_dt[!archetype_name %in% rownames(sim_mat), cluster := k + as.integer(as.factor(archetype_name))]
+arc_ann_dt[archetype_name == "FoxQ2d", archetype_family := "Forkhead"]
 # combine
 arc_clu_dt <- arc_ann_dt[archetype_name %in% arc_rep$archetype_name]
 
@@ -3538,8 +3554,8 @@ arc_ann_gp <- ggplot(
     shape = 21
   ) +
   geom_text(
-    data = unique(arc_plt_dt[,.(archetype_name, gene_label)]),
-    aes(y = archetype_name, label = archetype_name),
+    data = unique(arc_plt_dt[,.(archetype_name, archetype_family, gene_label)]),
+    aes(y = archetype_name, label = archetype_family),
     x = length(unique(arc_plt_dt$cell_type)) + 1, 
     hjust = 0, 
     size = 2,
@@ -3575,7 +3591,7 @@ arc_ann_gp <- ggplot(
 ggsave(
   file.path(fig_dir, sprintf("motif-enrichment-mona-q%s-FC-%s-padj-%s.pdf", q, fc_thr, pa_thr)),
   arc_ann_gp,
-  height = 18, width = 12, limitsize = FALSE
+  height = 19, width = 12, limitsize = FALSE
 )
 ```
 
@@ -3741,112 +3757,114 @@ iters <- c(marks, setdiff(genes, marks))
 # what to show on y axis
 y_value <- "motif_enrichment_fc"
 y_value <- "motif_deviation"
-y_label <- switch(y_value,
-  "motif_enrichment_fc" = "motif enrichment fold change",
-  "motif_deviation" = "TF activity"
-)
-f_label <- switch(y_value,
-  "motif_enrichment_fc" = "motif-enrichment-fc",
-  "motif_deviation" = "activity"
-)
-
-# where to save the plot
-pdf(
-  file.path(fig_dir, sprintf("tf-expression-%s-scatter-plots-%s.pdf", f_label, arc_id)), 
-  height = 10, width = 7
-)
-
-for (i in seq_along(iters)) {
+for (y_value in c("motif_enrichment_fc", "motif_deviation")) {
   
-  # gene annotation
-  gn <- iters[i]
-  pf <- tfan[gene==gn]$pfam
-  og <- tfan[gene==gn]$og
-  cn <- tfan[gene==gn]$common_name
-  tf <- ifelse(cn!="", sprintf("%s (%s)", gn, cn), gn)
-  mt <- unique(assign_dt[gene==gn]$archetype_name)
+  y_label <- switch(y_value,
+    "motif_enrichment_fc" = "motif enrichment fold change",
+    "motif_deviation" = "TF activity"
+  )
+  f_label <- switch(y_value,
+    "motif_enrichment_fc" = "motif-enrichment-fc",
+    "motif_deviation" = "activity"
+  )
   
-  print(sprintf("%s/%s: %s", i, length(iters), tf))
+  # where to save the plot
+  pdf(
+    file.path(fig_dir, sprintf("tf-expression-%s-scatter-plots-%s.pdf", f_label, arc_id)), 
+    height = 10, width = 7
+  )
   
-  # motif annotation
-  for (mm in mt) {
-    mm_dt <- assign_dt[gene==gn & archetype_name==mm]
-    tfam <- unique(mm_dt$tf_family)
-    afam <- unique(mm_dt$archetype_family)
-    rasg <- unique(mm_dt$assigned)
-    ranm <- unique(mm_dt$rank)
+  for (i in seq_along(iters)) {
     
-    tf_dt <- acc_exp_ct[gene==gn & archetype_name==mm]
-    tf_dt[, motif_metric := get(y_value)]
-    ecor <- switch(
-      y_value,
-      "motif_enrichment_fc" = unique(tf_dt$motif_enrichment_gene_expression_correalton),
-      "motif_deviation" = unique(tf_dt$motif_deviation_gene_expression_correalton)
-    )
-    acor  <- switch(
-      y_value,
-      "motif_enrichment_fc" = unique(tf_dt$motif_enrichment_gene_accessibility_correalton),
-      "motif_deviation" = unique(tf_dt$motif_deviation_gene_accessibility_correalton)
-    )
-    ttl <-  sprintf(
-        "%s\nOG: %s\nPFAM: %s\nmotif: %s\nTF family: %s\narchetype family: %s\nCisBP assigned: %s\nrank: %s\ngene expression correlation: %.4f\ngene score correlation: %.4f",
-        tf, og, pf, mm, tfam, afam, rasg, ranm, ecor, acor
-    )
+    # gene annotation
+    gn <- iters[i]
+    pf <- tfan[gene==gn]$pfam
+    og <- tfan[gene==gn]$og
+    cn <- tfan[gene==gn]$common_name
+    tf <- ifelse(cn!="", sprintf("%s (%s)", gn, cn), gn)
+    mt <- unique(assign_dt[gene==gn]$archetype_name)
     
-    # motif logo
-    mt_gp <- ggseqlogo(mots_arc_lst[[mm]]@motif) +
-      theme_void()
+    print(sprintf("%s/%s: %s", i, length(iters), tf))
     
-    # assemble scatter plot
-    tf_gp <- ggplot(tf_dt, aes(
-            expression, motif_metric, 
-            label = cell_type,
-            fill = cell_type, 
-            color = cell_type,
-            shape = stage
-        )
-      ) +
-      geom_point(size = 4) +
-      ggrepel::geom_text_repel(size = 4, alpha = 0.6) +
-      scale_fill_manual(values = ct_cols) +
-      scale_color_manual(
-        values = c(
-          structure(
-            colorspace::darken(ct_cols, 0.5),
-            names = names(ct_cols)
-          ),
-          structure(
-            colorspace::lighten(ct_cols, 0.5),
-            names = paste0(names(ct_cols), "_sc")
-          )
-        )
-      ) +
-      scale_x_continuous(limits = c(0, NA)) +
-      scale_shape_manual(
-          values = c("adult" = 21, "gastrula" = 24)
-      ) +
-      labs(
-          x = "TF expression",
-          y = y_label
-      ) +
-      theme(
-        # strip.text = element_text(size = 8),
-        # axis.text = element_text(size = 8),
-        # axis.title = element_text(size = 8),
-        # title = element_text(size = 8),
-        legend.position = "none"
+    # motif annotation
+    for (mm in mt) {
+      mm_dt <- assign_dt[gene==gn & archetype_name==mm]
+      tfam <- unique(mm_dt$tf_family)
+      afam <- unique(mm_dt$archetype_family)
+      rasg <- unique(mm_dt$assigned)
+      ranm <- unique(mm_dt$rank)
+      
+      tf_dt <- acc_exp_ct[gene==gn & archetype_name==mm]
+      tf_dt[, motif_metric := get(y_value)]
+      ecor <- switch(
+        y_value,
+        "motif_enrichment_fc" = unique(tf_dt$motif_enrichment_gene_expression_correalton),
+        "motif_deviation" = unique(tf_dt$motif_deviation_gene_expression_correalton)
       )
-    
-    # patchwork
-    patch <- mt_gp + tf_gp + 
-      plot_layout(ncol = 1, heights = c(1, 5)) +
-      plot_annotation(title = ttl)
-    print(patch)    
+      acor  <- switch(
+        y_value,
+        "motif_enrichment_fc" = unique(tf_dt$motif_enrichment_gene_accessibility_correalton),
+        "motif_deviation" = unique(tf_dt$motif_deviation_gene_accessibility_correalton)
+      )
+      ttl <-  sprintf(
+          "%s\nOG: %s\nPFAM: %s\nmotif: %s\nTF family: %s\narchetype family: %s\nCisBP assigned: %s\nrank: %s\ngene expression correlation: %.4f\ngene score correlation: %.4f",
+          tf, og, pf, mm, tfam, afam, rasg, ranm, ecor, acor
+      )
+      
+      # motif logo
+      mt_gp <- ggseqlogo(mots_arc_lst[[mm]]@motif) +
+        theme_void()
+      
+      # assemble scatter plot
+      tf_gp <- ggplot(tf_dt, aes(
+              expression, motif_metric, 
+              label = cell_type,
+              fill = cell_type, 
+              color = cell_type,
+              shape = stage
+          )
+        ) +
+        geom_point(size = 4) +
+        ggrepel::geom_text_repel(size = 4, alpha = 0.6) +
+        scale_fill_manual(values = ct_cols) +
+        scale_color_manual(
+          values = c(
+            structure(
+              colorspace::darken(ct_cols, 0.5),
+              names = names(ct_cols)
+            ),
+            structure(
+              colorspace::lighten(ct_cols, 0.5),
+              names = paste0(names(ct_cols), "_sc")
+            )
+          )
+        ) +
+        scale_x_continuous(limits = c(0, NA)) +
+        scale_shape_manual(
+            values = c("adult" = 21, "gastrula" = 24)
+        ) +
+        labs(
+            x = "TF expression",
+            y = y_label
+        ) +
+        theme(
+          # strip.text = element_text(size = 8),
+          # axis.text = element_text(size = 8),
+          # axis.title = element_text(size = 8),
+          # title = element_text(size = 8),
+          legend.position = "none"
+        )
+      
+      # patchwork
+      patch <- mt_gp + tf_gp + 
+        plot_layout(ncol = 1, heights = c(1, 5)) +
+        plot_annotation(title = ttl)
+      print(patch)    
+    }
+  
   }
-
+  dev.off()
 }
-dev.off()
-
 ```
 
 Plot dotmap of TF expression vs activity (deviation Z score).
@@ -3934,7 +3952,7 @@ gen_plt_gp <- ggplot(
 ggsave(
   file.path(fig_dir, sprintf("motif-activity-gene-expression-FC-%s-padj-%s.pdf", fc_thr, pa_thr)),
   gen_plt_gp,
-  height = 14, width = 10, limitsize = FALSE
+  height = 14, width = 9, limitsize = FALSE
 )
 ```
 
