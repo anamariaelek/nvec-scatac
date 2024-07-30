@@ -1,0 +1,26 @@
+---
+title: "GRN"
+author: "Anamaria Elek"
+date: today
+format: 
+  html:
+    code-fold: false
+    code-tools: false
+    embed-resources: true
+    highlight-style: github
+    toc: true 
+    code-line-numbers: false 
+execute:
+  eval: false
+  message: false
+  warning: false
+---
+
+```{r}
+#| label: initialize
+#| echo: FALSE
+knitr::opts_chunk$set(echo = TRUE, fig.width=7, fig.height=5) 
+```
+
+In this notebook, we model Gene Regulatory Networks (GRN) for *Nematostella* 
+cell types.

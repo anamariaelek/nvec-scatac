@@ -1,0 +1,95 @@
+---
+title: "Motif enrichment in Nematostella scATAC"
+author: "Anamaria Elek"
+date: today
+format: 
+  html:
+    code-fold: false
+    code-tools: false
+    embed-resources: true
+    highlight-style: github
+    toc: true 
+    code-line-numbers: false 
+execute:
+  eval: true
+  message: false
+  warning: false
+---
+
+```{r}
+#| label: initialize
+#| echo: FALSE
+knitr::opts_chunk$set(echo = TRUE, fig.width=7, fig.height=5) 
+```
+
+In this notebook, we generate motif archetypes from extensive set of input motifs:  
+
+- CisBP motifs assigned to __Nematostella__ TFs (inferred and direct)
+- Homer-enriched known and denovo motifs from adult and gastrula scATAC-seq data
+
+## Setup
+
+Load packages and functions.
+
+```{r}
+#| label: setup
+
+# load in-house functions
+source("metacell_downstream_functions/Downstream_functions.R")
+source("metacell_downstream_functions/utils.R")
+source("motif-analysis/mta_downstream_functions.R")
+source("scatac_helper_functions.R")
+
+# global settings
+options(stringsAsFactors = FALSE)
+
+# load packages
+library(BSgenome.jaNemVect1.1.DToL.Assembly)
+library(GenomicRanges)
+library(data.table)
+library(tidyr)
+library(stringr)
+library(ggplot2)
+library(patchwork)
+library(ggrepel)
+library(ggside)
+library(grid)
+library(ArchR)
+library(Seurat)
+library(metacell)
+library(universalmotif)
+
+# set ggplot2 theme
+theme_blank <- theme_minimal() + theme(
+  axis.title.x = element_blank(),
+  axis.title.y = element_blank(),
+  panel.border = element_blank(),
+  panel.grid=element_blank(),
+  axis.ticks = element_blank(),
+  text = element_text(size=20)
+)
+theme_py <- theme_light() + theme(
+  panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank(),
+  panel.border = element_rect(colour = "black", fill = NA),
+  text = element_text(size=20),
+  strip.placement = "outside", 
+  strip.text = element_text(size=20, color="black"),
+  strip.background = element_rect(fill="white")
+)
+theme_set(theme_py)
+```
+
+Define directories to save the results to.
+
+```{r}
+#| label: dirs
+
+# define directories
+adult_dir <- "ArchRProj_Nvec_TSS4_frag200"
+gastr_dir <- "ArchRProj_Nvec_gastrula"
+arc_dir <- "Results/Archetypes"
+fig_dir <- "Results/Plots"
+```
+
+

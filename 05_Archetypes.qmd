@@ -14,6 +14,9 @@ execute:
   eval: false
   message: false
   warning: false
+editor: 
+  markdown: 
+    wrap: 72
 ---
 
 ```{r}
@@ -22,10 +25,12 @@ execute:
 knitr::opts_chunk$set(echo = TRUE, fig.width=7, fig.height=5) 
 ```
 
-In this notebook, we generate motif archetypes from extensive set of input motifs:  
+In this notebook, we generate motif archetypes from extensive set of
+input motifs:
 
-- CisBP motifs assigned to __Nematostella__ TFs (inferred and direct)
-- Homer-enriched known and denovo motifs from adult and gastrula scATAC-seq data
+-   CisBP motifs assigned to *Nematostella* TFs (inferred and direct)
+-   Homer-enriched known and denovo motifs from adult and gastrula
+    scATAC-seq data
 
 ## Setup
 
@@ -92,6 +97,7 @@ adult_dir <- "ArchRProj_Nvec_TSS4_frag200"
 gastr_dir <- "ArchRProj_Nvec_gastrula"
 pks_dir <- "Results/Peaks"
 arc_dir <- "Results/Archetypes"
+mta_dir <- "Results/Motifs"
 dir.create(arc_dir, showWarnings = FALSE)
 fig_dir <- "Plots/Archetypes"
 dir.create(fig_dir, showWarnings = FALSE)
@@ -250,8 +256,8 @@ cisbp_all <- rbindlist(list(
 cisbp_all[, .N, TF_Name][order(-N)]
 ```
 
-We additionally assigned motifs to some Nematostella TFs by reducing the DBD 
-sequence identitiy threshold.
+We additionally assigned motifs to some Nematostella TFs by reducing the
+DBD sequence identitiy threshold.
 
 ```{r}
 # motifs we additionally assigned based on "extended" DBD similarity identity
@@ -488,6 +494,15 @@ dist_method <- "euclidean"
 # archetyping threshold
 ic_threshold <- 0.5
 len_threshold <- 5
+# id to save output files and plot
+arc_id <- sprintf(
+  "%s-%s-%s-IC%s-%sbp", 
+  similarity, method, min_cluster_similarity, ic_threshold, len_threshold
+)
+arch_file <- file.path(
+  arc_dir,
+  sprintf("motif-archetypes-%s.rds", arc_id)
+)
 ```
 
 Calculate pairwise similarities between input motifs.
@@ -512,10 +527,10 @@ saveRDS(
 )
 ```
 
-Cluster and order similarity matrix, then choose the minimum cluster similarity 
-so that clusters of motifs to archetype contain only similar motifs (e.g. when 
-using a higher value of 0.8, many cluster contain outlier motifs, with lower 
-values these get split).
+Cluster and order similarity matrix, then choose the minimum cluster
+similarity so that clusters of motifs to archetype contain only similar
+motifs (e.g. when using a higher value of 0.8, many cluster contain
+outlier motifs, with lower values these get split).
 
 ```{r}
 sim_mat <- readRDS(file.path(arc_dir, sprintf(
@@ -570,7 +585,7 @@ fwrite(
 )
 ```
 
-To construct archetypes, we use `mta_merge_archetype()` function (from 
+To construct archetypes, we use `mta_merge_archetype()` function (from
 `motif-analysis/mta_downstream_functions.R`).
 
 ```{r message=FALSE}
@@ -626,16 +641,11 @@ direct_mta[direct_mta %in% nms_v]
 
 ```
 
-Annotate archetype motifs i.e. create a dictionary with motif-to-archetype 
-mappings and other metadata.
+Annotate archetype motifs i.e. create a dictionary with
+motif-to-archetype mappings and other metadata.
 
 ```{r}
 # archetype motifs
-arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
-arch_file <- file.path(
-  arc_dir,
-  sprintf("motif-archetypes-%s.rds", arc_id)
-)
 arch <- readRDS(arch_file)
 
 # cisbp direct and inferred motifs for nematostella assigned to genes
@@ -745,10 +755,6 @@ Plot number of motifs per archetype.
 #| warning: false
 #| message: false
 
-arch_file <- file.path(
-  arc_dir,
-  "motif-archetypes-PPM-PCC-0.8-IC0.5-8bp.rds"
-)
 arch <- readRDS(arch_file)
 
 dict <- fread(str_replace(arch_file, ".rds$", ".dict"))
@@ -765,7 +771,7 @@ gp_nmot <- ggplot(dict_nmot, aes(archetype_num_motifs)) +
   labs(x = "number of motifs per archetype", y = "number of archetypes")
 
 ggsave(
-  file.path(fig_dir, "motifs-archetypes-number.pdf"),
+  file.path(fig_dir, sprintf("motifs-archetypes-number-%s.pdf", arc_id)),
   gp_nmot,
   width = 6, height = 4
 )
@@ -866,8 +872,8 @@ for (x in seq_along(arch_list_nm)) {
 dev.off()
 ```
 
-Plot heatmap of similarity of all motifs used in archetyping (i.e. motifs after 
-filtering), with archetyping clusters indicated.
+Plot heatmap of similarity of all motifs used in archetyping (i.e.
+motifs after filtering), with archetyping clusters indicated.
 
 ```{r eval=FALSE}
 require(ComplexHeatmap)
@@ -939,7 +945,7 @@ gp_source <- ggplot(dict_sour, aes(group, fill = source)) +
 
 gp_file <- file.path(
   fig_dir,
-  basename(file.path(str_replace(arch_file, "\\.rds$", "-motif-source.pdf")))
+  sprintf("motif-archetypes-source-%s.pdf", arc_id)
 )
 ggsave(gp_file, gp_source, width = 5, height = 5)
 ```
@@ -1012,6 +1018,7 @@ seqlvl <- seqdt[[1]]
 peaks_gr <- mta_trim_granges(peaks_gr, seqdt)
 
 # scanning archetypes
+q <- 0.98
 arc_scores_mona <- mta_gw_motif_score_monalisa(
   motifs = mona_arc_lst,
   genome_object = genome,
@@ -1019,14 +1026,14 @@ arc_scores_mona <- mta_gw_motif_score_monalisa(
   bin_width = 250,
   subsample_fraction = 0.10,
   score_quantiles = c(0, 0.25, 0.5, 0.75, 0.95, 0.98, 0.99, 0.995, 0.999, 1.0),
-  score_quantile_thr = 0.95,
+  score_quantile_thr = q,
   do_gw_scan = TRUE,
   given_gr = peaks_gr,
   nthreads = 16
 )
 saveRDS(
   arc_scores_mona,
-  str_replace_all(arch_fn, c("motif" = "motif-scores", "pwms.rds" = "mona.rds"))
+  str_replace_all(arch_fn, c("motif" = "motif-scores", "pwms.rds" = sprintf("mona-q%s.rds", q)))
 )
 
 # scanning motifs
@@ -1037,14 +1044,14 @@ mta_scores_mona <- mta_gw_motif_score_monalisa(
   bin_width = 250,
   subsample_fraction = 0.10,
   score_quantiles = c(0, 0.25, 0.5, 0.75, 0.95, 0.98, 0.99, 0.995, 0.999, 1.0),
-  score_quantile_thr = 0.95,
+  score_quantile_thr = q,
   do_gw_scan = TRUE,
   given_gr = peaks_gr,
   nthreads = 16
 )
 saveRDS(
   mta_scores_mona,
-  file.path(arc_dir, "motif-scores-input-motifs-mona.rds")
+  file.path(arc_dir, sprintf("motif-scores-input-motifs-mona-q%s.rds", q))
 )
 
 # map archetypes back to peaks
@@ -1059,7 +1066,7 @@ arc_data[, max_motif_score := maxs_arc[motif]]
 arc_data[, max_motif_score := pmax(.SD$max_motif_score, .SD$motif_score), motif]
 fwrite(
   arc_data,
-  str_replace_all(arch_fn, c("motif" = "motif-scores", "pwms.rds" = "mona.tsv.gz")),
+  str_replace_all(arch_fn, c("motif" = "motif-scores", "pwms.rds" = sprintf("mona-q%s.tsv.gz", q))),
   sep = "\t"
 )
 
@@ -1075,7 +1082,7 @@ mta_data[, max_motif_score := maxs_mta[motif]]
 mta_data[, max_motif_score := pmax(.SD$max_motif_score, .SD$motif_score), motif]
 fwrite(
   mta_data,
-  file.path(arc_dir, "motif-scores-input-motifs-mona.tsv.gz"),
+  file.path(arc_dir, sprintf("motif-scores-input-motifs-mona-q%s.tsv.gz", q)),
   sep = "\t"
 )
 ```
@@ -1206,15 +1213,16 @@ ggsave(
 
 ## Motif enrichment in cell type peaks
 
-Calculate motif enrichment in  cell type specific peaks.
+Calculate motif enrichment in cell type specific peaks.
 
 ```{r}
 # archetypes to use
 arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
 
 # archetype scores
+q <- 0.98
 arc_scores_mona <- readRDS(
-  file.path(arc_dir, sprintf("motif-scores-archetypes-%s-mona.rds", arc_id))
+  file.path(arc_dir, sprintf("motif-scores-archetypes-%s-mona-q%s.rds", arc_id, q))
 )
 arc_gr <- arc_scores_mona$gw_scan
 names(mcols(arc_gr))[1] <- str_replace(names(mcols(arc_gr))[1], "motif", "name")
@@ -1227,7 +1235,7 @@ dict <- fread(file.path(
 
 # motif scores
 mta_scores_mona <- readRDS(
-  file.path(arc_dir, "motif-scores-input-motifs-mona.rds")
+  file.path(arc_dir, sprintf("motif-scores-input-motifs-mona-q%s.rds", q))
 )
 mta_gr <- mta_scores_mona$gw_scan
 names(mcols(mta_gr))[1] <- str_replace(names(mcols(mta_gr))[1], "motif", "name")
@@ -1267,25 +1275,25 @@ for (ct in cell_types) {
     bg_object = pks_bg,
     thresholds_vector = NULL,
     label = ct,
-    nthreads = 2,
+    nthreads = 1,
     pval_adjust = "fdr"
   )
 
-  # enrichment motifs
-  mta_dt <- mta_motif_enrichment_test(
-    sites_object = mta_gr,
-    fg_object = pks_gr,
-    bg_object = pks_bg,
-    thresholds_vector = NULL,
-    label = ct,
-    nthreads = 2,
-    pval_adjust = "fdr"
-  )
+  # # enrichment motifs
+  # mta_dt <- mta_motif_enrichment_test(
+  #   sites_object = mta_gr,
+  #   fg_object = pks_gr,
+  #   bg_object = pks_bg,
+  #   thresholds_vector = NULL,
+  #   label = ct,
+  #   nthreads = 2,
+  #   pval_adjust = "fdr"
+  # )
 
   # all enrichment results
   enr_list[[ct]] <- rbindlist(list(
-    "archetype" = arc_dt,
-    "motif" = mta_dt
+    "archetype" = arc_dt
+    # "motif" = mta_dt
   ), idcol = "group")
 
 }
@@ -1296,14 +1304,14 @@ enr_dt <- rbindlist(enr_list, idcol = "cell_type")
 # save results archetypes
 fwrite(
   enr_dt[group == "archetype"][, group := NULL],
-  file.path(arc_dir, sprintf("motif-enrichment-cell-type-archetypes-%s.tsv", arc_id)),
+  file.path(arc_dir, sprintf("motif-enrichment-cell-type-archetypes-%s-mona-q%s.tsv", arc_id, q)),
   sep = "\t"
 )
 
 # save results motifs
 fwrite(
   enr_dt[group == "motif"][, group := NULL],
-  file.path(arc_dir, "motif-enrichment-cell-type-input-motifs.tsv"),
+  file.path(arc_dir, sprintf("motif-enrichment-cell-type-input-motifs-mona-q%s.tsv", q)),
   sep = "\t"
 )
 ```
@@ -1412,7 +1420,7 @@ ggsave(
 
 ```
 
-Plot motif enrichments for archetypes and best corresponding motif from 
+Plot motif enrichments for archetypes and best corresponding motif from
 archetyping cluster.
 
 ```{r}
@@ -1539,13 +1547,12 @@ ggsave(
 
 ## Motif deviation scores with chromVAR
 
-Next, we will calculate deviation scores on pseudobulk level (SEACells, as in
+Next, we will calculate deviation scores on pseudobulk level (SEACells,
+as in
 https://github.com/rargelaguet/mouse_organogenesis_10x_multiome_publication/).
 
-First we prepare the inputs:  
-- matrix of counts in peaks, and
-- binary matrix of motif hits in peaks.
-
+First we prepare the inputs:\
+- matrix of counts in peaks, and - binary matrix of motif hits in peaks.
 
 ```{r}
 source("scripts/chromvar_utils.R")
@@ -1590,8 +1597,8 @@ arc_matx <- arc_matx[match(rownames(peaks_mat_seacells), rownames(arc_matx)), ]
 all.equal(rownames(arc_matx), as.character(rownames(peaks_mat_seacells)))
 ```
 
-Then we select background sets of peaks to be used for deviation calculations, 
-matched for total accessibility and GC-content.
+Then we select background sets of peaks to be used for deviation
+calculations, matched for total accessibility and GC-content.
 
 ```{r}
 # we used mapped peaks
@@ -1699,10 +1706,10 @@ saveRDS(chromvar_mat, file.path(mat_dir, "Matrix-Archetypes-SEACells.rds"))
 saveRDS(chromvar_deviations, file.path(mat_dir, "chromvar_deviations.rds"))
 ```
 
-Now we can inspect motif scores in comparison to gene scores.  
-We will load gene scores aggregated per SEACells and chromVAR deviation scores 
-per SEACell. We also need initial assignemt of motifs to genes (from archetyping), 
-and 2D projection coordinates.
+Now we can inspect motif scores in comparison to gene scores.\
+We will load gene scores aggregated per SEACells and chromVAR deviation
+scores per SEACell. We also need initial assignemt of motifs to genes
+(from archetyping), and 2D projection coordinates.
 
 ```{r}
 # archetypes
@@ -2010,8 +2017,8 @@ saveRDS(
 )
 ```
 
-For every TF gene, find best correlated motif (among assigned ones, or among all 
-for genes without any assigned motifs)
+For every TF gene, find best correlated motif (among assigned ones, or
+among all for genes without any assigned motifs)
 
 ```{r}
 # get all accessibility-motif pairwise correlation values in data frame
@@ -2064,15 +2071,37 @@ cor_dt[, assigned := FALSE][pair %in% dict$pair, assigned := TRUE]
 cor_dt[, pair := NULL]
 dict[, pair := NULL]
 
-# add motif metadata
-tf_fam_dt <- unique(dict[, .(archetype_name, tf_family, source)])#[tf_family != ""]
-#tf_fam_dt[, tf_family := paste(sort(unique(.SD[tf_family != ""]$tf_family)), collapse = ","), archetype_name]
-#tf_fam_dt[, source := paste(sort(unique(.SD[source != ""]$source)), collapse = ","), archetype_name]
+# get motif structural class
+tf_fam_dt <- unique(dict[, .(archetype_name, tf_family, source)])
+# for Homer motifs, we have to guess structural class
+tf_fam_dt[tf_family == "" & grepl("Ash1", archetype_name, ignore.case = TRUE), tf_family := "GATA"]
+tf_fam_dt[tf_family == "" & grepl("GATA", archetype_name, ignore.case = TRUE), tf_family := "GATA"]
+tf_fam_dt[tf_family == "" & grepl("E-box", archetype_name, ignore.case = TRUE), tf_family := "HLH"]
+tf_fam_dt[tf_family == "" & grepl("Fox", archetype_name, ignore.case = TRUE), tf_family := "Forkhead"]
+tf_fam_dt[tf_family == "" & grepl("Hox", archetype_name, ignore.case = TRUE), tf_family := "Homeodomains"]
+tf_fam_dt[tf_family == "" & grepl("Isl", archetype_name, ignore.case = TRUE), tf_family := "Homeodomains"]
+tf_fam_dt[tf_family == "" & grepl("Nkx", archetype_name, ignore.case = TRUE), tf_family := "Homeodomains"]
+tf_fam_dt[tf_family == "" & grepl("Pax", archetype_name, ignore.case = TRUE), tf_family := "Pax"]
+tf_fam_dt[tf_family == "" & grepl("Pou", archetype_name, ignore.case = TRUE), tf_family := "Pou/Homeodomain"]
+tf_fam_dt[tf_family == "" & grepl("Tbx", archetype_name, ignore.case = TRUE), tf_family := "T-box"]
+tf_fam_dt[tf_family == "" & grepl("Run", archetype_name, ignore.case = TRUE), tf_family := "Runt_Runx"]
+tf_fam_dt[tf_family == "" & grepl("Sox", archetype_name, ignore.case = TRUE), tf_family := "HMGbox_Sox"]
+tf_fam_dt[tf_family == "" & grepl("Zic", archetype_name, ignore.case = TRUE), tf_family := "zf-C2H2"]
+tf_fam_dt[tf_family == "" & grepl("ZNF", archetype_name, ignore.case = TRUE), tf_family := "zf-C2H2"]
+for (fm in sort(unique(tf_fam_dt$tf_family))) {
+  tf_fam_dt[tf_family == "" & grepl(fm, archetype_name, ignore.case = TRUE), tf_family := fm]
+}
+# after all this, we still don't have class for these archetypes
+# unique(sort(str_remove(tf_fam_dt[tf_family==""]$archetype_name,"ARCH\\d+_")))
+# add this info to dataframe
 tf_fam_dt <- unique(tf_fam_dt)
 setnames(tf_fam_dt, c("tf_family"), c("archetype_family"))
+tf_fam_dt[, source := factor(source, levels = c("CisBP_D","CisBP_I","CisBP_N","Homer_known","Homer_denovo"))]
+setorder(tf_fam_dt, source)
+tf_fam_dt <- tf_fam_dt[, .SD[1], archetype_name]
 cor_dt <- merge.data.table(
   cor_dt, tf_fam_dt, by = "archetype_name",
-  all.x = TRUE, sort = FALSE, allow.cartesian = TRUE
+  all.x = TRUE, sort = FALSE
 )
 cor_dt[is.na(archetype_family), archetype_family := ""]
 
@@ -2171,7 +2200,8 @@ ggsave(
 )
 ```
 
-Plot distribution of gene expression - motif deviation Z score correlations.
+Plot distribution of gene expression - motif deviation Z score
+correlations.
 
 ```{r}
 # plot top correlations
@@ -2451,9 +2481,12 @@ setcolorder(class_top_all, c(
   "class"
 ))
 
+# keep only TFs with motif of same family
+class_top_asg <- class_top_all[tf_family == archetype_family]
+
 # save
 fwrite(
-  class_top_all,
+  class_top_asg,
   file.path(
     "Results", "Archetypes",
     sprintf("motif-assignment-archetypes-%s.tsv", arc_id)
@@ -2462,25 +2495,25 @@ fwrite(
 )
 ```
 
-For experimental validations, we want to keep also CisBP motifs that didn't make 
-it to correlation based assignments
+For experimental validations, we want to keep also CisBP motifs that
+didn't make it to correlation based assignments
 
 ```{r}
 # all initially assigned archetypes from CiSBP
 asign_mta <- cor_dt[assigned==TRUE][order(rank)]
-asign_oth_mta <- asign_mta[!gene %in% class_top_all[assigned == TRUE]$gene]
+asign_oth_mta <- asign_mta[!gene %in% class_top_asg[assigned == TRUE]$gene]
 asign_oth_mta <- asign_oth_mta[,.SD[1],gene]
 
 # TFs with no archetypes assigned (CisBP nor correlation)
-asign_non_mta <- cor_dt[!gene %in% c(class_top_all$gene, asign_oth_mta$gene)]
+asign_non_mta <- cor_dt[!gene %in% c(class_top_asg$gene, asign_oth_mta$gene)]
 asign_non_mta_1 <- asign_non_mta[archetype_family==tf_family][,.SD[1],gene]
 asign_non_mta_2 <- asign_non_mta[!gene %in% asign_non_mta_1$gene][,.SD[1],gene]
 asign_non_mta <- rbindlist(list(asign_non_mta_1, asign_non_mta_2))
 
 # combine all TFs
-cols <- intersect(colnames(class_top_all),colnames(cor_dt))
+cols <- intersect(colnames(class_top_asg),colnames(cor_dt))
 class_oth_all <- rbindlist(list(
-  "correlation" = class_top_all[,..cols][, correlation := TRUE],
+  "correlation" = class_top_asg[,..cols][, correlation := TRUE],
   "cisbp" = asign_oth_mta[,..cols][, correlation := FALSE],
   "none" = asign_non_mta[,..cols][, correlation := FALSE]
 ), idcol = "selected_by")
@@ -2581,6 +2614,14 @@ assign_cols <- c(
   "none" = "orange",
   "assigned+correlation" = "seagreen"
 )
+assign_expressed_cols <- c(
+  "assigned+correlation_not_expressed" = colorspace::lighten("seagreen", 0.5),
+  "assigned+correlation_expressed" = "seagreen", 
+  "correlation_not_expressed" = colorspace::lighten("lightgreen", 0.5),
+  "correlation_expressed" = "lightgreen", 
+  "none_not_expressed" = colorspace::lighten("orange", 0.5),
+  "none_expressed" = "orange"
+)
 
 # assignments
 g_dt <- fread(
@@ -2589,6 +2630,13 @@ g_dt <- fread(
     sprintf("motif-assignment-plus-cisbp-archetypes-%s.tsv", arc_id)
   )
 )
+
+# only expressed TFs 
+expressed_genes <- rownames(ctfp_mat)[apply(ctfp_mat, 1, max) > 1.4]
+expressed_tfs <- expressed_genes[expressed_genes %in% tfan$gene]
+g_dt[, expressed_gene := gene %in% expressed_tfs]
+g_dt[, group_expressed := paste(group, ifelse(expressed_gene, "expressed", "not_expressed"), sep = "_")]
+g_dt[, group_expressed := factor(group_expressed, levels = names(assign_expressed_cols))]
 
 # euler diagram of motif assignment per TF
 euler_dt <- unique(g_dt[,.(gene, assigned, correlation)])
@@ -2603,9 +2651,10 @@ plot(fit, quantities = TRUE, fills = assign_cols)
 dev.off()
 
 # summarise assignment groups per TF as barplots
+dt_b1 <- unique(g_dt[, .(gene, expressed_gene, group, group_expressed)])
 gp_b1 <- ggplot(
-    unique(g_dt[, .(gene, group)]),
-    aes(group, fill = group)
+    dt_b1,
+    aes(group, fill = group_expressed)
   ) +
   geom_bar(color = "black") +
   geom_text(
@@ -2613,7 +2662,7 @@ gp_b1 <- ggplot(
     stat = "count",
     position = position_stack(vjust = 0.5)
   ) +
-  scale_fill_manual(values = assign_cols) +
+  scale_fill_manual(values = assign_expressed_cols) +
   scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
   labs(y = "number of TFs", x = "") +
   theme(
@@ -2624,13 +2673,13 @@ gp_b1 <- ggplot(
   )
 
 # for genes that have both CisBP and correlation-selected motif, are they the same motifs?
-dt_b2 <- unique(g_dt[, .(gene, group, archetype_name)][
+dt_b2 <- unique(g_dt[, .(gene, expressed_gene, group, group_expressed, archetype_name)][
   group == "assigned+correlation"])[
-    , .N, .(gene, group)][
+    , .N, .(gene, expressed_gene, group_expressed)][
       , archetype := ifelse(N==1, "same archetype", "different archetype")]
 gp_b2 <- ggplot(
     dt_b2,
-    aes(archetype, fill = group)
+    aes(archetype, fill = group_expressed)
   ) +
   geom_bar(color = "black") +
   geom_text(
@@ -2638,7 +2687,7 @@ gp_b2 <- ggplot(
     stat = "count",
     position = position_stack(vjust = 0.5)
   ) +  
-  scale_fill_manual(values = assign_cols) +
+  scale_fill_manual(values = assign_expressed_cols) +
   scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
   labs(y = "number of TFs", x = "") +
   theme(
@@ -2649,13 +2698,13 @@ gp_b2 <- ggplot(
   )
 
 # for genes that have no CisBP nor correlation-selected motif, are the motif and best archetype the same famiily?
-dt_b3 <- g_dt[, .(gene, group, archetype_name, archetype_family, tf_family)][
+dt_b3 <- g_dt[, .(gene, group, group_expressed, archetype_name, archetype_family, tf_family)][
   group == "none"][
-    , .(same_class = archetype_family == tf_family), group][
+    , .(same_class = archetype_family == tf_family), group_expressed][
       , structural_class := ifelse(same_class==TRUE, "same class", "different class")]
 gp_b3 <- ggplot(
     dt_b3,
-    aes(structural_class, fill = group)
+    aes(structural_class, fill = group_expressed)
   ) +
   geom_bar(color = "black") +
   geom_text(
@@ -2663,7 +2712,7 @@ gp_b3 <- ggplot(
     stat = "count",
     position = position_stack(vjust = 0.5)
   ) +  
-  scale_fill_manual(values = assign_cols) +
+  scale_fill_manual(values = assign_expressed_cols) +
   scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
   labs(y = "", x = "") +
   theme(
@@ -2675,7 +2724,7 @@ gp_b3 <- ggplot(
   )
 
 # save plots
-gp_b <- gp_b1 / (gp_b2 + gp_b3)
+gp_b <- gp_b1 / (gp_b2 + gp_b3) + plot_layout(guides = "collect")
 ggsave(
   file.path(fig_dir, "motif-assignment-stats-barplots.pdf"), 
   gp_b, width = 4, height = 10
@@ -2756,9 +2805,9 @@ for (x in seq_along(genes)) {
 dev.off()
 ```
 
-We look at some of the assignment stats:  
+We look at some of the assignment stats:
 
-- number of TFs that each archetype gets assigned to  
+-   number of TFs that each archetype gets assigned to
 
 ```{r}
 # archetypes assignment
@@ -2805,9 +2854,9 @@ ggsave(
 )
 ```
 
-- per assignment class, how many TFs got archetypes that were already assigned 
-(CisBP) vs how many had a different archetype assigned, vs how many had no 
-archetype assigned
+-   per assignment class, how many TFs got archetypes that were already
+    assigned (CisBP) vs how many had a different archetype assigned, vs
+    how many had no archetype assigned
 
 ```{r}
 # assignmnet types
@@ -2884,7 +2933,8 @@ ggsave(
 )
 ```
 
-- per assignment class, how many TFs from each strucutral family are there
+-   per assignment class, how many TFs from each structural family are
+    there
 
 ```{r}
 # number of different TF families in each assignment class
@@ -2959,10 +3009,10 @@ ggsave(
 
 ## Experimentally determined motifs
 
-Besides archetypes, we will include motifs for TFs that we determined 
+Besides archetypes, we will include motifs for TFs that we determined
 experimentally:
 
-  1. FoxQ2d  
+1.  FoxQ2d
 
 First we will recalculate motif stats.
 
@@ -2975,7 +3025,6 @@ genes <- c(
 )
 
 # motifs
-mta_dir <- file.path("Results", "Motifs")
 motifs <- c(
   "FoxQ2d" = file.path(mta_dir, "FoxQ2d.motif1.motif")
 )
@@ -2994,7 +3043,7 @@ mona_mta_lst <- mta_convert_umot_to_monalisa(mots_mta_lst)
 
 ```
 
-  - motif scores in peaks  
+-   motif scores in peaks
 
 ```{r}
 # load peaks
@@ -3015,6 +3064,7 @@ seqlvl <- seqdt[[1]]
 peaks_gr <- mta_trim_granges(peaks_gr, seqdt)
 
 # scanning motifs
+q <- 0.98
 mta_scores_mona <- mta_gw_motif_score_monalisa(
   motifs = mona_mta_lst,
   genome_object = genome,
@@ -3022,7 +3072,7 @@ mta_scores_mona <- mta_gw_motif_score_monalisa(
   bin_width = 250,
   subsample_fraction = 0.10,
   score_quantiles = c(0, 0.25, 0.5, 0.75, 0.95, 0.98, 0.99, 0.995, 0.999, 1.0),
-  score_quantile_thr = 0.95,
+  score_quantile_thr = q,
   do_gw_scan = TRUE,
   given_gr = peaks_gr,
   nthreads = 16
@@ -3031,7 +3081,7 @@ mta_scores_mona <- mta_gw_motif_score_monalisa(
 # save
 saveRDS(
   mta_scores_mona,
-  file.path(mta_dir, "motif-scores-mona.rds")
+  file.path(mta_dir, sprintf("motif-scores-mona-q%s.rds", q))
 )
 
 # map motifs back to peaks
@@ -3055,17 +3105,17 @@ mta_data[, max_motif_score := pmax(.SD$max_motif_score, .SD$motif_score), motif]
 # save
 fwrite(
   mta_data,
-  file.path(mta_dir, "motif-scores-mona.tsv.gz"),
+  file.path(mta_dir, sprintf("motif-scores-mona-q%s.tsv.gz", q)),
   sep = "\t"
 )
 ```
 
-  - motif enrichment in cell type specific peaks  
+-   motif enrichment in cell type specific peaks
 
 ```{r}
 # motif scores in peaks
 mta_scores_mona <- readRDS(
-  file.path(mta_dir, "motif-scores-mona.rds")
+  file.path(mta_dir, sprintf("motif-scores-mona-q%s.rds", q))
 )
 mta_gr <- mta_scores_mona$gw_scan
 names(mcols(mta_gr))[1] <- str_replace(names(mcols(mta_gr))[1], "motif", "name")
@@ -3120,12 +3170,12 @@ enr_dt <- rbindlist(enr_list, idcol = "cell_type")
 # save results
 fwrite(
   enr_dt,
-  file.path(mta_dir, "motif-enrichment-cell-type.tsv"),
+  file.path(mta_dir, sprintf("motif-enrichment-cell-type-mona-q%s.tsv", q)),
   sep = "\t"
 )
 ```
- 
-  - motif deviation score with chromVAR  
+
+-   motif deviation score with chromVAR
 
 ```{r}
 source("scripts/chromvar_utils.R")
@@ -3203,7 +3253,7 @@ saveRDS(chromvar_mat, file.path(mat_dir, "Matrix-Motifs-SEACells.rds"))
 saveRDS(chromvar_deviations, file.path(mat_dir, "chromvar_deviations.rds"))
 ```
 
-  - correlation of gene scores and motif deviation Z scores  
+-   correlation of gene scores and motif deviation Z scores
 
 ```{r}
 # gene scores matrix aggregated per seacells
@@ -3224,7 +3274,7 @@ saveRDS(
 )
 ```
 
-  - correlation of gene expression and motif deviation Z scores.  
+-   correlation of gene expression and motif deviation Z scores.
 
 ```{r}
 # gene expression matrix aggregated per SEACell
@@ -3248,7 +3298,7 @@ saveRDS(
 )
 ```
 
-Next we can update motif-to-gene assignment.  
+Next we can update motif-to-gene assignment.
 
 ```{r}
 # load motif-to-gene assignment
@@ -3258,6 +3308,16 @@ mta_gen_fn <- file.path(
   sprintf("motif-assignment-archetypes-%s.tsv", arc_id)
 )
 mta_gen_dt <- fread(mta_gen_fn)
+
+# load correlations
+mot_exp_cor <- readRDS(file.path(
+  mta_dir, "ChromVAR",
+  "correlation-seacells-motif-score-gene-expression-metacell.rds"
+))
+mot_gen_cor <- readRDS(file.path(
+  mta_dir, "ChromVAR",
+  "correlation-seacells-motif-score-gene-score.rds"
+))
 
 # update existing motif assignments 
 genes_assigned <- intersect(genes, mta_gen_dt$gene)
@@ -3318,8 +3378,8 @@ fwrite(
 
 ## Combine motif metrics with other gene metrics
 
-Here we will combine and compare motif scores with motif enrichment, gene 
-expression and accessibility.
+Here we will combine and compare motif scores with motif enrichment,
+gene expression and accessibility.
 
 ```{r}
 # TF annotation
@@ -3345,11 +3405,12 @@ sim_mat <- readRDS(
 )
 
 # motif enrichments
+q <- 0.98
 enr_dt <- rbindlist(lapply(c(
   # archetypes
-  file.path(arc_dir, sprintf("motif-enrichment-cell-type-archetypes-%s.tsv", arc_id)),
+  file.path(arc_dir, sprintf("motif-enrichment-cell-type-archetypes-%s-mona-q%s.tsv", arc_id, q)),
   # experimental motifs
-  file.path(mta_dir, "motif-enrichment-cell-type.tsv")
+  file.path(mta_dir, sprintf("motif-enrichment-cell-type-mona-q%s.tsv", q))
 ), fread))
 
 # motif scores
@@ -3384,7 +3445,7 @@ Plot motif enrichment, indicating assigned TFs
 
 ```{r}
 # gene info for archetypes
-agn_dt <- assign_dt[,.(gene, archetype_name)]
+agn_dt <- assign_dt[archetype_family==tf_family][,.(gene, archetype_name)]
 
 # add TF gene info to motif enrichment
 setnames(enr_dt, "motif", "archetype_name")
@@ -3444,7 +3505,7 @@ arc_sig <- unique(arc_clu_dt[fc>fc_thr & padj<pa_thr]$archetype_name)
 length(arc_sig)
 
 # non-significant archetypes assigned to marker genes
-arc_non_sig <- unique(arc_clu_dt[!archetype_name %in% arc_sig][,.(archetype_name,common_name)])
+arc_non_sig <- unique(arc_clu_dt[!archetype_name %in% arc_sig][padj<0.05][,.(archetype_name,common_name)])
 arc_mks <- arc_non_sig[common_name != ""]$archetype_name
 
 # subset data
@@ -3452,7 +3513,7 @@ arc_plt_dt <- arc_clu_dt[archetype_name %in% c(arc_sig, arc_mks)]
 
 # transform data to plot
 arc_plt_dt[, fc_scaled := pmin(fc, 6)]
-arc_plt_dt[, minuslog10padj_scaled := pmin(minuslog10padj, 60)]
+arc_plt_dt[, minuslog10padj_scaled := pmin(minuslog10padj, 30)]
 arc_plt_dt[, gene_label := ""]
 arc_plt_dt[gene != "", gene_label := str_remove(gene, "Nvec_(vc1.1_)*")]
 arc_plt_dt[gene != "" & common_name != "", gene_label := common_name]
@@ -3489,7 +3550,7 @@ arc_ann_gp <- ggplot(
     labels = arc_plt_dt$gene_label[arc_plt_dt$gene_label != ""]
   ) +
   scale_x_discrete(
-    expand = expansion(mult = c(0.02, 0.3))
+    expand = expansion(mult = c(0.02, 0.42))
   ) +
   scale_fill_gradientn(
     name = "motif enrichment\nfold change",
@@ -3512,14 +3573,14 @@ arc_ann_gp <- ggplot(
 
 # save
 ggsave(
-  file.path(fig_dir, sprintf("motif-enrichment-FC-%s-padj-%s.pdf", fc_thr, pa_thr)),
+  file.path(fig_dir, sprintf("motif-enrichment-mona-q%s-FC-%s-padj-%s.pdf", q, fc_thr, pa_thr)),
   arc_ann_gp,
-  height = 22, width = 14, limitsize = FALSE
+  height = 18, width = 12, limitsize = FALSE
 )
 ```
 
-Next we will combine accessibility and expression for TF genes with motif 
-deviation Z scores from chromAR.
+Next we will combine accessibility and expression for TF genes with
+motif deviation Z scores from chromAR.
 
 ```{r}
 # map motifs to genes
