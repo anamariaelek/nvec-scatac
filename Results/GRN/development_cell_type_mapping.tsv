@@ -1,0 +1,32 @@
+cell_type	development_cell_type
+cnidocyte	cnidocyte
+gastro_circular_muscle_1	gastrodermis
+gastro_circular_muscle_2	gastrodermis
+gastro_parietal_muscle	gastrodermis
+gastro_unknown_1	gastrodermis
+gastro_unknown_2	gastrodermis
+muscle_1	retractor muscle
+muscle_2	retractor muscle
+digestive_filaments_1	ectoderm.pharyngeal
+digestive_filaments_2	ectoderm.pharyngeal
+digestive_filaments_3	ectoderm.pharyngeal
+precursors_1	ectoderm.embryonic
+precursors_2	ectoderm.embryonic
+precursors_3	ectoderm.embryonic
+epidermis_1	ectoderm.epidermis
+epidermis_2	ectoderm.epidermis
+neuron_GATA_Islet_1	neuronal
+neuron_GATA_Islet_2	neuronal
+neuron_GATA_Islet_3	neuronal
+neuron_Pou4_FoxL2_1	cnidocyte.mature
+neuron_Pou4_FoxL2_2	cnidocyte.mature
+gland	gland.mucous
+cnidocyte_precursors	cnidocyte
+ectoderm_embryonic_oral	ectoderm.embryonic
+ectoderm_embryonic	ectoderm.embryonic
+ectoderm_embryonic_aboral	ectoderm.embryonic
+mesendoderm_embryonic	mesendoderm.embryonic
+mesendoderm_ectoderm	mesendoderm.embryonic
+NPC	NPC
+neuronal	neuronal
+gland_mucous	gland.mucous
