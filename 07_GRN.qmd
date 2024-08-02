@@ -52,6 +52,8 @@ library(ggplot2)
 library(patchwork)
 library(ggrepel)
 library(ggside)
+library(ggseqlogo)
+library(universalmotif)
 library(grid)
 library(ArchR)
 library(Seurat)
@@ -1107,6 +1109,263 @@ ggsave(
 
 ```
 
+Aggregate chromVAR scores per cell type for plotting.
+
+```{r}
+# combined data
+chr_exp_ct <- fread(file.path(
+  grn_dir, lvl,
+  sprintf("gene_expression_%s_chromVAR_%s.tsv.gz", exp, id)
+))
+thrs <- 0.1
+chr_exp_ct <- chr_exp_ct[insilico_ChIP_threshold == thrs]
+setnames(chr_exp_ct, c("motif", "zscore"), c("archetype_name", "motif_deviation"))
+
+# aggregate per cell type
+chr_exp_ct <- chr_exp_ct[, .(
+  expression = mean(expression),
+  motif_deviation = mean(motif_deviation)
+), .(gene, gene_name, common_name, pfam, og, archetype_name, cell_type, stage)]
+
+```
+
+Plot per-TF scatterplots of expression vs activity (deviation Z score).
+
+```{r}
+# gene motif assignments
+arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
+assign_dt <- fread(file.path(
+  "Results", "Motifs", sprintf("motif-assignment-archetypes-%s.tsv", arc_id)
+))
+
+# archetypes pwms
+mots_arc_lst <- unlist(lapply(c(
+  file.path("Results", "Archetypes", sprintf("motif-archetypes-%s-pwms.rds", arc_id)),
+  file.path("Results", "Motifs", "motifs.rds")
+), readRDS))
+names(mots_arc_lst) <- sapply(mots_arc_lst, function(m) m@name)
+
+# loop over TFs-motifs pairs
+genes <- unique(chr_exp_ct$gene)
+marks <- genes[genes %in% tfan[common_name!=""]$gene]
+iters <- c(marks, setdiff(genes, marks))
+
+# where to save the plot
+pdf(
+  file.path(fig_dir, sprintf("tf-expression-activity-scatter-plots-%s.pdf", arc_id)), 
+  height = 10, width = 7
+)
+
+for (i in seq_along(iters)) {
+  
+  # gene annotation
+  gn <- iters[i]
+  pf <- tfan[gene==gn]$pfam
+  og <- tfan[gene==gn]$og
+  cn <- tfan[gene==gn]$common_name
+  tf <- ifelse(cn!="", sprintf("%s (%s)", gn, cn), gn)
+  mt <- unique(assign_dt[gene==gn]$archetype_name)
+  
+  print(sprintf("%s/%s: %s", i, length(iters), tf))
+  
+  # motif annotation
+  for (mm in mt) {
+    mm_dt <- assign_dt[gene==gn & archetype_name==mm]
+    tfam <- unique(mm_dt$tf_family)
+    afam <- unique(mm_dt$archetype_family)
+    tf_dt <- chr_exp_ct[gene==gn & archetype_name==mm]
+    ttl <-  sprintf(
+        "%s\nOG: %s\nPFAM: %s\nmotif: %s\nTF family: %s\narchetype family: %s",
+        tf, og, pf, mm, tfam, afam
+    )
+    
+    # motif logo
+    mt_gp <- ggseqlogo(mots_arc_lst[[mm]]@motif) +
+      theme_void()
+    
+    # assemble scatter plot
+    tf_gp <- ggplot(tf_dt, aes(
+            expression, motif_deviation, 
+            label = cell_type,
+            fill = cell_type, 
+            color = cell_type,
+            shape = stage
+        )
+      ) +
+      geom_point(size = 4) +
+      ggrepel::geom_text_repel(size = 4, alpha = 0.6) +
+      scale_fill_manual(values = ct_cols) +
+      scale_color_manual(
+        values = c(
+          structure(
+            colorspace::darken(ct_cols, 0.5),
+            names = names(ct_cols)
+          ),
+          structure(
+            colorspace::lighten(ct_cols, 0.5),
+            names = paste0(names(ct_cols), "_sc")
+          )
+        )
+      ) +
+      scale_x_continuous(limits = c(0, NA)) +
+      scale_shape_manual(
+          values = c("adult" = 21, "gastrula" = 24)
+      ) +
+      labs(
+          x = "TF expression",
+          y = "TF activity"
+      ) +
+      theme(
+        # strip.text = element_text(size = 8),
+        # axis.text = element_text(size = 8),
+        # axis.title = element_text(size = 8),
+        # title = element_text(size = 8),
+        legend.position = "none"
+      )
+    
+    # patchwork
+    patch <- mt_gp + tf_gp + 
+      plot_layout(ncol = 1, heights = c(1, 5)) +
+      plot_annotation(title = ttl)
+    print(patch)    
+  }
+
+}
+dev.off()
+
+# plot markers on one page
+ma_vc <- structure(tfan[match(marks, gene)]$common_name, names = marks)
+ma_vc <- ma_vc[ma_vc != "NR12"]
+go_gp <- ggplot(chr_exp_ct[gene %in% names(ma_vc)], aes(
+        expression, motif_deviation, 
+        label = cell_type,
+        fill = cell_type, 
+        color = cell_type,
+        shape = stage
+    )
+  ) +
+  geom_point(size = 2) +
+  ggrepel::geom_text_repel(size = 2, alpha = 0.6) +
+  scale_fill_manual(values = ct_cols) +
+  scale_color_manual(
+    values = c(
+      structure(
+        colorspace::darken(ct_cols, 0.5),
+        names = names(ct_cols)
+      ),
+      structure(
+        colorspace::lighten(ct_cols, 0.5),
+        names = paste0(names(ct_cols), "_sc")
+      )
+    )
+  ) +
+  scale_x_continuous(limits = c(0, NA)) +
+  scale_shape_manual(
+      values = c("adult" = 21, "gastrula" = 24)
+  ) +
+  facet_wrap(
+    "gene",
+    scales = "free",
+    labeller = labeller(gene = ma_vc)
+  ) +
+  labs(
+      x = "TF expression",
+      y = "TF activity"
+  ) +
+  theme(
+    strip.text = element_text(size = 8),
+    axis.text = element_text(size = 8),
+    axis.title = element_text(size = 8),
+    legend.position = "none"
+  )
+ggsave(
+  file.path(fig_dir, sprintf(
+    "tf-expression-activity-scatter-plots-%s-markers.pdf", arc_id
+  )), 
+  go_gp,
+  width = 12, height = 11
+)
+
+```
+
+Plot dotmap of TF expression vs activity (deviation Z score).
+
+```{r}
+# cluster motifs
+chr_exp_ct[, cell_type := factor(cell_type, levels = cell_types)]
+zscore_dt <- unique(chr_exp_ct[, .(gene, cell_type, motif_deviation)])
+zscore_dt <- dcast.data.table(zscore_dt, gene ~ cell_type, value.var = "motif_deviation")
+zscore_mt <- as.matrix(zscore_dt[, -1])
+rownames(zscore_mt) <- zscore_dt[[1]]
+gen_ord <- order(apply(zscore_mt, 1, which.max))
+gen_lvl <- rownames(zscore_mt)[gen_ord]
+chr_exp_ct[, gene := factor(gene, levels = gen_lvl)]
+setorder(chr_exp_ct, gene)
+
+# significant archetypes
+zs_thr <- 2
+fc_thr <- 1.5
+gen_sig <- unique(chr_exp_ct[expression>fc_thr & motif_deviation>zs_thr]$gene)
+length(gen_sig)
+
+# non-significant archetypes assigned to marker genes
+gen_non_sig <- unique(chr_exp_ct[!gene %in% gen_sig][,.(gene,common_name)])
+gen_mks <- unique(chr_exp_ct[common_name != ""]$gene)
+
+# subset data
+gen_plt_dt <- chr_exp_ct[gene %in% c(gen_sig, gen_mks)]
+
+# transform data to plot
+gen_plt_dt[, expression_scaled := pmin(expression, 8)]
+gen_plt_dt[, motif_deviation_scaled := pmax(pmin(motif_deviation, 20), 0)]
+gen_plt_dt[, gene_label := ""]
+gen_plt_dt[, gene_label := str_remove(gene, "Nvec_(vc1.1_)*")]
+gen_plt_dt[common_name != "", gene_label := common_name]
+gen_plt_dt[common_name == "" & og != "", gene_label := ifelse(nchar(og)>40, paste0(substr(og, 1, 37), "..."), og)]
+gen_plt_dt[gene != "" & common_name == "" & og == "" & pfam != "", gene_label := ifelse(nchar(pfam)>40, paste0(substr(pfam, 1, 37), "..."), pfam)]
+
+# motif enrichment dotmap
+gen_plt_gp <- ggplot(
+  gen_plt_dt, 
+  aes(cell_type, gene)
+  ) +
+  geom_point(
+    aes(size = motif_deviation_scaled, fill = expression_scaled),
+    shape = 21
+  ) +
+  scale_y_discrete(
+    breaks = gen_plt_dt$gene,
+    labels = gen_plt_dt$gene_label,
+    expand = expansion(mult = c(0.005, 0.005))
+  ) +
+  scale_x_discrete(expand = expansion(mult = c(0.02, 0.02))) +
+  scale_fill_gradientn(
+    name = "TF expression\nfold change",
+    breaks = c(0, 2, 4, 6, 8),
+    colours = c(
+      "gray99", "#ffd195", "orange", "orangered2", "#a71414", "#68093d", "#470447"
+    )
+  ) +
+  scale_size_continuous(
+    name = "TF motif activity",
+    range = c(0, 4)
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 8),
+    axis.text.y = element_text(size = 6),
+    panel.grid.major = element_line(linewidth = 0.25),
+    axis.title = element_blank(),
+    plot.margin = margin(5.5, 40, 5.5, 40)
+  )
+
+# save
+ggsave(
+  file.path(fig_dir, sprintf("motif-activity-gene-expression-FC-%s-zscore-%s.pdf", fc_thr, zs_thr)),
+  gen_plt_gp,
+  height = 14, width = 9, limitsize = FALSE
+)
+```
+
 ## Global GRN
 
 To identify putative GRN, we need to 
@@ -1160,6 +1419,138 @@ saveRDS(
 )
 ```
 
+Inspect global network:  
+
+```{r}
+# load global network
+grn_dt <- readRDS(file.path(
+    grn_dir, lvl, sprintf("insilico-chip-grn-%s.rds", id)
+))
+thrs <- 0.1
+grn_dt <- grn_dt[in_silico_chip_score > thrs]
+
+```
+
+  - distribution of TF inputs per target gene  
+  - distribution of target genes per TF  
+
+```{r}
+# number of target genes per TF
+dt_tf_gen <- unique(
+  grn_dt[, .(gene, target_gene)][!is.na(target_gene)]
+)
+tfs_target_self <- unique(dt_tf_gen[gene == target_gene]$gene)
+dt_tf_gen[, target_self := gene %in% tfs_target_self]
+dt_tf_gen <- dt_tf_gen[order(gene)]
+dt_tf_gen <- dt_tf_gen[, .N, .(gene, target_self)]
+dt_tf_gen[, median(N), target_self]
+# FALSE    89
+#  TRUE   224
+
+# plot
+gp_tf_gen <- ggplot(
+        dt_tf_gen, aes(
+          target_self, N
+        )
+    ) +
+    ggbeeswarm::geom_quasirandom(
+      size = 1, alpha = 1, fill = "#8a8a8a", color = "#3d3d3d"
+    ) +
+    geom_boxplot(outlier.shape = NA, alpha = 0.5) +
+    geom_text(
+      data = dt_tf_gen[, .(md = median(N)), target_self],
+      aes(x = target_self, y = max(dt_tf_gen$N), label = sprintf("median: %s", md)),
+      size = 5
+    ) +
+    scale_x_discrete(
+      breaks = c("TRUE", "FALSE"), 
+      labels = c("auto\nregulating\nTFs", "not auto\nregulating\nTFs"), 
+      drop = TRUE
+    ) +
+    scale_y_continuous(
+      expand = expansion(mult = c(0.1, 0.1)),
+      trans = "log10"
+    ) +
+    guides(
+      shape = guide_legend(override.aes = list(size = 5))
+    ) +
+    theme(
+      axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+      axis.ticks.x = element_blank(),
+      axis.title.x = element_blank()
+    ) +
+    labs(y = "target genes\nper TF")
+
+
+# number of TFs per target gene
+dt_tg_tfs <- unique(
+  grn_dt[, .(gene, target_gene)]
+)
+tfs_target_gene <- unique(dt_tg_tfs[gene == target_gene]$gene)
+dt_tg_tfs[, target_TF := gene %in% tfs_target_gene]
+dt_tg_tfs <- dt_tg_tfs[, .N, .(target_gene, target_TF)]
+dt_tg_tfs[, median(N), target_TF]
+#  TRUE     2
+# FALSE     3
+
+# plot
+gp_tg_tfs <- ggplot(
+        dt_tg_tfs, aes(
+          target_TF, N
+        )
+    ) +
+    ggbeeswarm::geom_quasirandom(
+      size = 1, alpha = 1, fill = "#8a8a8a", color = "#3d3d3d"
+    ) +
+    geom_boxplot(outlier.shape = NA, alpha = 0.5) +
+    geom_text(
+      data = dt_tg_tfs[, .(md = median(N)), target_TF],
+      aes(x = target_TF, y = max(dt_tg_tfs$N), label = sprintf("median: %s", md)),
+      size = 5
+    ) +
+    scale_x_discrete(
+      breaks = c("TRUE", "FALSE"), 
+      labels = c("target\ngene\nTF", "target\ngene\nnot TF"), 
+      drop = TRUE
+    ) +
+    scale_y_continuous(
+      limits = c(-0.5, NA),
+      expand = expansion(mult = c(0.1, 0.1)),
+      trans = "log10"
+    ) +
+    guides(shape = guide_legend(override.aes = list(size = 5))) +
+    theme(
+      axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+      axis.ticks.x = element_blank(),
+      axis.title.x = element_blank()
+    ) +
+    labs(y = "TFs per\ntarget gene")
+
+# all target genes together
+dt_tg_tfs[, Nchr := as.character(pmin(N, 11))]
+dt_tg_tfs[Nchr=="11", Nchr := ">10"]
+dt_tg_tfs[, Nchr := factor(Nchr, levels = c(as.character(0:10), ">10"))]
+gp_tg_tfs <- ggplot(dt_tg_tfs, aes(Nchr)) +
+    geom_bar(color = "#8a8a8a", fill = "#3d3d3d") +
+    geom_text(
+      data = dt_tg_tfs[,.(md=median(N))],
+      aes(x = "6", y = 5e3, label = sprintf("median: %s", md)),
+      size = 5
+    ) +
+    scale_y_continuous(
+      expand = expansion(mult = c(0, 0.05))
+    ) +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+    labs(x = "TFs per target gene", y = "target genes")
+
+# save plot
+gp_grn <- gp_tf_gen + gp_tg_tfs + 
+  plot_layout(guides = "collect", width = c(2, 3))
+ggsave(
+  file.path(fig_dir, "GRN-global-num-tfs-targets.pdf"),
+  gp_grn, height = 4, width = 9
+)
+```
 
 ## Gene developmental expression dynamics
 
@@ -1600,4 +1991,616 @@ saveRDS(
     )
 )
 ```
+
+### Filter GRN per cell type
+
+```{r}
+# how peak-TF correlations were calculated
+lvl <- "metacell"
+
+# mapping between metacells
+id <- "genes_exp_FC2_acc_FC4_spearman"
+
+# in silico ChIP threshold
+thrs <- 0.1
+
+# expression quantification: fc or umifrac
+exp <- "fc"
+
+# accessibility quantification: access or score
+acc <- "access"
+
+# quantile thresholds for expression and accessibility
+thr_q_exp <- 0.4
+thr_q_acc <- 0.4
+
+# chromvar threshold for TF motif activity
+chr_thrs <- 4
+
+# this is a global expression threshold for all cell types;
+# if not NULL, it overrides expression quantification and quantile threshold!
+thr_fc_exp <- NULL
+if (!is.null(thr_fc_exp)) exp <- "fc"
+
+# file name
+if (is.null(thr_fc_exp)) {
+  fn <- sprintf(
+    "expression_%s_%s_accessibility_%s_%s_chromvar_%s", 
+    exp, thr_q_exp, acc, thr_q_acc, chr_thrs
+  )
+} else {
+  fn <- sprintf(
+    "expression_%s_%s_accessibility_%s_%s_chromvar_%s", 
+    exp, thr_fc_exp, acc, thr_q_acc, chr_thrs
+  )
+}
+
+```
+
+Load global GRN data.
+
+```{r}
+# global GRN data
+grn_dt <- readRDS(file.path(
+    grn_dir, lvl, sprintf("insilico-chip-grn-%s.rds", id)
+))
+grn_dt <- unique(grn_dt[in_silico_chip_score > thrs])
+
+# global network targets
+grn_glob <- unique(grn_dt[, .(gene, target_gene)])
+setnames(grn_glob, "gene", "tf_gene")
+```
+
+Load gene developmental stage data
+
+```{r}
+# gene developmental stage data
+devel_dt <- fread(file.path(
+    grn_dir, "development_data_for_grn.tsv"
+))
+stopifnot(all(devel_dt$cell_type %in% cell_types))
+devel_dt[, cell_type := factor(cell_type, levels = cell_types)]
+```
+
+Load chromVAR gene scores per metacell and aggregate them per cell type.
+
+```{r}
+# chromvar data 
+exp_chromvar_dt <- fread(
+    file.path(
+        grn_dir, lvl,
+        sprintf("gene_expression_%s_chromVAR_%s.tsv.gz", exp, id)
+    )
+)
+exp_chromvar_dt <- exp_chromvar_dt[insilico_ChIP_threshold == thrs]
+stopifnot(all(exp_chromvar_dt$cell_type %in% cell_types))
+exp_chromvar_dt[, cell_type := factor(cell_type, levels = cell_types)]
+
+# aggregate zscores per cell type
+exp_chromvar_dt[, zscore := mean(zscore), .(gene, motif, cell_type)]
+exp_chromvar_dt[, expression := mean(expression), .(gene, motif, cell_type)]
+exp_chromvar_dt[, c("metacell", "expression", "insilico_ChIP_threshold") := NULL]
+exp_chromvar_dt <- unique(exp_chromvar_dt)
+```
+
+Load expression and accessibility data for base network, and combine with 
+chromVAR scores (i.e TF activity).
+
+```{r}
+# expression and accessibility data for base network
+gns_exp_acc_list <- readRDS(
+    file.path(
+        grn_dir, "cell_type", "grn_tf_targets_expression_accessibility.rds"
+    )
+)
+gns_exp_acc_dt <- rbindlist(gns_exp_acc_list)
+
+# combine withh cromVAR scores
+gns_exp_acc_act_dt <- merge.data.table(
+    gns_exp_acc_dt, exp_chromvar_dt,
+    by = intersect(colnames(exp_chromvar_dt), colnames(gns_exp_acc_dt)),
+    all.x = TRUE, sort = FALSE
+)
+setcolorder(gns_exp_acc_act_dt, c(
+  colnames(gns_exp_acc_dt)[1 : grep("target", colnames(gns_exp_acc_dt))[1]-1],
+  "zscore"
+))
+```
+
+Load per cell type thresholds of expression and accessibility, and combine with 
+base GRN gene data.
+
+```{r}
+# per cell type thresholds of expression and accessibility
+data_thrs <- fread(file.path(
+    grn_dir, "cell_type", sprintf(
+        "qthreshold_%s_expression_%s_accessibility_%s.tsv",
+        id, thr_q_exp, thr_q_acc
+    )
+))
+data_thrs[cell_type %in% adult_cell_types, stage := "adult"]
+data_thrs[cell_type %in% gastr_cell_types, stage := "gastrula"]
+stopifnot(all(data_thrs$cell_type %in% cell_types))
+data_thrs[, cell_type := factor(cell_type, levels = cell_types)]
+if (exp == "umifrac") {
+    data_thrs[, exp_thrs := thr_exp_umifrac]
+} else if (exp == "fc") {
+    data_thrs[, exp_thrs := thr_exp_fc]
+}
+if (!is.null(thr_fc_exp)) (
+  data_thrs[, exp_thrs := thr_fc_exp]
+)
+if (acc == "score") {
+    data_thrs[, acc_thrs := thr_gene_score]
+} else if (acc == "access") {
+    data_thrs[, acc_thrs := thr_accessibility]
+}
+
+# combine
+grn_base_dt <- merge.data.table(
+  gns_exp_acc_act_dt, data_thrs[, .(cell_type, stage, exp_thrs, acc_thrs)], 
+  by = c("cell_type", "stage")
+)
+```
+
+Filter TFs per cell type.
+
+```{r}
+# determine which TFs are active in which cell type
+# based on mean expression and z score
+if (exp == "fc") {
+  grn_filt_dt <- grn_base_dt[expression_fc > exp_thrs & zscore > chr_thrs]
+} else if (exp == "umifrac") {
+  grn_filt_dt <- grn_base_dt[expression_umifrac > exp_thrs & zscore > chr_thrs]
+}
+```
+
+Filter target genes
+
+```{r}
+# filter target genes per cell type
+# based on mean expression and accessibility/gene score
+if (exp == "fc") {
+  grn_filt_dt <- grn_filt_dt[target_expression_fc > exp_thrs]
+} else if (exp == "umifrac") {
+  grn_filt_dt <- grn_filt_dt[target_expression_umifrac > exp_thrs]
+}
+if (acc == "access") {
+  grn_filt_dt <- grn_filt_dt[target_accessibility > acc_thrs]
+} else if (exp == "score") {
+  grn_filt_dt <- grn_filt_dt[target_gene_score > acc_thrs]
+}
+```
+
+Identify auto-regulating TFs per cell type.
+
+```{r}
+# auto regulating TFs per cell type
+grn_auto_dt <- unique(grn_filt_dt[, .(gene, target_gene, cell_type)])
+grn_auto_dt <- rbindlist(lapply(cell_types, function(ct) {
+  auto_reg_gns <- unique(grn_auto_dt[cell_type == ct][gene == target_gene]$gene)
+  data.table(gene = auto_reg_gns)[, cell_type := ct][, target_self := TRUE]
+}))
+grn_filt_dt <- merge.data.table(
+  grn_filt_dt, grn_auto_dt, by = c("gene", "cell_type"), 
+  all.x = TRUE, sort = FALSE
+)
+grn_filt_dt[is.na(target_self), target_self := FALSE]
+```
+
+Save TF info tables per cell type.
+
+```{r}
+# TF info table
+tfs_info_dt <- unique(grn_filt_dt[, .(
+  cell_type, stage, gene, gene_name, common_name, og, pfam, 
+  expression_fc, expression_umifrac, gene_score, zscore, motif, id, target_self
+)])
+stopifnot(nrow(tfs_info_dt[,.N,.(cell_type,gene)][N>1])==0)
+
+# save
+fwrite(
+  tfs_info_dt,
+  file.path(
+    grn_dir, "networks", sprintf("grn_tfs_info_%s.tsv", fn)
+  ),
+  sep = "\t"
+)
+require(openxlsx)
+wb <- createWorkbook()
+for (ct in cell_types) {
+  sheetName <- substr(ct, 1, 30)
+  grn_ct <- tfs_info_dt[cell_type == ct]
+  addWorksheet(wb, sheetName = sheetName)
+  writeData(wb, sheet = sheetName, grn_ct)
+}
+saveWorkbook(
+  wb,
+  file.path(grn_dir, "networks", sprintf("grn_tfs_info_%s.xlsx", fn)),
+  overwrite = TRUE
+)
+```
+
+Complete GRN tables by includng TFs that pass TF filtering, but get removed 
+because no targets pass the filtering.
+
+```{r}
+# any TFs that have no target genes
+tfs_info_dt[, stage_cell_type_gene := paste(stage, cell_type, gene)]
+grn_filt_dt[, stage_cell_type_gene := paste(stage, cell_type, gene)]
+grn_fill_dt <- rbindlist(list(
+  grn_filt_dt,
+  tfs_info_dt[! stage_cell_type_gene %in% grn_filt_dt$stage_cell_type_gene]
+), use.names = TRUE, fill = TRUE)
+grn_fill_dt[, exp_thrs := .SD[!is.na(exp_thrs)]$exp_thrs[1], .(cell_type, stage)]
+grn_fill_dt[, acc_thrs := .SD[!is.na(acc_thrs)]$acc_thrs[1], .(cell_type, stage)]
+grn_fill_dt[, cell_type := factor(cell_type, levels = cell_types)]
+grn_fill_dt[, stage_cell_type_gene := NULL]
+tfs_info_dt[, stage_cell_type_gene := NULL]
+setorder(grn_fill_dt, cell_type, stage)
+
+# target TF annotations
+grn_fill_dt[, target_TF := target_gene %in% tfan$gene]
+grn_fill_dt[, target_active_TF := target_gene %in% .SD$gene, .(cell_type, stage)]
+
+# save
+fwrite(
+  grn_fill_dt,
+  file.path(
+    grn_dir, "networks", sprintf("grn_peaks_%s.tsv", fn)
+  ),
+  sep = "\t"
+)
+require(openxlsx)
+wb <- createWorkbook()
+for (ct in cell_types) {
+  sheetName <- substr(ct, 1, 30)
+  grn_ct <- grn_fill_dt[cell_type == ct]
+  addWorksheet(wb, sheetName = sheetName)
+  writeData(wb, sheet = sheetName, grn_ct)
+}
+saveWorkbook(
+  wb,
+  file.path(grn_dir, "networks", sprintf("grn_peaks_%s.xlsx", fn)),
+  overwrite = TRUE
+)
+```
+
+Save TF-gene network.
+
+```{r}
+# aggregate peaks per gene
+grn_gene_dt <- copy(grn_fill_dt)
+grn_gene_dt[, c("target_peak", "seqnames", "start", "end") := NULL]
+grn_gene_dt[, target_accessibility := mean(target_accessibility), .(gene, target_gene, cell_type, stage)]
+grn_gene_dt[, peak_tf_correlation_score := mean(peak_tf_correlation_score), .(gene, target_gene, cell_type, stage)]
+grn_gene_dt[, in_silico_chip_score := mean(in_silico_chip_score), .(gene, target_gene, cell_type, stage)]
+grn_gene_dt <- unique(grn_gene_dt)
+
+# save
+fwrite(
+  grn_gene_dt,
+  file.path(
+    grn_dir, "networks", sprintf("grn_genes_%s.tsv", fn)
+  ),
+  sep = "\t"
+)
+require(openxlsx)
+wb <- createWorkbook()
+for (ct in cell_types) {
+  sheetName <- substr(ct, 1, 30)
+  grn_ct <- grn_gene_dt[cell_type == ct]
+  addWorksheet(wb, sheetName = sheetName)
+  writeData(wb, sheet = sheetName, grn_ct)
+}
+saveWorkbook(
+  wb,
+  file.path(grn_dir, "networks", sprintf("grn_genes_%s.xlsx", fn)),
+  overwrite = TRUE
+)
+```
+
+Save TF-TF network.
+
+```{r}
+grn_tfs_dt <- copy(grn_gene_dt)
+grn_tfs_dt <- grn_tfs_dt[target_TF == TRUE]
+
+# any TFs that have no target genes
+tfs_info_dt[, stage_cell_type_gene := paste(stage, cell_type, gene)]
+grn_tfs_dt[, stage_cell_type_gene := paste(stage, cell_type, gene)]
+grn_tfs_dt <- rbindlist(list(
+  grn_tfs_dt,
+  tfs_info_dt[! stage_cell_type_gene %in% grn_tfs_dt$stage_cell_type_gene]
+), use.names = TRUE, fill = TRUE)
+grn_tfs_dt[, exp_thrs := .SD[!is.na(exp_thrs)]$exp_thrs[1], .(cell_type, stage)]
+grn_tfs_dt[, acc_thrs := .SD[!is.na(acc_thrs)]$acc_thrs[1], .(cell_type, stage)]
+grn_tfs_dt[, cell_type := factor(cell_type, levels = cell_types)]
+grn_tfs_dt[, stage_cell_type_gene := NULL]
+tfs_info_dt[, stage_cell_type_gene := NULL]
+setorder(grn_tfs_dt, cell_type, stage)
+
+# save
+fwrite(
+  grn_tfs_dt,
+  file.path(
+    grn_dir, "networks", sprintf("grn_tfs_%s.tsv", fn)
+  ),
+  sep = "\t"
+)
+require(openxlsx)
+wb <- createWorkbook()
+for (ct in cell_types) {
+  sheetName <- substr(ct, 1, 30)
+  grn_ct <- grn_tfs_dt[cell_type == ct]
+  addWorksheet(wb, sheetName = sheetName)
+  writeData(wb, sheet = sheetName, grn_ct)
+}
+saveWorkbook(
+  wb,
+  file.path(grn_dir, "networks", sprintf("grn_tfs_%s.xlsx", fn)),
+  overwrite = TRUE
+)
+```
+
+### Inspect cell type GRNs
+
+Inspect networks, plot stats and diagnostic plots.
+
+```{r}
+# how peak-TF correlations were calculated
+lvl <- "metacell"
+
+# mapping between metacells
+id <- "genes_exp_FC2_acc_FC4_spearman"
+
+# in silico ChIP threshold
+thrs <- 0.1
+
+# expression quantification: fc or umifrac
+exp <- "fc"
+
+# accessibility quantification: access or score
+acc <- "access"
+
+# quantile thresholds for expression and accessibility
+thr_q_exp <- 0.4
+thr_q_acc <- 0.4
+
+# chromvar threshold for TF motif activity
+chr_thrs <- 4
+
+# this is a global expression threshold for all cell types;
+# if not NULL, it overrides expression quantification and quantile threshold!
+thr_fc_exp <- NULL
+if (!is.null(thr_fc_exp)) exp <- "fc"
+
+# file name
+if (is.null(thr_fc_exp)) {
+  fn <- sprintf(
+    "expression_%s_%s_accessibility_%s_%s_chromvar_%s", 
+    exp, thr_q_exp, acc, thr_q_acc, chr_thrs
+  )
+} else {
+  fn <- sprintf(
+    "expression_%s_%s_accessibility_%s_%s_chromvar_%s", 
+    exp, thr_fc_exp, acc, thr_q_acc, chr_thrs
+  )
+}
+
+# load network
+grn_ct_dt <- fread(file.path(
+  grn_dir, "networks", sprintf("grn_genes_%s.tsv", fn)
+))
+grn_ct_dt[, cell_type := factor(cell_type, levels = cell_types)]
+```
+
+Per cell type
+
+-   number of TFs per cell type
+-   distribution of TF inputs per target gene
+-   distribution of target genes per TF
+
+```{r}
+# GRN data
+lvl_cols <- structure(
+  c("#66FF66", "#FFCC00", "#CC9900", "#FF0000", "#CC0099","#6600CC", "#0011CC", "#030B61", "#08153b", "#040a1c"),
+  names = 1:10
+)
+
+# number of TFs per cell type
+cp_tf_num <- ggplot(
+        unique(grn_ct_dt[, .(gene, cell_type)]),
+        aes(cell_type, fill = cell_type, color = cell_type)
+    ) +
+    geom_bar() +
+    scale_x_discrete(drop = TRUE) +
+    scale_fill_manual(values = ct_cols, drop = TRUE) +
+    scale_color_manual(values = structure(
+      colorspace::darken(ct_cols, 0.5),
+      names = names(ct_cols)
+    )) +
+    scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
+    theme(
+        legend.position = "none",
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.x = element_blank()
+    ) +
+    labs(y = "TFs")
+
+
+# number of target genes per TF per cell type
+ct_tf_gen <- unique(
+  grn_ct_dt[, .(gene, lvl, target_self, target_gene, cell_type)]
+)[, .N, .(cell_type, lvl, gene, target_self)]
+ct_tf_gen[, lvl := factor(lvl, levels = 1:10)]
+ct_tf_gen[, cell_type_box := paste0(cell_type, "_box")]
+cp_tf_gen <- ggplot(
+        ct_tf_gen, aes(
+          cell_type, N,
+          color = cell_type
+        )
+    ) +
+    ggrastr::rasterise(ggbeeswarm::geom_quasirandom(
+      aes(fill = cell_type, shape = target_self),
+      size = 1, alpha = 1
+    )) +
+    geom_boxplot(aes(fill = cell_type_box), outlier.shape = NA, alpha = 0.5) +
+    scale_x_discrete(drop = TRUE) +
+    scale_fill_manual(values = c(
+      ct_cols, 
+      structure(
+        colorspace::lighten(ct_cols, 0.8),
+        names = paste0(names(ct_cols), "_box")
+      )
+    ), guide = "none") +
+    scale_color_manual(values = structure(
+      colorspace::darken(ct_cols, 0.5),
+      names = names(ct_cols)
+    ), guide = "none") +
+    scale_shape_manual(values = c("TRUE" = 25, "FALSE" = 21)) +
+    scale_y_continuous(
+      expand = expansion(mult = c(0.1, 0.1)),
+      trans = "log10"
+    ) +
+    guides(
+      shape = guide_legend(override.aes = list(size = 5))
+    ) +
+    theme(
+      axis.text.x = element_blank(),
+      axis.ticks.x = element_blank(),
+      axis.title.x = element_blank()
+    ) +
+    labs(y = "target genes\nper TF")
+
+
+# number of TFs per target gene per cell type
+ct_tg_tfs <- unique(
+  grn_ct_dt[, .(gene, target_gene, target_TF, cell_type)]
+)[, .N, .(cell_type, target_TF, target_gene)]
+ct_tg_tfs[, cell_type_box := paste0(cell_type, "_box")]
+cp_tg_tfs <- ggplot(
+        ct_tg_tfs, aes(
+          cell_type, N,
+          color = cell_type
+        )
+    ) +
+    ggrastr::rasterise(ggbeeswarm::geom_quasirandom(
+      aes(fill = cell_type, shape = target_TF),
+      size = 1, alpha = 1
+    )) +
+    geom_boxplot(aes(fill = cell_type_box), outlier.shape = NA, alpha = 0.5) +
+    scale_x_discrete(drop = TRUE) +
+    scale_fill_manual(values = c(
+      ct_cols, structure(
+      colorspace::lighten(ct_cols, 0.8),
+      names = paste0(names(ct_cols), "_box")
+    )), guide = "none") +
+    scale_color_manual(values = structure(
+      colorspace::darken(ct_cols, 0.5),
+      names = names(ct_cols)
+    ), guide = "none") +
+    scale_shape_manual(values = c("TRUE" = 24, "FALSE" = 22)) +
+    scale_y_continuous(
+      expand = expansion(mult = c(0.1, 0.1)),
+      trans = "log2"
+    ) +
+    guides(shape = guide_legend(override.aes = list(size = 5))) +
+    theme(
+      axis.text.x = element_blank(),
+      axis.ticks.x = element_blank(),
+      axis.title.x = element_blank()
+    ) +
+    labs(y = "TFs per\ntarget gene")
+
+
+
+# overlap of targets per TF per cell type
+ct_tg_tfs <- unique(
+ grn_ct_dt[, .(gene, target_gene, target_TF, cell_type)]
+)
+ct_tf_ovl <- rbindlist(sapply(
+  as.character(unique(grn_ct_dt$cell_type)), 
+  function(ct) {
+    ct_dt <- ct_tg_tfs[cell_type == ct]
+    ct_tf <- unique(ct_dt$gene)
+    rbindlist(lapply(seq_along(ct_tf), function(i) {
+      rbindlist(lapply(seq_along(ct_tf), function(j) {
+        tf1 <- ct_tf[i]
+        tf2 <- ct_tf[j]
+        if (i > j) {
+          message(sprintf("%s: %s vs %s", ct, tf1, tf2))
+          target1 <- unique(ct_dt[gene == tf1]$target_gene)
+          target2 <- unique(ct_dt[gene == tf2]$target_gene)
+          ovl <- length(intersect(target1, target2)) / length(union(target1, target2))
+          data.table(tf_gene_1 = tf1, tf_gene_2 = tf2, target_overlap = ovl)
+        }
+      }))
+    }))                                                                                                               
+  }, simplify = FALSE, USE.NAMES = TRUE
+), idcol = "cell_type")
+ct_tf_ovl[, cell_type := factor(cell_type, levels = cell_types)]
+ct_tf_ovl[, cell_type_box := paste0(cell_type, "_box")]
+ct_tf_ovl[, mean(target_overlap), cell_type]
+cp_tg_ovl <- ggplot(
+        ct_tf_ovl, aes(
+          cell_type, target_overlap,
+          color = cell_type
+        )
+    ) +
+    # ggrastr::rasterise(ggbeeswarm::geom_quasirandom(
+    #   aes(fill = cell_type),
+    #   size = 1, alpha = 1, shape = 21
+    # )) +
+    geom_boxplot(
+      aes(fill = cell_type_box),
+      outlier.shape = 21, alpha = 1
+    ) +
+    scale_x_discrete(drop = TRUE) +
+    scale_fill_manual(values = c(
+      ct_cols, structure(
+      ct_cols,
+      names = paste0(names(ct_cols), "_box")
+    )), guide = "none") +
+    scale_color_manual(values = structure(
+      colorspace::darken(ct_cols, 0.5),
+      names = names(ct_cols)
+    ), guide = "none") +
+    scale_y_continuous(
+      expand = expansion(mult = c(0.1, 0.1))
+      #trans = "log2"
+    ) +
+    guides(shape = guide_legend(override.aes = list(size = 5))) +
+    theme(
+      axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)
+      #axis.ticks.x = element_blank(),
+      #axis.title.x = element_blank()
+    ) +
+    labs(y = "target gene overlap\nper pair of TFs")
+
+
+
+# plot
+gp_grn_ct <- cp_tf_num / cp_tg_ovl
+gp_grn_ct <- gp_grn_ct +
+  plot_annotation(title = sprintf(
+      "Expression %s %s & chromVAR Z %s",
+      exp, 
+      ifelse(
+        is.null(thr_fc_exp), 
+        sprintf("quantile %s", thr_q_exp), 
+        thr_fc_exp
+      ),
+      chr_thrs
+  ))
+
+# save
+ggsave(
+  file.path(fig_dir, sprintf("GRN-cell-type-num-tfs-targets-%s.pdf", fn)), 
+  gp_grn_ct, 
+  height = 8, width = 8
+)
+```
+
 

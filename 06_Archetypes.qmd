@@ -3935,7 +3935,7 @@ gen_plt_gp <- ggplot(
 
 # save
 ggsave(
-  file.path(fig_dir, sprintf("motif-activity-gene-expression-FC-%s-padj-%s.pdf", fc_thr, pa_thr)),
+  file.path(fig_dir, sprintf("motif-activity-gene-expression-FC-%s-zscore-%s.pdf", fc_thr, zs_thr)),
   gen_plt_gp,
   height = 14, width = 9, limitsize = FALSE
 )
