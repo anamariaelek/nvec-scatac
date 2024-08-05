@@ -345,7 +345,7 @@ saveRDS(
 Load gene expression data for adult and gastrula.
 
 ```{r}
-scdb_gastr_dir <- file.path("../../..", "scRNAseq_nvec_technau", "scdb")
+scdb_gastr_dir <- file.path("../..", "scRNAseq_nvec_technau", "scdb")
 scdb_init(scdb_gastr_dir, force_reinit = TRUE)
 mat_gastr <- scdb_mat("gastrula")
 mc_gastr <- scdb_mc("gastrula_K30")
@@ -353,7 +353,7 @@ mc_ann_gastr <- fread(file.path(
     scdb_gastr_dir, "annotation.gastrula_K30.tsv"
 ))
 
-scdb_adult_dir <- file.path("../../..", "scRNAseq_nvec_v4", "scdb")
+scdb_adult_dir <- file.path("../..", "scRNAseq_nvec_v4", "scdb")
 scdb_init(scdb_adult_dir, force_reinit = TRUE)
 mat_adult <- scdb_mat("Nvec")
 mc_adult <- scdb_mc("Nvec_K30_atlas")
@@ -399,6 +399,14 @@ if (lvl == "single_cell") {
         exp_adult <- umifrac_adult
         exp_gastr <- umifrac_gastr
     }
+  
+  mc_ann <- rbindlist(list(
+    mc_ann_adult[, .(metacell, cell_type, color)][, metacell := paste0("adult_", metacell)],
+    mc_ann_gastr[, .(metacell, cell_type, color)][, metacell := paste0("gastrula_", metacell)]
+  ))
+  fwrite(mc_ann, file.path(
+    res_dir, lvl, "gene_expression_metacell_annotation.tsv"
+  ), sep = "\t")
 
 } else if (lvl == "cell_type") {
 
@@ -467,60 +475,6 @@ saveRDS(
         res_dir, lvl, sprintf("gene_expression_%s_%s.rds", lvl, exp)
     )
 )
-```
-
-```{r}
-# Combine gene score data for adult and gastrula
-# if (lvl == "metacell") {
-#     acc_adult <- adult_gene_access
-#     acc_gastr <- gastr_gene_access
-# } else if (lvl == "cell_type") {
-#     acc_adult <- adult_gene_access_ct
-#     acc_gastr <- gastr_gene_access_ct
-# } else if (lvl == "single_cell") {
-#     acc_adult <- adult_gene_access_sc
-#     acc_gastr <- gastr_gene_access_sc
-#     acc_asign <- rbindlist(list(
-#         "adult" = as.data.table(proj_adult@cellColData)[,.(Cell, SEACell)],
-#         "gastrula" = as.data.table(proj_gastr@cellColData)[,.(Cell, SEACell)]
-#     ), idcol = "stage")
-#     acc_asign[, SEACell := paste(stage, SEACell, sep = "_")]
-#     acc_asign[, Cell := paste(stage, Cell, sep = "_")]
-#     fwrite(acc_asign, file.path(
-#         res_dir, lvl, "SEACell_assignment.tsv"
-#     ), sep = "\t")
-# }
-# 
-# colnames(acc_gastr) <- paste0("gastrula_", colnames(acc_gastr))
-# colnames(acc_adult) <- paste0("adult_", colnames(acc_adult))
-# 
-# gns <- unique(c(rownames(acc_gastr), rownames(acc_adult)))
-# 
-# miss_gastr_gns <- setdiff(gns, rownames(acc_gastr))
-# miss_gastr_mat <- matrix(
-#     0,
-#     nrow = length(miss_gastr_gns),
-#     ncol = ncol(acc_gastr),
-#     dimnames = list(miss_gastr_gns, colnames(acc_gastr))
-# )
-# acc_gastr <- do.call(rbind, list(acc_gastr, miss_gastr_mat))
-# 
-# miss_adult_gns <- setdiff(gns, rownames(acc_adult))
-# miss_adult_mat <- matrix(
-#     0,
-#     nrow = length(miss_adult_gns),
-#     ncol = ncol(acc_adult),
-#     dimnames = list(miss_adult_gns, colnames(acc_adult))
-# )
-# acc_adult <- do.call(rbind, list(acc_adult, miss_adult_mat))
-# 
-# acc_mt <- do.call(cbind, list(acc_gastr[gns, ], acc_adult[gns, ]))
-# saveRDS(
-#     acc_mt,
-#     file.path(
-#         res_dir, lvl, sprintf("gene_scores_%s.rds", lvl)
-#     )
-# )
 ```
 
 ## Mapping scRNA and scATAC meatacells

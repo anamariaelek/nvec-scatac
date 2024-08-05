@@ -1,0 +1,852 @@
+---
+title: "GRN"
+author: "Anamaria Elek"
+date: today
+format: 
+  html:
+    code-fold: false
+    code-tools: false
+    embed-resources: true
+    highlight-style: github
+    toc: true 
+    code-line-numbers: false 
+execute:
+  eval: false
+  message: false
+  warning: false
+---
+
+```{r}
+#| label: initialize
+#| echo: FALSE
+knitr::opts_chunk$set(echo = TRUE, fig.width=7, fig.height=5) 
+```
+
+In this notebook, we will construct Gene Regulatory Networks (GRN) for 
+*Nematostella* cell types.
+
+## Setup
+
+Load packages and functions.
+
+```{r}
+#| label: setup
+
+# load in-house functions
+source("metacell_downstream_functions/Downstream_functions.R") source("metacell_downstream_functions/Gene_module_functions.R")
+source("metacell_downstream_functions/utils.R")
+source("motif-analysis/mta_downstream_functions.R")
+source("scripts/scatac_helper_functions.R")
+
+# global settings
+options(stringsAsFactors = FALSE)
+
+# load packages
+library(RColorBrewer)
+library(BSgenome.jaNemVect1.1.DToL.Assembly)
+library(GenomicRanges)
+library(data.table)
+library(tidyr)
+library(stringr)
+library(ggplot2)
+library(patchwork)
+library(ggrepel)
+library(ggside)
+library(ggseqlogo)
+library(universalmotif)
+library(grid)
+library(ArchR)
+library(Seurat)
+library(metacell)
+
+# set ggplot2 theme
+theme_blank <- theme_minimal() + theme(
+  axis.title.x = element_blank(),
+  axis.title.y = element_blank(),
+  panel.border = element_blank(),
+  panel.grid=element_blank(),
+  axis.ticks = element_blank(),
+  text = element_text(size=20)
+)
+theme_py <- theme_light() + theme(
+  panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank(),
+  panel.border = element_rect(colour = "black", fill = NA),
+  text = element_text(size=20),
+  strip.placement = "outside", 
+  strip.text = element_text(size=20, color="black"),
+  strip.background = element_rect(fill="white")
+)
+theme_set(theme_py)
+```
+
+Define directories to read the data from and save the results to.
+
+```{r}
+#| label: dirs
+
+adult_dir <- "ArchRProj_Nvec_TSS4_frag200"
+gastr_dir <- "ArchRProj_Nvec_gastrula"
+pks_dir <- "Results/Peaks"
+mta_dir <- "Results/Motifs"
+arc_dir <- "Results/Archetypes"
+map_dir <- "Results/Metacells"
+grn_dir <- "Results/GRN"
+mod_dir <- "Results/Modules"
+dir.create(mod_dir, showWarnings = FALSE)
+fig_dir <- "Plots/Modules"
+dir.create(fig_dir, showWarnings = FALSE)
+ann_dir <- "annotation"
+```
+
+Load gene annotations.
+
+```{r}
+# gene annotation
+gnan <- fread(file.path(
+  ann_dir, "Nematostella_DToL_FINAL.tsv"
+))
+
+# TF annotation
+tfan <- fread(file.path(
+  ann_dir, "Nematostella_DToL_TFs_FINAL.tsv"
+))
+
+# golden markers
+gold <- fread(file.path(
+  ann_dir, "golden-marks-231124.tsv"
+), header = FALSE)
+setnames(gold, c("common_name", "gene", "remark"))
+```
+
+Project-specific variables:
+
+```{r}
+ct_cols <- c(
+  "cnidocyte"                  = "#ff42ff",
+  "cnidocyte_gastrula"         = "#f7abf7",
+  "ecto_pharynx"               = "#5bc0e8",
+  "ectoderm"                   = "#51a0be",
+  "ecto_aboral"                = "#045170",
+  "EMS"                        = "#bdf5bd",
+  "EMS_ecto_boundary"          = "#93dbce",
+  "gastro_circular_muscle_1"   = "#85c90e",
+  "gastro_circular_muscle_2"   = "#73b009",
+  "gastro_parietal_muscle"     = "#8ceb10",
+  "gastro_IRF1_2"              = "#c1eb05",
+  "gastro_somatic_gonad"       = "#bde314",
+  "muscle_tentacle_retractor"  = "#ffd700",
+  "muscle_mesentery_retractor" = "#f0e229",
+  "digestive_filaments_1"      = "#e33d3d",
+  "digestive_filaments_2"      = "#d10606",
+  "digestive_filaments_3"      = "#ad0303",
+  "epidermis_1"                = "#04ccd4",
+  "epidermis_2"                = "#16bacc",
+  "precursors_PGC"             = "#bebebe",
+  "precursors_endoNPC"         = "#8a8686",
+  "precursors_NPC"             = "#636363",
+  "NPC_1"                      = "#808d91",
+  "NPC_2"                      = "#758d92",
+  "neuron_GATA_Islet_1"        = "#0c82f7",
+  "neuron_GATA_Islet_2"        = "#1175f0",
+  "neuron_Pou4_FoxL2_1"        = "#101cde",
+  "neuron_Pou4_FoxL2_2"        = "#0b16bf",
+  "neuron_Pou4_FoxL2_3"        = "#2e39dd",
+  "neuronal_gastrula"          = "#063cb9",
+  "gland"                      = "#ff6f08",
+  "gland_mucin"                = "#ff8f12"
+)
+cell_types <- names(ct_cols)
+adult_cell_types <- c(
+  "cnidocyte",
+  "gastro_circular_muscle_1", 
+  "gastro_circular_muscle_2",
+  "gastro_parietal_muscle",
+  "gastro_IRF1_2",
+  "gastro_somatic_gonad",
+  "muscle_mesentery_retractor",
+  "muscle_tentacle_retractor",
+  "digestive_filaments_1",
+  "digestive_filaments_2",
+  "digestive_filaments_3",
+  "epidermis_1",
+  "epidermis_2",
+  "precursors_PGC",
+  "precursors_endoNPC",
+  "precursors_NPC",
+  "neuron_GATA_Islet_1",
+  "neuron_GATA_Islet_2",
+  "neuron_Pou4_FoxL2_1",
+  "neuron_Pou4_FoxL2_2",
+  "neuron_Pou4_FoxL2_3",
+  "gland"
+)
+gastr_cell_types <- c(setdiff(cell_types, adult_cell_types))
+bct_cols <- toupper(c(
+  "cnidocyte"                 = "#FF42FF",
+  "ecto"                      = "#51a0be",
+  "EMS"                       = "#bdf5bd",
+  "gastro_circular_muscle"    = "#73b009",
+  "gastro_parietal_muscle"    = "#8ceb10",
+  "gastro"                    = "#85c90e",  
+  "muscle"                    = "#FFD700",
+  "digestive_filaments"       = "#e33d3d",
+  "precursors"                = "#BEBEBE",
+  "NPC"                       = "#808d91",
+  "epidermis"                 = "#04ccd4",
+  "neuron_GATA_Islet"         = "#1175f0",
+  "neuron_Pou4_FoxL2"         = "#101cde",
+  "neuronal"                  = "#063cb9",
+  "gland"                     = "#ff6f08"
+))
+bct_maps <- setDT(cbind.data.frame(
+  cell_type = cell_types,
+  broad_cell_type = str_extract(cell_types, paste(names(bct_cols), collapse = "|"))
+))
+```
+
+## WGCNA
+
+Calculate WGCNA gene modules across all metacells.
+
+```{r}
+# define variable genes
+fc_thr <- 1.5
+var_genes <- names(which(apply(exp_mt, 1, max) > fc_thr))
+var_genes <- var_genes[!grepl("orphan", var_genes)]
+
+saveRDS(var_genes, file.path(mod_dir, sprintf("gmod.wgcna.FC%s.var_genes.txt", fc_thr)))
+
+# determine soft power
+gmod_determineSoftPowerWGCNA(
+	data = exp_mt[var_genes,], 
+	output_file = file.path(fig_dir, sprintf("gmod-softpower.pdf"))
+)
+
+# run wgcna with soft power value determined above (first value above line)
+pw_soft <- 10
+mc_wgcna = gmod_runWGCNA(
+	data = exp_mt[var_genes,],
+	propGenes = 1,
+	softPower = pw_soft,
+	cor_method = "pearson",
+	signedNetwork = TRUE
+)
+
+# plot dendrogram
+gmod_plotModulesCut(
+	mc_wgcna, 
+	output_file = file.path(fig_dir, sprintf("gmod-dendrogram-softPower%s.pdf", pw_soft))
+)
+
+# calculate module eigengenes
+mc_wgcna_me = gmod_calculateModuleEigengenes(
+	mc_wgcna,
+	split = 4, 
+	minClusterSize = 10, 
+	cutHeight = 0.99
+)
+
+# get module memberships
+mc_wgcna_gmods = gmod_moduleNonoverlapingMembership(
+	mc_wgcna, 
+	mc_wgcna_me, 
+	kME_threshold = 0.5
+)
+
+saveRDS(mc_wgcna, file.path(mod_dir, sprintf("gmod.wgcna.softPower%s.wgcna.rds", pw_soft)))
+saveRDS(mc_wgcna_gmods, file.path(mod_dir, sprintf("gmod.wgcna.softPower%s.gmods.rds", pw_soft)))
+saveRDS(mc_wgcna_me, file.path(mod_dir, sprintf("gmod.wgcna.softPower%s.ME.rds", pw_soft)))
+```
+
+Annotate gene modules with cell type info.
+
+```{r}
+# load results
+pw_soft <- 10
+mc_wgcna <- readRDS(file.path(mod_dir, sprintf("gmod.wgcna.softPower%s.wgcna.rds", pw_soft)))
+mc_wgcna_gmods <- readRDS(file.path(mod_dir, sprintf("gmod.wgcna.softPower%s.gmods.rds", pw_soft)))
+mc_wgcna_me <- readRDS(file.path(mod_dir, sprintf("gmod.wgcna.softPower%s.ME.rds", pw_soft)))
+
+# list of tfs to highlight
+list_tfs <- tfan$gene
+list_tfs_annot <- gnan[match(list_tfs, gene),]
+list_tfs_annot[common_name != "", gene_name := common_name]
+list_tfs_annot[gene_name == "", gene_name := og]
+list_tfs_annot <- list_tfs_annot$gene_name
+
+# map modules to mcs and cell types
+exp_an <- exp_an[match(colnames(exp_mt), metacell)]
+ct_vector = exp_an$cell_type
+names(ct_vector) = exp_an$metacell
+gmod_annotate_modules_to_mc_and_ct(
+  me = mc_wgcna_me, 
+  ct_vector = ct_vector, 
+  output_fn = file.path(mod_dir, sprintf("gmod.wgcna.softPower%s.mapping.csv", pw_soft))
+)
+
+```
+
+Plot heatmaps of gene modules and gene expression.
+
+```{r}
+gmod_plotMCheatmap_annotate_modules(
+	expr_matrix = exp_mt,
+	gmods = mc_wgcna_gmods,
+	me = mc_wgcna_me,
+	expr_matrix_colors = exp_an[, setNames(color, metacell)],
+	ex_output_file = file.path(fig_dir, sprintf("gmod-expression-softPower%s.pdf", pw_soft)),
+	an_output_file = file.path(mod_dir, sprintf("gmod.wgcna.softPower%s.annotation.csv", pw_soft)),
+	me_output_file = file.path(fig_dir, sprintf("gmod-eigengenes-softPower%s.pdf", pw_soft)),
+	do_expression = TRUE,
+	ex_width = 24, ex_height = 12,
+	me_width = 12, me_height = 6,
+	resolution_rate = 1, 
+	eigen_min = 0,
+	cor_cutoff_max = NULL,
+	annotation = gnan,
+	highlight_gene = list_tfs,
+	highlight_genes_annot = list_tfs_annot,
+	heatmap_colors = c("#fff3e3", "#ffd195", "orange", "orangered2","#a71414", "#68093d", "#470447"),
+	heatmap_colors_cor = c("white","#d6e72e","#6fb600","#003f4d")
+)
+```
+
+```{r}
+expr_matrix = exp_mt
+gmods = mc_wgcna_gmods
+me = mc_wgcna_me
+resolution_rate = 1
+eigen_min = 0
+cor_cutoff_max = NULL
+an_output_file = file.path(mod_dir, sprintf("gmod.wgcna.softPower%s.annotation.csv", pw_soft))
+me_output_file = file.path(fig_dir, sprintf("gmod-eigengenes-softPower%s.pdf", pw_soft))
+me_width = 12; me_height = 6
+do_expression = TRUE
+expr_matrix_colors = exp_an[, setNames(color, metacell)]
+ex_output_file = file.path(fig_dir, sprintf("gmod-expression-softPower%s.pdf", pw_soft))
+ex_width = 24; ex_height = 12
+annotation = gnan
+heatmap_colors = c("#fff3e3", "#ffd195", "orange", "orangered2","#a71414", "#68093d", "#470447")
+heatmap_colors_cor = c("#ffffef","#d6e72e","#6fb600","#003f4d")
+highlight_genes = list_tfs
+highlight_genes_annot = list_tfs_annot
+
+# me derive from calculateModuleEigengenes
+me = t(me) 
+
+# plot eigenvalues and reorder gmods based on them
+me = me[order(apply(me, 1, function(x) which.max(rollmean(x, 1)))), ]
+
+# do we have colors for the metacells?
+if (!is.null(expr_matrix_colors)) {
+	mc_colors = expr_matrix_colors
+	if (is.null(names(mc_colors))) names(mc_colors) = 1:length(mc_colors)
+} else {
+	mc_colors = FALSE
+}
+
+#
+# plot eigenvectors
+#
+
+# color vector
+me_plot = me [ rev(rownames(me)) , ]
+gmod_color_me = gsub("^ME", "", rownames(me_plot))
+names(gmod_color_me) = rownames(me_plot)
+
+# min and max values for the eigen heatmap
+if (is.null(eigen_max)) {
+	eigen_max = quantile(me_plot, 0.98)
+}
+if (is.null(eigen_min)) {
+	eigen_min = min(me_plot)
+}
+
+# plot
+hm = gmod_plot_complex_heatmap(
+	mat = me_plot,
+	name = "eigenvalue",
+	color_mat = heatmap_colors_cor,
+	color_min = eigen_min, 
+	color_max = eigen_max,
+	cluster_row = FALSE, 
+	cluster_col = FALSE, 
+	colors_row = gmod_color_me,
+	colors_col = mc_colors,
+	fontsize = 5, 
+	use_raster = FALSE,
+	title_row = "gene modules"
+)
+
+pdf(me_output_file, width = me_width, height = me_height)
+print(hm)
+dev.off()
+
+#
+# save gmods annotations
+#
+
+# get gmods genes
+gmods = gmods[gsub("ME", "", rownames(me))]
+gmods = sapply(gmods, function(x) x[x %in% rownames(expr_matrix)], USE.NAMES = TRUE, simplify = FALSE)
+unlist_gmods = unlist(gmods)
+
+# sort genes inside gmod by membership score?
+gene_module_membership = apply(WGCNA::signedKME(t(expr_matrix[unlist_gmods, ]), t(me)), 1, max)
+gmods = lapply(gmods, function(x) x[order(gene_module_membership[x], decreasing = TRUE)])
+
+# save gene module annotation table	
+tab = data.frame(
+	gene = unlist_gmods, 
+	gene_module = rep(names(gmods), lengths(gmods)), 
+	membership_score = round(gene_module_membership[unlist_gmods], 3)
+)
+# add gene annotations, if available
+if (!is.null(annotation)) {
+  if ("data.table" %in% class(annotation)) {
+      class(annotation) <- "data.frame"
+      rownames(annotation) = annotation[[1]]
+  }
+	tab = cbind(tab, annotation[unlist(gmods), ])
+	colnames(tab) [ ( ncol(tab) - ncol(annotation) + 1 ) : ncol(tab) ] = colnames(annotation)
+}
+write.table(tab, file = an_output_file, col.names = TRUE, row.names = FALSE, quote = FALSE, sep = "\t")
+
+#
+# plot genes correlation and expression side by side
+#
+
+# compute pearson correlation matrix (^ 5) and scale it
+x_cor = tgs_cor(t(expr_matrix[unlist_gmods, ]), spearman = FALSE)
+x_cor = tgs_cor(t(expr_matrix[unlist(gmods), ]), spearman = FALSE)
+x_cor[is.na(x_cor)]=0
+diag(x_cor)=0
+x_cor = (( 1 + x_cor ) / 2) ^ 5
+saveRDS(
+  x_cor,
+  file.path(mod_dir, sprintf("gmod.wgcna.softPower%s.gene_correlations.rds", pw_soft))
+)
+
+# subsample x_cor matrix
+if (resolution_rate < 1) {
+	x_cor_s = matrix_subsample(x_cor, subsample_rate = resolution_rate)
+} else {
+	x_cor_s = x_cor
+}
+rownames(x_cor_s) = 1:nrow(x_cor_s)
+colnames(x_cor_s) = 1:ncol(x_cor_s)
+
+# subsample gmod
+g_cor_v = lengths(gmods)
+g_cor_s = g_cor_v * resolution_rate
+g_cor_s = round_smart(g_cor_s)
+g_cor_s = rep(g_cor_v, g_cor_s)
+gmod_color = names(g_cor_s)
+names(gmod_color) = names(g_cor_s)
+colnames(x_cor_s) = names(g_cor_s)
+rownames(x_cor_s) = names(g_cor_s)
+
+# colnames are names of gmods located at the start position of each module
+v = as.numeric(as.factor(gmod_color))
+ixs_names = c(1, 1 + which(diff( v ) != 0))
+ixs_other = c(1 + which(diff( v ) == 0))
+ixs_names = pmin(ixs_names, dim(x_cor_s)[1])
+ixs_names = pmax(ixs_names, 1)
+ixs_other = pmin(ixs_other, dim(x_cor_s)[1])
+ixs_other = pmax(ixs_other, 1)
+colnames(x_cor_s) [ ixs_names ] = unique(names(g_cor_s))
+colnames(x_cor_s) [ ixs_other ] = ""
+rownames(x_cor_s) [ ixs_names ] = unique(names(g_cor_s))
+rownames(x_cor_s) [ ixs_other ] = ""
+
+# min and max values for the correlation map
+if (is.null(cor_cutoff_max)) {
+	cor_cutoff_max = quantile(x_cor_s, 0.99)
+}
+if (is.null(cor_cutoff_min)) {
+	cor_cutoff_min = 0
+}
+
+# first heatmap: gene-gene correlation
+hm1 = gmod_plot_complex_heatmap(
+	mat = x_cor_s,
+	name = "cor^5",
+	color_mat = heatmap_colors_cor,
+	color_min = cor_cutoff_min,
+	color_max = cor_cutoff_max,
+	cluster_row = FALSE,
+	cluster_col = FALSE,
+	name_row_show = FALSE,
+	name_col_show = TRUE,
+	categories_row = names(g_cor_s),
+	colors_row = gmod_color,
+	categories_col = names(g_cor_s),
+	colors_col = gmod_color,
+	fontsize = 5,
+	use_raster = TRUE,
+	raster_quality = 1,
+	title_col = "genes sorted by gene module",
+	title_row = sprintf("%i genes in %i modules", nrow(x_cor), length(gmods)))
+
+# second heatmap: footprints
+if (resolution_rate < 1) {
+	expr_s = matrix_subsample(expr_matrix[rownames(x_cor), ], subsample_rate_row = resolution_rate, subsample_rate_col = 1)
+} else {
+	expr_s = expr_matrix[rownames(x_cor), ]
+}
+rownames(expr_s) = rep("", nrow(expr_s))
+colnames(expr_s) = colnames(expr_matrix)
+
+# rownames are names of selected genes (if needed)
+if (!is.null(highlight_genes)) {
+	ixs_tfs_o = which(rownames(x_cor) %in% highlight_genes)
+	vec_tfs_o = rownames(x_cor) [ ixs_tfs_o ]
+	ixs_tfs_s = round(ixs_tfs_o * resolution_rate)
+	ixs_tfs_s = pmin(ixs_tfs_s, dim(expr_s)[1])
+	ixs_tfs_s = pmax(ixs_tfs_s, 1)
+	ixs_oth_s = which(!as.character(1:nrow(expr_s)) %in% as.character(ixs_tfs_s))
+	ixs_oth_s = pmin(ixs_oth_s, dim(expr_s)[1])
+	ixs_oth_s = pmax(ixs_oth_s, 1)
+	rownames(expr_s) [ ixs_tfs_s ] = vec_tfs_o
+	rownames(expr_s) [ is.na(rownames(expr_s)) ] = ""
+	
+	if (!is.null(highlight_genes_annot)) {
+	  names(highlight_genes_annot) = highlight_genes
+		vec_ann_o = highlight_genes_annot [ rownames(expr_s) [ ixs_tfs_s ] ]
+		rownames(expr_s) [ ixs_tfs_s ] = paste(vec_tfs_o, stringr::str_trunc(vec_ann_o, width = 40), sep = " | ")
+	}
+	
+}
+
+hm2 = gmod_plot_complex_heatmap(
+	mat = expr_s,
+	name = "fp",
+	color_mat = heatmap_colors,
+	color_min = 0,
+	color_max = 4,
+	cluster_row = TRUE,
+	cluster_col = FALSE,
+	name_row_show = TRUE,
+	name_col_show = TRUE,
+	categories_row = NULL,
+	colors_row = NULL,
+	categories_col = NULL,
+	colors_col = mc_colors,
+	fontsize = 3.5,
+	use_raster = TRUE,
+	raster_quality = 1,
+	title_row = "genes")
+
+# relative sizes of each heatmap
+hm1@matrix_param$width = unit(0.7, "npc")
+hm2@matrix_param$width = unit(0.5, "npc")
+
+pdf(ex_output_file, width = ex_width, height = ex_height)
+print(hm1 + hm2)
+dev.off()
+```
+
+## Modularization analysis
+
+For each cell type:
+
+1. We first select genes: 
+  a) by GE theshold (ie. those in GRN) or  
+  b) those with certain variability (FC > X)
+
+2. We then calculate expression correlation matrix for the selected genes.
+
+3. We then calculate the correlation of regulatory inputs for the selected genes 
+- this c
+
+4. We compare 2 and 3.
+
+Start by loading and transforming the input data.  
+From global GRN data, get max in silico ChIP scores for aech gene - TF pair.
+ 
+```{r}
+# unfiltered global GRN data
+grn_dt <- readRDS(file.path(
+    grn_dir, lvl, sprintf("insilico-chip-grn-%s.rds", id)
+))
+# aggregate peaks across gene-target gene pairs
+grn_gene_dt <- grn_dt[!is.na(target_gene)][, .(
+  peak_tf_correlation_score = max(peak_tf_correlation_score),
+  in_silico_chip_score = max(in_silico_chip_score)
+), .(gene, gene_name, common_name, og, pfam, motif, 
+     target_gene, target_gene_name, target_common_name, target_og, target_pfam
+)]
+# in silico ChIP scores for all pairs of TF genes-target genes
+ics_dt <- grn_gene_dt[, .(gene, target_gene, in_silico_chip_score)]
+# target gene - TF matrix of in silico ChIP scores
+ics_dc <- dcast.data.table(ics_dt, target_gene ~ gene, value.var = "in_silico_chip_score")
+dim(ics_dc)
+ics_mt <- as.matrix(ics_dc[, -1])
+rownames(ics_mt) <- ics_dc$target_gene
+stopifnot(!any(is.na(ics_mt)))
+```
+
+Alternatively, starting from motif binding scores, get max binding energy for
+each gene - motif pair.
+
+```{r}
+# motif scores
+arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
+q <- 0.95
+mta_dt <- rbindlist(lapply(c(
+  # archetypes
+  file.path(arc_dir, sprintf("motif-scores-archetypes-%s-mona-q%s.tsv.gz", arc_id, q)),
+  # experimental motifs
+  file.path(mta_dir, sprintf("motif-scores-mona-q%s.tsv.gz", q))
+), fread))[, .(peak, motif, motif_score, max_motif_score)]
+
+# add peak to gene assignments
+pks_dt <- fread(file.path(
+  pks_dir, "Peaks_cell_type_mapped_gene_assignment_coaccess.tsv"
+))[, .(seqnames, start, end, peak, gene)][gene != ""]
+mta_dt <- merge.data.table(mta_dt, pks_dt, by = c("peak"), allow.cartesian = TRUE)
+
+# select max motif score per gene
+mta_dt <- mta_dt[, .(motif_score = max(motif_score)), by = c("gene", "motif")]
+
+# make matrix
+mta_dc <- dcast.data.table(mta_dt, gene ~ motif, value.var = "motif_score")
+dim(mta_dc)
+mta_mt <- as.matrix(mta_dc[, -1])
+rownames(mta_mt) <- mta_dc$gene
+if (any(is.na(mta_mt))) {
+  mta_mt[is.na(mta_mt)] <- 0
+}
+```
+
+Load metacell expression data for all genes.
+
+```{r}
+exp_mt <- readRDS(file.path(
+  map_dir, "metacell", "gene_expression_metacell_fc.rds"
+))
+
+# annotation
+exp_an <- fread(file.path(
+  map_dir, "metacell", "gene_expression_metacell_annotation.tsv"
+))
+```
+
+Load per cell type GRN data for gene filtering.
+
+```{r}
+# how peak-TF correlations were calculated
+lvl <- "metacell"
+
+# mapping between metacells
+id <- "genes_exp_FC2_acc_FC4_spearman"
+
+# in silico ChIP threshold
+thrs <- 0.1
+
+# expression quantification: fc or umifrac
+exp <- "fc"
+
+# accessibility quantification: access or score
+acc <- "access"
+
+# quantile thresholds for expression and accessibility
+thr_q_exp <- 0.4
+thr_q_acc <- 0.4
+
+# chromvar threshold for TF motif activity
+chr_thrs <- 4
+
+# this is a global expression threshold for all cell types;
+# if not NULL, it overrides expression quantification and quantile threshold!
+thr_fc_exp <- 1.4
+if (!is.null(thr_fc_exp)) exp <- "fc"
+
+# file name
+if (is.null(thr_fc_exp)) {
+  fn <- sprintf(
+    "expression_%s_%s_accessibility_%s_%s_chromvar_%s", 
+    exp, thr_q_exp, acc, thr_q_acc, chr_thrs
+  )
+} else {
+  fn <- sprintf(
+    "expression_%s_%s_accessibility_%s_%s_chromvar_%s", 
+    exp, thr_fc_exp, acc, thr_q_acc, chr_thrs
+  )
+}
+
+# load network
+grn_ct_dt <- fread(file.path(
+  grn_dir, "networks", sprintf("grn_genes_%s.tsv", fn)
+))
+grn_ct_dt[, cell_type := factor(cell_type, levels = cell_types)]
+```
+
+Load WGCNA gene modules.
+
+```{r}
+#gmd_mt <- readRDS(file.path(mod_dir, sprintf("gmod.wgcna.softPower%s.gene_correlations.rds", pw_soft)))
+#gmd_me <- readRDS(file.path(mod_dir, sprintf("gmod.wgcna.softPower%s.ME.rds", pw_soft)))
+gmd_dt <- fread(file.path(mod_dir, sprintf("gmod.wgcna.softPower%s.annotation.csv", pw_soft)))
+cols <- unique(colnames(gmd_dt))
+gmd_dt <- gmd_dt[, ..cols]
+```
+
+For each cell type...
+
+```{r}
+ct <- "cnidocyte"
+
+# select genes
+gs <- unique(c(
+  grn_ct_dt[cell_type == ct]$gene,
+  grn_ct_dt[cell_type == ct]$target_gene
+))
+length(gs)
+if (!all(gs %in% rownames(exp_mt))) {
+  gs <- intersect(gs, rownames(exp_mt))
+}
+length(gs)
+if (!all(gs %in% rownames(ics_mt))) {
+  gs <- intersect(gs, rownames(ics_mt))
+}
+length(gs)
+if (!all(gs %in% rownames(mta_mt))) {
+  gs <- intersect(gs, rownames(mta_mt))
+}
+length(gs)
+if (!all(gs %in% gmd_dt$gene)) {
+  gs <- intersect(gs, gmd_dt$gene)
+}
+length(gs)
+
+# for in silico ChIP score, subset TFs for those in cell type of interest
+tfs <- grn_ct_dt[cell_type == ct]$gene
+if (!all(tfs %in% rownames(ics_mt))) {
+  tfs <- intersect(tfs, rownames(ics_mt))
+}
+length(tfs)
+
+# for motif score, subset motifs
+mts <- colnames(mta_mt)[
+  apply(mta_mt, 2, function(x) var(x)) > quantile(apply(mta_mt, 2, var), 0.75)
+]
+length(mts)
+
+# expression correlation
+exp_co <- cor(t(exp_mt[gs, ]))
+stopifnot(!any(is.na(exp_co)))
+
+# in silico chip score correlation
+ics_co <- cor(t(ics_mt[gs, tfs]))
+stopifnot(!any(is.na(ics_co)))
+
+# max motif score correlation
+mta_co <- cor(t(mta_mt[gs, mts]))
+stopifnot(!any(is.na(mta_co)))
+
+# cluster genes
+for (ord_val in c("gmo", "exp", "ics", "mta")) {
+
+
+  message("Ordering genes by ", ord_val, " correlation")
+  if (ord_val == "gmo") {
+    gen_ord <- intersect(gmd_dt$gene, gs)
+  } else {
+    dis_mat <- switch(
+      ord_val,
+      "exp" = exp_co,
+      "ics" = ics_co,
+      "mta" = mta_co
+    )
+    gen_cl <- stats::hclust(as.dist(1 - dis_mat), method = "ward.D2")
+    gen_ord <- rownames(dis_mat)[gen_cl$order]
+  }
+  exp_co_ord <- exp_co[gen_ord, gen_ord]
+  diag(exp_co_ord) <- 0
+  ics_co_ord <- ics_co[gen_ord, gen_ord]
+  diag(ics_co_ord) <- 0
+  mta_co_ord <- mta_co[gen_ord, gen_ord]
+  diag(mta_co) <- 0
+
+  
+  # plot
+  library(circlize)
+  #gmd_col = colorRamp2(c(min(gmd_co), 0, max(gmd_co)), c("#b2182b", "#f7f7f7", "#2166ac"))
+  exp_col = colorRamp2(c(min(exp_co_ord), 0, max(exp_co_ord)), c("#ef8a62", "#f7f7f7", "#67a9cf"))
+  ics_col = colorRamp2(c(min(ics_co_ord), 0, max(ics_co_ord)), c("#e9a3c9", "#f7f7f7", "#a1d76a"))
+  mta_col = colorRamp2(c(min(mta_co_ord), 0, max(mta_co_ord)), c("#af8dc3", "#f7f7f7", "#7fbf7b"))
+  
+  ht1 = Heatmap(
+    exp_co_ord, 
+    col = exp_col, name = "expression\ncorrelation",
+    cluster_rows = FALSE, cluster_columns = FALSE,
+    row_names_side = "left",
+    row_names_gp = gpar(fontsize = 6),
+    column_names_side = "bottom",
+    column_names_gp = gpar(fontsize = 6),
+    rect_gp = gpar(type = "none"),
+    layer_fun = function(j, i, x, y, w, h, fill) {
+        ind = which(row(exp_co) >= col(exp_co))
+        grid.rect(x[ind], y[ind], w[ind], h[ind], gp = gpar(fill = fill[ind], col = fill[ind]))
+    }
+  )
+  
+  ht2 = Heatmap(
+    ics_co_ord, 
+    col = ics_col, name = "in silico ChIP score\ncorrelation",
+    cluster_rows = FALSE, cluster_columns = FALSE,
+    row_names_side = "right",
+    row_names_gp = gpar(fontsize = 6),
+    column_names_side = "top",
+    column_names_gp = gpar(fontsize = 6),
+    rect_gp = gpar(type = "none"),
+    layer_fun = function(j, i, x, y, w, h, fill) {
+      ind = which(row(ics_co) <= col(ics_co))
+      grid.rect(x[ind], y[ind], w[ind], h[ind], gp = gpar(fill = fill[ind], col = fill[ind]))
+    }
+  )
+  
+  ht3 = Heatmap(
+    mta_co_ord, 
+    col = mta_col, name = "max motif score\ncorrelation",
+    cluster_rows = FALSE, cluster_columns = FALSE,
+    row_names_side = "right",
+    row_names_gp = gpar(fontsize = 6),
+    column_names_side = "top",
+    column_names_gp = gpar(fontsize = 6),
+    rect_gp = gpar(type = "none"),
+    layer_fun = function(j, i, x, y, w, h, fill) {
+      ind = which(row(mta_co) <= col(mta_co))
+      grid.rect(x[ind], y[ind], w[ind], h[ind], gp = gpar(fill = fill[ind], col = fill[ind]))
+    }
+  )
+  
+  ht4 = Heatmap(
+    mta_co_ord, 
+    col = mta_col, name = "max motif score\ncorrelation",
+    cluster_rows = FALSE, cluster_columns = FALSE,
+    row_names_side = "left",
+    row_names_gp = gpar(fontsize = 6),
+    column_names_side = "bottom",
+    column_names_gp = gpar(fontsize = 6),
+    rect_gp = gpar(type = "none"),
+    layer_fun = function(j, i, x, y, w, h, fill) {
+        ind = which(row(exp_co) >= col(exp_co))
+        grid.rect(x[ind], y[ind], w[ind], h[ind], gp = gpar(fill = fill[ind], col = fill[ind]))
+    }
+  )
+  
+  pdf(file.path(
+    fig_dir, sprintf("modularization-ordered-%s.pdf", ord_val)
+  ), width = 21, height = 20)
+  # expression - in silico chip
+  draw(ht1 + ht2, ht_gap = unit(-40, "cm"))
+  # expression - max motif score
+  draw(ht1 + ht3, ht_gap = unit(-40, "cm"))
+  # max motif score - in silico chip 
+  draw(ht4 + ht2, ht_gap = unit(-40, "cm"))
+  dev.off()
+}
+```
