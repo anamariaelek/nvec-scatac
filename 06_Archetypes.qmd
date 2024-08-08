@@ -1039,14 +1039,14 @@ seqlvl <- seqdt[[1]]
 peaks_gr <- mta_trim_granges(peaks_gr, seqdt)
 
 # scanning archetypes
-q <- 0.98
+q <- 0.95
 arc_scores_mona <- mta_gw_motif_score_monalisa(
   motifs = mona_arc_lst,
   genome_object = genome,
   index_object = seqdt,
   bin_width = 250,
   subsample_fraction = 0.10,
-  score_quantiles = c(0, 0.25, 0.5, 0.75, 0.95, 0.98, 0.99, 0.995, 0.999, 1.0),
+  score_quantiles = c(0, 0.05, 0.1, 0.25, 0.5, 0.75, 0.95, 0.98, 0.99, 0.995, 0.999, 1.0),
   score_quantile_thr = q,
   do_gw_scan = TRUE,
   given_gr = peaks_gr,
@@ -1084,7 +1084,17 @@ par_scor <- peaks_gr[subjectHits(arc_ovls)]
 mcols(arc_scor) <- cbind(mcols(arc_scor), mcols(par_scor))
 arc_data <- as.data.table(arc_scor)
 arc_data[, max_motif_score := maxs_arc[motif]]
-arc_data[, max_motif_score := pmax(.SD$max_motif_score, .SD$motif_score), motif]
+
+# # select top hit per peak
+# setorder(arc_data, -motif_score)
+# arc_data <- arc_data[,.SD[1],.(motif,peak)]
+# setorder(arc_data, seqnames, start)
+
+# add top motif score
+arc_data[, max_motif_score := maxs_arc[motif]]
+arc_data[, max_motif_score := pmax(.SD$max_motif_score, .SD$motif_score), motif][, max_motif_score := pmax(.SD$max_motif_score, .SD$motif_score), motif]
+
+# save
 fwrite(
   arc_data,
   str_replace_all(arch_fn, c("motif" = "motif-scores", "pwms.rds" = sprintf("mona-q%s.tsv.gz", q))),
@@ -1099,8 +1109,12 @@ mta_scor <- mta_hits[queryHits(mta_ovls)]
 pmt_scor <- peaks_gr[subjectHits(mta_ovls)]
 mcols(mta_scor) <- cbind(mcols(mta_scor), mcols(pmt_scor))
 mta_data <- as.data.table(mta_scor)
+
+# add top motif score
 mta_data[, max_motif_score := maxs_mta[motif]]
 mta_data[, max_motif_score := pmax(.SD$max_motif_score, .SD$motif_score), motif]
+
+# save
 fwrite(
   mta_data,
   file.path(arc_dir, sprintf("motif-scores-input-motifs-mona-q%s.tsv.gz", q)),
@@ -2481,7 +2495,7 @@ fwrite(
 ```
 
 For experimental validations, we want to keep also CisBP motifs that
-didn't make it to correlation based assignments
+didn't make it to correlation based assignments.
 
 ```{r}
 # all initially assigned archetypes from CiSBP
@@ -2589,7 +2603,36 @@ fwrite(g_dt, file.path(
 
 ```
 
-Inspect
+Final table for Supplementary materials.
+
+```{r}
+cols <- c(
+  "gene", "gene_name", "common_name", "og", "pfam", "tf_family",
+  "archetype_name", "archetype_family", "rank", 
+  "gene_score_correlation","gene_expression_correlation"
+)
+
+dt1 <- fread("motif-assignment-archetypes-PPM-PCC-0.8-IC0.5-5bp.tsv")
+dt1a <- dt1[!(gene_score_correlation<0.4 & gene_expression_correlation<0.4), ..cols]
+dt1b <- dt1[  gene_score_correlation<0.4 & gene_expression_correlation<0.4 & CisBP_assignment=="assigned", ..cols]
+
+dt2 <- fread("motif-assignment-plus-cisbp-archetypes-PPM-PCC-0.8-IC0.5-5bp.tsv")
+dt2a <- dt2[!gene %in% c(dt1a$gene, dt1b$gene)][, ..cols]
+
+dt <- rbindlist(list(
+  dt1a[, assignment := "assigned_correlation"],
+  dt1b[, assignment := "assigned_CisBP"],
+  dt2a[, assignment := "not_assigned"]
+))
+
+dt2b <- unique(
+  dt2[, .(archetype_name, archetype_source, most_similar_archetype, most_similar_archetype_source, archetype_archetype_similarity)]
+)
+dt <- merge.data.table(dt, dt2b, by = "archetype_name", all.x = TRUE, sort = FALSE)
+fwrite(dt, "motif-assignment.tsv", sep = "\t")
+```
+
+Inspect motif assignment.
 
 ```{r}
 # for plotting
@@ -3056,7 +3099,7 @@ mta_scores_mona <- mta_gw_motif_score_monalisa(
   index_object = seqdt,
   bin_width = 250,
   subsample_fraction = 0.10,
-  score_quantiles = c(0, 0.25, 0.5, 0.75, 0.95, 0.98, 0.99, 0.995, 0.999, 1.0),
+  score_quantiles = c(0, 0.05, 0.1, 0.25, 0.5, 0.75, 0.95, 0.98, 0.99, 0.995, 0.999, 1.0),
   score_quantile_thr = q,
   do_gw_scan = TRUE,
   given_gr = peaks_gr,
@@ -3423,7 +3466,7 @@ chromvar_mat <- rbind(chromvar_mat_arc, chromvar_mat_mta)
 # gene expression
 exp_mt <- readRDS(file.path(
   "Results", "Metacells", "metacell", 
-  "gene_expression_seacells_fc_genes_exp_FC2_acc_FC4_spearman.rds"
+  "gene_expression_fc_genes_exp_FC2_acc_FC4_spearman.rds"
 ))
 
 # gene scores
@@ -3529,7 +3572,14 @@ arc_plt_dt[nchar(gene_label) > 80, gene_label := paste0(substr(gene_label, 1, 77
 arc_plt_dt[, c("gene", "og", "pfam", "common_name") := NULL]
 arc_plt_dt <- unique(arc_plt_dt)
 
-# motif enrichment dotmap
+# save data for plot
+fwrite(
+  arc_plt_dt,
+  file.path(mta_dir, sprintf("motif-enrichment-mona-q%s-FC-%s-padj-%s.tsv", q, fc_thr, pa_thr)),
+  sep = "\t"
+)
+
+# plot motif enrichment dotmap
 arc_ann_gp <- ggplot(
   arc_plt_dt, 
   aes(cell_type, archetype_name)

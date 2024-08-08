@@ -33,7 +33,8 @@ Load packages and functions.
 #| label: setup
 
 # load in-house functions
-source("metacell_downstream_functions/Downstream_functions.R") source("metacell_downstream_functions/Gene_module_functions.R")
+source("metacell_downstream_functions/Downstream_functions.R") 
+source("metacell_downstream_functions/Gene_module_functions.R")
 source("metacell_downstream_functions/utils.R")
 source("motif-analysis/mta_downstream_functions.R")
 source("scripts/scatac_helper_functions.R")
@@ -210,6 +211,16 @@ bct_maps <- setDT(cbind.data.frame(
 Calculate WGCNA gene modules across all metacells.
 
 ```{r}
+# expression matrix
+exp_mt <- readRDS(file.path(
+  map_dir, "metacell", "gene_expression_metacell_fc.rds"
+))
+
+# expression metacell annotation
+exp_an <- fread(file.path(
+  map_dir, "metacell", "gene_expression_metacell_annotation.tsv"
+))
+
 # define variable genes
 fc_thr <- 1.5
 var_genes <- names(which(apply(exp_mt, 1, max) > fc_thr))
@@ -549,8 +560,6 @@ dev.off()
 
 ## Modularization analysis
 
-For each cell type:
-
 1. We first select genes: 
   a) by GE theshold (ie. those in GRN) or  
   b) those with certain variability (FC > X)
@@ -558,7 +567,7 @@ For each cell type:
 2. We then calculate expression correlation matrix for the selected genes.
 
 3. We then calculate the correlation of regulatory inputs for the selected genes 
-- this c
+- this can be in silico ChIP scores or motif scores for each target gene.
 
 4. We compare 2 and 3.
 
@@ -567,6 +576,8 @@ From global GRN data, get max in silico ChIP scores for aech gene - TF pair.
  
 ```{r}
 # unfiltered global GRN data
+lvl <- "metacell"
+id <- "genes_exp_FC2_acc_FC4_spearman"
 grn_dt <- readRDS(file.path(
     grn_dir, lvl, sprintf("insilico-chip-grn-%s.rds", id)
 ))
@@ -588,12 +599,16 @@ stopifnot(!any(is.na(ics_mt)))
 ```
 
 Alternatively, starting from motif binding scores, get max binding energy for
-each gene - motif pair.
+each gene - motif pair.  
+For this we will need to re-do motif-scoring with lower quantile threshold, so 
+as to get a score for every motif in (any preak associated to) every gene (code 
+in `06_Archetypes.qmd`.  
+Now we select  max binding energy for each gene - motif pair.
 
 ```{r}
 # motif scores
 arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
-q <- 0.95
+q <- 0.1
 mta_dt <- rbindlist(lapply(c(
   # archetypes
   file.path(arc_dir, sprintf("motif-scores-archetypes-%s-mona-q%s.tsv.gz", arc_id, q)),
@@ -601,17 +616,28 @@ mta_dt <- rbindlist(lapply(c(
   file.path(mta_dir, sprintf("motif-scores-mona-q%s.tsv.gz", q))
 ), fread))[, .(peak, motif, motif_score, max_motif_score)]
 
-# add peak to gene assignments
+# peak to gene assignments
 pks_dt <- fread(file.path(
   pks_dir, "Peaks_cell_type_mapped_gene_assignment_coaccess.tsv"
 ))[, .(seqnames, start, end, peak, gene)][gene != ""]
+
+# add assigned genes to motif scores in peaks
 mta_dt <- merge.data.table(mta_dt, pks_dt, by = c("peak"), allow.cartesian = TRUE)
 
 # select max motif score per gene
-mta_dt <- mta_dt[, .(motif_score = max(motif_score)), by = c("gene", "motif")]
+mta_dt[, relative_motif_score := motif_score / max_motif_score]
+mta_dt <- mta_dt[, .(relative_motif_score = max(relative_motif_score)), by = c("gene", "motif")]
+
+# select non-redundant archetypes
+mta_sg <- fread(file.path(mta_dir, "motif-enrichment-mona-q0.98-FC-1-padj-0.001.tsv"))
+mta_dt <- mta_dt[motif %in% mta_sg$archetype_name]
+
+# inspect distribution of max motif scores
+mta_gp <- ggplot(mta_dt, aes(relative_motif_score)) + geom_density()
+ggsave(file.path(fig_dir, "max_motif_score_density.pdf"), mta_gp, width = 5, height = 5)
 
 # make matrix
-mta_dc <- dcast.data.table(mta_dt, gene ~ motif, value.var = "motif_score")
+mta_dc <- dcast.data.table(mta_dt, gene ~ motif, value.var = "relative_motif_score")
 dim(mta_dc)
 mta_mt <- as.matrix(mta_dc[, -1])
 rownames(mta_mt) <- mta_dc$gene
@@ -623,13 +649,9 @@ if (any(is.na(mta_mt))) {
 Load metacell expression data for all genes.
 
 ```{r}
+# expression matrix
 exp_mt <- readRDS(file.path(
   map_dir, "metacell", "gene_expression_metacell_fc.rds"
-))
-
-# annotation
-exp_an <- fread(file.path(
-  map_dir, "metacell", "gene_expression_metacell_annotation.tsv"
 ))
 ```
 
@@ -683,56 +705,55 @@ grn_ct_dt <- fread(file.path(
 grn_ct_dt[, cell_type := factor(cell_type, levels = cell_types)]
 ```
 
-Load WGCNA gene modules.
+We can also load WGCNA gene modules, for comparison.
 
 ```{r}
-#gmd_mt <- readRDS(file.path(mod_dir, sprintf("gmod.wgcna.softPower%s.gene_correlations.rds", pw_soft)))
-#gmd_me <- readRDS(file.path(mod_dir, sprintf("gmod.wgcna.softPower%s.ME.rds", pw_soft)))
-gmd_dt <- fread(file.path(mod_dir, sprintf("gmod.wgcna.softPower%s.annotation.csv", pw_soft)))
+pw_soft <- 10
+gmd_dt <- fread(file.path(mod_dir, sprintf(
+  "gmod.wgcna.softPower%s.annotation.csv", pw_soft
+)))
 cols <- unique(colnames(gmd_dt))
 gmd_dt <- gmd_dt[, ..cols]
 ```
 
-For each cell type...
+Calculate correlations of gene expression, *in silico* ChIP scores, and max 
+motif scores for all gene-gene pairs. This way, we will get expression modules 
+and regulatory modules based on *in silico* ChIP score or motif scores, 
+respectively.
 
 ```{r}
-ct <- "cnidocyte"
+# define variable genes
+fc_thr <- 2.5
+var_genes <- names(which(apply(exp_mt, 1, max) > fc_thr))
+var_genes <- var_genes[!grepl("orphan", var_genes)]
+message("There are ", length(var_genes), " variable genes (FC >", fc_thr, ").")
 
-# select genes
-gs <- unique(c(
-  grn_ct_dt[cell_type == ct]$gene,
-  grn_ct_dt[cell_type == ct]$target_gene
-))
-length(gs)
-if (!all(gs %in% rownames(exp_mt))) {
-  gs <- intersect(gs, rownames(exp_mt))
-}
-length(gs)
+# subset by other matrices
+gs <- var_genes
 if (!all(gs %in% rownames(ics_mt))) {
   gs <- intersect(gs, rownames(ics_mt))
 }
-length(gs)
+message("There are ", length(gs), " genes after subsetting by in silico ChIP score matrix.")
 if (!all(gs %in% rownames(mta_mt))) {
   gs <- intersect(gs, rownames(mta_mt))
 }
-length(gs)
-if (!all(gs %in% gmd_dt$gene)) {
-  gs <- intersect(gs, gmd_dt$gene)
-}
-length(gs)
+message("There are ", length(gs), " genes after subsetting by in motif score matrix.")
+# FC 1.5 7896
+# FC 2.0 5022
 
 # for in silico ChIP score, subset TFs for those in cell type of interest
-tfs <- grn_ct_dt[cell_type == ct]$gene
+tfs <- unique(grn_dt$gene)
 if (!all(tfs %in% rownames(ics_mt))) {
   tfs <- intersect(tfs, rownames(ics_mt))
 }
-length(tfs)
+message("Using in silico ChIP scores for ", length(tfs), " TFs")
 
 # for motif score, subset motifs
+mts <- colnames(mta_mt)
 mts <- colnames(mta_mt)[
   apply(mta_mt, 2, function(x) var(x)) > quantile(apply(mta_mt, 2, var), 0.75)
 ]
-length(mts)
+message("Using scores for ", length(mts), " motifs")
 
 # expression correlation
 exp_co <- cor(t(exp_mt[gs, ]))
@@ -745,14 +766,18 @@ stopifnot(!any(is.na(ics_co)))
 # max motif score correlation
 mta_co <- cor(t(mta_mt[gs, mts]))
 stopifnot(!any(is.na(mta_co)))
+```
 
-# cluster genes
-for (ord_val in c("gmo", "exp", "ics", "mta")) {
+We plot ordered half-heatmaps of gene expression, *in silico* ChIP scores, and 
+max motif scores correlations.
 
+```{r}
+# make heatmaps
+for (ord_val in c("exp", "ics", "mta")) {
 
   message("Ordering genes by ", ord_val, " correlation")
   if (ord_val == "gmo") {
-    gen_ord <- intersect(gmd_dt$gene, gs)
+    gen_ord <- intersect(gmd_dt$gene, gns_list[[ct]])
   } else {
     dis_mat <- switch(
       ord_val,
@@ -768,27 +793,46 @@ for (ord_val in c("gmo", "exp", "ics", "mta")) {
   ics_co_ord <- ics_co[gen_ord, gen_ord]
   diag(ics_co_ord) <- 0
   mta_co_ord <- mta_co[gen_ord, gen_ord]
-  diag(mta_co) <- 0
-
+  diag(mta_co_ord) <- 0
+  
+  # subsample for plotting
+  set.seed(1950)
+  ids <- rep(c(TRUE, FALSE, FALSE), length.out =length(gen_ord))
+  exp_co_ord <- exp_co_ord[ids, ids]
+  ics_co_ord <- ics_co_ord[ids, ids]
+  mta_co_ord <- mta_co_ord[ids, ids]
   
   # plot
   library(circlize)
   #gmd_col = colorRamp2(c(min(gmd_co), 0, max(gmd_co)), c("#b2182b", "#f7f7f7", "#2166ac"))
-  exp_col = colorRamp2(c(min(exp_co_ord), 0, max(exp_co_ord)), c("#ef8a62", "#f7f7f7", "#67a9cf"))
-  ics_col = colorRamp2(c(min(ics_co_ord), 0, max(ics_co_ord)), c("#e9a3c9", "#f7f7f7", "#a1d76a"))
-  mta_col = colorRamp2(c(min(mta_co_ord), 0, max(mta_co_ord)), c("#af8dc3", "#f7f7f7", "#7fbf7b"))
-  
+  exp_col = colorRamp2(
+    c(pmin(quantile(exp_co_ord, 0.02), -0.1), 0, pmax(quantile(exp_co_ord, 0.98), 0.1)),
+    c("#ef8a62", "#f7f7f7", "#67a9cf")
+  )
+  ics_col = colorRamp2(
+    c(pmin(quantile(ics_co_ord, 0.02), -0.1), 0, pmax(quantile(ics_co_ord, 0.98), 0.1)), 
+    c("#e9a3c9", "#f7f7f7", "#a1d76a")
+  )
+  mta_col = colorRamp2(
+    c(pmin(quantile(mta_co_ord, 0.02), -0.1), 0, pmax(quantile(mta_co_ord, 0.98), 0.1)), 
+    c("#af8dc3", "#f7f7f7", "#7fbf7b")
+  )
   ht1 = Heatmap(
     exp_co_ord, 
     col = exp_col, name = "expression\ncorrelation",
+    border = FALSE, use_raster = TRUE,
     cluster_rows = FALSE, cluster_columns = FALSE,
+    show_row_names = FALSE,
     row_names_side = "left",
     row_names_gp = gpar(fontsize = 6),
+    show_column_names = FALSE,
     column_names_side = "bottom",
     column_names_gp = gpar(fontsize = 6),
     rect_gp = gpar(type = "none"),
+    row_title = sprintf("expression correlation"),
+    row_title_side = "left",
     layer_fun = function(j, i, x, y, w, h, fill) {
-        ind = which(row(exp_co) >= col(exp_co))
+        ind = which(row(exp_co_ord) >= col(exp_co_ord))
         grid.rect(x[ind], y[ind], w[ind], h[ind], gp = gpar(fill = fill[ind], col = fill[ind]))
     }
   )
@@ -796,14 +840,19 @@ for (ord_val in c("gmo", "exp", "ics", "mta")) {
   ht2 = Heatmap(
     ics_co_ord, 
     col = ics_col, name = "in silico ChIP score\ncorrelation",
+    border = FALSE, use_raster = TRUE,
     cluster_rows = FALSE, cluster_columns = FALSE,
+    show_row_names = FALSE,
     row_names_side = "right",
     row_names_gp = gpar(fontsize = 6),
+    show_column_names = FALSE,
     column_names_side = "top",
     column_names_gp = gpar(fontsize = 6),
+    column_title = sprintf("in silico ChIP score correlation"),
+    column_title_side = "top",
     rect_gp = gpar(type = "none"),
     layer_fun = function(j, i, x, y, w, h, fill) {
-      ind = which(row(ics_co) <= col(ics_co))
+      ind = which(row(ics_co_ord) <= col(ics_co_ord))
       grid.rect(x[ind], y[ind], w[ind], h[ind], gp = gpar(fill = fill[ind], col = fill[ind]))
     }
   )
@@ -811,14 +860,19 @@ for (ord_val in c("gmo", "exp", "ics", "mta")) {
   ht3 = Heatmap(
     mta_co_ord, 
     col = mta_col, name = "max motif score\ncorrelation",
+    border = FALSE, use_raster = TRUE,
     cluster_rows = FALSE, cluster_columns = FALSE,
+    show_row_names = FALSE,
     row_names_side = "right",
     row_names_gp = gpar(fontsize = 6),
+    show_column_names = FALSE,
     column_names_side = "top",
     column_names_gp = gpar(fontsize = 6),
     rect_gp = gpar(type = "none"),
+    column_title = sprintf("max motif score correlation"),
+    column_title_side = "top",
     layer_fun = function(j, i, x, y, w, h, fill) {
-      ind = which(row(mta_co) <= col(mta_co))
+      ind = which(row(mta_co_ord) <= col(mta_co_ord))
       grid.rect(x[ind], y[ind], w[ind], h[ind], gp = gpar(fill = fill[ind], col = fill[ind]))
     }
   )
@@ -826,27 +880,839 @@ for (ord_val in c("gmo", "exp", "ics", "mta")) {
   ht4 = Heatmap(
     mta_co_ord, 
     col = mta_col, name = "max motif score\ncorrelation",
+    border = FALSE, use_raster = TRUE,
     cluster_rows = FALSE, cluster_columns = FALSE,
+    show_row_names = FALSE,
     row_names_side = "left",
     row_names_gp = gpar(fontsize = 6),
+    show_column_names = FALSE,
     column_names_side = "bottom",
     column_names_gp = gpar(fontsize = 6),
     rect_gp = gpar(type = "none"),
+    row_title = sprintf("max motif score correlation"),
+    row_title_side = "left",
     layer_fun = function(j, i, x, y, w, h, fill) {
-        ind = which(row(exp_co) >= col(exp_co))
+        ind = which(row(mta_co_ord) >= col(mta_co_ord))
         grid.rect(x[ind], y[ind], w[ind], h[ind], gp = gpar(fill = fill[ind], col = fill[ind]))
     }
   )
   
+  message("Heatmaps ordered by ", ord_val)
+  pdf(file.path(
+    fig_dir, sprintf("modularization-global-FC%s-ordered-%s-subsampled.pdf", fc_thr, ord_val)
+  #), width = 21, height = 20)
+  ), width = 10.5, height = 10)
+  # expression - in silico chip
+  draw(ht1 + ht2, ht_gap = unit(-20, "cm"))
+  # expression - max motif score
+  draw(ht1 + ht3, ht_gap = unit(-20, "cm"))
+  # max motif score - in silico chip 
+  draw(ht4 + ht2, ht_gap = unit(-20, "cm"))
+  dev.off()
+
+}
+
+# correlations for all pairs of genes
+exp_dt <- melt.data.table(
+  as.data.table(exp_co, keep.rownames = "gene1"),
+  id.vars = "gene1",
+  variable.name = "gene2", 
+  value.name = "expression_correlation"
+)[, c("row", "col") := list(
+  match(gene1, rownames(exp_co)),
+  match(gene2, colnames(exp_co))
+)]
+exp_dt <- exp_dt[row<col]
+exp_dt[, c("row", "col") := NULL]
+
+ics_dt <- melt.data.table(
+  as.data.table(ics_co, keep.rownames = "gene1"),
+  id.vars = "gene1", 
+  variable.name = "gene2", 
+  value.name = "in_silico_chip_score_correlation"
+)[, c("row", "col") := list(
+  match(gene1, rownames(exp_co)),
+  match(gene2, colnames(exp_co))
+)]
+ics_dt <- ics_dt[row<col]
+ics_dt[, c("row", "col") := NULL]
+
+mta_dt <- melt.data.table(
+  as.data.table(mta_co, keep.rownames = "gene1"),
+  id.vars = "gene1", 
+  variable.name = "gene2", 
+  value.name = "max_motif_score_correlation"
+)[, c("row", "col") := list(
+  match(gene1, rownames(exp_co)),
+  match(gene2, colnames(exp_co))
+)]
+mta_dt <- mta_dt[row<col]
+mta_dt[, c("row", "col") := NULL]
+
+cor_dt <- merge.data.table(
+  exp_dt, 
+  merge.data.table(
+    ics_dt, 
+    mta_dt, 
+    by = c("gene1", "gene2"), all = TRUE
+  ),
+  by = c("gene1", "gene2"), all = TRUE
+)
+saveRDS(
+  cor_dt,
+  file.path(mod_dir, sprintf("gene-FC%s-correlations.rds", fc_thr))
+)
+```
+
+Plot 2D density plots of correlations between gene expression, in silico ChIP 
+scores, and max motif scores for all pairs of genes.
+
+```{r}
+# 2d density plots
+set.seed(1950)
+ids <- sample(seq_len(nrow(cor_dt)), 1e6)
+gp1 <- ggplot(cor_dt[ids,], aes(x = expression_correlation, y = in_silico_chip_score_correlation)) +
+  geom_density_2d_filled(alpha = 0.5, linewidth = 0.25, colour = "black") +
+  ggrastr::geom_point_rast(size = 0.5, alpha = 0.1) +
+  geom_smooth(method = "lm", se = FALSE) +
+  theme(legend.position = "none") +
+  labs(
+    x = "expression correlation",
+    y = "in silico ChIP score correlation"
+  )
+gp2 <- ggplot(cor_dt[ids,], aes(x = expression_correlation, y = max_motif_score_correlation)) +
+  geom_density_2d_filled(alpha = 0.5, linewidth = 0.25, colour = "black") +
+  ggrastr::geom_point_rast(size = 0.5, alpha = 0.1) +
+  geom_smooth(method = "lm", se = FALSE) +
+  theme(legend.position = "none") +
+  labs(
+    x = "expression correlation",
+    y = "max motif score correlation"
+  )
+gp3 <- ggplot(cor_dt[ids,], aes(x = in_silico_chip_score_correlation, y = max_motif_score_correlation)) +
+  geom_density_2d_filled(alpha = 0.5, linewidth = 0.25, colour = "black") +
+  ggrastr::geom_point_rast(size = 0.5, alpha = 0.1) +
+  geom_smooth(method = "lm", se = FALSE) +
+  theme(legend.position = "none") +
+  labs(
+    x = "in silico ChIP score correlation",
+    y = "max motif score correlation"
+  )
+gp_cor <- gp1 + gp2 + gp3 + plot_layout(ncol = 3)
+ggsave(
+  file.path(fig_dir, sprintf("modularization-global-FC%s-correlations.pdf", fc_thr)), 
+  gp_cor, width = 21, height = 7
+)
+```
+
+Next we will do this for each cell type separately, considering only genes that 
+are in each cell type's GRN.
+
+```{r}
+gns_list <- list()
+tfs_list <- list()
+mts_list <- list()
+exp_co_list <- list()
+ics_co_list <- list()
+mta_co_list <- list()
+
+for (ct in cell_types) {
+  
+  message("Cell type: ", ct)
+  
+  # select genes
+  gs <- unique(c(
+    grn_ct_dt[cell_type == ct]$gene,
+    grn_ct_dt[cell_type == ct]$target_gene
+  ))
+  message("There are ", length(gs), " genes in ", ct, " GRN.")
+  if (!all(gs %in% rownames(exp_mt))) {
+    gs <- intersect(gs, rownames(exp_mt))
+  }
+  message("There are ", length(gs), " genes after subsetting by expression matrix.")
+  if (!all(gs %in% rownames(ics_mt))) {
+    gs <- intersect(gs, rownames(ics_mt))
+  }
+  message("There are ", length(gs), " genes after subsetting by in silico ChIP score matrix.")
+  if (!all(gs %in% rownames(mta_mt))) {
+    gs <- intersect(gs, rownames(mta_mt))
+  }
+  message("There are ", length(gs), " genes after subsetting by in motif score matrix.")
+  # if (!all(gs %in% gmd_dt$gene)) {
+  #   gs <- intersect(gs, gmd_dt$gene)
+  # }
+  # message("There are ", length(gs), " genes after subseting by WGCNA gene modules.")
+  
+  if (!length(gs) > 1) {
+    message("No genes left for ", ct)
+    next
+  }
+  
+  # add to results list
+  gns_list[[ct]] <- gs
+  
+  # for in silico ChIP score, subset TFs for those in cell type of interest
+  tfs <- grn_ct_dt[cell_type == ct]$gene
+  if (!all(tfs %in% rownames(ics_mt))) {
+    tfs <- intersect(tfs, rownames(ics_mt))
+  }
+  message("Using in silico ChIP scores for ", length(tfs), " TFs")
+  
+  # add to results list
+  tfs_list[[ct]] <- tfs
+  
+  
+  # for motif score, subset motifs
+  mts <- colnames(mta_mt)
+  mts <- colnames(mta_mt)[
+    apply(mta_mt, 2, function(x) var(x)) > quantile(apply(mta_mt, 2, var), 0.75)
+  ]
+  message("Using scores for ", length(mts), " motifs")
+  
+  # add to results list
+  mts_list[[ct]] <- mts
+  
+  # expression correlation
+  exp_co <- cor(t(exp_mt[gs, ]))
+  stopifnot(!any(is.na(exp_co)))
+  
+  # add to results list
+  exp_co_list[[ct]] <- exp_co
+  
+  # in silico chip score correlation
+  ics_co <- cor(t(ics_mt[gs, tfs]))
+  if (any(is.na(ics_co)))
+    ics_co[is.na(ics_co)] <- 0
+  
+  # add to results list
+  ics_co_list[[ct]] <- ics_co
+  
+  # max motif score correlation
+  mta_co <- cor(t(mta_mt[gs, mts]))
+  if (any(is.na(mta_co)))
+    mta_co[is.na(mta_co)] <- 0
+  
+  # add to results list
+  mta_co_list[[ct]] <- mta_co
+
+}
+
+
+# cluster genes
+ht1_list <- list()
+ht2_list <- list()
+ht3_list <- list()
+ht4_list <- list()
+
+for (ct in cell_types) {
+  
+  print(ct)
+  exp_co <- exp_co_list[[ct]]
+  ics_co <- ics_co_list[[ct]]
+  mta_co <- mta_co_list[[ct]]
+  
+  if (any(
+    nrow(exp_co) < 2, nrow(ics_co) < 2, nrow(mta_co) < 2,
+    is.null(nrow(exp_co)), is.null(nrow(ics_co)), is.null(nrow(mta_co)),
+    all(exp_co==0), all(ics_co==0), all(mta_co==0)
+  )) {
+    message("Skipping ", ct, " due to insufficient data")
+    next
+  }
+  
+  for (ord_val in c("exp", "ics", "mta")) {
+  
+    message("Ordering genes by ", ord_val, " correlation")
+    if (ord_val == "gmo") {
+      gen_ord <- intersect(gmd_dt$gene, gns_list[[ct]])
+    } else {
+      dis_mat <- switch(
+        ord_val,
+        "exp" = exp_co,
+        "ics" = ics_co,
+        "mta" = mta_co
+      )
+      gen_cl <- stats::hclust(as.dist(1 - dis_mat), method = "ward.D2")
+      gen_ord <- rownames(dis_mat)[gen_cl$order]
+    }
+    exp_co_ord <- exp_co[gen_ord, gen_ord]
+    diag(exp_co_ord) <- 0
+    ics_co_ord <- ics_co[gen_ord, gen_ord]
+    diag(ics_co_ord) <- 0
+    mta_co_ord <- mta_co[gen_ord, gen_ord]
+    diag(mta_co_ord) <- 0
+  
+    
+    # plot
+    library(circlize)
+    #gmd_col = colorRamp2(c(min(gmd_co), 0, max(gmd_co)), c("#b2182b", "#f7f7f7", "#2166ac"))
+    exp_col = colorRamp2(
+      c(pmin(quantile(exp_co_ord, 0.02), -0.1), 0, pmax(quantile(exp_co_ord, 0.98), 0.1)),
+      c("#ef8a62", "#f7f7f7", "#67a9cf")
+    )
+    ics_col = colorRamp2(
+      c(pmin(quantile(ics_co_ord, 0.02), -0.1), 0, pmax(quantile(ics_co_ord, 0.98), 0.1)), 
+      c("#e9a3c9", "#f7f7f7", "#a1d76a")
+    )
+    mta_col = colorRamp2(
+      c(pmin(quantile(mta_co_ord, 0.02), -0.1), 0, pmax(quantile(mta_co_ord, 0.98), 0.1)), 
+      c("#af8dc3", "#f7f7f7", "#7fbf7b")
+    )
+    ht1 = Heatmap(
+      exp_co_ord, 
+      col = exp_col, name = "expression\ncorrelation",
+      border = FALSE,
+      cluster_rows = FALSE, cluster_columns = FALSE,
+      show_row_names = FALSE,
+      row_names_side = "left",
+      row_names_gp = gpar(fontsize = 6),
+      show_column_names = FALSE,
+      column_names_side = "bottom",
+      column_names_gp = gpar(fontsize = 6),
+      rect_gp = gpar(type = "none"),
+      row_title = sprintf("%s\nexpression correlation", ct),
+      row_title_side = "left",
+      layer_fun = function(j, i, x, y, w, h, fill) {
+          ind = which(row(exp_co_ord) >= col(exp_co_ord))
+          grid.rect(x[ind], y[ind], w[ind], h[ind], gp = gpar(fill = fill[ind], col = fill[ind]))
+      }
+    )
+    
+    ht2 = Heatmap(
+      ics_co_ord, 
+      col = ics_col, name = "in silico ChIP score\ncorrelation",
+      border = FALSE,
+      cluster_rows = FALSE, cluster_columns = FALSE,
+      show_row_names = FALSE,
+      row_names_side = "right",
+      row_names_gp = gpar(fontsize = 6),
+      show_column_names = FALSE,
+      column_names_side = "top",
+      column_names_gp = gpar(fontsize = 6),
+      column_title = sprintf("%s\nin silico ChIP score correlation", ct),
+      column_title_side = "top",
+      rect_gp = gpar(type = "none"),
+      layer_fun = function(j, i, x, y, w, h, fill) {
+        ind = which(row(ics_co_ord) <= col(ics_co_ord))
+        grid.rect(x[ind], y[ind], w[ind], h[ind], gp = gpar(fill = fill[ind], col = fill[ind]))
+      }
+    )
+    
+    ht3 = Heatmap(
+      mta_co_ord, 
+      col = mta_col, name = "max motif score\ncorrelation",
+      border = FALSE,
+      cluster_rows = FALSE, cluster_columns = FALSE,
+      show_row_names = FALSE,
+      row_names_side = "right",
+      row_names_gp = gpar(fontsize = 6),
+      show_column_names = FALSE,
+      column_names_side = "top",
+      column_names_gp = gpar(fontsize = 6),
+      rect_gp = gpar(type = "none"),
+      column_title = sprintf("%s\nmax motif score correlation", ct),
+      column_title_side = "top",
+      layer_fun = function(j, i, x, y, w, h, fill) {
+        ind = which(row(mta_co_ord) <= col(mta_co_ord))
+        grid.rect(x[ind], y[ind], w[ind], h[ind], gp = gpar(fill = fill[ind], col = fill[ind]))
+      }
+    )
+    
+    ht4 = Heatmap(
+      mta_co_ord, 
+      col = mta_col, name = "max motif score\ncorrelation",
+      border = FALSE,
+      cluster_rows = FALSE, cluster_columns = FALSE,
+      show_row_names = FALSE,
+      row_names_side = "left",
+      row_names_gp = gpar(fontsize = 6),
+      show_column_names = FALSE,
+      column_names_side = "bottom",
+      column_names_gp = gpar(fontsize = 6),
+      rect_gp = gpar(type = "none"),
+      row_title = sprintf("%s\nmax motif score correlation", ct),
+      row_title_side = "left",
+      layer_fun = function(j, i, x, y, w, h, fill) {
+          ind = which(row(mta_co_ord) >= col(mta_co_ord))
+          grid.rect(x[ind], y[ind], w[ind], h[ind], gp = gpar(fill = fill[ind], col = fill[ind]))
+      }
+    )
+    
+    ht1_list[[ord_val]][[ct]] <- ht1
+    ht2_list[[ord_val]][[ct]] <- ht2
+    ht3_list[[ord_val]][[ct]] <- ht3
+    ht4_list[[ord_val]][[ct]] <- ht4
+  }
+    
+}
+
+# plot heatmaps
+for (ord_val in c("exp", "ics", "mta")) {
+  
+  message("Heatmaps ordered by ", ord_val)
   pdf(file.path(
     fig_dir, sprintf("modularization-ordered-%s.pdf", ord_val)
-  ), width = 21, height = 20)
-  # expression - in silico chip
-  draw(ht1 + ht2, ht_gap = unit(-40, "cm"))
-  # expression - max motif score
-  draw(ht1 + ht3, ht_gap = unit(-40, "cm"))
-  # max motif score - in silico chip 
-  draw(ht4 + ht2, ht_gap = unit(-40, "cm"))
+  #), width = 21, height = 20)
+  ), width = 10.5, height = 10)
+    
+  for (ct in names(ht1_list[[ord_val]])) {
+    message(ct)
+    # expression - in silico chip
+    draw(ht1_list[[ord_val]][[ct]] + ht2_list[[ord_val]][[ct]], ht_gap = unit(-20, "cm"))
+    # expression - max motif score
+    draw(ht1_list[[ord_val]][[ct]] + ht3_list[[ord_val]][[ct]], ht_gap = unit(-20, "cm"))
+    # max motif score - in silico chip 
+    draw(ht4_list[[ord_val]][[ct]] + ht2_list[[ord_val]][[ct]], ht_gap = unit(-20, "cm"))
+  }
   dev.off()
+
 }
+
+# correlations for all pairs of genes
+co_list <- list()
+gp_list <- list()
+
+for (ct in cell_types) {
+  message(ct)
+  exp_dt <- melt.data.table(
+    as.data.table(exp_co_list[[ct]], keep.rownames = "gene1"),
+    id.vars = "gene1", 
+    variable.name = "gene2", 
+    value.name = "expression_correlation"
+  )[, c("row", "col") := list(
+    match(gene1, rownames(exp_co)),
+    match(gene2, colnames(exp_co))
+  )]
+  exp_dt <- exp_dt[row<col]
+  exp_dt[, c("row", "col") := NULL]
+  ics_dt <- melt.data.table(
+    as.data.table(ics_co_list[[ct]], keep.rownames = "gene1"),
+    id.vars = "gene1", 
+    variable.name = "gene2", 
+    value.name = "in_silico_chip_score_correlation"
+  )[, c("row", "col") := list(
+    match(gene1, rownames(exp_co)),
+    match(gene2, colnames(exp_co))
+  )]
+  ics_dt <- ics_dt[row<col]
+  ics_dt[, c("row", "col") := NULL]
+  mta_dt <- melt.data.table(
+    as.data.table(mta_co_list[[ct]], keep.rownames = "gene1"),
+    id.vars = "gene1", 
+    variable.name = "gene2", 
+    value.name = "max_motif_score_correlation"
+  )[, c("row", "col") := list(
+    match(gene1, rownames(exp_co)),
+    match(gene2, colnames(exp_co))
+  )]
+  mta_dt <- mta_dt[row<col]
+  mta_dt[, c("row", "col") := NULL]
+  
+  if (any(
+    nrow(exp_dt) < 1, nrow(ics_dt) < 1, nrow(mta_dt) < 1 
+  )) {
+    message("Skipping ", ct, " due to insufficient data")
+    next
+  }
+  
+  cor_dt <- merge.data.table(
+    exp_dt, 
+    merge.data.table(
+      ics_dt, 
+      mta_dt, 
+      by = c("gene1", "gene2"), all = TRUE
+    ),
+    by = c("gene1", "gene2"), all = TRUE
+  )
+  co_list[[ct]] <- cor_dt
+  
+  gp1 <- ggplot(cor_dt, aes(x = expression_correlation, y = in_silico_chip_score_correlation)) +
+    geom_density_2d_filled(alpha = 0.5, linewidth = 0.25, colour = "black") +
+    #ggrastr::geom_point_rast(alpha = 0.1) +
+    geom_smooth(method = "lm", se = FALSE) +
+    theme(legend.position = "none") +
+    labs(
+      x = "expression correlation",
+      y = "in silico ChIP score correlation"
+    )
+  gp2 <- ggplot(cor_dt, aes(x = expression_correlation, y = max_motif_score_correlation)) +
+    geom_density_2d_filled(alpha = 0.5, linewidth = 0.25, colour = "black") +
+    #ggrastr::geom_point_rast(alpha = 0.1) +
+    geom_smooth(method = "lm", se = FALSE) +
+    theme(legend.position = "none") +
+    labs(
+      x = "expression correlation",
+      y = "max motif score correlation"
+    )
+  gp3 <- ggplot(cor_dt, aes(x = in_silico_chip_score_correlation, y = max_motif_score_correlation)) +
+    geom_density_2d_filled(alpha = 0.5, linewidth = 0.25, colour = "black") +
+    #ggrastr::geom_point_rast(alpha = 0.1) +
+    geom_smooth(method = "lm", se = FALSE) +
+    theme(legend.position = "none") +
+    labs(
+      x = "in silico ChIP score correlation",
+      y = "max motif score correlation"
+    )
+  gp_cor <- gp1 + gp2 + gp3 + plot_layout(ncol = 3) + plot_annotation(title = ct)
+  gp_list[[ct]] <- gp_cor
+}
+
+# save density plots
+pdf(
+  file.path(fig_dir, "modularization-correlations.pdf"), 
+  width = 21, height = 8
+)
+for (i in seq_along(gp_list)) {
+  tryCatch(
+    print(gp_list[[i]]), 
+    error= function(e) {
+      message("Error plotting ", names(gp_list)[i], ":\n", e)
+    }
+  )
+}
+dev.off()
 ```
+
+Identify gene modukes using hierarchical clustering of gene-gene correlations.
+
+```{r}
+# # global correlations
+# fc_thr <- 2.5
+# cor_dt <- readRDS(
+#   file.path(mod_dir, sprintf("gene-FC%s-correlations.rds", fc_thr))
+# )
+
+# identify regulatory modules
+clu <- "hclust"
+
+reg_list <- list()
+rep_list <- list()
+
+for (ct in cell_types) {
+  
+  if (clu == "hclust") {
+    
+    message("Identifying modules using ", clu, " for ", ct)
+    
+    # select regulatory metric
+    cor_val <- "ics"
+    cor_lab <- switch(
+      cor_val,
+      "ics" = "in silico ChIP score correlation",
+      "mta" = "max motif score correlation"
+    )
+    cor_mat <- switch(
+      cor_val,
+      "ics" = ics_co_list[[ct]],
+      "mta" = mta_co_list[[ct]]
+    )
+    
+    # hierarchical clustering
+    gen_cl <- stats::hclust(as.dist(1 - cor_mat), method = "ward.D2")
+    # pdf(file.path(fig_dir, "hclust-ics.pdf"), width = 20, height = 6)
+    # plot(gen_cl)
+    # dev.off()
+    
+    # try different values for cutting the tree
+    ks <- seq(1, pmax(2, nrow(cor_mat)/3), 1)
+    
+    mod_dt_list <- list()
+    gen_md_list <- list()
+    
+    for(k in ks) {
+      # message("\nCutting tree in ", k, " modules")
+      gen_md <- cutree(gen_cl, k = k)
+      
+      # evaluate inside and outside module correlations
+      mod_dt <- rbindlist(lapply(sort(unique(unique(gen_md))), function(i) {
+        # message("Module ", i, ": ", sum(gen_md == i), " genes")
+        ins_gen <- names(gen_md)[gen_md == i]
+        out_gen <- names(gen_md)[gen_md != i]
+        ins_cor <- cor_mat[ins_gen, ins_gen]
+        out_cor <- cor_mat[ins_gen, out_gen]
+        ins_co <- mean(ins_cor[lower.tri(ins_cor)])
+        out_co <- mean(out_cor)
+        data.table(
+          k = k,
+          module = i,
+          genes = length(ins_gen),
+          ins_module_correlation = ins_co,
+          out_module_correlation = out_co
+        )
+      }))
+      
+      gen_md_list[[as.character(k)]] <- gen_md
+      mod_dt_list[[as.character(k)]] <- mod_dt
+      
+    }
+    
+    # find best k
+    mod_dt <- rbindlist(mod_dt_list)
+    mod_dt[, k := factor(k, levels = ks)]
+    mod_dt[, ins_k_correlation := mean(ins_module_correlation), k]
+    mod_dt[, out_k_correlation := mean(out_module_correlation), k]
+    
+    # transform for plotting
+    mod_dm_m <- melt.data.table(
+      mod_dt, 
+      id.vars = c("k", "module", "genes"),
+      measure.vars = c("ins_module_correlation", "out_module_correlation"),
+      variable.name = "correlation_type",
+      value.name = "correlation"
+    )
+    mod_dm_m[, correlation_type := as.character(correlation_type)]
+    mod_dm_m[, correlation_type := switch(
+      correlation_type, 
+      "ins_module_correlation" = "inside_module", 
+      "out_module_correlation" = "outside_module"
+    ), by = .I]
+    mod_dm_k <- melt.data.table(
+      mod_dt, 
+      id.vars = c("k", "module", "genes"),
+      measure.vars = c("ins_k_correlation", "out_k_correlation"),
+      variable.name = "correlation_type",
+      value.name = "k_correlation"
+    )
+    mod_dm_k[, correlation_type := as.character(correlation_type)]
+    mod_dm_k[, correlation_type := switch(
+      correlation_type, 
+      "ins_k_correlation" = "inside_module", 
+      "out_k_correlation" = "outside_module"
+    ), by = .I]
+    mod_dm <- merge.data.table(mod_dm_m, mod_dm_k, by = c("k", "module", "genes", "correlation_type"))
+    
+    mod_ks <- unique(mod_dt[,.(k,ins_k_correlation,out_k_correlation)])
+    mod_ks$out_k_correlation[1] <- 0
+    lag_ins <- lag(mod_ks$ins_k_correlation)[-(nrow(mod_ks)+1)]
+    lag_ins[1] <- 0
+    lag_out <- lag(mod_ks$out_k_correlation)[-(nrow(mod_ks)+1)]
+    lag_out[1] <- 0
+    mod_ks[, ins_diff := mod_ks$ins_k_correlation - lag_ins]
+    mod_ks[, out_diff := mod_ks$out_k_correlation - lag_out]
+    mod_ks <- mod_ks[complete.cases(mod_ks),]
+    mod_ks[, diff := ins_diff - out_diff]
+    #top_k <- as.character(mod_ks[ins_diff < sd(mod_ks$ins_diff)^2]$k)[1]
+    top_k <- as.character(rev(mod_ks[ins_diff > 0.02]$k))[1]
+    if (is.na(top_k)) {
+      top_k = as.character(rev(mod_ks$k)[1])
+    }
+    
+    # plot
+    mod_dm <- mod_dm[k %in% mod_ks$k]
+    mod_ks_gp <- ggplot(mod_dm, aes(
+      x = k, y = correlation, color = correlation_type, fill = correlation_type
+    )) +
+      geom_boxplot(outliers = FALSE) +
+      geom_line(
+        data = unique(mod_dm[, .(k, correlation_type, k_correlation)]),
+        aes(x = k, y = k_correlation, color = correlation_type, group = correlation_type)
+      ) +
+      geom_point(
+        data = unique(mod_dm[, .(k, correlation_type, k_correlation)]),
+        aes(x = k, y = k_correlation, color = correlation_type)
+      ) +
+      geom_vline(xintercept = top_k, linetype = "dashed", color = "red") +
+      facet_grid(correlation_type ~ ., scales = "free_y") +
+      scale_color_manual(values = c(
+        "inside_module" = "darkgreen", 
+        "outside_module" = "darkorange"
+      )) +
+      scale_fill_manual(values = c(
+        "inside_module" = colorspace::lighten("darkgreen", 0.8), 
+        "outside_module" = colorspace::lighten("darkorange", 0.8)
+      )) +
+      labs(title = ct, y = cor_lab) +
+      theme(
+        legend.position = "none",
+        panel.grid.major = element_line(colour = "grey", size = 0.25),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)
+      )
+    
+    # save plot to list
+    rep_list[[ct]] <- mod_ks_gp
+    
+    # get ordered genes for best module split
+    gen_clu <- gen_md_list[[top_k]]
+    gen_ord <- rownames(cor_mat)[gen_cl$order]
+    gen_clu <- gen_clu[gen_ord]
+    
+    # put results in a table
+    reg_dt <- data.table(
+      gene = names(gen_clu),
+      module = paste(ct, "module", gen_clu, sep = "_")
+    )
+    
+    reg_list[[ct]] <- reg_dt
+  }
+  
+}
+
+# save plots
+pdf(
+  file.path(fig_dir, sprintf("%s-%s-ks-modules.pdf", cor_val, clu)), 
+  width = 12, height = 6
+)
+print(rep_list)
+dev.off()
+
+# save modules data
+reg_mod <- rbindlist(reg_list, idcol = "cell_type")
+fwrite(
+  reg_mod, 
+  file.path(mod_dir, sprintf("regulatory-modules-%s-%s.tsv", cor_val, clu)), 
+  quote = FALSE
+)
+```
+
+Inspect genes within a module.
+
+```{r}
+# load regulatory modules
+cor_val <- "ics"
+cor_lab <- switch(
+  cor_val,
+  "ics" = "in silico ChIP score correlation",
+  "mta" = "max motif score correlation"
+)
+clu <- "hclust"
+reg_mod <- fread(
+  file.path(mod_dir, sprintf("regulatory-modules-%s-%s.tsv", cor_val, clu))
+)
+
+# add gene annotations
+reg_mod <- merge.data.table(
+  reg_mod, gnan, 
+  by = "gene", 
+  all.x = TRUE, sort = FALSE
+)
+
+```
+
+  - expression correlation of genes inside vs outside of module  
+  
+```{r}
+exp_gp_list <- list()
+mod_dt_list <- list()
+
+for (ct in unique(reg_mod$cell_type)) {
+  
+  message(ct)
+  
+  # expression correlations
+  exp_co <- exp_co_list[[ct]]
+  
+  reg_mct <- reg_mod[cell_type == ct]
+  
+  # evaluate inside and outside module correlations
+  mod_dt <- rbindlist(lapply(unique(reg_mct$module), function(i) {
+    # message("Module ", i, ": ", nrow(reg_mct[modele == i]), " genes")
+    ins_gen <- reg_mct[module == i]$gene
+    out_gen <- reg_mct[module != i]$gene
+    ins_cor <- exp_co[ins_gen, ins_gen]
+    out_cor <- exp_co[ins_gen, out_gen]
+    ins_co <- mean(ins_cor[lower.tri(ins_cor)])
+    out_co <- mean(out_cor)
+    data.table(
+      module = i,
+      genes = length(ins_gen),
+      ins_module_correlation = ins_co,
+      out_module_correlation = out_co
+    )
+  }))
+  
+  # add to list
+  mod_dt_list[[ct]] <- mod_dt
+  
+}
+
+# select genes
+mod_dt <- rbindlist(mod_dt_list, idcol = "cell_type")
+mod_dt[, cell_type := factor(cell_type, levels = cell_types)]
+mod_dt[, ins_ct_correlation := mean(ins_module_correlation), cell_type]
+mod_dt[, out_ct_correlation := mean(out_module_correlation), cell_type]
+
+# transform for plotting
+mod_dm_md <- melt.data.table(
+  mod_dt, 
+  id.vars = c("cell_type", "module", "genes"),
+  measure.vars = c("ins_module_correlation", "out_module_correlation"),
+  variable.name = "correlation_type",
+  value.name = "correlation"
+)
+mod_dm_md[, correlation_type := as.character(correlation_type)]
+mod_dm_md[, correlation_type := switch(
+  correlation_type, 
+  "ins_module_correlation" = "inside_module", 
+  "out_module_correlation" = "outside_module"
+), by = .I]
+mod_dm_ct <- melt.data.table(
+  mod_dt, 
+  id.vars = c("cell_type", "module", "genes"),
+  measure.vars = c("ins_ct_correlation", "out_ct_correlation"),
+  variable.name = "correlation_type",
+  value.name = "cell_type_correlation"
+)
+mod_dm_ct[, correlation_type := as.character(correlation_type)]
+mod_dm_ct[, correlation_type := switch(
+  correlation_type, 
+  "ins_ct_correlation" = "inside_module", 
+  "out_ct_correlation" = "outside_module"
+), by = .I]
+mod_dm <- merge.data.table(mod_dm_md, mod_dm_ct, by = c("cell_type", "module", "genes", "correlation_type"))
+
+
+# plot
+mod_ct_gp <- ggplot(mod_dm, aes(
+  x = correlation_type, y = correlation, 
+  color = correlation_type, fill = correlation_type
+)) +
+  geom_violin(
+    alpha = 0.5, scale = "width", draw_quantiles = 0.5, drop = FALSE
+  ) +
+  geom_segment(
+    data = dcast.data.table(
+      mod_dm, cell_type + module ~ correlation_type, value.var = "correlation"
+    ),
+    aes(
+      x = "inside_module", xend = "outside_module", 
+      y = inside_module, yend = outside_module,
+      group = module
+    ),
+    inherit.aes = FALSE,
+    color = 'grey', alpha = 0.5, linewidth = 0.5,
+    position = ggbeeswarm::position_quasirandom()
+  ) +
+  ggbeeswarm::geom_quasirandom(aes(size = genes), alpha = 0.5) +
+  scale_color_manual(values = c(
+    "inside_module" = "darkgreen", 
+    "outside_module" = "darkorange"
+  )) +
+  scale_fill_manual(values = c(
+    "inside_module" = colorspace::lighten("darkgreen", 0.8), 
+    "outside_module" = colorspace::lighten("darkorange", 0.8)
+  )) +
+  scale_size_continuous(range = c(0.5, 3)) +
+  facet_grid(. ~ cell_type) +
+  labs(y = "average gene expression correlation") +
+  theme(
+    legend.position = "bottom",
+    panel.grid.major = element_line(colour = "grey", size = 0.25),
+    axis.text.x = element_blank(), 
+    axis.ticks.x = element_blank(),
+    axis.title.x = element_blank(),
+    strip.text = element_text(angle = 90, vjust = 0.5, hjust = 0)
+  )
+
+# save plot
+ggsave(
+  file.path(fig_dir, sprintf("%s-%s-exp-modules.pdf", cor_val, clu)), 
+  mod_ct_gp, width = 24, height = 8
+)
+```
+  
+  - functional enrichment  
+
+```{r}
+
+```
+
