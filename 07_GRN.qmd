@@ -2221,7 +2221,7 @@ saveWorkbook(
 )
 ```
 
-Complete GRN tables by includng TFs that pass TF filtering, but get removed 
+Complete GRN tables by including TFs that pass TF filtering, but get removed 
 because no targets pass the filtering.
 
 ```{r}
@@ -2272,9 +2272,9 @@ Save TF-gene network.
 # aggregate peaks per gene
 grn_gene_dt <- copy(grn_fill_dt)
 grn_gene_dt[, c("target_peak", "seqnames", "start", "end") := NULL]
-grn_gene_dt[, target_accessibility := mean(target_accessibility), .(gene, target_gene, cell_type, stage)]
-grn_gene_dt[, peak_tf_correlation_score := mean(peak_tf_correlation_score), .(gene, target_gene, cell_type, stage)]
-grn_gene_dt[, in_silico_chip_score := mean(in_silico_chip_score), .(gene, target_gene, cell_type, stage)]
+grn_gene_dt[, target_accessibility := max(target_accessibility), .(gene, target_gene, cell_type, stage)]
+grn_gene_dt[, peak_tf_correlation_score := max(peak_tf_correlation_score), .(gene, target_gene, cell_type, stage)]
+grn_gene_dt[, in_silico_chip_score := max(in_silico_chip_score), .(gene, target_gene, cell_type, stage)]
 grn_gene_dt <- unique(grn_gene_dt)
 
 # save
