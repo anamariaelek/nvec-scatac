@@ -37,5 +37,7 @@ Results/Metacells/metacell/peak_footprint_genes_*.rds
 Results/Modules/gene-FC*-correlations.rds
 Results/Modules/gmod.wgcna.softPower*.gene_correlations.rds
 Results/Modules/gmod.wgcna.softPower*.wgcna.rds
+Results/Modules/GO/ics-hclust/results
+Results/Modules/PFAM/ics-hclust/results
 Results/Peaks/Matrix-Adult-Gastrula-Peaks-mapped-qnormalized.rds
 Results/Peaks/Sum_Adult_Gastrula_Peaks_SEACell_qnorm.rds
