@@ -1,0 +1,650 @@
+---
+title: "Motif syntax"
+author: "Anamaria Elek"
+date: today
+format: 
+  html:
+    code-fold: false
+    code-tools: false
+    embed-resources: true
+    highlight-style: github
+    toc: true 
+    code-line-numbers: false 
+execute:
+  eval: false
+  message: false
+  warning: false
+---
+
+```{r}
+#| label: initialize
+#| echo: FALSE
+knitr::opts_chunk$set(echo = TRUE, fig.width=7, fig.height=5) 
+```
+
+In this notebook, we will explore motif syntax.
+
+## Setup
+
+Load packages and functions.
+
+```{r}
+#| label: setup
+
+# load in-house functions
+source("metacell_downstream_functions/Downstream_functions.R") 
+source("metacell_downstream_functions/Gene_module_functions.R")
+source("metacell_downstream_functions/utils.R")
+source("motif-analysis/mta_downstream_functions.R")
+source("scripts/scatac_helper_functions.R")
+
+# global settings
+options(stringsAsFactors = FALSE)
+
+# load packages
+library(RColorBrewer)
+library(BSgenome.jaNemVect1.1.DToL.Assembly)
+library(GenomicRanges)
+library(data.table)
+library(tidyr)
+library(stringr)
+library(ggplot2)
+library(patchwork)
+library(ggrepel)
+library(ggside)
+library(ggseqlogo)
+library(universalmotif)
+library(grid)
+library(ArchR)
+library(Seurat)
+library(metacell)
+
+# set ggplot2 theme
+theme_blank <- theme_minimal() + theme(
+  axis.title.x = element_blank(),
+  axis.title.y = element_blank(),
+  panel.border = element_blank(),
+  panel.grid=element_blank(),
+  axis.ticks = element_blank(),
+  text = element_text(size=20)
+)
+theme_py <- theme_light() + theme(
+  panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank(),
+  panel.border = element_rect(colour = "black", fill = NA),
+  text = element_text(size=20),
+  strip.placement = "outside", 
+  strip.text = element_text(size=20, color="black"),
+  strip.background = element_rect(fill="white")
+)
+theme_set(theme_py)
+```
+
+Define directories to read the data from and save the results to.
+
+```{r}
+#| label: dirs
+
+adult_dir <- "ArchRProj_Nvec_TSS4_frag200"
+gastr_dir <- "ArchRProj_Nvec_gastrula"
+pks_dir <- "Results/Peaks"
+mta_dir <- "Results/Motifs"
+arc_dir <- "Results/Archetypes"
+map_dir <- "Results/Metacells"
+grn_dir <- "Results/GRN"
+mod_dir <- "Results/Modules"
+syn_dir <- "Results/Syntax"
+dir.create(syn_dir, showWarnings = FALSE)
+fig_dir <- "Plots/Syntax"
+dir.create(fig_dir, showWarnings = FALSE)
+ann_dir <- "annotation"
+```
+
+Load gene annotations.
+
+```{r}
+# gene annotation
+gnan <- fread(file.path(
+  ann_dir, "Nematostella_DToL_FINAL.tsv"
+))
+
+# TF annotation
+tfan <- fread(file.path(
+  ann_dir, "Nematostella_DToL_TFs_FINAL.tsv"
+))
+
+# golden markers
+gold <- fread(file.path(
+  ann_dir, "golden-marks-231124.tsv"
+), header = FALSE)
+setnames(gold, c("common_name", "gene", "remark"))
+```
+
+Project-specific variables:
+
+```{r}
+ct_cols <- c(
+  "cnidocyte"                  = "#ff42ff",
+  "cnidocyte_gastrula"         = "#f7abf7",
+  "ecto_pharynx"               = "#5bc0e8",
+  "ectoderm"                   = "#51a0be",
+  "ecto_aboral"                = "#045170",
+  "EMS"                        = "#bdf5bd",
+  "EMS_ecto_boundary"          = "#93dbce",
+  "gastro_circular_muscle_1"   = "#85c90e",
+  "gastro_circular_muscle_2"   = "#73b009",
+  "gastro_parietal_muscle"     = "#8ceb10",
+  "gastro_IRF1_2"              = "#c1eb05",
+  "gastro_somatic_gonad"       = "#bde314",
+  "muscle_tentacle_retractor"  = "#ffd700",
+  "muscle_mesentery_retractor" = "#f0e229",
+  "digestive_filaments_1"      = "#e33d3d",
+  "digestive_filaments_2"      = "#d10606",
+  "digestive_filaments_3"      = "#ad0303",
+  "epidermis_1"                = "#04ccd4",
+  "epidermis_2"                = "#16bacc",
+  "precursors_PGC"             = "#bebebe",
+  "precursors_endoNPC"         = "#8a8686",
+  "precursors_NPC"             = "#636363",
+  "NPC_1"                      = "#808d91",
+  "NPC_2"                      = "#758d92",
+  "neuron_GATA_Islet_1"        = "#0c82f7",
+  "neuron_GATA_Islet_2"        = "#1175f0",
+  "neuron_Pou4_FoxL2_1"        = "#101cde",
+  "neuron_Pou4_FoxL2_2"        = "#0b16bf",
+  "neuron_Pou4_FoxL2_3"        = "#2e39dd",
+  "neuronal_gastrula"          = "#063cb9",
+  "gland"                      = "#ff6f08",
+  "gland_mucin"                = "#ff8f12"
+)
+cell_types <- names(ct_cols)
+adult_cell_types <- c(
+  "cnidocyte",
+  "gastro_circular_muscle_1", 
+  "gastro_circular_muscle_2",
+  "gastro_parietal_muscle",
+  "gastro_IRF1_2",
+  "gastro_somatic_gonad",
+  "muscle_mesentery_retractor",
+  "muscle_tentacle_retractor",
+  "digestive_filaments_1",
+  "digestive_filaments_2",
+  "digestive_filaments_3",
+  "epidermis_1",
+  "epidermis_2",
+  "precursors_PGC",
+  "precursors_endoNPC",
+  "precursors_NPC",
+  "neuron_GATA_Islet_1",
+  "neuron_GATA_Islet_2",
+  "neuron_Pou4_FoxL2_1",
+  "neuron_Pou4_FoxL2_2",
+  "neuron_Pou4_FoxL2_3",
+  "gland"
+)
+gastr_cell_types <- c(setdiff(cell_types, adult_cell_types))
+bct_cols <- toupper(c(
+  "cnidocyte"                 = "#ff42ff",
+  "ecto"                      = "#51a0be",
+  "EMS"                       = "#bdf5bd",
+  "gastro_circular_muscle"    = "#73b009",
+  "gastro_parietal_muscle"    = "#8ceb10",
+  "gastro"                    = "#85c90e",  
+  "muscle"                    = "#ffd700",
+  "digestive_filaments"       = "#e33d3d",
+  "precursors"                = "#bebebe",
+  "NPC"                       = "#808d91",
+  "epidermis"                 = "#04ccd4",
+  "neuron_GATA_Islet"         = "#1175f0",
+  "neuron_Pou4_FoxL2"         = "#101cde",
+  "neuronal"                  = "#063cb9",
+  "gland"                     = "#ff6f08"
+))
+bct_maps <- setDT(cbind.data.frame(
+  cell_type = cell_types,
+  broad_cell_type = str_extract(cell_types, paste(names(bct_cols), collapse = "|"))
+))
+```
+
+## Motif syntax
+
+Motif lexicons analysis:  
+  - get locations of all hits (motif scores above the 95th quantile of genomic binding energy)  
+    for cell-type enriched motifs  
+  - get non-overlapping motifs hits  
+  - get motif hits with minimum distance between motifs (?)
+  
+First load the motifs hits input data.
+
+```{r}
+# load motif scores
+arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
+q <- 0.95
+mta_dt <- rbindlist(lapply(c(
+  # archetypes
+  file.path(arc_dir, sprintf("motif-scores-archetypes-%s-mona-q%s.tsv.gz", arc_id, q)),
+  # experimental motifs
+  file.path(mta_dir, sprintf("motif-scores-mona-q%s.tsv.gz", q))
+), fread))
+
+# calculate relative motif scores (independent of the motif length)
+mta_dt[, relative_motif_score := motif_score / max(motif_score)]
+mta_dt <- unique(mta_dt)
+
+# subset enriched motifs
+mta_en <- fread(file.path(mta_dir, "motif-enrichment-mona-q0.98-FC-1-padj-0.001.tsv"))
+mta_en[, cell_type := factor(cell_type, levels = cell_types)]
+mta_dt <- mta_dt[motif %in% mta_en$archetype_name]
+
+# save input motifs hits
+fwrite(
+  mta_dt, 
+  file.path(syn_dir, "motif-hits-all.tsv.gz"),
+  sep = "\t"
+)
+
+```
+
+Next we will reduce sets of overlapping motif hits in peaks to one best scoring 
+motif per set. To speed things up, we will run this parallelized across 
+chromosomes.
+
+```{bash}
+ovl=0.5
+mkdir logs
+
+for chr in "NW_026019277.1" "NW_026019278.1" "NW_026019279.1" "NW_026019251.1" "NW_026019260.1" "NW_026019264.1" "NW_026019267.1" "NW_026019271.1" "NW_026019272.1" "NW_026019275.1"
+do
+Rscript 09_Motif_syntax.R $chr $ovl > logs/09_Motif_syntax_$chr.log 2>&1 &
+done
+
+for chr in "NC_064034.1" "NC_064035.1" "NC_064036.1" "NC_064037.1" "NC_064038.1" "NC_064039.1" "NC_064040.1" "NC_064041.1" "NC_064042.1" "NC_064043.1" "NC_064044.1" "NC_064045.1" "NC_064046.1" "NC_064047.1" "NC_064048.1"
+do
+Rscript 09_Motif_syntax.R $chr $ovl > logs/09_Motif_syntax_$chr.log 2>&1 &
+done
+```
+
+Parse and save results from chromosome iterations.
+
+```{r}
+# load results
+res_fns <- list.files(
+  syn_dir, 
+  pattern = "motif-hits-reduced-N[WC].*.rds", 
+  full.names = TRUE
+)
+res_lst <- lapply(res_fns, function(x) readRDS(x))
+select_hits_lst <- unlist(lapply(res_lst, function(x) x$select_hits))
+reduce_hits_lst <- unlist(lapply(res_lst, function(x) x$reduce_hits))
+inputs_hits_lst <- unlist(lapply(res_lst, function(x) x$inputs_hits))
+
+# input motifs hits
+inputs_hits <- rbindlist(lapply(inputs_hits_lst, as.data.table))
+
+# save input motifs hits
+fwrite(
+  inputs_hits, 
+  file.path(syn_dir, "motif-hits-all.tsv.gz"),
+  sep = "\t"
+)
+
+# selected motifs hits
+select_hits <- rbindlist(lapply(select_hits_lst, as.data.table))
+
+# save selected hits
+fwrite(
+  select_hits, 
+  file.path(syn_dir, "motif-hits-selected.tsv.gz"),
+  sep = "\t"
+)
+
+# plot motif hits for inspection
+p_gr_all <- do.call("c", inputs_hits_lst)
+p_gr_sel <- do.call("c", select_hits_lst)
+pks <- intersect(unique(p_gr_all$peak), unique(p_gr_sel$peak))
+
+# # randomly subset peaks because there's just too many
+# set.seed(1950)
+# pks <- sample(pks, 10)
+# pks <- c(
+#   "peak111660", "peak111529", "peak110544", "peak109265", "peak107739",
+#   "peak108885", "peak107214", "peak110551", "peak112033", "peak109951"
+# )
+
+# check peaks with top scores of enriched motifs
+pks_mt <- unique(mta_en[fc > 2 & padj < 1e-5][,.(cell_type, archetype_name)])[order(cell_type)]
+pks_gm <- p_gr_all[p_gr_all$motif %in% pks_mt[cell_type=="cnidocyte"]$archetype_name]
+pks_dm <- as.data.table(pks_gm)
+setorder(pks_dm, -relative_motif_score)
+mtn <- "ARCH56_POU4F1"
+pks <- unique(pks_dm[motif == mtn]$peak)
+if (length(pks) > 20) {
+  pks <- sample(pks, 20)
+}
+
+# where to save the results
+plot_hits_lst <- vector("list", length(pks)); names(plot_hits_lst) <- pks
+for (pk in pks) {
+  
+  # all motif hits
+  pgr_all <- p_gr_all[p_gr_all$peak == pk]
+  gpp_all <- mta_plot_granges(
+    pgr_all, 
+    label = "motif", 
+    color = "relative_motif_score"
+  ) +
+    labs(title = "Input motif hits") +
+    theme(
+      axis.text.x = element_blank(),
+      axis.title.x = element_blank()
+    )
+  # reduced motif hits
+  pgr_sel <- p_gr_sel[p_gr_sel$peak == pk]
+  gpp_sel <- mta_plot_granges(
+    pgr_sel, 
+    label = "motif", 
+    color = "relative_motif_score",
+    xlims = c(min(start(pgr_all)), max(end(pgr_all)))
+  ) + 
+    labs(title = "Non-overlapping motif hits")
+  # assemble the plots
+  gpp <- gpp_all / gpp_sel + 
+    plot_layout(ncol = 1, guides = "keep") +
+    plot_annotation(title = sprintf("%s (%s)", pk, mtn))
+  # add to plots list
+  plot_hits_lst[[pk]] <- gpp
+}
+
+# save plots
+pdf(
+  file.path(fig_dir, "motif-hits-ranges-reduced.pdf"), 
+  width = 24, height = 18
+)
+print(plot_hits_lst)
+dev.off()
+
+```
+
+Compare number of motif hits per peak before and after reducing motif hits.
+
+```{r}
+# load motifs hits
+select_hits <- fread(file.path(syn_dir, "motif-hits-selected.tsv.gz"))
+inputs_hits <- fread(file.path(syn_dir, "motif-hits-all.tsv.gz"))
+all_hits <- rbindlist(list("all" = inputs_hits, "reduced" = select_hits), idcol = "set")
+
+# how many (different or same) motifs hits per peak?
+mta_pks_mts_diff <- unique(all_hits[,.(motif, peak, set)])[, .N, .(peak, set)]
+mta_pks_mts_same <- unique(all_hits[, .N, .(motif, peak, set)])
+
+ggp_pks_mts_same <- ggplot(mta_pks_mts_same, aes(N)) + 
+  geom_histogram(bins = 50, color = "white") +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1)), trans = "log10") +
+  facet_grid(set ~ ., scales = "free_y") +
+  labs(x = "Number of same motif hits per peak", y = "Number of peaks") +
+  theme(panel.grid.major = element_line())
+  
+ggp_pks_mts_diff <- ggplot(mta_pks_mts_diff, aes(N)) + 
+  geom_histogram(bins = 50, color = "white") +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
+  facet_grid(set ~ ., scales = "free_y") +
+  labs(x = "Number of different motifs hits per peak", y = "Number of peaks") +
+  theme(panel.grid.major = element_line())
+
+ggp_pks_mts <- ggp_pks_mts_same / ggp_pks_mts_diff + plot_layout(ncol = 1)
+ggsave(
+  file.path(fig_dir, "motif-hits-per-peak.pdf"), 
+  ggp_pks_mts, width = 8, height = 6
+)
+```
+
+Per cell type lexicons: in cell type specific peaks
+
+```{r}
+# load motifs hits
+#select_hits <- fread(file.path(syn_dir, "motif-hits-all.tsv.gz"))
+select_hits <- fread(file.path(syn_dir, "motif-hits-selected.tsv.gz"))
+select_hits[, strand := NULL]
+setnames(
+  select_hits, 
+  c("seqnames", "start", "end", "width"),
+  c("motif_seqnames", "motif_start", "motif_end", "motif_width")
+)
+
+# all peaks
+peaks <- fread(file.path(pks_dir, "Peaks_cell_type_mapped.bed"))
+setnames(peaks, c("seqnames", "start", "end", "peak", "score", "strand"))
+peaks <- unique(peaks)
+peaks_gr <- makeGRangesFromDataFrame(peaks, keep.extra.columns = TRUE)
+  
+# load per cell type peaks
+pks_list <- vector("list", length = length(cell_types))
+names(pks_list) <- cell_types
+for (ct in cell_types) {
+
+  message(sprintf("Peaks for %s", ct))
+  
+  # cell type peaks
+  stg_dir <- ifelse(ct %in% adult_cell_types, adult_dir, gastr_dir)
+  pks_fn <- file.path(
+    stg_dir, "ArchRProj", "PeakDifferential", "cell_type_filtered",
+    sprintf("Peaks-%s-vs-others.tsv", ct)
+  )
+  pks_dt <- fread(pks_fn, select = 1:3)
+  setnames(pks_dt, c("seqnames", "start", "end"))
+  
+  pks_gr <- makeGRangesFromDataFrame(pks_dt)
+  
+  # overlp peaks (to map per-stage peak ids to final peak set ids)
+  pks_ovl <- findOverlaps(query = peaks_gr, subject = pks_gr)
+  pks_dat <- peaks_gr[queryHits(pks_ovl)]
+  
+  # add to list
+  pks_list[[ct]] <- as.data.table(pks_dat)
+
+}
+pks_ct <- rbindlist(pks_list, idcol = "cell_type")
+pks_ct[, c("score", "strand") := NULL]
+
+# merge with selected motif hits
+stopifnot(all(unique(pks_ct$peak) %in% select_hits$peak))
+mts_ct <- merge(
+  pks_ct, select_hits, 
+  by = "peak", 
+  allow.cartesian = TRUE
+)
+
+# save
+fwrite(
+  mts_ct, 
+  #file.path(syn_dir, "motif-hits-all-cell-type.tsv.gz"),
+  file.path(syn_dir, "motif-hits-selected-cell-type.tsv.gz"),
+  sep = "\t"
+)
+```
+
+Add motifs similarity clusters info to motifs hits
+
+```{r}
+# archetype pairwise similarities
+sim_mat <- readRDS(
+  file.path(arc_dir, "motif-similarity-archetypes-PPM-PCC-0.8-IC0.5-5bp.rds")
+)
+
+# clusters of archetypes based on pairwise similarities
+hc <- hclust(
+  tgs_dist(sim_mat), method = "complete"
+)
+ord <- hc$labels[hc$order]
+sim_mat <- sim_mat[ord, ord]
+k <- 400
+ctr <- cutree(hc, k = k)
+
+# add experimental motifs
+ets <- unique(mts_ct[!motif %in% names(ctr)]$motif)
+ctr <- c(ctr, structure(
+  max(ctr) + seq_along(ets),
+  names = ets
+))
+
+# add to motif hits info
+mts_ct[, motif_cluster := ctr[motif]]
+stopifnot(nrow(mts_ct[is.na(motif_cluster)])==0)
+
+# save
+fwrite(
+  mts_ct, 
+  file.path(syn_dir, "motif-hits-selected-cell-type.tsv.gz"),
+  sep = "\t"
+)
+```
+
+Count motif hits in peaks per cell type.
+
+```{r}
+# load results
+mts_ct <- fread(file.path(syn_dir, "motif-hits-selected-cell-type.tsv.gz"))
+
+# order peaks and cell types
+peaks <- paste0(
+  "peak",
+  unique(sort(as.integer(str_extract(mts_ct$peak, "\\d+"))))
+)
+mts_ct[, cell_type := factor(cell_type, levels = cell_types)]
+mts_ct[, peak := factor(peak, levels = peaks)]
+setorder(mts_ct, cell_type, peak)
+
+# unique motif hits in peaks per cell type
+mts_ct_uniq <- unique(mts_ct[, .(cell_type, peak, motif)])
+
+# plot
+gp_pks_mts <- ggplot(
+  mts_ct_uniq[, .N, .(cell_type, peak)],
+  aes(cell_type, N, fill = cell_type, color = cell_type)
+) + 
+  geom_violin(alpha = 0.5, scale = "width", draw_quantiles = 0.5, drop = FALSE) +
+  # ggbeeswarm::geom_quasirandom(shape = 21, alpha = 0.8) +
+  scale_fill_manual(values = ct_cols) +
+  scale_color_manual(values = structure(
+    colorspace::darken(ct_cols, 0.5),
+    names = names(ct_cols)
+  )) +
+  labs(x = "cell type", y = "number of motifs\nper peak") +
+  theme(
+    legend.position = "none",
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+    panel.grid.major.y = element_line(colour = "grey", size = 0.25)
+  )
+
+ggsave(
+  file.path(fig_dir, "motif-hits-per-peak-per-cell-type.pdf"), 
+  gp_pks_mts, width = 10, height = 5
+)
+```
+
+Count motif combinations (not considering order, distance...) per cell type.
+
+```{r}
+# load results
+# mts_ct <- fread(file.path(syn_dir, "motif-hits-all-cell-type.tsv.gz"))
+mts_ct <- fread(file.path(syn_dir, "motif-hits-selected-cell-type.tsv.gz"))
+
+# get motif counts in peaks per cell type
+cmb_ls <- lapply(cell_types, function(ct) {
+  
+  message(ct)
+  
+  # make a matrix of motif hits in peaks
+  mts_dat <- unique(
+    mts_ct[cell_type == ct, .(
+      cell_type, peak, motif
+      # motif_start, motif_end,  # include if we want all instances of motif in a peak
+    )]
+  )
+  
+  # count in how many peaks a motif occurs
+  occ_mts <- unique(
+    mts_dat[, .(peak, motif)]
+  )[, .(motif_occur = .N), motif]
+  
+  # add to motifs hits table
+  mts_dat <- merge.data.table(
+    mts_dat, occ_mts, by = "motif", 
+    all.x = TRUE, sort = FALSE
+  )
+  
+  # select motifs that have hits in more than 10% of peaks
+  mts_top <- mts_dat[motif_occur > 0.1 * length(unique(mts_dat$peak))]
+  
+  # find top combinations of motifs
+  mts_com <- rbindlist(lapply(c(2:4), function(n) {
+    mts_comb <- combn(
+      unique(mts_top$motif), n, simplify = FALSE
+    )
+    rbindlist(lapply(mts_comb, function(x) {
+      dt <- unique(mts_top[motif %in% x, .(peak, motif)])[, N := .N, peak]
+      unique(dt[N == n][,motif := paste(x, collapse = "+")])
+    }))
+  }))
+  
+  # count in how many peaks a combination of motif occurs
+  mts_com[, motif_occur := .N, .(motif, N)]
+  
+  # combine with motifs hits table
+  rbindlist(list(
+    mts_top[, N := 1],
+    mts_com[, cell_type := ct]
+  ), use.names = TRUE)
+  
+})
+
+# combine results across cell types
+cmb_dt <- rbindlist(cmb_ls)
+
+# plot results
+cpl_ls <- lapply(cell_types, function(ct) {
+  
+  message(ct)
+  
+  # select data
+  cmb_ct <- cmb_dt[cell_type == ct]
+  cmb_ct <- unique(cmb_ct[, .(motif, motif_occur, N)])
+  setorder(cmb_ct, N, -motif_occur)
+  cmb_ct[, motif := factor(motif, levels = rev(unique(cmb_ct$motif)))]
+  
+  # seelect motifs to show in plot
+  i <- 1
+  while (length(unique(cmb_ct$motif)) > 100) {
+    cmb_mt <- cmb_ct[motif_occur > 10*i]
+    if (length(unique(cmb_mt$motif)) < 50)
+      break
+    cmb_ct <- cmb_mt
+    print(sprintf("occurance > %s: %s motifs", 10*i, length(unique(cmb_mt$motif))))
+    i <- i + 1
+  }
+  
+  # plot
+  cpl_ct <- ggplot(cmb_ct, aes(motif_occur, motif)) + 
+    geom_bar(stat = "identity", fill = ct_cols[ct]) +
+    scale_x_continuous(expand = expansion(mult = c(0, 0.1)), trans = "log10") +
+    labs(title = ct) +
+    theme(
+      panel.grid.major.x = element_line(colour = "grey", size = 0.25),
+      panel.grid.minor.x = element_line(colour = "grey", size = 0.05),
+    )
+  if (length(unique(cmb_ct$N)) > 1) {
+    cpl_ct <- cpl_ct + 
+      facet_grid(N ~ ., scales = "free", space = "free")
+  }
+  cpl_ct
+})
+
+# save plots
+pdf(
+  file.path(fig_dir, "motif-occurance-per-cell-type.pdf"), 
+  width = 18, height = 32
+)
+print(cpl_ls)
+dev.off()
+
+```

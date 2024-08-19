@@ -601,7 +601,7 @@ stopifnot(!any(is.na(ics_mt)))
 Alternatively, starting from motif binding scores, get max binding energy for
 each gene - motif pair.  
 For this we will need to re-do motif-scoring with lower quantile threshold, so 
-as to get a score for every motif in (any preak associated to) every gene (code 
+as to get a score for every motif in (any peak associated to) every gene (code 
 in `06_Archetypes.qmd`.  
 Now we select  max binding energy for each gene - motif pair.
 
