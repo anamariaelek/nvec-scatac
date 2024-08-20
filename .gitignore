@@ -4,6 +4,7 @@ ArchRProj_Nvec_TSS4_frag200/ArchRProj/GeneScoreMatrix/Matrix-Gene-Scores-Dist-Va
 CisBP/TF_Information_all_motifs.txt
 CisBP/pwms
 genome/Nvec_vc1.1_gDNA.fasta*
+logs
 Plots/Archetypes/norm/
 Plots/Modules/modularization-ordered-*.pdf
 Plots/Modules/modularization-global-FC*-ordered-*-subsampled.pdf
@@ -41,3 +42,11 @@ Results/Modules/GO/ics-hclust/results
 Results/Modules/PFAM/ics-hclust/results
 Results/Peaks/Matrix-Adult-Gastrula-Peaks-mapped-qnormalized.rds
 Results/Peaks/Sum_Adult_Gastrula_Peaks_SEACell_qnorm.rds
+Results/Syntax/fcovl0.5
+Results/Syntax/scoreenrovl0.5
+Results/Syntax/scoreenrovl0.8
+Results/Syntax/scoreovl0.5
+Results/Syntax/scoreovl0.8
+Results/Syntax/motif-hits-all.tsv.gz
+Results/Syntax/motif-hits-reduced.tsv.gz
+Results/Syntax/motif-hits-selected.tsv.gz
