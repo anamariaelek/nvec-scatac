@@ -207,274 +207,6 @@ bct_maps <- setDT(cbind.data.frame(
 ```
 
 
-## Reduce overlapping motifs (bottom-up approach)
-
-We will derive motif lexicons by starting from motif hits in cell type specific 
-peaks. First, get locations of all hits (motif scores above the 95th quantile of 
-genomic binding energy) for cell-type enriched motifs. Then we identify groups 
-of overlapping motif hits, and select the most enriched motif as representative 
-motif hit per group. 
-
-Load the motifs hits input data.
-
-```{r}
-# load motif scores
-arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
-q <- 0.95
-mta_dt <- rbindlist(lapply(c(
-  # archetypes
-  file.path(arc_dir, sprintf("motif-scores-archetypes-%s-mona-q%s.tsv.gz", arc_id, q)),
-  # experimental motifs
-  file.path(mta_dir, sprintf("motif-scores-mona-q%s.tsv.gz", q))
-), fread))
-
-# calculate relative motif scores (independent of the motif length)
-mta_dt[, relative_motif_score := motif_score / max(motif_score)]
-mta_dt <- unique(mta_dt)
-
-# subset enriched motifs
-mta_en <- fread(file.path(mta_dir, "motif-enrichment-mona-q0.98-FC-1-padj-0.001.tsv"))
-mta_en[, cell_type := factor(cell_type, levels = cell_types)]
-mta_en <- unique(mta_en[,.(cell_type, archetype_name, fc, pval, padj)])
-setnames(mta_en, "archetype_name", "motif")
-mta_dt <- mta_dt[motif %in% mta_en$motif]
-
-# save input motifs hits
-fwrite(
-  mta_dt, 
-  file.path(syn_dir, "motif-hits-all.tsv.gz"),
-  sep = "\t"
-)
-
-```
-
-For each cell type, get specific peaks and reduce overlapping motifs in each 
-peak, selecting the top enriched one per group.
-
-```{r}
-# all peaks
-peaks <- fread(file.path(pks_dir, "Peaks_cell_type_mapped.bed"))
-setnames(peaks, c("seqnames", "start", "end", "peak", "score", "strand"))
-peaks <- unique(peaks)
-peaks_gr <- makeGRangesFromDataFrame(peaks, keep.extra.columns = TRUE)
-
-# overlap to merge peaks
-reciprocal_overlap <- 0.5
-
-# load per cell type peaks
-pks_list <- 
-  select_hits_list <- 
-    reduce_hits_list <-
-      inputs_hits_list <- 
-        vector("list", length = length(cell_types))
-names(pks_list) <- 
-  names(select_hits_list) <- 
-    names(reduce_hits_list) <- 
-      names(inputs_hits_list) <- 
-        cell_types
-
-for (ct in cell_types) {
-
-  message(sprintf("%s | Reducingp peaks for %s", Sys.time(), ct))
-  
-  # cell type peaks
-  stg_dir <- ifelse(ct %in% adult_cell_types, adult_dir, gastr_dir)
-  pks_fn <- file.path(
-    stg_dir, "ArchRProj", "PeakDifferential", "cell_type_filtered",
-    sprintf("Peaks-%s-vs-others.tsv", ct)
-  )
-  pks_dt <- fread(pks_fn, select = 1:3)
-  setnames(pks_dt, c("seqnames", "start", "end"))
-  
-  pks_gr <- makeGRangesFromDataFrame(pks_dt)
-  
-  # overlap peaks (to map per-stage peak ids to final peak set ids)
-  pks_ovl <- findOverlaps(query = peaks_gr, subject = pks_gr)
-  pks_dat <- peaks_gr[queryHits(pks_ovl)]
-  
-  # add to list
-  pks_list[[ct]] <- pks_dat
-  
-  # peaks in cell type
-  mta_ct_dt <- mta_dt[peak %in% pks_dat$peak]
-  
-  # motif enrichment in cell type
-  mta_ct_en <- mta_en[cell_type == ct]
-  
-  # combine
-  mta_ct <- merge.data.table(mta_ct_dt, mta_ct_en, by = "motif", all.x = TRUE)
-  
-  # make ranges
-  mta_gr <- makeGRangesFromDataFrame(mta_ct, keep.extra.columns = TRUE)
-  
-  # reduce motif hits
-  red_res <- mta_reduce_motif_hits(
-    mta_gr, 
-    reciprocal_overlap = reciprocal_overlap,
-    order_col = "padj",
-    order_decrease = FALSE
-  )
-  
-  # add to list
-  select_hits_list[[ct]] <- red_res$select_hits
-  reduce_hits_list[[ct]] <- red_res$reduce_hits
-  inputs_hits_list[[ct]] <- red_res$inputs_hits
-  
-}
-
-message(sprintf("%s | All done", Sys.time()))
-
-# save input motifs hits
-inputs_hits <- do.call("c", unname(inputs_hits_list))
-inputs_hits <- as.data.table(inputs_hits)
-fwrite(
-  inputs_hits, 
-  file.path(syn_dir, "motif-hits-all.tsv.gz"),
-  sep = "\t"
-)
-
-# save reduced groups hits
-reduce_hits <- do.call("c", unname(reduce_hits_list))
-reduce_hits <- as.data.table(reduce_hits)
-fwrite(
-  reduce_hits, 
-  file.path(syn_dir, "motif-hits-reduced.tsv.gz"),
-  sep = "\t"
-)
-
-# save selected motifs hits
-select_hits <- do.call("c", unname(select_hits_list))
-select_hits <- as.data.table(select_hits)
-fwrite(
-  select_hits, 
-  file.path(syn_dir, "motif-hits-selected.tsv.gz"),
-  sep = "\t"
-)
-```
-
-To speed things up, we will run this parallelized across cell types.
-
-```{bash}
-ovl=0.5
-mkdir logs
-for ct in cnidocyte cnidocyte_gastrula ecto_pharynx ectoderm ecto_aboral EMS EMS_ecto_boundary gastro_circular_muscle_1 gastro_circular_muscle_2 gastro_parietal_muscle gastro_IRF1_2 gastro_somatic_gonad muscle_tentacle_retractor muscle_mesentery_retractor digestive_filaments_1 digestive_filaments_2 digestive_filaments_3 epidermis_1 epidermis_2 precursors_PGC precursors_endoNPC precursors_NPC NPC_1 NPC_2 neuron_GATA_Islet_1 neuron_GATA_Islet_2 neuron_Pou4_FoxL2_1 neuron_Pou4_FoxL2_2 neuron_Pou4_FoxL2_3 neuronal_gastrula gland gland_mucin
-do
-Rscript 09_Motif_syntax_bottom_up.R $ct $ovl > logs/09_Motif_syntax_$ct.log 2>&1 &
-done
-```
-
-Parse and save results from cell type iterations.
-
-```{r}
-# load results
-res_fns <- list.files(
-  syn_dir, 
-  pattern = "motif-hits-reduced-.*.rds", 
-  full.names = TRUE
-)
-res_lst <- lapply(res_fns, function(x) readRDS(x))
-select_hits_lst <- unlist(lapply(res_lst, function(x) x$select_hits))
-reduce_hits_lst <- unlist(lapply(res_lst, function(x) x$reduce_hits))
-inputs_hits_lst <- unlist(lapply(res_lst, function(x) x$inputs_hits))
-
-# input motifs hits
-inputs_hits <- rbindlist(lapply(inputs_hits_lst, as.data.table))
-
-# save input motifs hits
-fwrite(
-  inputs_hits, 
-  file.path(syn_dir, "motif-hits-all.tsv.gz"),
-  sep = "\t"
-)
-
-# reduced groups hits list
-reduce_hits <- rbindlist(lapply(reduce_hits_lst, as.data.table))
-
-# save reduced groups hits
-fwrite(
-  reduce_hits, 
-  file.path(syn_dir, "motif-hits-reduced.tsv.gz"),
-  sep = "\t"
-)
-
-# selected motifs hits
-select_hits <- rbindlist(lapply(select_hits_lst, as.data.table))
-
-# save selected hits
-fwrite(
-  select_hits, 
-  file.path(syn_dir, "motif-hits-selected.tsv.gz"),
-  sep = "\t"
-)
-```
-
-Plot motif hits for inspection.
-
-```{r}
-plot_hits_lst <- vector("list", length = length(cell_types))
-names(plot_hits_lst) <- cell_types
-
-for (ct in cell_types) {
-  
-  p_gr_all <- inputs_hits[inputs_hits$cell_type == ct, ]
-  p_gr_sel <- select_hits[select_hits$cell_type == ct, ]
-  
-  pks <- intersect(unique(p_gr_all$peak), unique(p_gr_sel$peak))
-  message(sprintf("%s peaks for %s", length(pks), ct))
-  
-  # randomly subset peaks because there's just too many
-  if (length(pks) > 10) {
-    set.seed(1950)
-    pks <- sample(pks, 10)
-  }
-  
-  # where to save the results
-  plot_hits_lst[[ct]] <- vector("list", length(pks))
-  names(plot_hits_lst[[ct]]) <- pks
-  
-  for (pk in pks) {
-    
-    # all motif hits
-    pgr_all <- p_gr_all[p_gr_all$peak == pk]
-    gpp_all <- mta_plot_granges(
-      pgr_all, 
-      label = "motif", 
-      color = "fc"
-    ) +
-      labs(title = "Input motif hits") +
-      theme(
-        axis.text.x = element_blank(),
-        axis.title.x = element_blank()
-      )
-    # reduced motif hits
-    pgr_sel <- p_gr_sel[p_gr_sel$peak == pk]
-    gpp_sel <- mta_plot_granges(
-      pgr_sel, 
-      label = "motif", 
-      color = "fc",
-      xlims = c(min(pgr_all$start), max(pgr_all$end))
-    ) + 
-      labs(title = "Non-overlapping motif hits")
-    # assemble the plots
-    gpp <- gpp_all / gpp_sel + 
-      plot_layout(ncol = 1, guides = "keep") +
-      plot_annotation(title = sprintf("%s %s", ct, pk))
-    # add to plots list
-    plot_hits_lst[[ct]][[pk]] <- gpp
-  }
-}
-
-
-# save plots
-pdf(
-  file.path(fig_dir, "motif-hits-ranges-reduced.pdf"), 
-  width = 24, height = 18
-)
-print(plot_hits_lst)
-dev.off()
-
-```
-
 ## Reduce overlapping motifs (top-down approach)
 
 We will derive motif lexicons by starting from motif hits in all peaks.  
@@ -748,6 +480,274 @@ fwrite(
 )
 ```
 
+## Reduce overlapping motifs (bottom-up approach)
+
+We will derive motif lexicons by starting from motif hits in cell type specific 
+peaks. First, get locations of all hits (motif scores above the 95th quantile of 
+genomic binding energy) for cell-type enriched motifs. Then we identify groups 
+of overlapping motif hits, and select the most enriched motif as representative 
+motif hit per group. 
+
+Load the motifs hits input data.
+
+```{r}
+# load motif scores
+arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
+q <- 0.95
+mta_dt <- rbindlist(lapply(c(
+  # archetypes
+  file.path(arc_dir, sprintf("motif-scores-archetypes-%s-mona-q%s.tsv.gz", arc_id, q)),
+  # experimental motifs
+  file.path(mta_dir, sprintf("motif-scores-mona-q%s.tsv.gz", q))
+), fread))
+
+# calculate relative motif scores (independent of the motif length)
+mta_dt[, relative_motif_score := motif_score / max(motif_score)]
+mta_dt <- unique(mta_dt)
+
+# subset enriched motifs
+mta_en <- fread(file.path(mta_dir, "motif-enrichment-mona-q0.98-FC-1-padj-0.001.tsv"))
+mta_en[, cell_type := factor(cell_type, levels = cell_types)]
+mta_en <- unique(mta_en[,.(cell_type, archetype_name, fc, pval, padj)])
+setnames(mta_en, "archetype_name", "motif")
+mta_dt <- mta_dt[motif %in% mta_en$motif]
+
+# save input motifs hits
+fwrite(
+  mta_dt, 
+  file.path(syn_dir, "motif-hits-all.tsv.gz"),
+  sep = "\t"
+)
+
+```
+
+For each cell type, get specific peaks and reduce overlapping motifs in each 
+peak, selecting the top enriched one per group.
+
+```{r}
+# all peaks
+peaks <- fread(file.path(pks_dir, "Peaks_cell_type_mapped.bed"))
+setnames(peaks, c("seqnames", "start", "end", "peak", "score", "strand"))
+peaks <- unique(peaks)
+peaks_gr <- makeGRangesFromDataFrame(peaks, keep.extra.columns = TRUE)
+
+# overlap to merge peaks
+reciprocal_overlap <- 0.5
+
+# load per cell type peaks
+pks_list <- 
+  select_hits_list <- 
+    reduce_hits_list <-
+      inputs_hits_list <- 
+        vector("list", length = length(cell_types))
+names(pks_list) <- 
+  names(select_hits_list) <- 
+    names(reduce_hits_list) <- 
+      names(inputs_hits_list) <- 
+        cell_types
+
+for (ct in cell_types) {
+
+  message(sprintf("%s | Reducingp peaks for %s", Sys.time(), ct))
+  
+  # cell type peaks
+  stg_dir <- ifelse(ct %in% adult_cell_types, adult_dir, gastr_dir)
+  pks_fn <- file.path(
+    stg_dir, "ArchRProj", "PeakDifferential", "cell_type_filtered",
+    sprintf("Peaks-%s-vs-others.tsv", ct)
+  )
+  pks_dt <- fread(pks_fn, select = 1:3)
+  setnames(pks_dt, c("seqnames", "start", "end"))
+  
+  pks_gr <- makeGRangesFromDataFrame(pks_dt)
+  
+  # overlap peaks (to map per-stage peak ids to final peak set ids)
+  pks_ovl <- findOverlaps(query = peaks_gr, subject = pks_gr)
+  pks_dat <- peaks_gr[queryHits(pks_ovl)]
+  
+  # add to list
+  pks_list[[ct]] <- pks_dat
+  
+  # peaks in cell type
+  mta_ct_dt <- mta_dt[peak %in% pks_dat$peak]
+  
+  # motif enrichment in cell type
+  mta_ct_en <- mta_en[cell_type == ct]
+  
+  # combine
+  mta_ct <- merge.data.table(mta_ct_dt, mta_ct_en, by = "motif", all.x = TRUE)
+  
+  # make ranges
+  mta_gr <- makeGRangesFromDataFrame(mta_ct, keep.extra.columns = TRUE)
+  
+  # reduce motif hits
+  red_res <- mta_reduce_motif_hits(
+    mta_gr, 
+    reciprocal_overlap = reciprocal_overlap,
+    order_col = "padj",
+    order_decrease = FALSE
+  )
+  
+  # add to list
+  select_hits_list[[ct]] <- red_res$select_hits
+  reduce_hits_list[[ct]] <- red_res$reduce_hits
+  inputs_hits_list[[ct]] <- red_res$inputs_hits
+  
+}
+
+message(sprintf("%s | All done", Sys.time()))
+
+# save input motifs hits
+inputs_hits <- do.call("c", unname(inputs_hits_list))
+inputs_hits <- as.data.table(inputs_hits)
+fwrite(
+  inputs_hits, 
+  file.path(syn_dir, "motif-hits-all.tsv.gz"),
+  sep = "\t"
+)
+
+# save reduced groups hits
+reduce_hits <- do.call("c", unname(reduce_hits_list))
+reduce_hits <- as.data.table(reduce_hits)
+fwrite(
+  reduce_hits, 
+  file.path(syn_dir, "motif-hits-reduced.tsv.gz"),
+  sep = "\t"
+)
+
+# save selected motifs hits
+select_hits <- do.call("c", unname(select_hits_list))
+select_hits <- as.data.table(select_hits)
+fwrite(
+  select_hits, 
+  file.path(syn_dir, "motif-hits-selected.tsv.gz"),
+  sep = "\t"
+)
+```
+
+To speed things up, we will run this parallelized across cell types.
+
+```{bash}
+ovl=0.5
+mkdir logs
+for ct in cnidocyte cnidocyte_gastrula ecto_pharynx ectoderm ecto_aboral EMS EMS_ecto_boundary gastro_circular_muscle_1 gastro_circular_muscle_2 gastro_parietal_muscle gastro_IRF1_2 gastro_somatic_gonad muscle_tentacle_retractor muscle_mesentery_retractor digestive_filaments_1 digestive_filaments_2 digestive_filaments_3 epidermis_1 epidermis_2 precursors_PGC precursors_endoNPC precursors_NPC NPC_1 NPC_2 neuron_GATA_Islet_1 neuron_GATA_Islet_2 neuron_Pou4_FoxL2_1 neuron_Pou4_FoxL2_2 neuron_Pou4_FoxL2_3 neuronal_gastrula gland gland_mucin
+do
+Rscript 09_Motif_syntax_bottom_up.R $ct $ovl > logs/09_Motif_syntax_$ct.log 2>&1 &
+done
+```
+
+Parse and save results from cell type iterations.
+
+```{r}
+# load results
+res_fns <- list.files(
+  syn_dir, 
+  pattern = "motif-hits-reduced-.*.rds", 
+  full.names = TRUE
+)
+res_lst <- lapply(res_fns, function(x) readRDS(x))
+select_hits_lst <- unlist(lapply(res_lst, function(x) x$select_hits))
+reduce_hits_lst <- unlist(lapply(res_lst, function(x) x$reduce_hits))
+inputs_hits_lst <- unlist(lapply(res_lst, function(x) x$inputs_hits))
+
+# input motifs hits
+inputs_hits <- rbindlist(lapply(inputs_hits_lst, as.data.table))
+
+# save input motifs hits
+fwrite(
+  inputs_hits, 
+  file.path(syn_dir, "motif-hits-all.tsv.gz"),
+  sep = "\t"
+)
+
+# reduced groups hits list
+reduce_hits <- rbindlist(lapply(reduce_hits_lst, as.data.table))
+
+# save reduced groups hits
+fwrite(
+  reduce_hits, 
+  file.path(syn_dir, "motif-hits-reduced.tsv.gz"),
+  sep = "\t"
+)
+
+# selected motifs hits
+select_hits <- rbindlist(lapply(select_hits_lst, as.data.table))
+
+# save selected hits
+fwrite(
+  select_hits, 
+  file.path(syn_dir, "motif-hits-selected.tsv.gz"),
+  sep = "\t"
+)
+```
+
+Plot motif hits for inspection.
+
+```{r}
+plot_hits_lst <- vector("list", length = length(cell_types))
+names(plot_hits_lst) <- cell_types
+
+for (ct in cell_types) {
+  
+  p_gr_all <- inputs_hits[inputs_hits$cell_type == ct, ]
+  p_gr_sel <- select_hits[select_hits$cell_type == ct, ]
+  
+  pks <- intersect(unique(p_gr_all$peak), unique(p_gr_sel$peak))
+  message(sprintf("%s peaks for %s", length(pks), ct))
+  
+  # randomly subset peaks because there's just too many
+  if (length(pks) > 10) {
+    set.seed(1950)
+    pks <- sample(pks, 10)
+  }
+  
+  # where to save the results
+  plot_hits_lst[[ct]] <- vector("list", length(pks))
+  names(plot_hits_lst[[ct]]) <- pks
+  
+  for (pk in pks) {
+    
+    # all motif hits
+    pgr_all <- p_gr_all[p_gr_all$peak == pk]
+    gpp_all <- mta_plot_granges(
+      pgr_all, 
+      label = "motif", 
+      color = "fc"
+    ) +
+      labs(title = "Input motif hits") +
+      theme(
+        axis.text.x = element_blank(),
+        axis.title.x = element_blank()
+      )
+    # reduced motif hits
+    pgr_sel <- p_gr_sel[p_gr_sel$peak == pk]
+    gpp_sel <- mta_plot_granges(
+      pgr_sel, 
+      label = "motif", 
+      color = "fc",
+      xlims = c(min(pgr_all$start), max(pgr_all$end))
+    ) + 
+      labs(title = "Non-overlapping motif hits")
+    # assemble the plots
+    gpp <- gpp_all / gpp_sel + 
+      plot_layout(ncol = 1, guides = "keep") +
+      plot_annotation(title = sprintf("%s %s", ct, pk))
+    # add to plots list
+    plot_hits_lst[[ct]][[pk]] <- gpp
+  }
+}
+
+
+# save plots
+pdf(
+  file.path(fig_dir, "motif-hits-ranges-reduced.pdf"), 
+  width = 24, height = 18
+)
+print(plot_hits_lst)
+dev.off()
+
+```
+
 ## Summaries
 
 Compare number of motif hits per peak before and after reducing motif hits.
@@ -837,7 +837,13 @@ mta_en <- fread(file.path(mta_dir, "motif-enrichment-mona-q0.98-FC-1-padj-0.001.
 mta_en[, cell_type := factor(cell_type, levels = cell_types)]
 mta_en[, archetype_name := factor(archetype_name, levels = unique(mta_en$archetype_name))]
 
-# load results (top-down)
+# load motif-to-TF assignments
+arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
+arc_as <- fread(file.path(arc_dir, sprintf(
+  "motif-assignment-archetypes-%s.tsv", arc_id
+)))
+
+# load reduced motif hits (top-down)
 # mts_ct <- fread(file.path(syn_dir, "enrovl0.5", "motif-hits-selected-cell-type.tsv.gz"))
 # setnames(mts_ct, "motif", "archetype_name")
 # mts_ct <- merge.data.table(
@@ -846,14 +852,45 @@ mta_en[, archetype_name := factor(archetype_name, levels = unique(mta_en$archety
 #   all.x = TRUE, sort = FALSE
 # )
 
-# load results (bottom-up)
+# load reduced motif hits (bottom-up)
 mts_ct <- fread(file.path(syn_dir, "motif-hits-selected.tsv.gz"))
 mts_ct[, archetype_name := motif]
+
+# how many archetypes assigned to TFs are among the selected motifs?
+arc_sl <- unique(arc_as[, .(archetype_name)])
+arc_sl[, selected := archetype_name %in% mts_ct$archetype_name]
+arc_sl[, .N, selected]
+
+# how many of the selected motifs are assigned to TFs?
+arc_tf <- unique(mts_ct[, .(archetype_name)])
+arc_tf[, assigned := archetype_name %in% arc_as$archetype_name]
+arc_tf[, .N, assigned]
+
+# add archetype family info
 mts_ct <- merge.data.table(
-  mts_ct, unique(mta_en[, .(archetype_name, archetype_family, cell_type)]),
-  by = c("archetype_name", "cell_type"),
-  all.x = TRUE, sort = FALSE
+  mts_ct, 
+  unique(mta_en[, .(archetype_name, archetype_family)]),
+  sort = FALSE, all.x = TRUE
 )
+
+# merge with motif assignments
+mts_ct <- merge.data.table(
+  mts_ct, unique(arc_as[, .(
+    gene, gene_name, common_name, og, pfam, tf_family, 
+    archetype_name, CisBP_assignment
+  )]),
+  by = c("archetype_name"),
+  all.x = TRUE, sort = FALSE, allow.cartesian = TRUE
+)
+mts_ct[is.na(mts_ct)] <- ""
+
+# make gene labels
+mts_ct[gene_name == "" & common_name != "", gene_name := common_name]
+mts_ct[, gene_label := common_name]
+mts_ct[gene_label == "", gene_label := ifelse(nchar(gene_name) > 45, paste0(substr(gene_name, 1, 43), "..."), gene_name)]
+mts_ct[gene_label == "", gene_label := ifelse(nchar(og) > 45, paste0(substr(og, 1, 43), "..."), og)]
+mts_ct[gene_label == "", gene_label := ifelse(nchar(pfam) > 45, paste0(substr(pfam, 1, 43), "..."), pfam)]
+stopifnot(nrow(mts_ct[gene != "" & gene_label == ""]) == 0)
 
 # count motif hits per cell type
 mts_ct[, n_peaks := length(unique(.SD$peak)), .(cell_type)]
@@ -861,8 +898,8 @@ mts_ct[, n_peaks_motif := length(unique(.SD$peak)), .(cell_type, archetype_name)
 mts_ct[, frac_peaks_motif := n_peaks_motif / n_peaks]
 
 # filter out motifs with no clear enrichment
-arc_ns <- unique(mta_en[fc > 1.5]$archetype_name)
-mts_ct <- mts_ct[archetype_name %in% arc_ns]
+# arc_ns <- unique(mta_en[fc > 1.5]$archetype_name)
+# mts_ct <- mts_ct[archetype_name %in% arc_ns]
 ```
 
 Plot motif occurrences together on dotmap with motif enrichment FC.
@@ -871,41 +908,52 @@ Plot motif occurrences together on dotmap with motif enrichment FC.
 # data for plotting
 mts_ns <- unique(mts_ct[, .(
   cell_type, archetype_name, archetype_family,
+  gene, gene_label,
   n_peaks, n_peaks_motif, frac_peaks_motif,
   fc, pval, padj
 )])
 stopifnot(!any(mts_ns[,.N,.(cell_type, archetype_name)]$N > 1))
+mts_ns[, gene_archetype := paste(gene, archetype_name, sep = " | ")]
 
 # transform for plotting
 mts_ns[, cell_type := factor(cell_type, levels = cell_types)]
 mts_ns[, archetype_name := factor(archetype_name, levels = unique(mta_en$archetype_name))]
+setorder(mts_ns, archetype_name, cell_type)
+mts_ns[, gene_archetype := factor(gene_archetype, levels = unique(mts_ns$gene_archetype))]
 mts_ns[, fc_scaled := pmin(fc, 6)]
 mts_ns[, minuslog10padj := -1 * log10(padj)]
 mts_ns[, minuslog10padj_scaled := pmin(minuslog10padj, 30)]
 
+# archetype family colors
+arc_fam_vec <- sort(unique(mts_ns$archetype_family))
+arc_fam_col <- structure(
+  colorRampPalette(brewer.pal(8, "Dark2"))(length(arc_fam_vec)),
+  names = arc_fam_vec
+)
+
 # plot motif enrichment dotmap
-mts_gp <- ggplot(
+mts_gp_occ <- ggplot(
   mts_ns, 
-  aes(cell_type, archetype_name)
+  aes(cell_type, gene_archetype)
   ) +
   geom_point(
     aes(size = frac_peaks_motif, fill = fc_scaled),
     shape = 21
   ) +
   geom_text(
-    data = unique(mts_ns[,.(archetype_name, archetype_family)]),
-    aes(y = archetype_name, label = archetype_family),
+    data = unique(mts_ns[,.(gene_archetype, archetype_name)]),
+    aes(y = gene_archetype, label = archetype_name),
     x = length(unique(mts_ns$cell_type)) + 1,
     hjust = 0,
     size = 2,
     inherit.aes = FALSE
   ) +
-  # scale_y_discrete(
-  #   breaks = mts_ns$archetype_name[mts_ns$gene_label != ""],
-  #   labels = mts_ns$archetype_name[mts_ns$gene_label != ""]
-  # ) +
+  scale_y_discrete(
+    breaks = mts_ns[gene_label != ""]$gene_archetype,
+    labels = mts_ns[gene_label != ""]$gene_label
+  ) +
   scale_x_discrete(
-    expand = expansion(mult = c(0.02, 0.42))
+    expand = expansion(mult = c(0.02, 0.5))
   ) +
   scale_fill_gradientn(
     name = "motif enrichment\nfold change",
@@ -927,9 +975,33 @@ mts_gp <- ggplot(
     plot.margin = margin(5.5, 40, 5.5, 40)
   )
 
+# archetype family annotation colorbar
+mts_dt_arc <- unique(mts_ns[,.(gene_archetype, archetype_family)])
+mts_dt_arc[, x := 1]
+mts_gp_arc <- ggplot(mts_dt_arc) +
+  geom_tile(
+    aes(x = x, y = gene_archetype, fill = archetype_family),
+  ) +
+  scale_y_discrete(
+    position = "right",
+    breaks = mts_dt_arc$gene_archetype,
+    labels = mts_dt_arc$archetype_family,
+  ) +
+  scale_fill_manual(values = arc_fam_col) +
+  theme_void() +
+  theme(
+    axis.text.y = element_text(size = 6, hjust = 0),
+    leegend.position = "none"
+  )
+
+mts_gp <- mts_gp_occ +
+  plot_spacer() +
+  (mts_gp_arc & theme(legend.position = "none")) + 
+  plot_layout(nrow = 1, widths = c(20, -3, 0.25), guides = "collect")
+
 ggsave(
-  file.path(fig_dir, "motif-hits-number-fc-dotmap.pdf"), 
-  mts_gp, height = 20, width = 10, limitsize = FALSE
+  file.path(fig_dir, "motif-hits-number-fc-dotmap-all.pdf"), 
+  mts_gp, height = 28, width = 12, limitsize = FALSE
 )
 ```
 
@@ -1064,3 +1136,5 @@ print(cpl_ls)
 dev.off()
 
 ```
+
+
