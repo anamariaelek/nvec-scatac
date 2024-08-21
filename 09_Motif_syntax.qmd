@@ -630,7 +630,27 @@ To speed things up, we will run this parallelized across cell types.
 ```{bash}
 ovl=0.5
 mkdir logs
-for ct in cnidocyte cnidocyte_gastrula ecto_pharynx ectoderm ecto_aboral EMS EMS_ecto_boundary gastro_circular_muscle_1 gastro_circular_muscle_2 gastro_parietal_muscle gastro_IRF1_2 gastro_somatic_gonad muscle_tentacle_retractor muscle_mesentery_retractor digestive_filaments_1 digestive_filaments_2 digestive_filaments_3 epidermis_1 epidermis_2 precursors_PGC precursors_endoNPC precursors_NPC NPC_1 NPC_2 neuron_GATA_Islet_1 neuron_GATA_Islet_2 neuron_Pou4_FoxL2_1 neuron_Pou4_FoxL2_2 neuron_Pou4_FoxL2_3 neuronal_gastrula gland gland_mucin
+
+
+for ct in cnidocyte cnidocyte_gastrula ecto_pharynx ectoderm ecto_aboral EMS EMS_ecto_boundary
+do
+Rscript 09_Motif_syntax_bottom_up.R $ct $ovl > logs/09_Motif_syntax_$ct.log 2>&1 &
+done
+
+
+for ct in gastro_circular_muscle_1 gastro_circular_muscle_2 gastro_parietal_muscle gastro_IRF1_2 gastro_somatic_gonad muscle_tentacle_retractor muscle_mesentery_retractor
+do
+Rscript 09_Motif_syntax_bottom_up.R $ct $ovl > logs/09_Motif_syntax_$ct.log 2>&1 &
+done
+
+
+for ct in digestive_filaments_1 digestive_filaments_2 digestive_filaments_3 epidermis_1 epidermis_2 precursors_PGC precursors_endoNPC precursors_NPC
+do
+Rscript 09_Motif_syntax_bottom_up.R $ct $ovl > logs/09_Motif_syntax_$ct.log 2>&1 &
+done
+
+
+for ct in NPC_1 NPC_2 neuron_GATA_Islet_1 neuron_GATA_Islet_2 neuron_Pou4_FoxL2_1 neuron_Pou4_FoxL2_2 neuron_Pou4_FoxL2_3 neuronal_gastrula gland gland_mucin
 do
 Rscript 09_Motif_syntax_bottom_up.R $ct $ovl > logs/09_Motif_syntax_$ct.log 2>&1 &
 done
@@ -712,7 +732,7 @@ for (ct in cell_types) {
     gpp_all <- mta_plot_granges(
       pgr_all, 
       label = "motif", 
-      color = "fc"
+      color = "padj"
     ) +
       labs(title = "Input motif hits") +
       theme(
@@ -724,7 +744,7 @@ for (ct in cell_types) {
     gpp_sel <- mta_plot_granges(
       pgr_sel, 
       label = "motif", 
-      color = "fc",
+      color = "padj",
       xlims = c(min(pgr_all$start), max(pgr_all$end))
     ) + 
       labs(title = "Non-overlapping motif hits")
@@ -740,7 +760,7 @@ for (ct in cell_types) {
 
 # save plots
 pdf(
-  file.path(fig_dir, "motif-hits-ranges-reduced.pdf"), 
+  file.path(fig_dir, "motif-hits-ranges-reduced-padj.pdf"), 
   width = 24, height = 18
 )
 print(plot_hits_lst)
@@ -832,10 +852,37 @@ ggsave(
 Get top-occurring motifs per cell type.
 
 ```{r}
-# load enrichment data (for comparison)
-mta_en <- fread(file.path(mta_dir, "motif-enrichment-mona-q0.98-FC-1-padj-0.001.tsv"))
+# load enrichment data (significant, non-redundant)
+# mta_en <- fread(file.path(mta_dir, "motif-enrichment-mona-q0.98-FC-1-padj-0.001.tsv"))
+# mta_en[, cell_type := factor(cell_type, levels = cell_types)]
+# mta_en[, archetype_name := factor(archetype_name, levels = unique(mta_en$archetype_name))]
+
+# load enrichment data (all)
+mta_en <- rbindlist(lapply(c(
+  file.path(mta_dir, "motif-enrichment-cell-type-mona-q0.98.tsv"),
+  file.path(arc_dir, "motif-enrichment-cell-type-archetypes-PPM-PCC-0.8-IC0.5-5bp-mona-q0.95.tsv")
+), fread))
+mta_en <- unique(mta_en[,.(cell_type, motif, fc, pval, padj)])
+
+# cluster enrichment data for plot
 mta_en[, cell_type := factor(cell_type, levels = cell_types)]
-mta_en[, archetype_name := factor(archetype_name, levels = unique(mta_en$archetype_name))]
+mta_en[, minuslog10padj := -1 * log10(padj)]
+padj_dt <- unique(mta_en[, .(motif, cell_type, minuslog10padj)])
+padj_dt <- dcast.data.table(padj_dt, motif ~ cell_type, value.var = "minuslog10padj")
+padj_mt <- as.matrix(padj_dt[, -1])
+rownames(padj_mt) <- padj_dt[[1]]
+arc_ord <- order(apply(padj_mt, 1, which.max))
+arc_lvl <- rownames(padj_mt)[arc_ord]
+mta_en[, motif := factor(motif, levels = arc_lvl)]
+setorder(mta_en, motif)
+setnames(mta_en, "motif", "archetype_name")
+
+# select significant archetypes
+# fc_thr <- 1
+# pa_thr <- 0.001
+# arc_sig <- unique(mta_en[fc>fc_thr & padj<pa_thr]$motif)
+# length(arc_sig)
+# mta_en <- mta_en[archetype_name %in% arc_sig]
 
 # load motif-to-TF assignments
 arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
@@ -854,6 +901,7 @@ arc_as <- fread(file.path(arc_dir, sprintf(
 
 # load reduced motif hits (bottom-up)
 mts_ct <- fread(file.path(syn_dir, "motif-hits-selected.tsv.gz"))
+#mts_ct <- fread(file.path(syn_dir, "motif-hits-all.tsv.gz"))
 mts_ct[, archetype_name := motif]
 
 # how many archetypes assigned to TFs are among the selected motifs?
@@ -866,12 +914,20 @@ arc_tf <- unique(mts_ct[, .(archetype_name)])
 arc_tf[, assigned := archetype_name %in% arc_as$archetype_name]
 arc_tf[, .N, assigned]
 
+# load archetype family info
+cor_dt <- fread(file.path(
+  "Results", 
+  sprintf("ChromVAR-%s", arc_id), 
+  "correlation-seacells-archetype-motif-score-gene.tsv.gz"
+))
+
 # add archetype family info
 mts_ct <- merge.data.table(
   mts_ct, 
-  unique(mta_en[, .(archetype_name, archetype_family)]),
+  unique(cor_dt[, .(archetype_name, archetype_family)]),
   sort = FALSE, all.x = TRUE
 )
+mts_ct[archetype_name == "FoxQ2d", archetype_family := "Forkhead"]
 
 # merge with motif assignments
 mts_ct <- merge.data.table(
@@ -930,6 +986,7 @@ arc_fam_col <- structure(
   colorRampPalette(brewer.pal(8, "Dark2"))(length(arc_fam_vec)),
   names = arc_fam_vec
 )
+arc_fam_col[names(arc_fam_col)==""] <- "white"
 
 # plot motif enrichment dotmap
 mts_gp_occ <- ggplot(
@@ -997,11 +1054,11 @@ mts_gp_arc <- ggplot(mts_dt_arc) +
 mts_gp <- mts_gp_occ +
   plot_spacer() +
   (mts_gp_arc & theme(legend.position = "none")) + 
-  plot_layout(nrow = 1, widths = c(20, -3, 0.25), guides = "collect")
+  plot_layout(nrow = 1, widths = c(20, -2.7, 0.25), guides = "collect")
 
 ggsave(
   file.path(fig_dir, "motif-hits-number-fc-dotmap-all.pdf"), 
-  mts_gp, height = 28, width = 12, limitsize = FALSE
+  mts_gp, height = 42, width = 12, limitsize = FALSE
 )
 ```
 
@@ -1041,10 +1098,11 @@ for (ct in cell_types) {
   
   # find top combinations of motifs
   mts_com <- rbindlist(lapply(c(2:4), function(n) {
+    message("Counting combinations of ", n, " motifs in ", ct, " peaks:")
     mts_comb <- combn(
       unique(mts_top$motif), n, simplify = FALSE
     )
-    rbindlist(lapply(mts_comb, function(x) {
+    rbindlist(pblapply(mts_comb, function(x) {
       dt <- unique(mts_top[motif %in% x, .(peak, motif)])[, N := .N, peak]
       unique(dt[N == n][,motif := paste(x, collapse = "+")])
     }))

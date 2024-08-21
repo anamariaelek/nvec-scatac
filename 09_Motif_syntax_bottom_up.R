@@ -123,11 +123,21 @@ mta_dt <- rbindlist(lapply(c(
 # calculate relative motif scores (independent of the motif length)
 mta_dt[, relative_motif_score := motif_score / max(motif_score)]
 
-# subset enriched motifs
+# select enriched motifs
 mta_en <- fread(file.path(mta_dir, "motif-enrichment-mona-q0.98-FC-1-padj-0.001.tsv"))
-mta_en <- unique(mta_en[,.(cell_type, archetype_name, fc, pval, padj)])
-setnames(mta_en, "archetype_name", "motif")
-mta_dt <- mta_dt[motif %in% mta_en$motif]
+
+# select assigned motifs
+mta_as <- fread(file.path(arc_dir, "motif-assignment-archetypes-PPM-PCC-0.8-IC0.5-5bp.tsv"))
+
+# subset motifs
+mta_dt <- mta_dt[motif %in% c(mta_en$archetype_name, mta_as$archetype_name)]
+
+# enrichment values
+mta_en <- rbindlist(lapply(c(
+  file.path(mta_dir, "motif-enrichment-cell-type-mona-q0.98.tsv"),
+  file.path(arc_dir, "motif-enrichment-cell-type-archetypes-PPM-PCC-0.8-IC0.5-5bp-mona-q0.95.tsv")
+), fread))
+mta_en <- unique(mta_en[,.(cell_type, motif, fc, pval, padj)])
 
 # all peaks
 peaks <- fread(file.path(pks_dir, "Peaks_cell_type_mapped.bed"))
@@ -155,10 +165,10 @@ pks_dat <- peaks_gr[queryHits(pks_ovl)]
 mta_ct_dt <- mta_dt[peak %in% pks_dat$peak]
 
 # motif enrichment in cell type
-mta_ct_en <- mta_en[cell_type == ct]
+mta_ct_en <- mta_en[cell_type == ct][padj < 0.05]
 
 # combine
-mta_ct <- merge.data.table(mta_ct_dt, mta_ct_en, by = "motif", all.x = TRUE)
+mta_ct <- merge.data.table(mta_ct_dt, mta_ct_en, by = "motif")
 
 # make ranges
 mta_gr <- makeGRangesFromDataFrame(mta_ct, keep.extra.columns = TRUE)
