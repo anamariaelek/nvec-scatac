@@ -42,6 +42,7 @@ Results/Modules/GO/ics-hclust/results
 Results/Modules/PFAM/ics-hclust/results
 Results/Peaks/Matrix-Adult-Gastrula-Peaks-mapped-qnormalized.rds
 Results/Peaks/Sum_Adult_Gastrula_Peaks_SEACell_qnorm.rds
+Results/Syntax/fcenrassignovl0.5/
 Results/Syntax/fcenrovl0.5
 Results/Syntax/fcovl0.5
 Results/Syntax/pvalenrovl0.5

@@ -36,6 +36,7 @@ ann_dir <- "annotation"
 pks_dir <- "Results/Peaks"
 mta_dir <- "Results/Motifs"
 arc_dir <- "Results/Archetypes"
+grn_dir <- "Results/GRN"
 syn_dir <- "Results/Syntax"
 dir.create(syn_dir, showWarnings = FALSE)
 fig_dir <- "Plots/Syntax"
@@ -120,8 +121,29 @@ mta_dt <- rbindlist(lapply(c(
   file.path(mta_dir, sprintf("motif-scores-mona-q%s.tsv.gz", q))
 ), fread))
 
-# calculate relative motif scores (independent of the motif length)
-mta_dt[, relative_motif_score := motif_score / max(motif_score)]
+# in silico ChIP score filtered peaks
+ics_fn <- file.path(syn_dir, "motif-hits-ics-filtered.tsv.gz")
+# if filtered peaks file doesn't exist, create it
+if (!file.exists(ics_fn)) {
+  message("Filtering motif hits by in silico ChIP score")
+  lvl <- "metacell"
+  id <- "genes_exp_FC2_acc_FC4_spearman"
+  thr <- 0.1
+  ics_dt <- fread(file.path(
+    grn_dir, lvl, sprintf(
+      "insilico-chip-binding-score-%s.tsv.gz", id
+    )
+  ))
+  ics_dt <- unique(ics_dt[in_silico_chip_score > thr, .(seqnames, start, end, peak, motif)])
+  fwrite(ics_dt, file.path(syn_dir, "motif-hits-ics-filtered.tsv.gz"), sep = "\t")
+} else {
+  message("Loading filtered motif hits: ", ics_fn)
+  ics_dt <- fread(ics_fn, sep = "\t")
+}
+
+# subset motifs hits
+mta_dt <- merge.data.table(mta_dt, ics_dt[, .(peak, motif)], by = c("peak", "motif"))
+mta_dt <- unique(mta_dt)
 
 # select enriched motifs
 mta_en <- fread(file.path(mta_dir, "motif-enrichment-mona-q0.98-FC-1-padj-0.001.tsv"))

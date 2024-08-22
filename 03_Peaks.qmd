@@ -745,5 +745,32 @@ saveRDS(
 )
 ```
 
+## Promoters classification
+
+```{r}
+# load mapped peaks
+pks_fn <- file.path(pks_dir, "Peaks_cell_type_mapped.tsv")
+pks_mp <- fread(pks_fn)
+
+# load promoters classification
+pks_cl <- sapply(c("adult", "gastrula"), function(stg) {
+  stg_dir <- switch(stg, adult = adult_dir, gastrula = gastr_dir)
+  fn <- file.path(stg_dir, "ArchRProj", "Promoters", "annotation_peaks.tsv")
+  dt <- fread(fn)
+  setnames(dt, "peak", paste0("peak_", stg))
+  merge.data.table(
+    dt, pks_mp, by = paste0("peak_", stg), all.x = TRUE, sort = FALSE
+  )
+}, simplify = FALSE, USE.NAMES = TRUE)
+pks_dt <- rbindlist(pks_cl, idcol = "stage", use.names = TRUE)
+
+# save
+setcolorder(pks_dt, c(
+  "seqnames", "start", "end", "width", "strand", "score",
+  "peak", "peak_adult", "peak_gastrula", "gene", "promoter", "cell_types", "stage", "id"
+))
+fwrite(pks_dt, file.path(pks_dir, "Peaks_cell_type_promoter_annotation.tsv"), sep = "\t")
+
+```
 
 
