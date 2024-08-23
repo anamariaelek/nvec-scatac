@@ -749,15 +749,19 @@ dev.off()
 
 ## Summaries
 
+Load results
+
+```{r}
+syn_sub_dir <- "fcenrassignovl0.5"
+mts_ct <- fread(file.path(syn_dir, syn_sub_dir, "motif-hits-selected.tsv.gz"))
+amt_ct <- fread(file.path(syn_dir, syn_sub_dir, "motif-hits-all.tsv.gz"))
+```
+
 Compare number of motif hits per peak before and after reducing motif hits.
 
 ```{r}
-# load motifs hits
-select_hits <- fread(file.path(syn_dir, "motif-hits-selected.tsv.gz"))
-inputs_hits <- fread(file.path(syn_dir, "motif-hits-all.tsv.gz"))
-all_hits <- rbindlist(list("all" = inputs_hits, "reduced" = select_hits), idcol = "set")
-
 # how many (different or same) motifs hits per peak?
+all_hits <- rbindlist(list("all" = amt_ct, "reduced" = mts_ct), idcol = "set")
 mta_pks_mts_diff <- unique(all_hits[,.(motif, peak, set)])[, .N, .(peak, set)]
 mta_pks_mts_same <- unique(all_hits[, .N, .(motif, peak, set)])
 
@@ -785,12 +789,6 @@ ggsave(
 Count number of motifs per cell types.
 
 ```{r}
-# load results (top-down)
-# mts_ct <- fread(file.path(syn_dir, "motif-hits-selected-cell-type.tsv.gz"))
-
-# load results (bottom-up)
-mts_ct <- fread(file.path(syn_dir, "motif-hits-selected.tsv.gz"))
-
 # order peaks and cell types
 peaks <- paste0(
   "peak",
@@ -845,12 +843,6 @@ ggsave(
 Count number of motif hits per peak for all cell types.
 
 ```{r}
-# load results (top-down)
-# mts_ct <- fread(file.path(syn_dir, "motif-hits-selected-cell-type.tsv.gz"))
-
-# load results (bottom-up)
-mts_ct <- fread(file.path(syn_dir, "motif-hits-selected.tsv.gz"))
-
 # order peaks and cell types
 peaks <- paste0(
   "peak",
@@ -893,7 +885,7 @@ gp_pks_mts <- ggplot(
   ) +
   scale_y_continuous(
     breaks = seq(1, max(mts_ct_uniq_n$n_motifs), by = 1),
-    expand = expansion(mult = c(0.1, 0.1))
+    expand = expansion(mult = c(0.05, 0.05))
   ) +
   labs(x = "cell type", y = "motifs per peak") +
   theme(
@@ -904,8 +896,14 @@ gp_pks_mts <- ggplot(
 
 ggsave(
   file.path(fig_dir, "motif-hits-per-peak-per-cell-type.pdf"), 
-  gp_pks_mts, width = 10, height = 6
+  gp_pks_mts, width = 10, height = 8
 )
+```
+
+Peaks per cell type
+
+```{r}
+unique(mts_ct[, .(peak,cell_type)])[,.N,cell_type][order(-N)]
 ```
 
 Annotate motifs and peaks with metadata.
@@ -915,45 +913,8 @@ Annotate motifs and peaks with metadata.
 #  motifs hits results  #
 # # # # # # # # # # # # #
 
-# load reduced motif hits
-mts_ct <- fread(file.path(syn_dir, "motif-hits-selected.tsv.gz"))
+# reduced motif hits
 mts_ct[, archetype_name := motif]
-
-# # # # # # # # # # # # # # # #
-#  motif enrichment metadata  #
-# # # # # # # # # # # # # # # #
-
-# load enrichment data (significant, non-redundant)
-# mta_en <- fread(file.path(mta_dir, "motif-enrichment-mona-q0.98-FC-1-padj-0.001.tsv"))
-# mta_en[, cell_type := factor(cell_type, levels = cell_types)]
-# mta_en[, archetype_name := factor(archetype_name, levels = unique(mta_en$archetype_name))]
-
-# load enrichment data (all)
-mta_en <- rbindlist(lapply(c(
-  file.path(mta_dir, "motif-enrichment-cell-type-mona-q0.98.tsv"),
-  file.path(arc_dir, "motif-enrichment-cell-type-archetypes-PPM-PCC-0.8-IC0.5-5bp-mona-q0.95.tsv")
-), fread))
-mta_en <- unique(mta_en[,.(cell_type, motif, fc, pval, padj)])
-
-# cluster enrichment data for plot
-mta_en[, cell_type := factor(cell_type, levels = cell_types)]
-mta_en[, minuslog10padj := -1 * log10(padj)]
-padj_dt <- unique(mta_en[, .(motif, cell_type, minuslog10padj)])
-padj_dt <- dcast.data.table(padj_dt, motif ~ cell_type, value.var = "minuslog10padj")
-padj_mt <- as.matrix(padj_dt[, -1])
-rownames(padj_mt) <- padj_dt[[1]]
-arc_ord <- order(apply(padj_mt, 1, which.max))
-arc_lvl <- rownames(padj_mt)[arc_ord]
-mta_en[, motif := factor(motif, levels = arc_lvl)]
-setorder(mta_en, motif)
-setnames(mta_en, "motif", "archetype_name")
-
-# select significant archetypes
-# fc_thr <- 1
-# pa_thr <- 0.001
-# arc_sig <- unique(mta_en[fc>fc_thr & padj<pa_thr]$motif)
-# length(arc_sig)
-# mta_en <- mta_en[archetype_name %in% arc_sig]
 
 # # # # # # # # # # # # # #
 #  peaks classification   #
@@ -1004,6 +965,7 @@ cor_dt <- fread(file.path(
 mts_ct <- merge.data.table(
   mts_ct, 
   unique(cor_dt[, .(archetype_name, archetype_family)]),
+  by = "archetype_name",
   sort = FALSE, all.x = TRUE
 )
 mts_ct[archetype_name == "FoxQ2d", archetype_family := "Forkhead"]
@@ -1052,16 +1014,46 @@ mts_ct[, cell_type := factor(cell_type, levels = cell_types)]
 mts_ct[, n_peaks := length(unique(.SD$peak)), .(cell_type)]
 mts_ct[, n_peaks_motif := length(unique(.SD$peak)), .(cell_type, archetype_name)]
 mts_ct[, frac_peaks_motif := n_peaks_motif / n_peaks]
-
-# filter out motifs with no clear enrichment
-# arc_ns <- unique(mta_en[fc > 1.5]$archetype_name)
-# mts_ct <- mts_ct[archetype_name %in% arc_ns]
 ```
 
 Plot motif occurrences together on dotmap with motif enrichment FC.
 
 ```{r}
-# data for plotting
+# we will order data for plotting by motif enrichment FC
+
+# load enrichment data (significant, non-redundant)
+# mta_en <- fread(file.path(mta_dir, "motif-enrichment-mona-q0.98-FC-1-padj-0.001.tsv"))
+# mta_en[, cell_type := factor(cell_type, levels = cell_types)]
+# mta_en[, archetype_name := factor(archetype_name, levels = unique(mta_en$archetype_name))]
+
+# load enrichment data (all)
+mta_en <- rbindlist(lapply(c(
+  file.path(mta_dir, "motif-enrichment-cell-type-mona-q0.98.tsv"),
+  file.path(arc_dir, "motif-enrichment-cell-type-archetypes-PPM-PCC-0.8-IC0.5-5bp-mona-q0.95.tsv")
+), fread))
+mta_en <- unique(mta_en[,.(cell_type, motif, fc, pval, padj)])
+
+# cluster enrichment data for plot
+mta_en[, cell_type := factor(cell_type, levels = cell_types)]
+mta_en[, minuslog10padj := -1 * log10(padj)]
+padj_dt <- unique(mta_en[, .(motif, cell_type, minuslog10padj)])
+padj_dt <- dcast.data.table(padj_dt, motif ~ cell_type, value.var = "minuslog10padj")
+padj_mt <- as.matrix(padj_dt[, -1])
+rownames(padj_mt) <- padj_dt[[1]]
+arc_ord <- order(apply(padj_mt, 1, which.max))
+arc_lvl <- rownames(padj_mt)[arc_ord]
+mta_en[, motif := factor(motif, levels = arc_lvl)]
+setorder(mta_en, motif)
+setnames(mta_en, "motif", "archetype_name")
+
+# select significant archetypes
+# fc_thr <- 1
+# pa_thr <- 0.001
+# arc_sig <- unique(mta_en[fc>fc_thr & padj<pa_thr]$motif)
+# length(arc_sig)
+# mta_en <- mta_en[archetype_name %in% arc_sig]
+
+# count motif hits data for plotting
 mts_ns <- unique(mts_ct[, .(
   cell_type, archetype_name, archetype_family,
   gene, gene_label,
@@ -1157,7 +1149,7 @@ mts_gp <- mts_gp_occ +
   plot_layout(nrow = 1, widths = c(20, -2.7, 0.25), guides = "collect")
 
 ggsave(
-  file.path(fig_dir, "motif-hits-number-fc-dotmap-insilico-chip.pdf"), 
+  file.path(fig_dir, "motif-hits-number-fc-dotmap.pdf"), 
   mts_gp, height = 42, width = 12, limitsize = FALSE
 )
 ```
@@ -1165,14 +1157,26 @@ ggsave(
 Count motif combinations (not considering order, distance...) per cell type.
 
 ```{r}
+# subset motifs assigned to TFs
 use_genes_assigned_to_motfs <- TRUE
 
+# subset motifs assigned to active TFs
+use_active_tfs <- TRUE
+grn_tfs <- fread(file.path(
+  grn_dir, 
+  "networks", 
+  "grn_tfs_info_expression_fc_0.4_accessibility_access_0.4_chromvar_4.tsv"
+))
+grn_tfs <- unique(grn_tfs[,.(motif, gene, zscore, cell_type)])
+
+# list to save results
 cmb_ls <- structure(vector("list", length = length(cell_types)), names = cell_types)
 
+# loop over cell types
 for (ct in cell_types) {
   
   message(ct)
-  cols <- c("N", "peak", "promoter", "motif", "motif_occur")
+  cols <- c("N", "peak", "promoter", "motif", "motif_occur", "motif_nocp_occur")
   
   # make a matrix of motif hits in peaks
   if (use_genes_assigned_to_motfs == TRUE) {
@@ -1183,6 +1187,13 @@ for (ct in cell_types) {
         gene, gene_label, common_name
       )]
     )
+    if (use_active_tfs == TRUE) {
+      mts_dat <- merge.data.table(
+        mts_dat, unique(grn_tfs[cell_type == ct]),
+        by = c("motif", "gene", "cell_type"), 
+        all = FALSE, sort = FALSE
+      )
+    }
   } else {
     mts_dat <- unique(
       mts_ct[cell_type == ct, .(
@@ -1194,11 +1205,16 @@ for (ct in cell_types) {
   
   # number of peaks in cell type
   n_pks <- length(unique(mts_dat$peak))
+  n_nocp_pks <- length(unique(mts_dat[promoter != "CP"]$peak))
   
   # count in how many peaks a motif occurs
   occ_mts <- unique(
-    mts_dat[, .(peak, motif)]
-  )[, .(motif_occur = .N), motif]
+    mts_dat[, .(peak, promoter, motif)]
+  )[, ':='(
+    motif_occur = length(unique(.SD$peak)),
+    motif_nocp_occur = length(unique(.SD[promoter != "CP"]$peak))
+  ), motif]
+  occ_mts <- unique(occ_mts[, .(motif, motif_occur, motif_nocp_occur)])
   
   # add to motifs hits table
   mts_dat <- merge.data.table(
@@ -1208,7 +1224,6 @@ for (ct in cell_types) {
   
   # genes instead of motifs
   if (use_genes_assigned_to_motfs == TRUE) {
-    
     mts_dat[, genes := paste(unique(sort(.SD$gene)), collapse = " | "), .(motif)]
     mts_dat[, gene_label := paste(unique(c(
       sort(.SD[common_name != ""]$gene_label),
@@ -1221,7 +1236,6 @@ for (ct in cell_types) {
     mts_dat <- unique(mts_dat)
     mts_dat[, motif := NULL]
     setnames(mts_dat, "gene_label", "motif")
-    
   }
   
   # select motifs that have hits in more than 10% of peaks
@@ -1245,18 +1259,21 @@ for (ct in cell_types) {
   
   # count in how many peaks a combination of motif occurs
   if (nrow(mts_com) > 0) { 
-    mts_com[, motif_occur := .N, .(motif, N)]
-  
+    mts_com[, ':='(
+      motif_occur = length(unique(.SD$peak)),
+      motif_nocp_occur = length(unique(.SD[promoter != "CP"]$peak))
+    ), .(motif, N)]
+    
     # combine with motifs hits table
     mts_top <- rbindlist(list(
       mts_top[, ..cols],
       mts_com[, ..cols]
-    ), use.names = TRUE)[, cell_type := ct][, n_pks := n_pks]
+    ), use.names = TRUE)[, cell_type := ct]
   }
   
   # add to list
   mts_top[, cell_type := ct]
-  mts_top[, n_pks := n_pks]
+  mts_top[, n_pks := n_pks][, n_nocp_pks := n_nocp_pks]
   cmb_ls[[ct]] <- mts_top
   
 }
@@ -1277,12 +1294,14 @@ cpl_ls <- lapply(cell_types, function(ct) {
   
   # select data
   cmb_ct <- cmb_dt[cell_type == ct]
-  cmb_ct <- unique(cmb_ct[, .(motif, motif_occur, N, n_pks)])
+  cmb_ct <- unique(cmb_ct[, .(motif, motif_occur, motif_nocp_occur, N, n_pks, n_nocp_pks)])
   setorder(cmb_ct, N, -motif_occur)
   cmb_ct[, motif := factor(motif, levels = rev(unique(cmb_ct$motif)))]
+  
   if (nrow(cmb_ct) > 0) { 
     # number of peaks in cell type
     n_pks <- unique(cmb_ct$n_pks)
+    n_nocp_pks <- unique(cmb_ct$n_nocp_pks)
     
     # only show in plot motifs with hits in more than 1 peak 
     cmb_ct <- cmb_ct[motif_occur > 1]
@@ -1312,7 +1331,7 @@ cpl_ls <- lapply(cell_types, function(ct) {
         expand = expansion(mult = c(0, 0.1)), 
         breaks = int_breaks,
         name = "number of peaks",
-        sec.axis = sec_axis(~ . / n_pks * 100, name = "% of peaks")
+        sec.axis = sec_axis(~ . / n_nocp_pks * 100, name = "% of peaks")
       ) +
       scale_y_discrete(
         breaks = unique(cmb_ct$motif),
@@ -1338,7 +1357,7 @@ cpl_ls <- lapply(cell_types, function(ct) {
 
 # save plots
 pdf(
-  file.path(fig_dir, "motif-TF-occurance-per-cell-type-insilico-ChIP.pdf"), 
+  file.path(fig_dir, "motif-TF-occurance-per-cell-type.pdf"), 
   width = 24, height = 42
 )
 tryCatch(print(cpl_ls), error = function(e) warning(e))
