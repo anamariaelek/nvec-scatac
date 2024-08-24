@@ -141,18 +141,29 @@ mta_dt <- rbindlist(lapply(c(
 #   ics_dt <- fread(ics_fn, sep = "\t")
 # }
 # 
-# # subset motifs hits
+# # subset motifs hits in peaks
 # mta_dt <- merge.data.table(mta_dt, ics_dt[, .(peak, motif)], by = c("peak", "motif"))
 # mta_dt <- unique(mta_dt)
 
-# select enriched motifs
+# enriched motifs
 mta_en <- fread(file.path(mta_dir, "motif-enrichment-mona-q0.98-FC-1-padj-0.001.tsv"))
 
-# select assigned motifs
+# assigned motifs
 mta_as <- fread(file.path(arc_dir, "motif-assignment-archetypes-PPM-PCC-0.8-IC0.5-5bp.tsv"))
 
-# subset motifs
-mta_dt <- mta_dt[motif %in% c(mta_en$archetype_name, mta_as$archetype_name)]
+# active TFs motifs
+grn_tfs <- fread(file.path(
+  grn_dir,
+  "networks",
+  "grn_tfs_info_expression_fc_0.4_accessibility_access_0.4_chromvar_4.tsv"
+))
+grn_tfs <- unique(grn_tfs[cell_type == ct, .(motif, gene, zscore, cell_type)])
+
+# subset enriched and assigned motifs
+# mta_dt <- mta_dt[motif %in% c(mta_en$archetype_name, mta_as$archetype_name)]
+
+# subset motifs assigned to active TFs
+mta_dt <- mta_dt[motif %in% grn_tfs$motif]
 
 # enrichment values
 mta_en <- rbindlist(lapply(c(
@@ -176,7 +187,6 @@ pks_fn <- file.path(
 )
 pks_dt <- fread(pks_fn, select = 1:3)
 setnames(pks_dt, c("seqnames", "start", "end"))
-
 pks_gr <- makeGRangesFromDataFrame(pks_dt)
 
 # overlap peaks (to map per-stage peak ids to final peak set ids)
@@ -187,7 +197,7 @@ pks_dat <- peaks_gr[queryHits(pks_ovl)]
 mta_ct_dt <- mta_dt[peak %in% pks_dat$peak]
 
 # motif enrichment in cell type
-mta_ct_en <- mta_en[cell_type == ct][padj < 0.05]
+mta_ct_en <- mta_en[cell_type == ct]#[padj < 0.05]
 
 # combine
 mta_ct <- merge.data.table(mta_ct_dt, mta_ct_en, by = "motif")

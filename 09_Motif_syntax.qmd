@@ -78,6 +78,17 @@ theme_py <- theme_light() + theme(
   strip.background = element_rect(fill="white")
 )
 theme_set(theme_py)
+
+# helper function to make gene labels
+makeGeneLabels <- function(dt) {
+  dt[gene_name == "" & common_name != "", gene_name := common_name]
+  dt[, gene_label := common_name]
+  dt[gene_label == "", gene_label := ifelse(nchar(gene_name) > 45, paste0(substr(gene_name, 1, 43), "..."), gene_name)]
+  dt[gene_label == "", gene_label := ifelse(nchar(og) > 45, paste0(substr(og, 1, 43), "..."), og)]
+  dt[gene_label == "", gene_label := ifelse(nchar(pfam) > 45, paste0(substr(pfam, 1, 43), "..."), pfam)]
+  stopifnot(nrow(dt[gene != "" & gene_label == ""]) == 0)
+  return(dt)
+}
 ```
 
 Define directories to read the data from and save the results to.
@@ -747,12 +758,612 @@ dev.off()
 
 ```
 
+## Comparisons
+
+```{r}
+# results to compare
+syn_sub_dirs <- c(
+  "enrich" = "fcenrovl0.5",
+  "enrich | assign" = "fcenrassignovl0.5",
+  #"enrich | assign | ischip" = "fcenrassignovl0.5ics",
+  "active" = "fcactovl0.5"
+)
+
+# load results
+mts_ct <- rbindlist(sapply(syn_sub_dirs, function(x) {
+  fread(file.path(syn_dir, x, "motif-hits-selected.tsv.gz"))[, iteration := x]
+}, simplify = FALSE, USE.NAMES = TRUE), fill = TRUE)
+mts_ct[, cell_type := factor(cell_type, levels = cell_types)]
+```
+
+Count occurrences for combinations of motifs.
+
+```{r}
+# # # # # # # # # # # # #
+#  motifs hits results  #
+# # # # # # # # # # # # #
+
+# reduced motif hits
+mts_ct[, archetype_name := motif]
+
+# # # # # # # # # # # # # #
+#  peaks classification   #
+# # # # # # # # # # # # # #
+
+# load peaks classification
+pks_dt <- fread(file.path(pks_dir, "Peaks_cell_type_promoter_annotation.tsv"))
+
+# cell type entries into separate rows
+pks_dt <- separate_rows(pks_dt, "cell_types", sep = ",")
+setDT(pks_dt)
+setnames(pks_dt, "cell_types", "cell_type")
+
+# annotations for each peak: CP > SP > AP > NO
+pks_dt <- unique(pks_dt[, .(peak, promoter, cell_type)])
+pks_dt[promoter == "AP+", promoter := "AP"]
+pks_dt[, promoter := factor(promoter, levels = c("CP", "SP", "AP", "NO"))]
+setorder(pks_dt, peak, promoter)
+setnames(pks_dt, "cell_type", "broad_cell_type")
+pks_dt <- pks_dt[, .SD[1], .(peak, broad_cell_type)]
+pks_dt <- unique(pks_dt)
+stopifnot(!any(pks_dt[,.N,.(peak, broad_cell_type)]$N > 1))
+
+# merge hits results with peaks classification
+mts_ct <- merge.data.table(
+  mts_ct, bct_maps,
+  by = "cell_type", all.x = TRUE
+)
+mts_ct <- merge.data.table(
+  mts_ct, pks_dt,
+  by = c("peak", "broad_cell_type"), 
+  all.x = TRUE
+)
+mts_ct[is.na(promoter), promoter := "NO"]
+
+# # # # # # # # # # # #
+#  archetype family   #
+# # # # # # # # # # # #
+
+# load archetype family info
+cor_dt <- fread(file.path(
+  "Results", 
+  sprintf("ChromVAR-%s", arc_id), 
+  "correlation-seacells-archetype-motif-score-gene.tsv.gz"
+))
+
+# add archetype family info
+mts_ct <- merge.data.table(
+  mts_ct, 
+  unique(cor_dt[, .(archetype_name, archetype_family)]),
+  by = "archetype_name",
+  sort = FALSE, all.x = TRUE
+)
+mts_ct[archetype_name == "FoxQ2d", archetype_family := "Forkhead"]
+
+# # # # # # # # # # # # # # #
+#  motif to TF assignment   #
+# # # # # # # # # # # # # # #
+
+# load motif-to-TF assignments
+arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
+arc_as <- fread(file.path(arc_dir, sprintf(
+  "motif-assignment-archetypes-%s.tsv", arc_id
+)))
+
+# merge hits results with motif assignments
+mts_ct <- merge.data.table(
+  mts_ct, unique(arc_as[, .(
+    gene, gene_name, common_name, og, pfam, tf_family, 
+    archetype_name, CisBP_assignment
+  )]),
+  by = c("archetype_name"),
+  all.x = TRUE, sort = FALSE, allow.cartesian = TRUE
+)
+mts_ct[is.na(mts_ct)] <- ""
+
+# make gene labels
+mts_ct <- makeGeneLabels(mts_ct)
+
+# # # # # # # # #
+#  active TFs   #
+# # # # # # # # #
+
+# subset motifs assigned to active TFs?
+use_active_tfs <- FALSE
+
+if (use_active_tfs == TRUE) {
+  
+  # load active TFs
+  grn_tfs <- fread(file.path(
+    grn_dir, 
+    "networks", 
+    "grn_tfs_info_expression_fc_0.4_accessibility_access_0.4_chromvar_4.tsv"
+  ))
+  grn_tfs <- unique(grn_tfs[,.(motif, gene, zscore, cell_type)])
+  
+  # merge hits results with active TFs
+  mts_ct <- merge.data.table(
+    mts_ct, grn_tfs,
+    by = c("motif", "gene", "cell_type"),
+    all = FALSE, sort = FALSE
+  )
+  
+}
+
+# # # # # # # # # #
+#   count hits    #
+# # # # # # # # # #
+
+# count motif hits per cell type
+mts_ct[, cell_type := factor(cell_type, levels = cell_types)]
+mts_ct[, n_peaks := length(unique(.SD$peak)), .(cell_type, iteration)]
+mts_ct[, n_peaks_motif := length(unique(.SD$peak)), .(cell_type, archetype_name, iteration)]
+mts_ct[, frac_peaks_motif := n_peaks_motif / n_peaks]
+
+# list to save results
+cmb_ls <- structure(vector("list", length = length(syn_sub_dirs)), names = syn_sub_dirs)
+cmb_ls <- sapply(cmb_ls, function(x) structure(vector("list", length = length(cell_types)), names = cell_types), simplify = FALSE, USE.NAMES = TRUE)
+
+# loop over cell types
+require(pbapply)
+
+for (it in syn_sub_dirs) {
+  
+  # use genes names instead of motifs 
+  use_genes_assigned_to_motfs <- switch(
+    it,
+    "fcenrovl0.5" = FALSE,
+    "fcenrassignovl0.5" = FALSE,
+    "fcenrassignovl0.5ics" = TRUE,
+    "fcactovl0.5" = TRUE
+  )
+  
+  for (ct in cell_types) {
+    
+    message(ct)
+    cols <- c("N", "peak", "promoter", "motif", "motif_occur", "motif_nocp_occur")
+    
+    # make a matrix of motif hits in peaks
+    if (use_genes_assigned_to_motfs == TRUE) {
+      mts_dat <- unique(
+        mts_ct[iteration == it & cell_type == ct & gene != "", .(
+          cell_type, peak, promoter, motif,
+          # motif_start, motif_end,  # include if we want all instances of motif in a peak
+          gene, gene_label, common_name
+        )]
+      )
+    } else {
+      mts_dat <- unique(
+        mts_ct[iteration == it & cell_type == ct, .(
+          cell_type, peak, promoter, motif
+          # motif_start, motif_end,  # include if we want all instances of motif in a peak
+        )]
+      )
+    }
+    
+    # number of peaks in cell type
+    n_pks <- length(unique(mts_dat$peak))
+    n_nocp_pks <- length(unique(mts_dat[promoter != "CP"]$peak))
+    
+    # count in how many peaks a motif occurs
+    occ_mts <- unique(
+      mts_dat[, .(peak, promoter, motif)]
+    )[, ':='(
+      motif_occur = length(unique(.SD$peak)),
+      motif_nocp_occur = length(unique(.SD[promoter != "CP"]$peak))
+    ), motif]
+    occ_mts <- unique(occ_mts[, .(motif, motif_occur, motif_nocp_occur)])
+    
+    # add to motifs hits table
+    mts_dat <- merge.data.table(
+      mts_dat, occ_mts, by = "motif", 
+      all.x = TRUE, sort = FALSE
+    )
+    
+    # genes instead of motifs
+    if (use_genes_assigned_to_motfs == TRUE) {
+      mts_dat[, genes := paste(unique(sort(.SD$gene)), collapse = " | "), .(motif)]
+      mts_dat[, gene_label := paste(unique(c(
+        sort(.SD[common_name != ""]$gene_label),
+        sort(.SD[common_name == ""]$gene_label)
+      )), collapse = " | "), .(motif)]
+      mts_dat[nchar(gene_label) > 100, gene_label := paste0(
+        substr(gene_label, 1, 97), "..."
+      ), gene_label]
+      mts_dat[, c("gene") := NULL]
+      mts_dat <- unique(mts_dat)
+      mts_dat[, motif := NULL]
+      setnames(mts_dat, "gene_label", "motif")
+    }
+    
+    # select motifs that have hits in more than 10% of peaks
+    mts_top <- mts_dat[motif_occur > 0.1 * length(unique(mts_dat$peak))]
+    mts_top[, N := 1]
+    mts_top <- unique(mts_top[, ..cols])
+    
+    # find top combinations of motifs
+    mts_com <- rbindlist(lapply(c(2:4), function(n) {
+      tryCatch({
+        message("Counting combinations of ", n, " motifs in ", ct, " peaks:")
+        mts_comb <- combn(
+          unique(mts_top$motif), n, simplify = FALSE
+        )
+        rbindlist(pblapply(mts_comb, function(x) {
+          dt <- unique(mts_top[motif %in% x, .(peak, promoter, motif)])[, N := .N, peak]
+          unique(dt[N == n][, motif := paste(x, collapse = " + ")])
+        }))      
+      }, error = function(e) NULL)
+    }))
+    
+    # count in how many peaks a combination of motif occurs
+    if (nrow(mts_com) > 0) { 
+      mts_com[, ':='(
+        motif_occur = length(unique(.SD$peak)),
+        motif_nocp_occur = length(unique(.SD[promoter != "CP"]$peak))
+      ), .(motif, N)]
+      
+      # combine with motifs hits table
+      mts_top <- rbindlist(list(
+        mts_top[, ..cols],
+        mts_com[, ..cols]
+      ), use.names = TRUE)[, cell_type := ct]
+    }
+    
+    # add to list
+    mts_top[, cell_type := ct]
+    mts_top[, n_pks := n_pks][, n_nocp_pks := n_nocp_pks]
+    cmb_ls[[it]][[ct]] <- mts_top
+    
+  }
+
+}
+
+# combine results across cell types and iterations
+cmb_dt <- rbindlist(lapply(cmb_ls, rbindlist, idcol = "cell_type"), idcol = "iteration")
+
+# count fractions of peaks explained by motifs combinations
+cmb_dt[, motif_frac_occur := motif_occur / n_pks]
+cmb_dt[, motif_frac_nocp_occur := motif_nocp_occur / n_nocp_pks]
+
+# save
+fwrite(
+  cmb_dt, 
+  file.path(syn_dir, "motif-hits-combinations.tsv.gz"), 
+  sep = "\t"
+)
+```
+
+Plot:  
+
+```{r}
+cmb_dt <- fread(file.path(syn_dir, "motif-hits-combinations.tsv.gz"))
+cmb_dt[, cell_type := factor(cell_type, levels = cell_types)]
+cmb_dt[, iteration := factor(iteration, levels = syn_sub_dirs)]
+```
+
+  - number of peaks and motifs per cell type
+
+```{r}
+# peaks counts
+mts_ct_pks <- unique(mts_ct[, .(cell_type, peak, iteration)])
+
+# motif counts
+mts_ct_mts <- unique(mts_ct[, .(cell_type, motif, iteration)])
+
+# plot adult and gastrula separately
+ct_list <- gp_list <- 
+  structure(vector("list", length = 2), names = c("adult", "gastrula"))
+for (stage in c("adult", "gastrula")) {
+  
+  # cell types to consider
+  cell_type_subset <- switch (
+    stage,
+    "adult" = adult_cell_types,
+    "gastrula" = gastr_cell_types
+  )
+  
+  # list of data to plot
+  ct_list[[stage]] <- list(
+    "# peaks" = mts_ct_pks,
+    "# motifs" = mts_ct_mts
+  )
+  
+  # peaks counts
+  gp_list[[stage]] <- lapply(seq_along(ct_list[[stage]]), function(i) {
+    dt <- ct_list[[stage]][[i]]
+    dt <- dt[cell_type %in% cell_type_subset]
+    nm <- names(ct_list[[stage]])[i]
+    max_bar_height <- max(dt[, .N, cell_type]$N)
+    
+    # plot
+    ggplot(dt, aes(iteration, fill = cell_type, color = cell_type)) + 
+      geom_bar() +
+      geom_text(
+        aes(
+          label = after_stat(count),
+          y = after_stat(ifelse(count < 0.15 * max_bar_height, count + 0.05 * max_bar_height, count / 2))
+        ),
+        stat = "count", 
+        size = 3, angle = 90
+      ) +
+      scale_fill_manual(values = ct_cols) +
+      scale_color_manual(values = structure(
+        colorspace::darken(ct_cols, 0.6),
+        names = names(ct_cols)
+      )) +
+      scale_x_discrete(
+        breaks = syn_sub_dirs,
+        labels = names(syn_sub_dirs)
+      ) +
+      scale_y_continuous(
+        expand = expansion(mult = c(0, 0.15))
+      ) +
+      facet_grid(. ~ cell_type, switch = "x") +
+      labs(y = nm) +
+      theme(
+        #axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.x = element_blank(),
+        #strip.text.x.bottom = element_text(angle = 90, vjust = 0.5, hjust = 1),
+        strip.text.x.bottom = element_blank(),
+        panel.grid.major.y = element_line(),
+        panel.border = element_blank(),
+        panel.background = element_blank(),
+        legend.position = "none"
+      )
+  })
+  
+}
+```
+
+  - fraction of peaks each motif is in
+  
+```{r}
+# fraction of peaks with motifs
+for (stage in c("adult", "gastrula")) {
+    
+  # cell types to consider
+  cell_type_subset <- switch (
+    stage,
+    "adult" = adult_cell_types,
+    "gastrula" = gastr_cell_types
+  )
+  
+  # peaks with motifs fraction
+  dt <- unique(mts_ct[, .(cell_type, peak, motif, iteration)])
+  dt <- dt[cell_type %in% cell_type_subset]
+  dt[, n_peaks := length(unique(.SD$peak)), .(cell_type, iteration)]
+  dt[, motif_in_pekas := length(unique(.SD$peak)), .(cell_type, motif, iteration)]
+  dt[, motif_in_pekas := motif_in_pekas / n_peaks]
+  nm <- "Fraction of motifs"
+  
+  # plot
+  gp <- ggplot(dt, aes(iteration, motif_in_pekas, fill = cell_type, color = cell_type)) + 
+    geom_boxplot() +
+    scale_fill_manual(values = ct_cols) +
+    scale_color_manual(values = structure(
+      colorspace::darken(ct_cols, 0.6),
+      names = names(ct_cols)
+    )) +
+    scale_y_continuous(
+      expand = expansion(mult = c(0, 0.15))
+    ) +
+    facet_grid(. ~ cell_type, switch = "x") +
+    labs(y = nm) +
+    theme(
+      #axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+      axis.text.x = element_blank(),
+      axis.ticks.x = element_blank(),
+      axis.title.x = element_blank(),
+      #strip.text.x.bottom = element_text(angle = 90, vjust = 0.5, hjust = 1),
+      strip.text.x.bottom = element_blank(),
+      panel.grid.major.y = element_line(),
+      panel.border = element_blank(),
+      panel.background = element_blank(),
+      legend.position = "none"
+    )
+  # gp_list[[stage]][[nm]] <- gp
+}
+```
+
+  - fraction of peaks with combinations of motifs
+
+```{r}
+# plot fractions of peaks explained by motifs combinations
+for (stage in c("adult", "gastrula")) {
+  
+  # cell types to consider
+  cell_type_subset <- switch (
+    stage,
+    "adult" = adult_cell_types,
+    "gastrula" = gastr_cell_types
+  )
+  
+  # peaks with combinations of motifs
+  dt <- unique(cmb_dt[, .(cell_type, N, motif, motif_frac_occur, motif_occur, iteration)])
+  dt <- dt[cell_type %in% cell_type_subset]
+  dt[, motif_occur := as.numeric(motif_occur)]
+  dt <- melt.data.table(dt, measure.vars = c("motif_occur", "motif_frac_occur"))
+  dt[variable == "motif_frac_occur", value := value * 100]
+  dt[, variable := ifelse(variable == "motif_occur", "#", "%")]
+  dt[, variable := factor(variable, levels = c("#", "%"))]
+  dt[, cell_type := factor(cell_type, levels = cell_types)]
+  nm <- "Peaks with motif(s)"
+  
+  # plot
+  gp <- ggplot(dt, aes(iteration, value, fill = cell_type, color = cell_type)) + 
+    geom_boxplot() +
+    scale_fill_manual(values = ct_cols) +
+    scale_color_manual(values = structure(
+      colorspace::darken(ct_cols, 0.6),
+      names = names(ct_cols)
+    )) +
+    scale_x_discrete(
+      breaks = syn_sub_dirs,
+      labels = names(syn_sub_dirs)
+    ) +
+    facet_grid(
+      N + variable ~ cell_type, 
+      switch = "x", 
+      scales = "free_y",
+      labeller = labeller(N = c(
+        "1" = "1 motif", "2" = "2 motifs", "3" = "3 motifs", "4" = "4 motifs"
+      ))
+    ) +
+    labs(y = nm) +
+    theme(
+      axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+      axis.title.x = element_blank(),
+      strip.text.x.bottom = element_text(angle = 90, vjust = 0.5, hjust = 1),
+      panel.grid.major.y = element_line(),
+      panel.border = element_blank(),
+      panel.background = element_blank(),
+      legend.position = "none"
+    )
+  gp_list[[stage]][[nm]] <- gp
+}
+```
+
+Save plots
+
+```{r}
+# assemble plots
+for (stage in c("adult", "gastrula")) {
+  ggp_ct <- patchwork::wrap_plots(
+    gp_list[[stage]], 
+    ncol = 1,
+    heights = c(1, 1, 8)
+  )
+  
+  # save plot
+  pdf(
+    file.path(fig_dir, sprintf("compare-peaks-per-cell-type-%s.pdf", stage)), 
+    width = 24, height = 26
+  )
+  print(ggp_ct)
+  dev.off()
+}
+```
+
+Plot top motifs combinations for each iteration
+
+```{r}
+# subset motifs combinations only
+cob_dt <- unique(cmb_dt[N > 1, .(iteration, cell_type, N, motif, motif_occur, motif_frac_occur)])
+
+# rank each motif combo by fraction of cell type peaks it appears in
+setorder(cob_dt, iteration, cell_type, -motif_frac_occur)
+cob_dt[, rank := 1:nrow(.SD), .(iteration, cell_type)]
+
+# load motifs logos
+arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
+mots_arc_lst <- unlist(lapply(c(
+  file.path("Results", "Archetypes", sprintf("motif-archetypes-%s-pwms.rds", arc_id)),
+  file.path("Results", "Motifs", "motifs.rds")
+), readRDS))
+names(mots_arc_lst) <- sapply(mots_arc_lst, function(m) m@name)
+
+# load motif-to-TF assignments
+arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
+arc_as <- fread(file.path(arc_dir, sprintf(
+  "motif-assignment-archetypes-%s.tsv", arc_id
+)))
+
+# make gene labels (need this for mapping back to motifs)
+arc_as <- makeGeneLabels(arc_as)
+
+# loop over iterations
+for (it in syn_sub_dirs) {
+  
+  message(it)
+  
+  # loop over cell types
+  cl <- lapply(cell_types, function(ct) {
+    
+    message(ct)
+    dc <- cob_dt[iteration == it][cell_type == ct]
+    
+    # get top ranked motif combos
+    is <- pmin(max(dc$rank), 20)
+    lr <- lapply(seq_len(is), function(i) {
+      
+      dt <- dc[rank == i]
+      ms <- str_split(dt$motif, " \\+ ")[[1]]
+      
+      # title: in how many peaks (percent) motif combo appears
+      tl <- sprintf("%d: %d peaks (%.1f%%)", i, dt$motif_occur, dt$motif_frac_occur * 100)
+      
+      message(sprintf("%s with %s", tl, dt$motif))
+      
+      # individual motifs logos
+      lg <- lapply(ms, function(mt) {
+        
+        # if multiple genes for motif, check most frequent motif
+        mm <- str_split(mt, " \\| ")[[1]]
+        ml <- unlist(lapply(mm, function(x) {
+          if (x %in% arc_as$gene_label) {
+            arc_as[gene_label == x]$archetype_name
+          } else {
+            x
+          }
+        }))
+        if (length(ml) > 1) {
+          mm <- names(sort(table(ml),decreasing=TRUE)[1])
+        }
+        if (mm %in% arc_as$gene_label) {
+          mm <- arc_as[gene_label == mm]$archetype_name
+        }
+        
+        # map gene
+        mg <- NULL
+        if (mm %in% arc_as$archetype_name) {
+          mg <- paste(arc_as[archetype_name == mm]$gene_label, collapse = " |\n")
+        }
+
+        # motif logo
+        ts <- ifelse(!is.null(mg), sprintf("%s (%s)", mg, mm), mm)
+        if (match(mt, ms) == 1) {
+          ts <- sprintf("%s\n%s", tl, ts)
+        } else {
+          ts <- sprintf("\n%s", ts)
+        }
+        ggseqlogo(mots_arc_lst[[mm]]@motif) + 
+          theme_void() +
+          labs(subtitle = ts)
+
+      })
+      
+      # plot logos for motif combination
+      patchwork::wrap_plots(lg, nrow = 1) + plot_annotation(title = tl)
+      
+    })
+    
+
+    patchwork::wrap_plots(lr, ncol = 1) + plot_annotation(title = ct)
+    
+  })
+  
+  # save plot
+  pdf(
+    file.path(fig_dir, sprintf("motifs-combinations-ranked-%s.pdf", it)), 
+    width = 6, height = 24
+  )
+  print(cl)
+  dev.off()
+  
+}
+
+
+```
+
+
 ## Summaries
 
 Load results
 
 ```{r}
-syn_sub_dir <- "fcenrassignovl0.5"
+syn_sub_dir <- "fcactovl0.5"
 mts_ct <- fread(file.path(syn_dir, syn_sub_dir, "motif-hits-selected.tsv.gz"))
 amt_ct <- fread(file.path(syn_dir, syn_sub_dir, "motif-hits-all.tsv.gz"))
 ```
@@ -898,12 +1509,6 @@ ggsave(
   file.path(fig_dir, "motif-hits-per-peak-per-cell-type.pdf"), 
   gp_pks_mts, width = 10, height = 8
 )
-```
-
-Peaks per cell type
-
-```{r}
-unique(mts_ct[, .(peak,cell_type)])[,.N,cell_type][order(-N)]
 ```
 
 Annotate motifs and peaks with metadata.
@@ -1161,7 +1766,7 @@ Count motif combinations (not considering order, distance...) per cell type.
 use_genes_assigned_to_motfs <- TRUE
 
 # subset motifs assigned to active TFs
-use_active_tfs <- TRUE
+use_active_tfs <- FALSE
 grn_tfs <- fread(file.path(
   grn_dir, 
   "networks", 
@@ -1173,6 +1778,7 @@ grn_tfs <- unique(grn_tfs[,.(motif, gene, zscore, cell_type)])
 cmb_ls <- structure(vector("list", length = length(cell_types)), names = cell_types)
 
 # loop over cell types
+require(pbapply)
 for (ct in cell_types) {
   
   message(ct)
