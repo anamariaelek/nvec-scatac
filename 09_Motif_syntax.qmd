@@ -503,7 +503,7 @@ Load the motifs hits input data.
 ```{r}
 # load motif scores
 arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
-q <- 0.95
+q <- 0.9
 mta_dt <- rbindlist(lapply(c(
   # archetypes
   file.path(arc_dir, sprintf("motif-scores-archetypes-%s-mona-q%s.tsv.gz", arc_id, q)),
@@ -523,12 +523,68 @@ setnames(mta_en, "archetype_name", "motif")
 mta_dt <- mta_dt[motif %in% mta_en$motif]
 
 # save input motifs hits
+bed_cols <- c("seqnames", "start", "end", "motif", "relative_motif_score", "strand")
 fwrite(
-  mta_dt, 
-  file.path(syn_dir, "motif-hits-all.tsv.gz"),
+  mta_dt[,..bed_cols], 
+  file.path(syn_dir, "motif-hits-all.bed.gz"),
+  col.names = FALSE,
   sep = "\t"
 )
+# fwrite(
+#   mta_dt, 
+#   file.path(syn_dir, "motif-hits-all.tsv.gz"),
+#   sep = "\t"
+# )
 
+# filter peaks by in silico chip score
+ics_fn <- file.path(syn_dir, "motif-hits-ics-filtered.tsv.gz")
+# if filtered peaks file doesn't exist, create it
+if (!file.exists(ics_fn)) {
+  message("Filtering motif hits by in silico ChIP score")
+  lvl <- "metacell"
+  id <- "genes_exp_FC2_acc_FC4_spearman"
+  thr <- 0.1
+  ics_dt <- fread(file.path(
+    grn_dir, lvl, sprintf(
+      "insilico-chip-binding-score-%s.tsv.gz", id
+    )
+  ))
+  ics_dt <- unique(ics_dt[in_silico_chip_score > thr, .(seqnames, start, end, peak, motif)])
+  fwrite(ics_dt, file.path(syn_dir, "motif-hits-ics-filtered.tsv.gz"), sep = "\t")
+} else {
+  message("Loading filtered motif hits: ", ics_fn)
+  ics_dt <- fread(ics_fn, sep = "\t")
+}
+
+# subset motifs hits in peaks
+mta_dt <- merge.data.table(mta_dt, ics_dt[, .(peak, motif)], by = c("peak", "motif"))
+mta_dt <- unique(mta_dt)
+
+# add gene assignment info
+arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
+arc_as <- fread(file.path(arc_dir, sprintf(
+  "motif-assignment-archetypes-%s.tsv", arc_id
+)))
+setnames(arc_as, "archetype_name", "motif")
+mta_dt <- merge.data.table(
+  mta_dt, 
+  rbindlist(list(
+    unique(arc_as[, .(motif, gene, gene_name, common_name, og, pfam)]),
+    gnan[common_name=="FoxQ2d", .(gene, gene_name, common_name, og, pfam)][, motif := "FoxQ2d"]
+  ), use.names=TRUE), 
+  by = "motif",
+  all.x = TRUE, sort = FALSE, allow.cartesian = TRUE
+)
+stopifnot(nrow(mta_dt[is.na(gene)]) == 0)
+
+# save filtered motifs hits
+bed_cols <- c("seqnames", "start", "end", "gene", "relative_motif_score", "strand", "motif", "gene_name", "common_name", "og", "pfam")
+fwrite(
+  mta_dt[,..bed_cols], 
+  file.path(syn_dir, "motif-hits-ics.bed.gz"),
+  col.names = FALSE,
+  sep = "\t"
+)
 ```
 
 For each cell type, get specific peaks and reduce overlapping motifs in each 
@@ -639,10 +695,12 @@ To speed things up, we will run this parallelized across cell types.
 
 ```{bash}
 ovl=0.5
+q=0.95
+sub="active" # enrich OR enrich-assign OR active
 mkdir logs
 for ct in cnidocyte cnidocyte_gastrula ecto_pharynx ectoderm ecto_aboral EMS EMS_ecto_boundary gastro_circular_muscle_1 gastro_circular_muscle_2 gastro_parietal_muscle gastro_IRF1_2 gastro_somatic_gonad muscle_tentacle_retractor muscle_mesentery_retractor digestive_filaments_1 digestive_filaments_2 digestive_filaments_3 epidermis_1 epidermis_2 precursors_PGC precursors_endoNPC precursors_NPC NPC_1 NPC_2 neuron_GATA_Islet_1 neuron_GATA_Islet_2 neuron_Pou4_FoxL2_1 neuron_Pou4_FoxL2_2 neuron_Pou4_FoxL2_3 neuronal_gastrula gland gland_mucin
 do
-Rscript 09_Motif_syntax_bottom_up.R $ct $ovl > logs/09_Motif_syntax_$ct.log 2>&1 &
+Rscript 09_Motif_syntax_bottom_up.R $ct $ovl $q $sub > logs/09_Motif_syntax_$ct.log 2>&1 &
 done
 ```
 
@@ -650,8 +708,9 @@ Parse and save results from cell type iterations.
 
 ```{r}
 # load results
+syn_sub_dir <- "q0.95-hits-enrich-assign-motifs-ovl-0.5"
 res_fns <- list.files(
-  syn_dir, 
+  file.path(syn_dir, syn_sub_dir),
   pattern = "motif-hits-reduced-.*.rds", 
   full.names = TRUE
 )
@@ -666,7 +725,7 @@ inputs_hits <- rbindlist(lapply(inputs_hits_lst, as.data.table))
 # save input motifs hits
 fwrite(
   inputs_hits, 
-  file.path(syn_dir, "motif-hits-all.tsv.gz"),
+  file.path(syn_dir, syn_sub_dir, "motif-hits-all.tsv.gz"),
   sep = "\t"
 )
 
@@ -676,7 +735,7 @@ reduce_hits <- rbindlist(lapply(reduce_hits_lst, as.data.table))
 # save reduced groups hits
 fwrite(
   reduce_hits, 
-  file.path(syn_dir, "motif-hits-reduced.tsv.gz"),
+  file.path(syn_dir, syn_sub_dir, "motif-hits-reduced.tsv.gz"),
   sep = "\t"
 )
 
@@ -686,7 +745,7 @@ select_hits <- rbindlist(lapply(select_hits_lst, as.data.table))
 # save selected hits
 fwrite(
   select_hits, 
-  file.path(syn_dir, "motif-hits-selected.tsv.gz"),
+  file.path(syn_dir, syn_sub_dir, "motif-hits-selected.tsv.gz"),
   sep = "\t"
 )
 ```
@@ -694,6 +753,49 @@ fwrite(
 Plot motif hits for inspection.
 
 ```{r}
+# peaks per cell type
+pks_list <- vector("list", length = length(cell_types))
+for (ct in cell_types) {
+
+  # cell type peaks
+  stg_dir <- ifelse(ct %in% adult_cell_types, adult_dir, gastr_dir)
+  pks_fn <- file.path(
+    stg_dir, "ArchRProj", "PeakDifferential", "cell_type_filtered",
+    sprintf("Peaks-%s-vs-others.tsv", ct)
+  )
+  pks_dt <- fread(pks_fn, select = 1:3)
+  setnames(pks_dt, c("seqnames", "start", "end"))
+  
+  pks_gr <- makeGRangesFromDataFrame(pks_dt)
+  
+  # overlap peaks (to map per-stage peak ids to final peak set ids)
+  pks_ovl <- findOverlaps(query = peaks_gr, subject = pks_gr)
+  pks_dat <- peaks_gr[queryHits(pks_ovl)]
+  
+  message(sprintf("%s peaks for %s", length(unique(pks_dat$peak)), ct))
+  
+  # add to list
+  pks_list[[ct]] <- as.data.table(pks_dat)
+  
+}
+
+# randomly subset peaks because there's just too many
+pks_sub_list <- sapply(names(pks_list), function(ct) {
+  pks <- unique(pks_list[[ct]]$peak)
+  if (length(pks) > 10) {
+    set.seed(1950)
+    pks <- sample(pks, 10)
+  }
+  return(pks)
+}, simplify = FALSE, USE.NAMES = TRUE)
+
+# reduced motif hits results
+syn_sub_dir <- "q0.9-hits-enrich-assign-motifs-ovl-0.5"
+inputs_hits <- fread(file.path(syn_dir, syn_sub_dir, "motif-hits-all.tsv.gz"))
+select_hits <- fread(file.path(syn_dir, syn_sub_dir, "motif-hits-selected.tsv.gz"))
+
+
+# list to save the plots
 plot_hits_lst <- vector("list", length = length(cell_types))
 names(plot_hits_lst) <- cell_types
 
@@ -702,14 +804,8 @@ for (ct in cell_types) {
   p_gr_all <- inputs_hits[inputs_hits$cell_type == ct, ]
   p_gr_sel <- select_hits[select_hits$cell_type == ct, ]
   
-  pks <- intersect(unique(p_gr_all$peak), unique(p_gr_sel$peak))
-  message(sprintf("%s peaks for %s", length(pks), ct))
-  
-  # randomly subset peaks because there's just too many
-  if (length(pks) > 10) {
-    set.seed(1950)
-    pks <- sample(pks, 10)
-  }
+  # peaks to plot
+  pks <- pks_sub_list[[ct]]
   
   # where to save the results
   plot_hits_lst[[ct]] <- vector("list", length(pks))
@@ -750,7 +846,7 @@ for (ct in cell_types) {
 
 # save plots
 pdf(
-  file.path(fig_dir, "motif-hits-ranges-reduced.pdf"), 
+  file.path(fig_dir, sprintf("motif-hits-ranges-reduced-%s.pdf", syn_sub_dir)), 
   width = 24, height = 18
 )
 print(plot_hits_lst)
@@ -760,13 +856,15 @@ dev.off()
 
 ## Comparisons
 
+### Parse data for comparisons
+
 ```{r}
 # results to compare
 syn_sub_dirs <- c(
-  "enrich" = "fcenrovl0.5",
-  "enrich | assign" = "fcenrassignovl0.5",
-  #"enrich | assign | ischip" = "fcenrassignovl0.5ics",
-  "active" = "fcactovl0.5"
+  "0.90 enrich" = "q0.9-hits-enrich-assign-motifs-ovl-0.5",
+  "0.95 enrich" = "q0.95-hits-enrich-assign-motifs-ovl-0.5",
+  "0.90 active" = "q0.9-hits-active-motifs-ovl-0.5",
+  "0.95 active" = "q0.95-hits-active-motifs-ovl-0.5"
 )
 
 # load results
@@ -789,6 +887,9 @@ mts_ct[, archetype_name := motif]
 # # # # # # # # # # # # # #
 #  peaks classification   #
 # # # # # # # # # # # # # #
+
+# all peaks
+pks_al <- fread(file.path(pks_dir, "Peaks_cell_type_mapped.tsv"))
 
 # load peaks classification
 pks_dt <- fread(file.path(pks_dir, "Peaks_cell_type_promoter_annotation.tsv"))
@@ -907,21 +1008,42 @@ cmb_ls <- sapply(cmb_ls, function(x) structure(vector("list", length = length(ce
 # loop over cell types
 require(pbapply)
 
+pks_fcs_thr <- 2
+pks_fdr_thr <- 0.01
+if (!is.null(pks_fcs_thr) & !is.null(pks_fdr_thr)) {
+  syn_fn <- sprintf(
+    "motif-hits-combinations-in-peaks-FC-%s-FDR-%s.tsv.gz", 
+    pks_fcs_thr, pks_fdr_thr
+  )
+} else if (is.null(pks_fcs_thr) & !is.null(pks_fcs_thr)) {
+  syn_fn <- sprintf(
+    "motif-hits-combinations-in-peaks-FDR-%s.tsv.gz", 
+    pks_fdr_thr
+  )
+} else if (!is.null(pks_fcs_thr) & is.null(pks_fdr_thr)) {
+  syn_fn <- sprintf(
+    "motif-hits-combinations-in-peaks-FC-%s.tsv.gz", 
+    pks_fcs_thr
+  )
+} else {
+  syn_fn <- "motif-hits-combinations-in-peaks.tsv.gz"
+}
+
 for (it in syn_sub_dirs) {
   
   # use genes names instead of motifs 
   use_genes_assigned_to_motfs <- switch(
     it,
-    "fcenrovl0.5" = FALSE,
-    "fcenrassignovl0.5" = FALSE,
-    "fcenrassignovl0.5ics" = TRUE,
-    "fcactovl0.5" = TRUE
+    "q0.9-hits-enrich-assign-motifs-ovl-0.5" = FALSE,
+    "q0.95-hits-enrich-assign-motifs-ovl-0.5" = FALSE,
+    "q0.9-hits-active-motifs-ovl-0.5" = TRUE,
+    "q0.95-hits-active-motifs-ovl-0.5" = TRUE
   )
   
   for (ct in cell_types) {
     
     message(ct)
-    cols <- c("N", "peak", "promoter", "motif", "motif_occur", "motif_nocp_occur")
+    cols <- c("N", "peak", "promoter", "motif", "motif_occur", "motif_enh_occur")
     
     # make a matrix of motif hits in peaks
     if (use_genes_assigned_to_motfs == TRUE) {
@@ -941,18 +1063,49 @@ for (it in syn_sub_dirs) {
       )
     }
     
+    # add peaks diff values
+    pks_df <- fread(file.path(
+      ifelse(ct %in% adult_cell_types, adult_dir, gastr_dir), 
+      "ArchRProj", "PeakDifferential", "cell_type_filtered", 
+      sprintf("Peaks-%s-vs-others.tsv", ct)
+    ))
+    setnames(pks_df, "peak", ifelse(ct %in% adult_cell_types, "peak_adult", "peak_gastrula"))
+    pks_df <- merge.data.table(
+      pks_df, pks_al[, .(seqnames, start, end, peak, peak_adult, peak_gastrula)],
+      by = c("seqnames", "start", "end", ifelse(ct %in% adult_cell_types, "peak_adult", "peak_gastrula")),
+      all.x = FALSE, sort = FALSE
+    )
+    pks_df[, c("peak_adult", "peak_gastrula", "score", "strand") := NULL]
+    pks_df <- unique(pks_df)
+    mts_dat <- merge.data.table(
+      mts_dat, pks_df, by = "peak", all.x = TRUE, sort = FALSE
+    )
+    setcolorder(mts_dat, c(
+      "cell_type", "motif", "peak", "promoter", 
+      "seqnames", "start", "end", "Log2FC", "Pval", "FDR"
+    ))
+    
+    # subset peaks
+    if (!is.null(pks_fcs_thr) & !is.null(pks_fdr_thr)) {
+      mts_dat <- mts_dat[Log2FC > pks_fcs_thr & FDR < pks_fdr_thr]
+    } else if (is.null(pks_fcs_thr) & !is.null(pks_fcs_thr)) {
+      mts_dat <- mts_dat[Log2FC > pks_fcs_thr]
+    } else if (!is.null(pks_fcs_thr) & is.null(pks_fdr_thr)) {
+      mts_dat <- mts_dat[FDR < pks_fdr_thr]
+    }
+      
     # number of peaks in cell type
     n_pks <- length(unique(mts_dat$peak))
-    n_nocp_pks <- length(unique(mts_dat[promoter != "CP"]$peak))
+    n_enh_pks <- length(unique(mts_dat[promoter == "NO"]$peak))
     
     # count in how many peaks a motif occurs
     occ_mts <- unique(
       mts_dat[, .(peak, promoter, motif)]
     )[, ':='(
       motif_occur = length(unique(.SD$peak)),
-      motif_nocp_occur = length(unique(.SD[promoter != "CP"]$peak))
+      motif_enh_occur = length(unique(.SD[promoter == "NO"]$peak))
     ), motif]
-    occ_mts <- unique(occ_mts[, .(motif, motif_occur, motif_nocp_occur)])
+    occ_mts <- unique(occ_mts[, .(motif, motif_occur, motif_enh_occur)])
     
     # add to motifs hits table
     mts_dat <- merge.data.table(
@@ -999,7 +1152,7 @@ for (it in syn_sub_dirs) {
     if (nrow(mts_com) > 0) { 
       mts_com[, ':='(
         motif_occur = length(unique(.SD$peak)),
-        motif_nocp_occur = length(unique(.SD[promoter != "CP"]$peak))
+        motif_enh_occur = length(unique(.SD[promoter == "NO"]$peak))
       ), .(motif, N)]
       
       # combine with motifs hits table
@@ -1011,7 +1164,7 @@ for (it in syn_sub_dirs) {
     
     # add to list
     mts_top[, cell_type := ct]
-    mts_top[, n_pks := n_pks][, n_nocp_pks := n_nocp_pks]
+    mts_top[, n_pks := n_pks][, n_enh_pks := n_enh_pks]
     cmb_ls[[it]][[ct]] <- mts_top
     
   }
@@ -1023,20 +1176,67 @@ cmb_dt <- rbindlist(lapply(cmb_ls, rbindlist, idcol = "cell_type"), idcol = "ite
 
 # count fractions of peaks explained by motifs combinations
 cmb_dt[, motif_frac_occur := motif_occur / n_pks]
-cmb_dt[, motif_frac_nocp_occur := motif_nocp_occur / n_nocp_pks]
+cmb_dt[, motif_frac_enh_occur := motif_enh_occur / n_enh_pks]
 
 # save
 fwrite(
   cmb_dt, 
-  file.path(syn_dir, "motif-hits-combinations.tsv.gz"), 
+  file.path(syn_dir, syn_fn), 
   sep = "\t"
 )
 ```
 
-Plot:  
+### Plot
+
+Load data
 
 ```{r}
-cmb_dt <- fread(file.path(syn_dir, "motif-hits-combinations.tsv.gz"))
+# results to compare
+syn_sub_dirs <- c(
+  "0.90 enrich" = "q0.9-hits-enrich-assign-motifs-ovl-0.5",
+  "0.95 enrich" = "q0.95-hits-enrich-assign-motifs-ovl-0.5",
+  "0.90 active" = "q0.9-hits-active-motifs-ovl-0.5",
+  "0.95 active" = "q0.95-hits-active-motifs-ovl-0.5"
+)
+
+# motif hits file
+# this contains all motifs hits
+mts_ct <- rbindlist(sapply(syn_sub_dirs, function(x) {
+  fread(file.path(syn_dir, x, "motif-hits-selected.tsv.gz"))[, iteration := x]
+}, simplify = FALSE, USE.NAMES = TRUE), fill = TRUE)
+
+# syntax results file
+# this data only contains motifs that are in > 10% peaks
+pks_fcs_thr <- 2
+pks_fdr_thr <- 0.01
+if (!is.null(pks_fcs_thr) & !is.null(pks_fdr_thr)) {
+  syn_fn <- sprintf(
+    "motif-hits-combinations-in-peaks-FC-%s-FDR-%s.tsv.gz", 
+    pks_fcs_thr, pks_fdr_thr
+  )
+} else if (is.null(pks_fcs_thr) & !is.null(pks_fcs_thr)) {
+  syn_fn <- sprintf(
+    "motif-hits-combinations-in-peaks-FDR-%s.tsv.gz", 
+    pks_fdr_thr
+  )
+} else if (!is.null(pks_fcs_thr) & is.null(pks_fdr_thr)) {
+  syn_fn <- sprintf(
+    "motif-hits-combinations-in-peaks-FC-%s.tsv.gz", 
+    pks_fcs_thr
+  )
+} else {
+  syn_fn <- "motif-hits-combinations-in-peaks.tsv.gz"
+}
+cmb_dt <- fread(file.path(syn_dir, syn_fn))
+
+# filter motif hits to only include those in the syntax results
+mts_ct <- merge.data.table(
+  mts_ct, unique(cmb_dt[, .(cell_type, peak)]), 
+  by = c("cell_type", "peak"),
+  sort = FALSE
+)
+
+# order for plotting
 cmb_dt[, cell_type := factor(cell_type, levels = cell_types)]
 cmb_dt[, iteration := factor(iteration, levels = syn_sub_dirs)]
 ```
@@ -1045,10 +1245,10 @@ cmb_dt[, iteration := factor(iteration, levels = syn_sub_dirs)]
 
 ```{r}
 # peaks counts
-mts_ct_pks <- unique(mts_ct[, .(cell_type, peak, iteration)])
+mts_ct_pks <- unique(cmb_dt[, .(cell_type, peak, iteration)])
 
 # motif counts
-mts_ct_mts <- unique(mts_ct[, .(cell_type, motif, iteration)])
+mts_ct_mts <- unique(cmb_dt[, .(cell_type, motif, iteration)])
 
 # plot adult and gastrula separately
 ct_list <- gp_list <- 
@@ -1238,15 +1438,15 @@ for (stage in c("adult", "gastrula")) {
   
   # save plot
   pdf(
-    file.path(fig_dir, sprintf("compare-peaks-per-cell-type-%s.pdf", stage)), 
-    width = 24, height = 26
+    file.path(fig_dir, str_replace(syn_fn, ".tsv.gz", sprintf("-counts-%s.pdf", stage))),
+    width = 28, height = 26
   )
   print(ggp_ct)
   dev.off()
 }
 ```
 
-Plot top motifs combinations for each iteration
+Plot logos for top motifs combinations for each iteration.
 
 ```{r}
 # subset motifs combinations only
@@ -1275,8 +1475,9 @@ arc_as <- makeGeneLabels(arc_as)
 
 # loop over iterations
 for (it in syn_sub_dirs) {
-  
-  message(it)
+  message("# # # # # # # # # # # # # # # # # # # # # # # # # # # # #")
+  message("#     ", it)
+  message("# # # # # # # # # # # # # # # # # # # # # # # # # # # # #")
   
   # loop over cell types
   cl <- lapply(cell_types, function(ct) {
@@ -1318,7 +1519,11 @@ for (it in syn_sub_dirs) {
         # map gene
         mg <- NULL
         if (mm %in% arc_as$archetype_name) {
-          mg <- paste(arc_as[archetype_name == mm]$gene_label, collapse = " |\n")
+          gs <- arc_as[archetype_name == mm]$gene_label
+          mg <- paste(
+            substr(gs, 1, 30)[1:pmin(length(gs),3)], 
+            collapse = " |\n"
+          )
         }
 
         # motif logo
@@ -1346,17 +1551,145 @@ for (it in syn_sub_dirs) {
   
   # save plot
   pdf(
-    file.path(fig_dir, sprintf("motifs-combinations-ranked-%s.pdf", it)), 
-    width = 6, height = 24
+    
+    file.path(fig_dir, str_replace(syn_fn, ".tsv.gz", sprintf("-logos-%s.pdf", it))),
+    width = 6, height = 28
   )
   print(cl)
   dev.off()
   
 }
 
-
 ```
 
+Plot barplots of fraction of peaks for each motif combination.
+
+```{r}
+# helper function for plotting integer breaks
+int_breaks <- function(x, n = 5) {
+  l <- pretty(x, n)
+  l[abs(l %% 1) < .Machine$double.eps ^ 0.5] 
+}
+
+# list to save the plots
+gp_list <- structure(vector("list", length = length(cell_types)), names = cell_types)
+
+# plot fractions of peaks explained by motifs combinations
+for (ct in cell_types) {
+  
+  ct_list <- structure(vector("list", length = length(syn_sub_dirs)), names = syn_sub_dirs)
+  
+  for (it in syn_sub_dirs) {
+  
+    # select data
+    cmb_ct <- cmb_dt[cell_type == ct & iteration == it]
+    cmb_ct <- unique(cmb_ct[, .(motif, motif_occur, motif_enh_occur, N, n_pks, n_enh_pks)])
+    setorder(cmb_ct, N, -motif_occur)
+    cmb_ct[, motif := factor(motif, levels = rev(unique(cmb_ct$motif)))]
+    cmb_ct[, motif_perc := motif_occur / n_pks * 100]
+    cmb_ct[, motif_enh_perc := motif_enh_occur / n_enh_pks * 100]
+    cmb_ct <- melt.data.table(
+      cmb_ct, 
+      measure.vars = c("motif_perc", "motif_enh_perc"), 
+      variable.name = "peaks_set", 
+      value.name = "value"
+    )
+    
+    if (nrow(cmb_ct) > 0) { 
+      
+      # only show in plot motifs with hits in more than 1 peak 
+      cmb_ct <- cmb_ct[motif_occur > 1]
+      
+      # only show in plot motifs with hits in more than 2 peaks
+      cmb_mt <- cmb_ct[motif_occur > 2]
+      if (length(unique(cmb_mt$motif)) > 10)
+        cmb_ct <- cmb_mt
+      
+      # select top motifs to show in plot
+      i <- 1
+      while (length(unique(cmb_ct$motif)) > 80) {
+        cmb_mt <- cmb_ct[motif_occur > 10*i]
+        if (length(unique(cmb_mt$motif)) < 40)
+          break
+        cmb_ct <- cmb_mt
+        print(sprintf(
+          "occurance > %s: %s motifs", 10*i, length(unique(cmb_mt$motif))
+        ))
+        i <- i + 1
+      }
+  
+      # plot
+      cpl_ct <- ggplot(cmb_ct, aes(value, motif)) + 
+        geom_bar(
+          stat = "identity", 
+          fill = ct_cols[ct], 
+          color = colorspace::darken(ct_cols[ct], 0.5)
+        ) +
+        scale_x_continuous(
+          expand = expansion(mult = c(0, 0.15)),
+          name = "% of peaks"
+        ) +
+        geom_text(
+          aes(label = sprintf(" %d (%.1f%%) ", motif_occur, value)),
+          hjust = 0, vjust = 0.5, size = 6, 
+          color = colorspace::darken(ct_cols[ct], 0.5)
+        ) +
+        scale_y_discrete(
+          breaks = unique(cmb_ct$motif),
+          labels = str_replace_all(unique(cmb_ct$motif), "\\+", "+\n"),
+        ) +
+        labs(title = ct, subtitle = it) +
+        theme(
+          panel.grid.major.x = element_line(colour = "grey", size = 0.25),
+          panel.grid.minor.x = element_line(colour = "grey", size = 0.05),
+        )
+      if (length(unique(cmb_ct$N)) > 1) {
+        cpl_ct <- tryCatch({
+          cpl_ct + facet_grid(
+            N ~ peaks_set, 
+            scales = "free", space = "free", 
+            labeller = labeller(
+              "peaks_set" = c("motif_perc" = "% of peaks", "motif_enh_perc" = "% of enhancers"),
+              "N" = function(x) ifelse(x == 1, "1 motif", paste0(x, " motifs"))
+            )
+          )
+        }, error = function(e) cpl_ct)
+      } else {
+        cpl_ct <- tryCatch({
+          cpl_ct <- cpl_ct + 
+            ggforce::facet_col(
+              vars(peaks_set), 
+              scales = "free_x", space = "free", 
+              strip.position = "right",
+              labeller = labeller("peaks_set" = c("motif_perc" = "% of peaks", "motif_enh_perc" = "% of enhancers"))
+            )
+        }, error = function(e) cpl_ct)
+      }
+    } else {
+      cpl_ct <- NULL
+    }
+    
+    ct_list[[it]] <- cpl_ct
+    
+  }
+  
+  gp_list[[ct]] <- ct_list
+}
+
+
+# save plots
+pdf(
+  file.path(fig_dir, str_replace(syn_fn, ".tsv.gz", "-barplots.pdf")), 
+  width = 24, height = 42
+)
+for (i in seq_along(gp_list)) {
+  tryCatch(
+    print(gp_list[[i]]), 
+    error = function(e) NULL
+  ) 
+}
+dev.off()
+```
 
 ## Summaries
 

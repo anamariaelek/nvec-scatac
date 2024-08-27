@@ -104,16 +104,31 @@ adult_cell_types <- c(
 )
 gastr_cell_types <- c(setdiff(cell_types, adult_cell_types))
 
+# parse arguments
+
 # cell type is the first argument passed to this script
 ct <- as.character(commandArgs(trailingOnly = TRUE)[1])
 
 # overlap fraction is the second argument passed to this script
 reciprocal_overlap <- as.numeric(commandArgs(trailingOnly = TRUE)[2])
 
+# quantile for motif scores is the third argument passed to this script
+q <- as.numeric(commandArgs(trailingOnly = TRUE)[3])
+
+# which motifs to subset is the fourth argument passed to this script
+# "enrich" OR "enrich-assign" OR "active"
+subset_motifs <- as.character(commandArgs(trailingOnly = TRUE)[4])
+
+# subdirectory where to save the results
+res_dir <- sprintf("q%s-hits-%s-motifs-ovl-%s", q, subset_motifs, reciprocal_overlap)
+dir.create(file.path(syn_dir, res_dir), showWarnings = FALSE)
+
+# starting analysis
+message("")
+
 # load motif scores
-message("Loading motif scores")
+message(sprintf("%s | Loading motif scores above %s quantile", Sys.time(), q))
 arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
-q <- 0.95
 mta_dt <- rbindlist(lapply(c(
   # archetypes
   file.path(arc_dir, sprintf("motif-scores-archetypes-%s-mona-q%s.tsv.gz", arc_id, q)),
@@ -146,7 +161,7 @@ mta_dt <- rbindlist(lapply(c(
 # mta_dt <- unique(mta_dt)
 
 # enriched motifs
-mta_en <- fread(file.path(mta_dir, "motif-enrichment-mona-q0.98-FC-1-padj-0.001.tsv"))
+mta_en <- fread(file.path(mta_dir, sprintf("motif-enrichment-mona-q%s-FC-1-padj-0.001.tsv", q)))
 
 # assigned motifs
 mta_as <- fread(file.path(arc_dir, "motif-assignment-archetypes-PPM-PCC-0.8-IC0.5-5bp.tsv"))
@@ -159,16 +174,23 @@ grn_tfs <- fread(file.path(
 ))
 grn_tfs <- unique(grn_tfs[cell_type == ct, .(motif, gene, zscore, cell_type)])
 
-# subset enriched and assigned motifs
-# mta_dt <- mta_dt[motif %in% c(mta_en$archetype_name, mta_as$archetype_name)]
-
-# subset motifs assigned to active TFs
-mta_dt <- mta_dt[motif %in% grn_tfs$motif]
+# subset motifs
+if (subset_motifs == "enrich") {
+  # enriched motifs
+  mta_dt <- mta_dt[motif %in% mta_en$archetype_name]  
+} else if (subset_motifs == "enrich|assign") {
+  # enriched and assigned motifs
+  mta_dt <- mta_dt[motif %in% c(mta_en$archetype_name, mta_as$archetype_name)]  
+} else if (subset_motifs == "active") {
+  # motifs assigned to active TFs
+  mta_dt <- mta_dt[motif %in% grn_tfs$motif]
+}
+message(sprintf("%s | Subset %s motifs", Sys.time(), subset_motifs))
 
 # enrichment values
 mta_en <- rbindlist(lapply(c(
-  file.path(mta_dir, "motif-enrichment-cell-type-mona-q0.98.tsv"),
-  file.path(arc_dir, "motif-enrichment-cell-type-archetypes-PPM-PCC-0.8-IC0.5-5bp-mona-q0.95.tsv")
+  file.path(mta_dir, sprintf("motif-enrichment-cell-type-mona-q%s.tsv", q)),
+  file.path(arc_dir, sprintf("motif-enrichment-cell-type-archetypes-PPM-PCC-0.8-IC0.5-5bp-mona-q%s.tsv", q))
 ), fread))
 mta_en <- unique(mta_en[,.(cell_type, motif, fc, pval, padj)])
 
@@ -215,7 +237,7 @@ red_res <- mta_reduce_motif_hits(
 message(sprintf("%s | Done reducing hits for %s", Sys.time(), ct))
 
 # save results
-out_fn <- file.path(syn_dir, sprintf("motif-hits-reduced-%s.rds", ct))
+out_fn <- file.path(syn_dir, res_dir, sprintf("motif-hits-reduced-%s.rds", ct))
 saveRDS(red_res, out_fn)
 message("Saved to: ", out_fn)
 
