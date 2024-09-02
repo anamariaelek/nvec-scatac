@@ -1,0 +1,222 @@
+---
+title: "DAPseq primers"
+author: "Anamaria Elek"
+date: today
+format: 
+  html:
+    code-fold: false
+    code-tools: false
+    embed-resources: true
+    highlight-style: github
+    toc: true 
+    code-line-numbers: false 
+execute:
+  eval: false
+  message: false
+  warning: false
+---
+
+```{r}
+#| label: initialize
+#| echo: FALSE
+knitr::opts_chunk$set(echo = TRUE, fig.width=7, fig.height=5) 
+```
+
+```{r}
+library(data.table)
+library(stringr)
+library(Biostrings)
+library(GenomicRanges)
+library(BSgenome.jaNemVect1.1.DToL.Assembly)
+```
+
+Primers matching to the genome
+
+```{r}
+# load primers
+ps <- readDNAStringSet("annotation/DAPseq-primers.fasta")
+gs <- unique(str_remove(names(ps), ":(rev|fwd)\\d+"))
+  
+# load genome
+require(BSgenome.jaNemVect1.1.DToL.Assembly)
+
+# load gene annotations
+ga <- rtracklayer::import("genome/Nvec_v4_merged_annotation_sort.gtf.gz")
+ga <- ga[ga$type == "transcript", ]
+
+# match sequences to the reference genome
+gr <- lapply(gs, function(g) {
+  
+  message(sprintf("%s (%d / %d)", g, which(gs == g), length(gs)))
+  
+  # get chromosome on which the gene is
+  chr <- as.character(seqnames(ga[ga$transcript_id == g, ]))
+  
+  # get primers of the gene
+  prs <- ps[grep(g, names(ps))]
+  
+  # get fwd primer
+  prf <- unlist(prs[grepl("fwd", names(prs))])
+  
+  # get rev primer
+  prr <- unlist(prs[grepl("rev", names(prs))])
+  
+  # match fwd primer
+  mrf <- vmatchPattern(prf, Nvectensis)
+  mrf <- mrf[seqnames(mrf) == chr]
+  mrf$primer <- "fwd"
+  
+  # match rev primer
+  mrr <- vmatchPattern(prr, Nvectensis)
+  mrr <- mrr[seqnames(mrr) == chr]
+  mrr$primer <- "rev"
+  
+  # return
+  pgr <- c(mrf, mrr)
+  pgr$gene <- g
+  pgr
+  
+})
+
+# transform to single GRanges object
+gr <- do.call("c", gr)
+gr
+
+# data table
+dt <- as.data.table(gr)
+dt[, gene := paste(gene, primer, sep = "_")]
+dt[, score := "."]
+stopifnot(nrow(dt[,.N,gene][N>1]) == 0)
+
+# save bed
+fwrite(
+  dt[, .(seqnames, start, end, gene, score, strand)],
+  "annotation/DAPseq-primers.bed",
+  sep = "\t",
+  col.names = FALSE
+)
+
+hamming <- function(x, y) {
+  sum(as.character(x) != as.character(y))
+}
+
+# match sequences to the reference genome WITH MISMATCHES
+min_mismatch <- 1
+max_mismatch <- 5
+gr <- lapply(gs, function(g) {
+  
+  message(sprintf("%s (%d / %d)", g, which(gs == g), length(gs)))
+  
+  # get chromosome on which the gene is
+  ggr <- ga[ga$transcript_id == g, ]
+  tss <- ifelse(strand(ggr) == "+", start(ggr), end(ggr))
+  tes <- ifelse(strand(ggr) == "+", end(ggr), start(ggr))
+  chr <- as.character(seqnames(ggr))
+  
+  # get primers of the gene
+  prs <- ps[grep(g, names(ps))]
+  
+  # get fwd primer
+  prf <- unlist(prs[grepl("fwd", names(prs))])
+  
+  # get rev primer
+  prr <- unlist(prs[grepl("rev", names(prs))])
+  
+  # match fwd primer
+  mrf <- vmatchPattern(prf, Nvectensis, min.mismatch = min_mismatch, max.mismatch = max_mismatch)
+  mrf <- mrf[seqnames(mrf) == chr]
+  if (length(mrf) > 0) {
+    mrf$primer <- "fwd"
+    # count number of mismatches to respective primer
+    mmf <- getSeq(Nvectensis, mrf)
+    mrf$hamming_distance <- sapply(mmf, hamming, prf)
+  }
+  
+  # match rev primer
+  mrr <- vmatchPattern(prr, Nvectensis, min.mismatch = min_mismatch, max.mismatch = max_mismatch)
+  mrr <- mrr[seqnames(mrr) == chr]
+  if (length(mrr) > 0) {
+    mrr$primer <- "rev"
+    # count number of mismatches to respective primer
+    mmr <- getSeq(Nvectensis, mrr)
+    mrr$hamming_distance <- sapply(mmr, hamming, prr)
+  }
+  
+  # return
+  pgr <- c(mrf, mrr)
+  if (length(pgr) > 0) {
+    pgr$gene <- g
+    # count distance to respective gene
+    pgr$dist_to_tss <- pmin(abs(start(pgr) - tss), abs(end(pgr) - tss))
+    pgr$dist_to_tes <- pmin(abs(start(pgr) - tss), abs(end(pgr) - tss))
+  }
+  pgr
+  
+})
+
+# transform to single GRanges object
+gr <- do.call("c", gr)
+gr
+
+# data table
+dt <- as.data.table(gr)
+dt <- dt[dist_to_tss < 3000 | dist_to_tes < 3000]
+dt[, gene := paste(gene, primer, sep = "_")]
+
+# save bed
+fwrite(
+  dt[, .(seqnames, start, end, gene, hamming_distance, strand, dist_to_tss, dist_to_tes)],
+  "annotation/DAPseq-primers-mismatches.tsv",
+  sep = "\t",
+  col.names = TRUE
+)
+
+```
+
+
+### For DAPseq candidates
+
+```{r}
+# developmental expression data
+dev_dir <- "/home/anamaria/cluster/aelek/proj/scRNAseq_nvec_technau/"
+rpm_dt <- readRDS(file.path(dev_dir, "pseudobulk_rpm.rds"))
+
+# append adult to adukt tissues
+tiss <- c("phbw", "bodywall", "mesentery", "pharynx", "tentacle", "mesf")
+rpm_dt[mat %in% tiss, mat := paste0("adult_", mat)]
+
+# aggregate per broad stages
+rpm_dt[, stage := str_extract(mat, "gastrula|planula|polyp|adult")]
+
+# TFs we want to use
+tfs <- readLines(file.path(dev_dir, "dapseq_candidates.txt"))
+dts <- rpm_dt[gene %in% tfs]
+
+# order and select top expressed
+dts[, mat := factor(mat, levels = unique(dts$mat))]
+dts[, stage := factor(stage, levels = c("gastrula", "planula", "polyp", "adult"))]
+setorder(dts, stage, gene, mat, -rpm)
+setcolorder(dts, c("gene", "rpm", "stage", "mat", "cell_type"))
+
+# matrices to save
+dts_per_stage <- dts[, .SD[1], .(gene, stage)]
+setcolorder(dts_per_stage, c("gene", "rpm", "stage", "mat", "cell_type"))
+dts_per_stime <- dts[, .SD[1], .(gene, stage, mat)]
+setcolorder(dts_per_stime, c("gene", "rpm", "stage", "mat", "cell_type"))
+
+# save excel file
+library(openxlsx)
+wb <- createWorkbook()
+
+addWorksheet(wb, "rpm_per_stage")
+writeData(wb, "rpm_per_stage", dts_per_stage)
+
+addWorksheet(wb, "rpm_per_stage_time")
+writeData(wb, "rpm_per_stage_time", dts_per_stime)
+
+
+addWorksheet(wb, "rpm_all")
+writeData(wb, "rpm_all", dts)
+
+saveWorkbook(wb, file.path("annotation", "DAPseq-candidates-rpm-per-stage.xlsx"))
+```
