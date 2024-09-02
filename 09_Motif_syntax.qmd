@@ -503,7 +503,7 @@ Load the motifs hits input data.
 ```{r}
 # load motif scores
 arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
-q <- 0.9
+q <- 0.8
 mta_dt <- rbindlist(lapply(c(
   # archetypes
   file.path(arc_dir, sprintf("motif-scores-archetypes-%s-mona-q%s.tsv.gz", arc_id, q)),
@@ -536,29 +536,29 @@ fwrite(
 #   sep = "\t"
 # )
 
-# filter peaks by in silico chip score
-ics_fn <- file.path(syn_dir, "motif-hits-ics-filtered.tsv.gz")
-# if filtered peaks file doesn't exist, create it
-if (!file.exists(ics_fn)) {
-  message("Filtering motif hits by in silico ChIP score")
-  lvl <- "metacell"
-  id <- "genes_exp_FC2_acc_FC4_spearman"
-  thr <- 0.1
-  ics_dt <- fread(file.path(
-    grn_dir, lvl, sprintf(
-      "insilico-chip-binding-score-%s.tsv.gz", id
-    )
-  ))
-  ics_dt <- unique(ics_dt[in_silico_chip_score > thr, .(seqnames, start, end, peak, motif)])
-  fwrite(ics_dt, file.path(syn_dir, "motif-hits-ics-filtered.tsv.gz"), sep = "\t")
-} else {
-  message("Loading filtered motif hits: ", ics_fn)
-  ics_dt <- fread(ics_fn, sep = "\t")
-}
-
-# subset motifs hits in peaks
-mta_dt <- merge.data.table(mta_dt, ics_dt[, .(peak, motif)], by = c("peak", "motif"))
-mta_dt <- unique(mta_dt)
+# # peaks with high (>0.1) in silico chip score
+# ics_fn <- file.path(syn_dir, "motif-hits-ics-filtered.tsv.gz")
+# # if filtered peaks file doesn't exist, create it
+# if (!file.exists(ics_fn)) {
+#   message("Filtering motif hits by in silico ChIP score")
+#   lvl <- "metacell"
+#   id <- "genes_exp_FC2_acc_FC4_spearman"
+#   thr <- 0.1
+#   ics_dt <- fread(file.path(
+#     grn_dir, lvl, sprintf(
+#       "insilico-chip-binding-score-%s.tsv.gz", id
+#     )
+#   ))
+#   ics_dt <- unique(ics_dt[in_silico_chip_score > thr, .(seqnames, start, end, peak, motif)])
+#   fwrite(ics_dt, file.path(syn_dir, "motif-hits-ics-filtered.tsv.gz"), sep = "\t")
+# } else {
+#   message("Loading filtered motif hits: ", ics_fn)
+#   ics_dt <- fread(ics_fn, sep = "\t")
+# }
+# 
+# # filter peaks with motif hits by in silico chip score
+# mta_dt <- merge.data.table(mta_dt, ics_dt[, .(peak, motif)], by = c("peak", "motif"))
+# mta_dt <- unique(mta_dt)
 
 # add gene assignment info
 arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
@@ -695,10 +695,10 @@ To speed things up, we will run this parallelized across cell types.
 
 ```{bash}
 ovl=0.5
-q=0.95
+q=0.8
 sub="active" # enrich OR enrich-assign OR active
 mkdir logs
-for ct in cnidocyte cnidocyte_gastrula ecto_pharynx ectoderm ecto_aboral EMS EMS_ecto_boundary gastro_circular_muscle_1 gastro_circular_muscle_2 gastro_parietal_muscle gastro_IRF1_2 gastro_somatic_gonad muscle_tentacle_retractor muscle_mesentery_retractor digestive_filaments_1 digestive_filaments_2 digestive_filaments_3 epidermis_1 epidermis_2 precursors_PGC precursors_endoNPC precursors_NPC NPC_1 NPC_2 neuron_GATA_Islet_1 neuron_GATA_Islet_2 neuron_Pou4_FoxL2_1 neuron_Pou4_FoxL2_2 neuron_Pou4_FoxL2_3 neuronal_gastrula gland gland_mucin
+for ct in cnidocyte cnidocyte_gastrula ectoderm ecto_aboral EMS EMS_ecto_boundary ecto_pharynx gastro_circular_muscle_1 gastro_circular_muscle_2 gastro_parietal_muscle gastro_IRF1_2 gastro_somatic_gonad muscle_tentacle_retractor muscle_mesentery_retractor digestive_filaments_1 digestive_filaments_2 digestive_filaments_3 epidermis_1 epidermis_2 precursors_PGC precursors_endoNPC precursors_NPC NPC_1 NPC_2 neuron_GATA_Islet_1 neuron_GATA_Islet_2 neuron_Pou4_FoxL2_1 neuron_Pou4_FoxL2_2 neuron_Pou4_FoxL2_3 neuronal_gastrula gland gland_mucin
 do
 Rscript 09_Motif_syntax_bottom_up.R $ct $ovl $q $sub > logs/09_Motif_syntax_$ct.log 2>&1 &
 done
@@ -708,7 +708,7 @@ Parse and save results from cell type iterations.
 
 ```{r}
 # load results
-syn_sub_dir <- "q0.95-hits-enrich-assign-motifs-ovl-0.5"
+syn_sub_dir <- "q0.8-hits-active-motifs-ovl-0.5"
 res_fns <- list.files(
   file.path(syn_dir, syn_sub_dir),
   pattern = "motif-hits-reduced-.*.rds", 
@@ -861,8 +861,10 @@ dev.off()
 ```{r}
 # results to compare
 syn_sub_dirs <- c(
+  "0.80 enrich" = "q0.8-hits-enrich-assign-motifs-ovl-0.5",
   "0.90 enrich" = "q0.9-hits-enrich-assign-motifs-ovl-0.5",
   "0.95 enrich" = "q0.95-hits-enrich-assign-motifs-ovl-0.5",
+  "0.80 active" = "q0.8-hits-active-motifs-ovl-0.5",
   "0.90 active" = "q0.9-hits-active-motifs-ovl-0.5",
   "0.95 active" = "q0.95-hits-active-motifs-ovl-0.5"
 )
@@ -1008,7 +1010,7 @@ cmb_ls <- sapply(cmb_ls, function(x) structure(vector("list", length = length(ce
 # loop over cell types
 require(pbapply)
 
-pks_fcs_thr <- 2
+pks_fcs_thr <- 1.5
 pks_fdr_thr <- 0.01
 if (!is.null(pks_fcs_thr) & !is.null(pks_fdr_thr)) {
   syn_fn <- sprintf(
@@ -1034,8 +1036,10 @@ for (it in syn_sub_dirs) {
   # use genes names instead of motifs 
   use_genes_assigned_to_motfs <- switch(
     it,
+    "q0.8-hits-enrich-assign-motifs-ovl-0.5" = FALSE,
     "q0.9-hits-enrich-assign-motifs-ovl-0.5" = FALSE,
     "q0.95-hits-enrich-assign-motifs-ovl-0.5" = FALSE,
+    "q0.8-hits-active-motifs-ovl-0.5" = TRUE,
     "q0.9-hits-active-motifs-ovl-0.5" = TRUE,
     "q0.95-hits-active-motifs-ovl-0.5" = TRUE
   )
@@ -1193,8 +1197,11 @@ Load data
 ```{r}
 # results to compare
 syn_sub_dirs <- c(
+  "0.80 enrich" = "q0.8-hits-enrich-assign-motifs-ovl-0.5",
+  # "0.85 enrich" = "q0.85-hits-enrich-assign-motifs-ovl-0.5",
   "0.90 enrich" = "q0.9-hits-enrich-assign-motifs-ovl-0.5",
   "0.95 enrich" = "q0.95-hits-enrich-assign-motifs-ovl-0.5",
+  "0.80 active" = "q0.8-hits-active-motifs-ovl-0.5",
   "0.90 active" = "q0.9-hits-active-motifs-ovl-0.5",
   "0.95 active" = "q0.95-hits-active-motifs-ovl-0.5"
 )
@@ -1202,12 +1209,15 @@ syn_sub_dirs <- c(
 # motif hits file
 # this contains all motifs hits
 mts_ct <- rbindlist(sapply(syn_sub_dirs, function(x) {
-  fread(file.path(syn_dir, x, "motif-hits-selected.tsv.gz"))[, iteration := x]
+  message(x)
+  fn <- file.path(syn_dir, x, "motif-hits-selected.tsv.gz")
+  message(fn)
+  fread(fn)[, iteration := x]
 }, simplify = FALSE, USE.NAMES = TRUE), fill = TRUE)
 
 # syntax results file
 # this data only contains motifs that are in > 10% peaks
-pks_fcs_thr <- 2
+pks_fcs_thr <- 1.5
 pks_fdr_thr <- 0.01
 if (!is.null(pks_fcs_thr) & !is.null(pks_fdr_thr)) {
   syn_fn <- sprintf(
@@ -1244,11 +1254,16 @@ cmb_dt[, iteration := factor(iteration, levels = syn_sub_dirs)]
   - number of peaks and motifs per cell type
 
 ```{r}
+# order for plotting
+mts_ct[, cell_type := factor(cell_type, levels = cell_types)]
+mts_ct[, iteration := factor(iteration, levels = syn_sub_dirs)]
+
 # peaks counts
-mts_ct_pks <- unique(cmb_dt[, .(cell_type, peak, iteration)])
+mts_ct_pks <- unique(mts_ct[, .(cell_type, peak, iteration)])
 
 # motif counts
-mts_ct_mts <- unique(cmb_dt[, .(cell_type, motif, iteration)])
+mts_ct_mts <- unique(mts_ct[, .(cell_type, motif, iteration)])
+
 
 # plot adult and gastrula separately
 ct_list <- gp_list <- 
@@ -1439,7 +1454,7 @@ for (stage in c("adult", "gastrula")) {
   # save plot
   pdf(
     file.path(fig_dir, str_replace(syn_fn, ".tsv.gz", sprintf("-counts-%s.pdf", stage))),
-    width = 28, height = 26
+    width = 30, height = 26
   )
   print(ggp_ct)
   dev.off()

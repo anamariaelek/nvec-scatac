@@ -228,12 +228,20 @@ mta_ct <- merge.data.table(mta_ct_dt, mta_ct_en, by = "motif")
 mta_gr <- makeGRangesFromDataFrame(mta_ct, keep.extra.columns = TRUE)
 
 # reduce motif hits
-red_res <- mta_reduce_motif_hits(
-  mta_gr, 
-  reciprocal_overlap = reciprocal_overlap,
-  order_col = "fc",
-  order_decrease = TRUE
-)
+red_res_ls <- lapply(unique(seqnames(mta_gr)), function(x) {
+  message(sprintf("%s | Reducing hits for %s", Sys.time(), x))
+  mta_reduce_motif_hits(
+    mta_gr, seqnames = x,
+    reciprocal_overlap = reciprocal_overlap,
+    order_col = "fc",
+    order_decrease = TRUE
+  )
+})
+red_res <- sapply(
+  c("select_hits", "reduce_hits", "inputs_hits"), function(x) {
+    ls <- lapply(red_res_ls, function(y) y[[x]])
+    do.call("c", ls)
+}, USE.NAMES = TRUE, simplify = FALSE)
 message(sprintf("%s | Done reducing hits for %s", Sys.time(), ct))
 
 # save results

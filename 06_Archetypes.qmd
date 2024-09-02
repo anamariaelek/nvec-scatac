@@ -1039,7 +1039,7 @@ seqlvl <- seqdt[[1]]
 peaks_gr <- mta_trim_granges(peaks_gr, seqdt)
 
 # scanning archetypes
-q <- 0.95
+q <- 0.98
 arc_scores_mona <- mta_gw_motif_score_monalisa(
   motifs = mona_arc_lst,
   genome_object = genome,
@@ -1339,14 +1339,14 @@ enr_dt <- rbindlist(enr_list, idcol = "cell_type")
 # save results archetypes
 fwrite(
   enr_dt[group == "archetype"][, group := NULL],
-  file.path(arc_dir, sprintf("motif-enrichment-cell-type-archetypes-%s-mona-q%s.tsv", arc_id, q)),
+  file.path(arc_dir, sprintf("motif-enrichment-cell-type-archetypes-%s-mona-q%s.tsv.gz", arc_id, q)),
   sep = "\t"
 )
 
 # save results motifs
 fwrite(
   enr_dt[group == "motif"][, group := NULL],
-  file.path(arc_dir, sprintf("motif-enrichment-cell-type-input-motifs-mona-q%s.tsv", q)),
+  file.path(arc_dir, sprintf("motif-enrichment-cell-type-input-motifs-mona-q%s.tsv.gz", q)),
   sep = "\t"
 )
 ```
@@ -3099,7 +3099,7 @@ mta_scores_mona <- mta_gw_motif_score_monalisa(
   index_object = seqdt,
   bin_width = 250,
   subsample_fraction = 0.10,
-  score_quantiles = c(0, 0.05, 0.1, 0.25, 0.5, 0.75, 0.95, 0.98, 0.99, 0.995, 0.999, 1.0),
+  score_quantiles = c(0, 0.05, 0.1, 0.25, 0.5, 0.75, 0.80, 0.90, 0.95, 0.98, 0.99, 0.995, 0.999, 1.0),
   score_quantile_thr = q,
   do_gw_scan = TRUE,
   given_gr = peaks_gr,

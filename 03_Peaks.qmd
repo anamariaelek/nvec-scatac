@@ -82,12 +82,44 @@ Define directories to save the results to.
 #| label: dirs
 
 # define directories
-gastr_dir <- "ArchRProj_Nvec_TSS4_frag200"
-adult_dir <- "ArchRProj_Nvec_gastrula"
+adult_dir <- "ArchRProj_Nvec_TSS4_frag200"
+gastr_dir <- "ArchRProj_Nvec_gastrula"
 pks_dir <- "Results/Peaks"
 fig_dir <- "Results/Plots"
 ```
 
+
+```{r}
+#| label: fix_peaks_files
+#| ehco: FALSE
+#| eval: FALSE
+#| include: FALSE
+
+for (ct in adult_cell_types) {
+  message(ct)
+  all_pks <- fread(file.path(adult_dir, "ArchRProj", "PeakDifferential", "cell_type", sprintf("Peaks-%s-vs-others.tsv", ct)))
+  flt_pks <- fread(file.path(adult_dir, "ArchRProj", "PeakDifferential", "cell_type_filtered", sprintf("Peaks-%s-vs-others.tsv", ct)))
+  if ("gene" %in% colnames(all_pks)) {
+    all_pks[, gene := NULL]
+  }
+  setnames(flt_pks,colnames(all_pks)[1:6])
+  fln_pks <- merge.data.table(
+    all_pks, flt_pks, by = colnames(all_pks)[1:6], 
+    all.x = FALSE, sort = FALSE
+  )
+  if (!all(flt_pks$peak %in% fln_pks$peak)) {
+    break(sprintf("Error: not all peaks are present in the filtered set for %s", ct))
+  }
+  if (any(duplicated(fln_pks$peak))) {
+    break(sprintf("Error: duplicated peaks in the filtered set for %s", ct))
+  }
+  fwrite(
+    fln_pks,
+    file.path(adult_dir, "ArchRProj", "PeakDifferential", "cell_type_filtered", sprintf("Peaks-%s-vs-others.tsv", ct)),
+    sep = "\t"
+  )
+}
+```
 
 ## Mapping peaks
 
