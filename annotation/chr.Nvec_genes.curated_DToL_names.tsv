@@ -1,0 +1,497 @@
+gene	og	name	ID_JGI_Vienna
+Nvec_vc1.1_XM_048733416.1	chr.PHD.HG1.7:Taf3	Taf3	Nvec_NVE10129
+Nvec_vc1.1_XM_032362209.2	chr.TUDOR.HG1.32:like:Rnf17		Nvec_NVE11814
+Nvec_vc1.1_XM_048721520.1	chr.Hat1_N.HG1.0:Hat1	Hat1	Nvec_NVE11887
+Nvec_vc1.1_XM_001623180.3	chr.Histone.HG2.1:H2ac1/H2ac4/H2ac6/H2ac7/H2ac8/H2ac10/H2ac11/H2ac12/H2ac13/H2ac15/H2ac18/H2ac19/H2ac20/H2ac21/H2ac22/H2ac23/H2ac24/H2ac25/H2aj/H2al1a/H2al1b/H2al1c/H2al1d/H2al1e/H2al1f/H2al1g/H2al1h/H2al1i/H2al1j/H2al1k/H2al1m/H2al1n/H2al1o/H2al2a/H2al2b/H2al2c/H2ax	H2ac1/H2ac10/H2ac11/H2ac12/H2ac13/H2ac15/H2ac18/H2ac19/H2ac20/H2ac21/H2ac22/H2ac23/H2ac24/H2ac25/H2ac4/H2ac6/H2ac7/H2ac8/H2aj/H2al1a/H2al1b/H2al1c/H2al1d/H2al1e/H2al1f/H2al1g/H2al1h/H2al1i/H2al1j/H2al1k/H2al1m/H2al1n/H2al1o/H2al2a/H2al2b/H2al2c/H2ax	Nvec_NVE12410
+Nvec_vc1.1_XM_032386634.2	chr.PWWP.HG1.1:like:Dnmt3a/Dnmt3b/Pwwp2a/Pwwp2b		Nvec_NVE14913
+Nvec_vc1.1_XM_032385139.2	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_NVE14996
+Nvec_NVE15670	chr.PHD.HG1.70:like:Pygo1/Pygo2		Nvec_NVE15670
+Nvec_vc1.1_XM_032366618.2	chr.PHD.HG1.22:Phrf1	Phrf1	Nvec_NVE16359
+Nvec_vc1.1_XM_032386052.2	chr.SET.HG1.27:Ehmt1/Ehmt2	Ehmt1/Ehmt2	Nvec_NVE16554
+Nvec_vc1.1_XM_032386039.2	Nvec_NVE16556:HG.Unclassified	""	Nvec_NVE16556
+Nvec_vc1.1_XM_032370349.2	chr.SWIRM.HG1.2:like:Kdm1a;chr.zf-CW.HG1.4:Kdm1b	""	Nvec_NVE17156
+Nvec_vc1.1_XM_048727811.1	chr.SNF2_N.HG1.10:Hltf	Hltf	Nvec_NVE17193
+Nvec_vc1.1_XM_032385639.2	chr.Acetyltransf_1.HG3.0:Kat2a/Kat2b		Nvec_NVE17394
+Nvec_vc1.1_XM_048724160.1	chr.PWWP.HG1.3:Zcwpw2	Zcwpw2	Nvec_NVE18085
+Nvec_vc1.1_XM_048729980.1	chr.LinkerHistone.HG1.1:like:H1f0/H1f1/H1f2/H1f3/H1f4/H1f5/H1f6/H1f8/H1f9/H1f10/Hp1bp3/Shprh		Nvec_NVE18594
+Nvec_vc1.1_XM_048721867.1	chr.TUDOR.HG1.20:Rnf17	Rnf17	Nvec_NVE18643
+Nvec_vc1.1_XM_048734390.1	chr.TUDOR.HG1.20:Rnf17	Rnf17	Nvec_NVE1899
+Nvec_vc1.1_XM_032383713.2	chr.SET.HG2.0:Prdm6/Prdm14	Prdm6	Nvec_NVE21127
+Nvec_vc1.1_XM_032383712.2	chr.SET.HG2.0:Prdm6/Prdm14	Prdm6	Nvec_NVE21130
+Nvec_vc1.1_XM_032369261.2	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18		Nvec_NVE21353
+Nvec_vc1.1_XM_032382547.2	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_NVE23183
+Nvec_vc1.1_XM_032378983.2	chr.PHD.HG1.2:Rsf1	Rsf1	Nvec_NVE2340
+Nvec_vc1.1_XM_048722003.1	chr.CupinJmjC.HG1.16:like:Gm28042/Hif1an/Hr/Hspbap1/Jmjd1c/Jmjd4/Jmjd6/Jmjd7/Jmjd8/Kdm2a/Kdm2b/Kdm3a/Kdm3b/Kdm7a/Kdm8/Phf2/Phf8/Riox1/Riox2/Tyw5		Nvec_NVE23744
+Nvec_vc1.1_XM_032365595.2	chr.SNF2_N.HG1.0:Ercc6	Ercc6	Nvec_NVE24059
+Nvec_vc1.1_XM_048734125.1	chr.PHD.HG1.70:like:Pygo1/Pygo2		Nvec_NVE25868
+Nvec_vc1.1_XM_048727629.1	chr.Chromo.HG1.17:Chd1/Chd2;chr.SNF2_N.HG1.23:Chd1/Chd2	""	Nvec_NVE26189
+Nvec_vc1.1_XM_048719383.1	chr.MBT.HG1.4:L3mbtl2/Mbtd1/Sfmbt1/Sfmbt2		Nvec_NVE2731
+Nvec_vc1.1_XM_032364290.2	chr.Histone.HG3.4:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15	H3c13/H3c14	Nvec_NVE3901
+Nvec_vc1.1_XM_032364289.2	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_NVE3902
+Nvec_vc1.1_XM_048720696.1	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_NVE3902
+Nvec_vc1.1_XM_032382351.2	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_NVE5229
+Nvec_vc1.1_XM_032376959.2	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_NVE5230
+Nvec_vc1.1_XM_032376963.2	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18		Nvec_NVE5231
+Nvec_vc1.1_XM_048730883.1	chr.SET.HG2.2:Prdm2	Prdm2	Nvec_NVE5671
+Nvec_vc1.1_XM_032376059.2	chr.TUDOR.HG1.52:Stk31	Stk31	Nvec_NVE6555
+Nvec_vc1.1_XM_032375859.2	chr.Acetyltransf_1.HG4.0:like:Elp3		Nvec_NVE6788
+Nvec_vc1.1_XM_048726662.1	chr.CupinJmjC.HG2.2:Kdm5a/Kdm5b/Kdm5c/Kdm5d	Kdm5a/Kdm5b/Kdm5c/Kdm5d	Nvec_NVE8979
+Nvec_vc1.1_XM_048734363.1	chr.PWWP.HG1.5:Msh6	Msh6	Nvec_NVE9488
+Nvec_vc1.1_XM_048724525.1	chr.CupinJmjC.HG1.38:like:Jmjd4/Jmjd6/Jmjd8		Nvec_NVE9562
+Nvec_vc1.1_XM_001634019.3	chr.PWWP.HG1.17:Hdgf/Hdgfl1/Hdgfl2/Hdgfl3/Psip1	Hdgf/Hdgfl1/Hdgfl2/Hdgfl3/Psip1	Nvec_v1g102123
+Nvec_vc1.1_XM_001634013.3	chr.CupinJmjC.HG1.32:like:Riox1/Riox2		Nvec_v1g102483
+Nvec_vc1.1_XM_001633899.3	chr.zf-CCHH.HG2.0:Chfr	Chfr	Nvec_v1g102520
+Nvec_vc1.1_XM_032382471.2	chr.Histone.HG2.0:Sos1/Sos2	Sos1/Sos2	Nvec_v1g104774
+Nvec_vc1.1_XM_048730234.1	chr.Histone.HG3.4:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15	H3c2/H3c3/H3c6	Nvec_v1g104848
+Nvec_vc1.1_XM_048722690.1	chr.SET.HG1.24:Setd3	Setd3	Nvec_v1g105099
+Nvec_vc1.1_XM_048721821.1	chr.SWIRM.HG1.3:Kdm1a	Kdm1a	Nvec_v1g105193
+Nvec_vc1.1_XM_032382242.2	chr.SNF2_N.HG1.12:Smarcad1	Smarcad1	Nvec_v1g105359
+Nvec_vc1.1_XM_032381914.2	chr.Bromodomain.HG1.7:Crebbp/Ep300;chr.KAT11.HG1.2:Crebbp/Ep300	""	Nvec_v1g106064
+Nvec_vc1.1_XM_048731920.1	chr.ING.HG1.2:Ing3	Ing3	Nvec_v1g106759
+Nvec_vc1.1_XM_001632534.3	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18		Nvec_v1g106863
+Nvec_vc1.1_XM_048728409.1	chr.PHD.HG1.63:Cxxc1	Cxxc1	Nvec_v1g10765
+Nvec_vc1.1_XM_001632267.3	chr.Acetyltransf_1.HG1.4:Gnpnat1	Gnpnat1	Nvec_v1g107874
+Nvec_vc1.1_XM_048730629.1	chr.BAH.HG1.7:Mta1/Mta2/Mta3	Mta1/Mta2/Mta3	Nvec_v1g107943
+Nvec_vc1.1_XM_048730418.1	chr.CupinJmjC.HG1.37:Kdm7a/Phf2/Phf8;chr.PHD.HG1.64:Kdm7a/Phf2/Phf8	""	Nvec_v1g110445
+Nvec_vc1.1_XM_048725924.1	chr.SNF2_N.HG1.1:Ercc6l	Ercc6l	Nvec_v1g110916
+Nvec_vc1.1_XM_032380131.2	chr.Rtt106.HG1.0:Ssrp1;chr.SSrecog.HG1.0:Ssrp1	""	Nvec_v1g110962
+Nvec_vc1.1_XM_032380175.2	chr.SNF2_N.HG1.19:Gm42715/Srcap	Gm42715/Srcap	Nvec_v1g111040
+Nvec_vc1.1_XM_048728176.1	chr.Hist_deacetyl.HG1.9:Hdac3	Hdac3	Nvec_v1g111922
+Nvec_vc1.1_XM_048729113.1	chr.CupinJmjC.HG2.1:Kdm4a/Kdm4b/Kdm4c/Kdm4d	Kdm4a/Kdm4b/Kdm4c/Kdm4d	Nvec_v1g111939
+Nvec_vc1.1_XM_032379506.2	chr.SET.HG2.0:Prdm6/Prdm14	Prdm6	Nvec_v1g112691
+Nvec_vc1.1_XM_032379504.2	chr.SET.HG2.0:Prdm6/Prdm14	Prdm6	Nvec_v1g112757
+Nvec_vc1.1_XM_001630679.3	chr.MRG.HG1.0:Msl3/Msl3l2	Msl3/Msl3l2	Nvec_v1g113169
+Nvec_vc1.1_XM_048733375.1	chr.Hist_deacetyl.HG1.5:Hdac6/Hdac10	Hdac10	Nvec_v1g11424
+Nvec_vc1.1_XM_001630259.3	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18		Nvec_v1g114245
+Nvec_vc1.1_XM_048720059.1	chr.PHD.HG1.62:like:Cxxc1		Nvec_v1g114761
+Nvec_vc1.1_XM_048719588.1	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g115076
+Nvec_vc1.1_XM_032378269.2	chr.SET.HG1.22:Setd6	Setd6	Nvec_v1g115756
+Nvec_vc1.1_XM_048726156.1	chr.Hira.HG1.0:Hira	Hira	Nvec_v1g115956
+Nvec_vc1.1_XM_001629695.3	chr.SET.HG1.9:Kmt5a	Kmt5a	Nvec_v1g116044
+Nvec_vc1.1_XM_032378063.2	chr.PHD.HG1.73:Pygo1/Pygo2	Pygo1/Pygo2	Nvec_v1g116134
+Nvec_vc1.1_XM_032377982.2	chr.SET.HG1.40:Kmt2c/Kmt2d	Kmt2c/Kmt2d	Nvec_v1g116282
+Nvec_vc1.1_XM_032377982.2	chr.PHD.HG1.65:Kmt2c/Kmt2d	Kmt2c/Kmt2d	Nvec_v1g116372
+Nvec_vc1.1_XM_048734150.1	chr.PHD.HG1.6:like:Bptf/Cxxc1/Dido1/Fbxl19/Kdm2a/Kdm2b/Kdm7a/Kmt2e/Phf2/Phf3/Phf8/Phf13/Phf23/Pygo1/Pygo2/Taf3		Nvec_v1g117077
+Nvec_vc1.1_XM_048723212.1	chr.CupinJmjC.HG1.39:Jmjd4	Jmjd4	Nvec_v1g117188
+Nvec_vc1.1_XM_001628715.3	chr.Histone.HG3.4:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15	H3c1/H3c10/H3c11/H3c8	Nvec_v1g118897
+Nvec_vc1.1_XM_032376952.2	chr.Histone.HG3.4:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15	H3c1/H3c10/H3c11/H3c8	Nvec_v1g118897
+Nvec_vc1.1_XM_001628715.3	chr.Histone.HG3.6:like:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15/H3f3a/H3f3b		Nvec_v1g118903
+Nvec_vc1.1_XM_032376952.2	chr.Histone.HG3.6:like:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15/H3f3a/H3f3b		Nvec_v1g118903
+Nvec_vc1.1_XM_032376961.2	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g118965
+Nvec_vc1.1_XM_032376715.2	chr.SET.HG2.0:Prdm6/Prdm14		Nvec_v1g119550
+Nvec_vc1.1_XM_001628309.3	chr.CupinJmjC.HG1.8:like:Gm28042/Hif1an/Hr/Hspbap1/Jmjd1c/Jmjd4/Jmjd6/Jmjd7/Jmjd8/Kdm2a/Kdm2b/Kdm3a/Kdm3b/Kdm7a/Kdm8/Phf2/Phf8/Riox1/Riox2/Tyw5		Nvec_v1g120151
+Nvec_vc1.1_XM_001628295.3	chr.Acetyltransf_1.HG1.18:Nat8/Nat8f1/Nat8f2/Nat8f3/Nat8f4/Nat8f5/Nat8f6/Nat8f7/Nat8l		Nvec_v1g120217
+Nvec_vc1.1_XM_048720709.1	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18		Nvec_v1g120733
+Nvec_vc1.1_XM_048721520.1	chr.Hat1_N.HG1.0:Hat1	Hat1	Nvec_v1g120818
+Nvec_vc1.1_XM_032375910.2	chr.TUDOR.HG1.6:Tdrd6/Tdrd12	Tdrd12/Tdrd6	Nvec_v1g121235
+Nvec_vc1.1_XM_048724428.1	chr.Bromodomain.HG1.30:Baz1b;chr.PHD.HG1.35:Baz1b	""	Nvec_v1g121685
+Nvec_vc1.1_XM_048721517.1	chr.PHD.HG1.52:like:Kmt2a/Kmt2b/Kmt2c/Kmt2d		Nvec_v1g121841
+Nvec_vc1.1_XM_048728542.1	chr.SET.HG1.26:Setdb1/Setdb2	Setdb1/Setdb2	Nvec_v1g123168
+Nvec_vc1.1_XM_001621797.3	chr.SIR2.HG1.14:Sirt7	Sirt7	Nvec_v1g123976
+Nvec_vc1.1_XM_001627012.3	chr.SET.HG1.37:Smyd5	Smyd5	Nvec_v1g124123
+Nvec_vc1.1_XM_032374704.2	chr.MOZ_SAS.HG1.1:Kat5	Kat5	Nvec_v1g124260
+Nvec_vc1.1_XM_032374627.2	chr.MBT.HG1.4:L3mbtl2/Mbtd1/Sfmbt1/Sfmbt2	Sfmbt1/Sfmbt2	Nvec_v1g124448
+Nvec_vc1.1_XM_048731147.1	chr.BAH.HG1.1:Dnmt1	Dnmt1	Nvec_v1g125496
+Nvec_vc1.1_XM_048729630.1	chr.ADD_DNMT3.HG1.0:Dnmt3a/Dnmt3b/Dnmt3c/Dnmt3l;chr.PWWP.HG1.2:Dnmt3a/Dnmt3b	""	Nvec_v1g127267
+Nvec_vc1.1_XM_032373640.2	chr.BAH.HG1.2:Ash1l/Pbrm1;chr.Bromodomain.HG1.19:Pbrm1	""	Nvec_v1g127783
+Nvec_vc1.1_XM_032373525.2	chr.Bromodomain.HG1.22:Zmynd8/Zmynd11;chr.PWWP.HG1.11:Zmynd11	""	Nvec_v1g128202
+Nvec_vc1.1_XM_048734150.1	chr.PHD.HG1.6:like:Bptf/Cxxc1/Dido1/Fbxl19/Kdm2a/Kdm2b/Kdm7a/Kmt2e/Phf2/Phf3/Phf8/Phf13/Phf23/Pygo1/Pygo2/Taf3		Nvec_v1g130437
+Nvec_vc1.1_XM_048734655.1	chr.SNF2_N.HG1.15:Rad54l2	Rad54l2	Nvec_v1g133031
+Nvec_vc1.1_XM_048733416.1	chr.PHD.HG1.7:Taf3	Taf3	Nvec_v1g133899
+Nvec_vc1.1_XM_032371227.2	chr.SNF2_N.HG1.21:Chd1l	Chd1l	Nvec_v1g135257
+Nvec_vc1.1_XM_001623988.3	chr.Acetyltransf_1.HG1.11:Naa50	Naa50	Nvec_v1g135323
+Nvec_vc1.1_XM_048731794.1	chr.Bromodomain.HG1.15:Brd2/Brd3/Brd4/Brdt	Brd2/Brd3/Brd4/Brdt	Nvec_v1g135675
+Nvec_vc1.1_XM_032371111.2	chr.Histone.HG3.0:Cenpa	Cenpa	Nvec_v1g135702
+Nvec_vc1.1_XM_048734390.1	chr.TUDOR.HG1.24:like:Akap1/Snd1/Stk31/Tdrd5/Tdrd7/Tdrd9/Tdrkh		Nvec_v1g136045
+Nvec_vc1.1_XM_048732677.1	chr.PHD.HG1.26:like:Dpf1/Dpf2/Dpf3/Kat6a/Kat6b/Kmt2a/Kmt2b/Kmt2c/Kmt2d/Phf10		Nvec_v1g136105
+Nvec_vc1.1_XM_001623734.3	chr.SIR2.HG1.1:Sirt1	Sirt1	Nvec_v1g136467
+Nvec_vc1.1_XM_048726224.1	chr.SWIRM.HG2.0:Tada2a	Tada2a	Nvec_v1g137087
+Nvec_vc1.1_XM_032370465.2	chr.Acetyltransf_1.HG1.20:Kat14	Kat14	Nvec_v1g137737
+Nvec_vc1.1_XM_048732170.1	chr.SET.HG1.41:Kmt2a/Kmt2b	Kmt2a/Kmt2b	Nvec_v1g137828
+Nvec_vc1.1_XM_001623131.3	chr.Histone.HG8.0:Taf11	Taf11	Nvec_v1g138459
+Nvec_vc1.1_XM_001623126.3	chr.PHD.HG1.8:Ints12	Ints12	Nvec_v1g138493
+Nvec_vc1.1_XM_048732170.1	chr.SET.HG1.41:Kmt2a/Kmt2b	Kmt2a/Kmt2b	Nvec_v1g139250
+Nvec_vc1.1_XM_001622708.3	chr.Histone.HG7.0:Taf12	Taf12	Nvec_v1g139976
+Nvec_vc1.1_XM_048734251.1	chr.CupinJmjC.HG1.19:like:Hif1an		Nvec_v1g140820
+Nvec_vc1.1_XM_001639326.3	chr.Histone.HG3.4:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15	H3c15	Nvec_v1g141878
+Nvec_vc1.1_XM_048720029.1	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g141884
+Nvec_vc1.1_XM_032369261.2	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18		Nvec_v1g141889
+Nvec_vc1.1_XM_048730629.1	chr.BAH.HG1.7:Mta1/Mta2/Mta3	Mta1/Mta2/Mta3	Nvec_v1g143957
+Nvec_vc1.1_XM_048725607.1	chr.SNF2_N.HG1.9:Rad54l	Rad54l	Nvec_v1g145813
+Nvec_vc1.1_XM_048734002.1	chr.SNF2_N.HG1.7:Shprh	Shprh	Nvec_v1g146769
+Nvec_vc1.1_XM_032382547.2	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_v1g148947
+Nvec_vc1.1_XM_048730234.1	chr.Histone.HG3.4:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15	H3c4/H3c7	Nvec_v1g148952
+Nvec_vc1.1_XM_048719528.1	chr.Histone.HG3.1:like:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15/H3f3a/H3f3b		Nvec_v1g150025
+Nvec_vc1.1_XM_032376959.2	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_v1g150398
+Nvec_vc1.1_XM_032382351.2	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g150407
+Nvec_vc1.1_XM_001632296.3	chr.Chromo.HG1.4:Cbx2/Cbx4/Cbx6/Cbx7/Cbx8/Npcd		Nvec_v1g151943
+Nvec_vc1.1_XM_001632560.3	chr.Histone.HG3.4:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15	H3c15	Nvec_v1g152385
+Nvec_vc1.1_XM_048719588.1	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H4c1/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9	Nvec_v1g152452
+Nvec_vc1.1_XM_048720159.1	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g152686
+Nvec_vc1.1_XM_048730418.1	chr.PHD.HG1.64:Kdm7a/Phf2/Phf8	Kdm7a/Phf2/Phf8	Nvec_v1g153107
+Nvec_vc1.1_XM_001618979.3	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18		Nvec_v1g153118
+Nvec_vc1.1_XM_048719506.1	chr.Histone.HG3.6:like:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15/H3f3a/H3f3b		Nvec_v1g153121
+Nvec_vc1.1_XM_048719588.1	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g153478
+Nvec_vc1.1_XM_001630020.2	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g153567
+Nvec_vc1.1_XM_048719489.1	chr.Histone.HG3.4:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15	H3c15	Nvec_v1g153569
+Nvec_vc1.1_XM_048719553.1	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g153605
+Nvec_vc1.1_XM_048719489.1	chr.Histone.HG3.6:like:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15/H3f3a/H3f3b		Nvec_v1g153612
+Nvec_vc1.1_XM_048719533.1	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_v1g153614
+Nvec_vc1.1_XM_001640293.3	chr.Hist_deacetyl.HG1.2:like:Hdac11		Nvec_v1g154458
+Nvec_vc1.1_XM_048719489.1	chr.Histone.HG3.6:like:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15/H3f3a/H3f3b		Nvec_v1g154474
+Nvec_vc1.1_XM_048720159.1	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g155025
+Nvec_vc1.1_XM_001618208.3	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18		Nvec_v1g155159
+Nvec_vc1.1_XM_001618209.2	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18		Nvec_v1g155165
+Nvec_vc1.1_XM_048719528.1	chr.Histone.HG3.4:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15	H3c1/H3c10/H3c11/H3c8	Nvec_v1g155317
+Nvec_vc1.1_XM_048719554.1	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g155473
+Nvec_vc1.1_XM_001629695.3	chr.SET.HG1.9:Kmt5a	Kmt5a	Nvec_v1g155903
+Nvec_vc1.1_XM_048719531.1	chr.Histone.HG3.6:like:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15/H3f3a/H3f3b		Nvec_v1g156943
+Nvec_vc1.1_XM_001622833.3	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g157309
+Nvec_vc1.1_XM_032377701.2	chr.Bromodomain.HG1.16:Atad2/Atad2b	Atad2/Atad2b	Nvec_v1g15775
+Nvec_vc1.1_XM_032366427.2	chr.Chromo.HG1.7:like:Cbx1/Cbx3/Cbx5/Cdyl/Cdyl2/Chd1/Chd2/Chd3/Chd4/Chd5/Chd6/Chd7/Chd8/Chd9/Mphosph8/Suv39h1/Suv39h2		Nvec_v1g158808
+Nvec_vc1.1_XM_001640566.3	chr.CupinJmjC.HG1.18:like:Gm28042/Hif1an/Hr/Hspbap1/Jmjd1c/Jmjd4/Jmjd6/Jmjd7/Jmjd8/Kdm2a/Kdm2b/Kdm3a/Kdm3b/Kdm7a/Kdm8/Phf2/Phf8/Riox1/Riox2/Tyw5		Nvec_v1g159444
+Nvec_vc1.1_XM_001640386.3	chr.Histone.HG3.1:like:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15/H3f3a/H3f3b		Nvec_v1g159483
+Nvec_vc1.1_XM_032363485.2	chr.SNF2_N.HG1.17:Hells	Hells	Nvec_v1g161221
+Nvec_vc1.1_XM_048734002.1	chr.SNF2_N.HG1.7:Shprh	Shprh	Nvec_v1g162318
+Nvec_vc1.1_XM_001637327.3	chr.CupinJmjC.HG1.5:Gm28042/Jmjd7	Gm28042/Jmjd7	Nvec_v1g162331
+Nvec_vc1.1_XM_032387410.2	chr.DOT1.HG1.4:Dot1l	Dot1l	Nvec_v1g162356
+Nvec_vc1.1_XM_032386576.2	chr.CupinJmjC.HG1.11:Kdm8	Kdm8	Nvec_v1g163066
+Nvec_vc1.1_XM_032386469.2	chr.zf-CW.HG1.6:Morc1/Morc2a/Morc2b	Morc1/Morc2a/Morc2b	Nvec_v1g163141
+Nvec_vc1.1_XM_032385994.1	chr.NAP.HG1.0:Set/Tspyl1/Tspyl2/Tspyl3/Tspyl4/Tspyl5		Nvec_v1g163440
+Nvec_vc1.1_XM_001631427.3	chr.Acetyltransf_1.HG4.3:Elp3	Elp3	Nvec_v1g164834
+Nvec_vc1.1_XM_032381678.2	chr.Bromodomain.HG1.34:Brd1/Brpf1/Brpf3;chr.PHD.HG1.32:Brd1/Brpf1/Brpf3	""	Nvec_v1g167144
+Nvec_vc1.1_XM_032381412.2	chr.CupinJmjC.HG1.31:Hr/Jmjd1c/Kdm3a/Kdm3b	Hr/Jmjd1c/Kdm3a/Kdm3b	Nvec_v1g167409
+Nvec_vc1.1_XM_001631897.3	chr.MOZ_SAS.HG1.5:Kat8	Kat8	Nvec_v1g167841
+Nvec_vc1.1_XM_032380740.2	chr.TUDOR.HG1.32:like:Rnf17		Nvec_v1g167920
+Nvec_vc1.1_XM_001631427.3	chr.Acetyltransf_1.HG4.3:Elp3	Elp3	Nvec_v1g168258
+Nvec_vc1.1_XM_032379810.2	chr.DOT1.HG1.0:like:Dot1l		Nvec_v1g168568
+Nvec_vc1.1_XM_048719451.1	chr.SNF2_N.HG1.4:Btaf1	Btaf1	Nvec_v1g169525
+Nvec_vc1.1_XM_032377982.2	chr.PHD.HG1.77:like:Kmt2a/Kmt2b		Nvec_v1g169962
+Nvec_vc1.1_XM_001629320.3	chr.Histone.HG5.0:Pole3	Pole3	Nvec_v1g170236
+Nvec_vc1.1_XM_048725607.1	chr.SNF2_N.HG1.9:Rad54l	Rad54l	Nvec_v1g171328
+Nvec_vc1.1_XM_001627520.3	chr.Acetyltransf_1.HG5.0:Nat9	Nat9	Nvec_v1g171834
+Nvec_vc1.1_XM_001626448.3	chr.CupinJmjC.HG1.17:like:Gm28042/Hif1an/Hr/Hspbap1/Jmjd1c/Jmjd4/Jmjd6/Jmjd7/Jmjd8/Kdm2a/Kdm2b/Kdm3a/Kdm3b/Kdm7a/Kdm8/Phf2/Phf8/Riox1/Riox2/Tyw5		Nvec_v1g172835
+Nvec_vc1.1_XM_032372668.2	chr.CupinJmjC.HG1.12:like:Tyw5		Nvec_v1g173996
+Nvec_vc1.1_XM_001624585.3	chr.Chromo.HG1.9:like:Cdyl/Cdyl2/Chd1/Chd2/Chd3/Chd4/Chd5/Chd6/Chd7/Chd8/Chd9/Mphosph8/Suv39h1/Suv39h2		Nvec_v1g174587
+Nvec_vc1.1_XM_032371111.2	chr.Histone.HG3.0:Cenpa	Cenpa	Nvec_v1g175104
+Nvec_vc1.1_XM_048719561.1	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g175850
+Nvec_vc1.1_XM_001621797.3	chr.SIR2.HG1.14:Sirt7	Sirt7	Nvec_v1g176429
+Nvec_vc1.1_XM_048719533.1	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_v1g176704
+Nvec_vc1.1_XM_048720158.1	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_v1g176747
+Nvec_vc1.1_XM_001618979.3	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18		Nvec_v1g176824
+Nvec_vc1.1_XM_032367252.2	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_v1g177240
+Nvec_v1g177252	chr.MRG.HG1.1:Morf4l1/Morf4l2	Morf4l1/Morf4l2	Nvec_v1g177252
+Nvec_vc1.1_XM_048729872.1	chr.Bromodomain.HG1.23:Taf1	Taf1	Nvec_v1g178700
+Nvec_vc1.1_XM_001640185.3	chr.ASF1_hist_chap.HG1.0:Asf1a/Asf1b	Asf1a/Asf1b	Nvec_v1g178884
+Nvec_vc1.1_XM_032365357.2	chr.Bromodomain.HG1.21:Smarca2/Smarca4;chr.SNF2_N.HG1.13:Smarca2/Smarca4	""	Nvec_v1g178940
+Nvec_vc1.1_XM_001639685.3	chr.SIR2.HG1.6:Sirt3	Sirt3	Nvec_v1g179325
+Nvec_vc1.1_XM_001638302.3	chr.Histone.HG2.4:H2az1/H2az2	H2az1/H2az2	Nvec_v1g180812
+Nvec_vc1.1_XM_001635694.3	chr.TUDOR.HG1.47:Snd1	Snd1	Nvec_v1g183195
+Nvec_vc1.1_XM_001635169.3	chr.PHD.HG1.70:like:Pygo1/Pygo2;chr.PWWP.HG1.6:Nsd1/Nsd2;chr.SET.HG1.19:Nsd1/Nsd2	""	Nvec_v1g183768
+Nvec_vc1.1_XM_001629605.3	chr.PHD.HG1.74:like:Kmt2a/Kmt2b		Nvec_v1g18566
+Nvec_vc1.1_XM_001633036.3	chr.CupinJmjC.HG1.40:Jmjd6		Nvec_v1g185932
+Nvec_vc1.1_XM_032380141.2	chr.MBT.HG1.1:L3mbtl1/L3mbtl3	L3mbtl1/L3mbtl3	Nvec_v1g187589
+Nvec_vc1.1_XM_001627879.3	chr.SIR2.HG1.3:Sirt4	Sirt4	Nvec_v1g190741
+Nvec_vc1.1_XM_048723762.1	chr.Hist_deacetyl.HG1.1:Hdac4/Hdac5/Hdac7/Hdac9	Hdac4/Hdac5/Hdac7/Hdac9	Nvec_v1g190860
+Nvec_vc1.1_XM_048726662.1	chr.CupinJmjC.HG2.2:Kdm5a/Kdm5b/Kdm5c/Kdm5d;chr.PHD.HG1.13:Phf12	""	Nvec_v1g191566
+Nvec_vc1.1_XM_001623716.3	chr.Histone.HG3.2:like:H3f3a/H3f3b		Nvec_v1g194445
+Nvec_vc1.1_XM_048732170.1	chr.SET.HG1.41:Kmt2a/Kmt2b	Kmt2a/Kmt2b	Nvec_v1g194976
+Nvec_vc1.1_XM_048732170.1	chr.PHD.HG1.71:Kmt2a/Kmt2b	Kmt2a/Kmt2b	Nvec_v1g194978
+Nvec_vc1.1_XM_001622372.3	chr.SET.HG1.30:like:Ezh1/Ezh2/Gm49388/Kmt2a/Kmt2b/Kmt2c/Kmt2d/Setd1a/Setd1b		Nvec_v1g195312
+Nvec_vc1.1_XM_048719588.1	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18		Nvec_v1g195934
+Nvec_vc1.1_XM_048719489.1	chr.Histone.HG3.4:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15	H3c13/H3c14	Nvec_v1g196006
+Nvec_vc1.1_XM_048719588.1	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18		Nvec_v1g196014
+Nvec_vc1.1_XM_048719536.1	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_v1g196022
+Nvec_vc1.1_XM_048719528.1	chr.Histone.HG3.6:like:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15/H3f3a/H3f3b		Nvec_v1g196043
+Nvec_vc1.1_XM_048723541.1	chr.PHD.HG1.70:like:Pygo1/Pygo2		Nvec_v1g196845
+Nvec_vc1.1_XM_032366747.2	chr.PHD.HG1.1:Phf21a/Phf21b	Phf21a/Phf21b	Nvec_v1g197064
+Nvec_vc1.1_XM_001641050.3	chr.CupinJmjC.HG1.10:like:Kdm8		Nvec_v1g197330
+Nvec_vc1.1_XM_032366482.2	chr.SET.HG2.2:Prdm2	Prdm2	Nvec_v1g197426
+Nvec_vc1.1_XM_001640985.3	chr.Acetyltransf_1.HG1.9:like:Aanat/Kat14/Naa10/Naa11/Naa12/Naa20/Naa30/Naa50/Naa60/Naa80/Nat8/Nat8f1/Nat8f2/Nat8f3/Nat8f4/Nat8f5/Nat8f6/Nat8f7/Nat8l		Nvec_v1g197473
+Nvec_vc1.1_XM_048729872.1	chr.Bromodomain.HG1.23:Taf1	Taf1	Nvec_v1g197956
+Nvec_vc1.1_XM_032365679.2	chr.LinkerHistone.HG1.2:like:H1f0/H1f1/H1f2/H1f3/H1f4/H1f5/H1f6/H1f8/H1f9/H1f10/Hp1bp3/Shprh		Nvec_v1g198083
+Nvec_vc1.1_XM_001640295.3	chr.Histone.HG3.4:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15	H3c1/H3c10/H3c11/H3c8	Nvec_v1g198088
+Nvec_vc1.1_XM_001618359.3	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g198108
+Nvec_vc1.1_XM_001618359.3	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g198111
+Nvec_vc1.1_XM_001618359.3	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g198116
+Nvec_vc1.1_XM_048724525.1	chr.CupinJmjC.HG1.38:like:Jmjd4/Jmjd6/Jmjd8		Nvec_v1g198745
+Nvec_vc1.1_XM_048720395.1	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_v1g19891
+Nvec_vc1.1_XM_048722003.1	chr.CupinJmjC.HG1.7:like:Gm28042/Hif1an/Hr/Hspbap1/Jmjd1c/Jmjd4/Jmjd6/Jmjd7/Jmjd8/Kdm2a/Kdm2b/Kdm3a/Kdm3b/Kdm7a/Kdm8/Phf2/Phf8/Riox1/Riox2/Tyw5		Nvec_v1g200049
+Nvec_vc1.1_XM_032363298.2	chr.Histone.HG3.4:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15	H3c13/H3c14	Nvec_v1g200351
+Nvec_vc1.1_XM_001638414.3	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g200353
+Nvec_vc1.1_XM_001638293.3	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g200571
+Nvec_vc1.1_XM_032362875.2	chr.SET.HG2.0:Prdm6/Prdm14	Prdm6	Nvec_v1g200651
+Nvec_vc1.1_XM_048720760.1	chr.Bromodomain.HG1.33:Brd7/Brd9	Brd7/Brd9	Nvec_v1g200933
+Nvec_vc1.1_XM_001637989.3	chr.CupinJmjC.HG1.42:like:Jmjd6		Nvec_v1g200946
+Nvec_vc1.1_XM_048728071.1	chr.TUDOR.HG1.10:like:Akap1/Rnf17/Snd1/Stk31/Tdrd1/Tdrd5/Tdrd6/Tdrd7/Tdrd9/Tdrd12/Tdrkh		Nvec_v1g201344
+Nvec_vc1.1_XM_048721867.1	chr.TUDOR.HG1.20:Rnf17	Rnf17	Nvec_v1g203286
+Nvec_vc1.1_XM_032385773.2	chr.Acetyltransf_1.HG1.13:Naa80	Naa80	Nvec_v1g203328
+Nvec_vc1.1_XM_001635488.3	chr.Acetyltransf_1.HG1.1:Sat1/Sat2/Satl1		Nvec_v1g204044
+Nvec_vc1.1_XM_001635370.3	chr.Histone.HG1.4:like:H2bc1/H2bc3/H2bc4/H2bc6/H2bc7/H2bc8/H2bc9/H2bc11/H2bc12/H2bc13/H2bc14/H2bc15/H2bc18/H2bc21/H2bc22/H2bc23/H2bc24/H2bc27/H2bl1/H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18		Nvec_v1g204099
+Nvec_vc1.1_XM_032384591.2	chr.zf-CCHH.HG1.7:Aplf	Aplf	Nvec_v1g204602
+Nvec_vc1.1_XM_032384486.2	chr.Acetyltransf_1.HG1.18:Nat8/Nat8f1/Nat8f2/Nat8f3/Nat8f4/Nat8f5/Nat8f6/Nat8f7/Nat8l	Nat8/Nat8f1/Nat8f2/Nat8f3/Nat8f4/Nat8f5/Nat8f6/Nat8f7/Nat8l	Nvec_v1g204737
+Nvec_vc1.1_XM_048734732.1	chr.TUDOR.HG1.50:like:Stk31		Nvec_v1g204832
+Nvec_vc1.1_XM_001634719.3	chr.SET.HG1.2:Kmt5b/Kmt5c	Kmt5b/Kmt5c	Nvec_v1g204976
+Nvec_vc1.1_XM_001634554.3	chr.Histone.HG4.3:Pole4	Pole4	Nvec_v1g205207
+Nvec_vc1.1_XM_048731385.1	chr.TUDOR.HG1.34:Tdrd5	Tdrd5	Nvec_v1g205481
+Nvec_vc1.1_XM_032380138.2	chr.MBT.HG1.1:L3mbtl1/L3mbtl3	L3mbtl1/L3mbtl3	Nvec_v1g20650
+Nvec_vc1.1_XM_032382135.2	chr.PWWP.HG1.4:Zcwpw1;chr.zf-CW.HG1.3:like:Zcwpw2	""	Nvec_v1g207143
+Nvec_vc1.1_XM_048720243.1	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18		Nvec_v1g207429
+Nvec_vc1.1_XM_001638414.3	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g207796
+Nvec_vc1.1_XM_032381367.2	chr.Bromodomain.HG1.24:Sp100/Sp140	Sp100/Sp140	Nvec_v1g207995
+Nvec_vc1.1_XM_032380177.2	chr.SNF2_N.HG1.8:Rad54b	Rad54b	Nvec_v1g209299
+Nvec_vc1.1_XM_048734600.1	chr.PHD.HG1.69:like:Pygo1/Pygo2		Nvec_v1g210606
+Nvec_vc1.1_XM_001630153.3	chr.Acetyltransf_1.HG1.1:Sat1/Sat2/Satl1	Sat1/Sat2/Satl1	Nvec_v1g210741
+Nvec_vc1.1_XM_048727975.1	chr.CAF1A.HG1.0:Chaf1a	Chaf1a	Nvec_v1g211889
+Nvec_vc1.1_XM_001628715.3	chr.Histone.HG3.4:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15	H3c4/H3c7	Nvec_v1g212541
+Nvec_vc1.1_XM_032376952.2	chr.Histone.HG3.4:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15	H3c4/H3c7	Nvec_v1g212541
+Nvec_vc1.1_XM_032376433.2	chr.Acetyltransf_1.HG1.18:Nat8/Nat8f1/Nat8f2/Nat8f3/Nat8f4/Nat8f5/Nat8f6/Nat8f7/Nat8l		Nvec_v1g213075
+Nvec_vc1.1_XM_001628310.3	chr.Acetyltransf_1.HG1.18:Nat8/Nat8f1/Nat8f2/Nat8f3/Nat8f4/Nat8f5/Nat8f6/Nat8f7/Nat8l		Nvec_v1g213078
+Nvec_vc1.1_XM_048720158.1	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_v1g213586
+Nvec_vc1.1_XM_032375359.2	chr.SET.HG1.39:Smyd1/Smyd3		Nvec_v1g214071
+Nvec_vc1.1_XM_032374986.2	chr.SET.HG1.13:Smyd4	Smyd4	Nvec_v1g214433
+Nvec_vc1.1_XM_032374899.2	chr.TUDOR.HG1.40:Tdrkh	Tdrkh	Nvec_v1g214512
+Nvec_vc1.1_XM_048729113.1	chr.PHD.HG1.43:Kdm4a/Kdm4b/Kdm4c/Phf14	Kdm4a/Kdm4b/Kdm4c	Nvec_v1g214558
+Nvec_vc1.1_XM_048726944.1	chr.Acetyltransf_1.HG2.0:NA		Nvec_v1g216415
+Nvec_v1g216418	chr.Acetyltransf_1.HG2.0:NA		Nvec_v1g216418
+Nvec_v1g216424	chr.Acetyltransf_1.HG2.0:NA		Nvec_v1g216424
+Nvec_vc1.1_XM_048721760.1	chr.zf-CW.HG1.1:Morc3/Morc4	Morc3/Morc4	Nvec_v1g21684
+Nvec_vc1.1_XM_048731920.1	chr.ING.HG1.2:Ing3	Ing3	Nvec_v1g219416
+Nvec_vc1.1_XM_001623182.3	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g219654
+Nvec_vc1.1_XM_032372476.2	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g219654
+Nvec_vc1.1_XM_001623180.3	chr.Histone.HG2.1:H2ac1/H2ac4/H2ac6/H2ac7/H2ac8/H2ac10/H2ac11/H2ac12/H2ac13/H2ac15/H2ac18/H2ac19/H2ac20/H2ac21/H2ac22/H2ac23/H2ac24/H2ac25/H2aj/H2al1a/H2al1b/H2al1c/H2al1d/H2al1e/H2al1f/H2al1g/H2al1h/H2al1i/H2al1j/H2al1k/H2al1m/H2al1n/H2al1o/H2al2a/H2al2b/H2al2c/H2ax	H2ac1/H2ac10/H2ac11/H2ac12/H2ac13/H2ac15/H2ac18/H2ac19/H2ac20/H2ac21/H2ac22/H2ac23/H2ac24/H2ac25/H2ac4/H2ac6/H2ac7/H2ac8/H2aj/H2al1a/H2al1b/H2al1c/H2al1d/H2al1e/H2al1f/H2al1g/H2al1h/H2al1i/H2al1j/H2al1k/H2al1m/H2al1n/H2al1o/H2al2a/H2al2b/H2al2c/H2ax	Nvec_v1g219655
+Nvec_vc1.1_XM_048719504.1	chr.Histone.HG3.4:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15	H3c1/H3c10/H3c11/H3c8	Nvec_v1g220095
+Nvec_vc1.1_XM_048722261.1	chr.CupinJmjC.HG1.41:like:Jmjd6		Nvec_v1g220294
+Nvec_vc1.1_XM_001622486.3	chr.SET.HG1.1:like:Ash1l/Ehmt1/Ehmt2/Ezh1/Ezh2/Gm49388/Kmt2a/Kmt2b/Kmt2c/Kmt2d/Kmt2e/Kmt5a/Nsd1/Nsd2/Setd1a/Setd1b/Setd2/Setd5/Setdb1/Setdb2/Setmar/Suv39h1/Suv39h2		Nvec_v1g220581
+Nvec_vc1.1_XM_048719531.1	chr.Histone.HG3.4:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15	H3c13/H3c14	Nvec_v1g220974
+Nvec_vc1.1_XM_032373640.2	chr.Bromodomain.HG1.0:like:Ash1l/Atad2/Atad2b/Baz1a/Baz1b/Baz2a/Baz2b/Bptf/Brd1/Brd2/Brd3/Brd4/Brd7/Brd8/Brd8dc/Brd9/Brdt/Brpf1/Brpf3/Brwd1/Brwd3/Cecr2/Crebbp/Ep300/Kat2a/Kat2b/Pbrm1/Phip/Smarca2/Smarca4/Sp100/Sp140/Taf1/Trim24/Trim33/Trim66/Zmynd8/Zmynd11		Nvec_v1g221284
+Nvec_vc1.1_XM_001621204.3	chr.Chromo.HG1.0:like:Cbx1/Cbx2/Cbx3/Cbx4/Cbx5/Cbx6/Cbx7/Cbx8/Cdyl/Cdyl2/Chd1/Chd2/Chd3/Chd4/Chd5/Chd6/Chd7/Chd8/Chd9/Mphosph8/Npcd/Suv39h1/Suv39h2		Nvec_v1g222195
+Nvec_vc1.1_XM_032368076.2	chr.PHD.HG1.70:like:Pygo1/Pygo2		Nvec_v1g222471
+Nvec_vc1.1_XM_001641594.3	chr.SNF2_N.HG1.6:Smarcal1	Smarcal1	Nvec_v1g222964
+Nvec_vc1.1_XM_032385480.2	chr.SET.HG1.29:Setd2	Setd2	Nvec_v1g22303
+Nvec_vc1.1_XM_001619814.3	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_v1g223737
+Nvec_vc1.1_XM_001619682.3	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g223889
+Nvec_vc1.1_XM_032384663.2	chr.NAP.HG1.1:Nap1l1/Nap1l2/Nap1l3/Nap1l4/Nap1l5	Nap1l1/Nap1l2/Nap1l3/Nap1l4/Nap1l5	Nvec_v1g224199
+Nvec_vc1.1_XM_032375387.2	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18		Nvec_v1g224503
+Nvec_vc1.1_XM_048720923.1	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_v1g224504
+Nvec_vc1.1_XM_032376952.2	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_v1g224504
+Nvec_vc1.1_XM_032375910.2	chr.TUDOR.HG1.6:Tdrd6/Tdrd12	Tdrd12/Tdrd6	Nvec_v1g224534
+Nvec_vc1.1_XM_001622833.3	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g224537
+Nvec_vc1.1_XM_048720159.1	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g224574
+Nvec_vc1.1_XM_048719533.1	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_v1g224575
+Nvec_vc1.1_XM_048720159.1	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g224727
+Nvec_vc1.1_XM_048720158.1	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_v1g224843
+Nvec_vc1.1_XM_032375910.2	chr.TUDOR.HG1.6:Tdrd6/Tdrd12	Tdrd12/Tdrd6	Nvec_v1g224903
+Nvec_vc1.1_XM_048719588.1	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18		Nvec_v1g224955
+Nvec_vc1.1_XM_001619682.3	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g224990
+Nvec_vc1.1_XM_001640296.3	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_v1g225178
+Nvec_vc1.1_XM_001640409.3	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18		Nvec_v1g225179
+Nvec_vc1.1_XM_001624609.3	chr.Hist_deacetyl.HG1.6:Hdac8	Hdac8	Nvec_v1g225284
+Nvec_vc1.1_XM_001619682.3	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g225285
+Nvec_vc1.1_XM_048720395.1	chr.Histone.HG1.0:like:H2bc1/H2bc3/H2bc4/H2bc6/H2bc7/H2bc8/H2bc9/H2bc11/H2bc12/H2bc13/H2bc14/H2bc15/H2bc18/H2bc21/H2bc22/H2bc23/H2bc24/H2bc27/H2bl1/H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18		Nvec_v1g225293
+Nvec_vc1.1_XM_048733418.1	chr.Chromo.HG1.0:like:Cbx1/Cbx2/Cbx3/Cbx4/Cbx5/Cbx6/Cbx7/Cbx8/Cdyl/Cdyl2/Chd1/Chd2/Chd3/Chd4/Chd5/Chd6/Chd7/Chd8/Chd9/Mphosph8/Npcd/Suv39h1/Suv39h2		Nvec_v1g225305
+Nvec_vc1.1_XM_048720158.1	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_v1g225386
+Nvec_vc1.1_XM_048720158.1	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_v1g225407
+Nvec_vc1.1_XM_048720158.1	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_v1g225433
+Nvec_v1g225937	chr.Acetyltransf_1.HG1.12:like:Naa80		Nvec_v1g225937
+Nvec_vc1.1_XM_001632774.3	chr.SNF2_N.HG1.20:Smarca1/Smarca5	Smarca1/Smarca5	Nvec_v1g226879
+Nvec_vc1.1_XM_001632478.3	chr.PHD.HG1.25:Uhrf1/Uhrf2;chr.TTD.HG1.1:Uhrf1/Uhrf2	""	Nvec_v1g226911
+Nvec_vc1.1_XM_048719531.1	chr.Histone.HG3.6:like:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15/H3f3a/H3f3b		Nvec_v1g227545
+Nvec_vc1.1_XM_048719490.1	chr.Histone.HG3.4:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15	H3c2/H3c3/H3c6	Nvec_v1g227630
+Nvec_vc1.1_XM_001622833.3	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g227726
+Nvec_vc1.1_XM_048719528.1	chr.Histone.HG3.4:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15	H3c2/H3c3/H3c6	Nvec_v1g227737
+Nvec_vc1.1_XM_048719528.1	chr.Histone.HG3.4:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15	H3c13/H3c14	Nvec_v1g227739
+Nvec_vc1.1_XM_048719528.1	chr.Histone.HG3.6:like:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15/H3f3a/H3f3b		Nvec_v1g227757
+Nvec_vc1.1_XM_048719588.1	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18		Nvec_v1g227759
+Nvec_vc1.1_XM_048719553.1	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g227761
+Nvec_vc1.1_XM_048719554.1	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g227764
+Nvec_vc1.1_XM_048719489.1	chr.Histone.HG3.4:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15	H3c2/H3c3/H3c6	Nvec_v1g227771
+Nvec_vc1.1_XM_048719522.1	chr.Histone.HG3.4:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15	H3c13/H3c14	Nvec_v1g227772
+Nvec_vc1.1_XM_048719528.1	chr.Histone.HG3.4:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15	H3c1/H3c10/H3c11/H3c8	Nvec_v1g227782
+Nvec_vc1.1_XM_048719489.1	chr.Histone.HG3.4:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15	H3c13/H3c14	Nvec_v1g227799
+Nvec_vc1.1_XM_001622833.3	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g227814
+Nvec_vc1.1_XM_001622833.3	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g227820
+Nvec_vc1.1_XM_001640409.3	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18		Nvec_v1g228147
+Nvec_vc1.1_XM_001640411.3	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g228159
+Nvec_vc1.1_XM_001618359.3	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g228163
+Nvec_vc1.1_XM_001639326.3	chr.Histone.HG3.4:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15	H3c13/H3c14	Nvec_v1g228351
+Nvec_vc1.1_XM_001638826.3	chr.SIR2.HG1.10:Sirt2		Nvec_v1g228435
+Nvec_vc1.1_XM_032363300.2	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g228495
+Nvec_vc1.1_XM_048720524.1	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18		Nvec_v1g228500
+Nvec_vc1.1_XM_001638369.3	chr.Histone.HG2.1:H2ac1/H2ac4/H2ac6/H2ac7/H2ac8/H2ac10/H2ac11/H2ac12/H2ac13/H2ac15/H2ac18/H2ac19/H2ac20/H2ac21/H2ac22/H2ac23/H2ac24/H2ac25/H2aj/H2al1a/H2al1b/H2al1c/H2al1d/H2al1e/H2al1f/H2al1g/H2al1h/H2al1i/H2al1j/H2al1k/H2al1m/H2al1n/H2al1o/H2al2a/H2al2b/H2al2c/H2ax	H2ac1/H2ac10/H2ac11/H2ac12/H2ac13/H2ac15/H2ac18/H2ac19/H2ac20/H2ac21/H2ac22/H2ac23/H2ac24/H2ac25/H2ac4/H2ac6/H2ac7/H2ac8/H2aj/H2al1a/H2al1b/H2al1c/H2al1d/H2al1e/H2al1f/H2al1g/H2al1h/H2al1i/H2al1j/H2al1k/H2al1m/H2al1n/H2al1o/H2al2a/H2al2b/H2al2c/H2ax	Nvec_v1g228531
+Nvec_vc1.1_XM_032382548.2	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g229400
+Nvec_vc1.1_XM_032382513.2	chr.PHD.HG1.45:Dpf1/Dpf2/Dpf3	Dpf1/Dpf2/Dpf3	Nvec_v1g229404
+Nvec_vc1.1_XM_001632560.3	chr.Histone.HG3.4:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15	H3c4/H3c7	Nvec_v1g229546
+Nvec_vc1.1_XM_001639326.3	chr.Histone.HG3.4:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15	H3c4/H3c7	Nvec_v1g229551
+Nvec_vc1.1_XM_048722635.1	chr.MOZ_SAS.HG1.6:Kat6a/Kat6b	Kat6a/Kat6b	Nvec_v1g229690
+Nvec_vc1.1_XM_048724709.1	chr.Chromo.HG1.13:Chd3/Chd4/Chd5;chr.PHD.HG1.10:like:Chd3/Chd4/Chd5;chr.SNF2_N.HG1.24:Chd3/Chd4/Chd5	""	Nvec_v1g229706
+Nvec_vc1.1_XM_001639326.3	chr.Histone.HG3.6:like:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15/H3f3a/H3f3b		Nvec_v1g230009
+Nvec_vc1.1_XM_001619680.3	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_v1g230010
+Nvec_vc1.1_XM_048724568.1	chr.ING.HG1.1:Ing4/Ing5	Ing4/Ing5	Nvec_v1g230105
+Nvec_v1g230236	chr.Histone.HG3.6:like:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15/H3f3a/H3f3b		Nvec_v1g230236
+Nvec_vc1.1_XM_001628267.3	chr.Acetyltransf_1.HG1.24:Naa10/Naa11/Naa12	Naa10/Naa11/Naa12	Nvec_v1g230324
+Nvec_vc1.1_XM_048720159.1	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g230389
+Nvec_vc1.1_XM_001626676.3	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g230610
+Nvec_vc1.1_XM_001626660.3	chr.Histone.HG2.1:H2ac1/H2ac4/H2ac6/H2ac7/H2ac8/H2ac10/H2ac11/H2ac12/H2ac13/H2ac15/H2ac18/H2ac19/H2ac20/H2ac21/H2ac22/H2ac23/H2ac24/H2ac25/H2aj/H2al1a/H2al1b/H2al1c/H2al1d/H2al1e/H2al1f/H2al1g/H2al1h/H2al1i/H2al1j/H2al1k/H2al1m/H2al1n/H2al1o/H2al2a/H2al2b/H2al2c/H2ax	H2ac1/H2ac10/H2ac11/H2ac12/H2ac13/H2ac15/H2ac18/H2ac19/H2ac20/H2ac21/H2ac22/H2ac23/H2ac24/H2ac25/H2ac4/H2ac6/H2ac7/H2ac8/H2aj/H2al1a/H2al1b/H2al1c/H2al1d/H2al1e/H2al1f/H2al1g/H2al1h/H2al1i/H2al1j/H2al1k/H2al1m/H2al1n/H2al1o/H2al2a/H2al2b/H2al2c/H2ax	Nvec_v1g230611
+Nvec_vc1.1_XM_001626661.3	chr.Histone.HG2.1:H2ac1/H2ac4/H2ac6/H2ac7/H2ac8/H2ac10/H2ac11/H2ac12/H2ac13/H2ac15/H2ac18/H2ac19/H2ac20/H2ac21/H2ac22/H2ac23/H2ac24/H2ac25/H2aj/H2al1a/H2al1b/H2al1c/H2al1d/H2al1e/H2al1f/H2al1g/H2al1h/H2al1i/H2al1j/H2al1k/H2al1m/H2al1n/H2al1o/H2al2a/H2al2b/H2al2c/H2ax	H2ac1/H2ac10/H2ac11/H2ac12/H2ac13/H2ac15/H2ac18/H2ac19/H2ac20/H2ac21/H2ac22/H2ac23/H2ac24/H2ac25/H2ac4/H2ac6/H2ac7/H2ac8/H2aj/H2al1a/H2al1b/H2al1c/H2al1d/H2al1e/H2al1f/H2al1g/H2al1h/H2al1i/H2al1j/H2al1k/H2al1m/H2al1n/H2al1o/H2al2a/H2al2b/H2al2c/H2ax	Nvec_v1g230611
+Nvec_vc1.1_XM_001625599.3	chr.CupinJmjC.HG1.33:Riox2	Riox2	Nvec_v1g230798
+Nvec_vc1.1_XM_001622865.3	chr.CupinJmjC.HG1.20:Hif1an	Hif1an	Nvec_v1g231221
+Nvec_vc1.1_XM_048732677.1	chr.MOZ_SAS.HG1.7:Kat7	Kat7	Nvec_v1g231439
+Nvec_vc1.1_XM_032376963.2	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18		Nvec_v1g231525
+Nvec_vc1.1_XM_032382334.2	chr.Histone.HG3.4:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15	H3c1/H3c10/H3c11/H3c8	Nvec_v1g231526
+Nvec_vc1.1_XM_032368919.2	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_v1g231532
+Nvec_vc1.1_XM_048720158.1	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_v1g231565
+Nvec_vc1.1_XM_048719533.1	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_v1g231574
+Nvec_vc1.1_XM_048731897.1	chr.LinkerHistone.HG1.0:Kat6b	Kat6b	Nvec_v1g232381
+Nvec_vc1.1_XM_032385574.2	chr.ING.HG1.0:Ing1/Ing2	Ing1/Ing2	Nvec_v1g232401
+Nvec_vc1.1_XM_032373722.2	chr.CupinJmjC.HG1.14:like:Gm28042/Hif1an/Hr/Hspbap1/Jmjd1c/Jmjd4/Jmjd6/Jmjd7/Jmjd8/Kdm2a/Kdm2b/Kdm3a/Kdm3b/Kdm7a/Kdm8/Phf2/Phf8/Riox1/Riox2/Tyw5		Nvec_v1g233468
+Nvec_vc1.1_XM_001624421.3	chr.Acetyltransf_1.HG1.3:Naa40	Naa40	Nvec_v1g233638
+Nvec_vc1.1_XM_001624041.3	chr.PHD.HG1.16:Phf13/Phf23	Phf23	Nvec_v1g233661
+Nvec_vc1.1_XM_001623881.3	chr.Chromo.HG1.10:like:Cdyl/Cdyl2/Mphosph8		Nvec_v1g233680
+Nvec_vc1.1_XM_032373722.2	chr.CupinJmjC.HG1.14:like:Gm28042/Hif1an/Hr/Hspbap1/Jmjd1c/Jmjd4/Jmjd6/Jmjd7/Jmjd8/Kdm2a/Kdm2b/Kdm3a/Kdm3b/Kdm7a/Kdm8/Phf2/Phf8/Riox1/Riox2/Tyw5		Nvec_v1g233788
+Nvec_vc1.1_XM_032384663.2	chr.NAP.HG1.1:Nap1l1/Nap1l2/Nap1l3/Nap1l4/Nap1l5	Nap1l1/Nap1l2/Nap1l3/Nap1l4/Nap1l5	Nvec_v1g236778
+Nvec_vc1.1_XM_048720122.1	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g237164
+Nvec_vc1.1_XM_048731292.1	chr.Acetyltransf_1.HG1.1:Sat1/Sat2/Satl1	Sat1/Sat2/Satl1	Nvec_v1g237402
+Nvec_vc1.1_XM_001619665.3	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_v1g237683
+Nvec_vc1.1_XM_048732447.1	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_v1g237683
+Nvec_vc1.1_XM_001641543.3	chr.Acetyltransf_1.HG1.23:Naa20	Naa20	Nvec_v1g238091
+Nvec_vc1.1_XM_048730345.1	chr.SNF2_N.HG1.16:Ino80	Ino80	Nvec_v1g238634
+Nvec_vc1.1_XM_001640613.3	chr.Acetyltransf_1.HG1.22:Naa30	Naa30	Nvec_v1g238651
+Nvec_vc1.1_XM_048719997.1	chr.CupinJmjC.HG1.35:like:Hr/Jmjd1c/Kdm3a/Kdm3b		Nvec_v1g238775
+Nvec_vc1.1_XM_001640321.3	chr.Chromo.HG1.4:Cbx2/Cbx4/Cbx6/Cbx7/Cbx8/Npcd		Nvec_v1g238789
+Nvec_vc1.1_XM_032364310.2	chr.Histone.HG6.1:Cenps	Cenps	Nvec_v1g239424
+Nvec_vc1.1_XM_001639145.3	chr.Chromo.HG1.0:like:Cbx1/Cbx2/Cbx3/Cbx4/Cbx5/Cbx6/Cbx7/Cbx8/Cdyl/Cdyl2/Chd1/Chd2/Chd3/Chd4/Chd5/Chd6/Chd7/Chd8/Chd9/Mphosph8/Npcd/Suv39h1/Suv39h2		Nvec_v1g239575
+Nvec_vc1.1_XM_001638492.3	chr.CupinJmjC.HG2.0:Jarid2	Jarid2	Nvec_v1g239891
+Nvec_vc1.1_XM_032363059.2	chr.Histone.HG4.2:Chrac1	Chrac1	Nvec_v1g239929
+Nvec_vc1.1_XM_048722635.1	chr.LinkerHistone.HG1.0:Kat6b;chr.PHD.HG1.61:like:Kat6a/Kat6b	""	Nvec_v1g24012
+Nvec_vc1.1_XM_001637721.3	chr.PWWP.HG1.7:like:Brd1/Brpf1/Brpf3/Glyr1/Hdgf/Hdgfl1/Hdgfl2/Hdgfl3/Msh6/Nsd1/Nsd2/Psip1/Zmynd8/Zmynd11		Nvec_v1g240351
+Nvec_vc1.1_XM_048732573.1	chr.Bromodomain.HG1.27:like:Bptf/Brd1/Brd7/Brd8/Brd8dc/Brd9/Brpf1/Brpf3/Kat2a/Kat2b		Nvec_v1g240544
+Nvec_vc1.1_XM_001636916.3	chr.PHD.HG1.55:like:Bptf/Kdm7a/Phf2/Phf8		Nvec_v1g240784
+Nvec_vc1.1_XM_032386432.2	chr.LinkerHistone.HG1.5:like:H1f8/Hp1bp3/Shprh		Nvec_v1g240941
+Nvec_vc1.1_XM_032386449.2	chr.PHD.HG2.0:Asxl1/Asxl2/Asxl3	Asxl1/Asxl2/Asxl3	Nvec_v1g240970
+Nvec_vc1.1_XM_048733287.1	chr.ADD_ATRX.HG1.0:Atrx	Atrx	Nvec_v1g241026
+Nvec_vc1.1_XM_001636450.3	chr.Hist_deacetyl.HG1.3:Hdac11	Hdac11	Nvec_v1g241031
+Nvec_vc1.1_XM_048726465.1	chr.PHD.HG1.13:Phf12		Nvec_v1g241179
+Nvec_vc1.1_XM_048730424.1	chr.TUDOR.HG1.42:Tdrd9	Tdrd9	Nvec_v1g241253
+Nvec_vc1.1_XM_032385499.2	chr.Histone.HG5.1:Dr1	Dr1	Nvec_v1g241356
+Nvec_v1g241592	chr.Acetyltransf_1.HG1.18:Nat8/Nat8f1/Nat8f2/Nat8f3/Nat8f4/Nat8f5/Nat8f6/Nat8f7/Nat8l		Nvec_v1g241592
+Nvec_vc1.1_XM_048731196.1	chr.zf-CW.HG1.5:like:Kdm1b/Morc1/Morc2a/Morc2b/Morc3/Morc4/Zcwpw1/Zcwpw2		Nvec_v1g241632
+Nvec_vc1.1_XM_048728090.1	chr.CupinJmjC.HG1.2:like:Gm28042/Hif1an/Hr/Hspbap1/Jmjd1c/Jmjd4/Jmjd6/Jmjd7/Jmjd8/Kdm2a/Kdm2b/Kdm3a/Kdm3b/Kdm7a/Kdm8/Phf2/Phf8/Riox1/Riox2/Tyw5		Nvec_v1g242274
+Nvec_vc1.1_XM_001634079.3	chr.Acetyltransf_1.HG1.16:like:Kat14/Naa10/Naa11/Naa12/Naa20/Naa30		Nvec_v1g242429
+Nvec_vc1.1_XM_001633920.3	chr.Acetyltransf_1.HG2.0:NA		Nvec_v1g242475
+Nvec_vc1.1_XM_001633505.3	chr.YEATS.HG1.2:Yeats4	Yeats4	Nvec_v1g242763
+Nvec_vc1.1_XM_048726872.1	chr.CupinJmjC.HG1.36:Kdm2a/Kdm2b;chr.PHD.HG1.15:Fbxl19/Kdm2a/Kdm2b	""	Nvec_v1g242923
+Nvec_vc1.1_XM_001632296.3	chr.Chromo.HG1.4:Cbx2/Cbx4/Cbx6/Cbx7/Cbx8/Npcd		Nvec_v1g243415
+Nvec_vc1.1_XM_048732706.1	chr.CupinJmjC.HG3.0:Kdm6a/Kdm6b/Uty	Kdm6a/Kdm6b/Uty	Nvec_v1g243923
+Nvec_v1g244688	chr.Acetyltransf_1.HG1.19:like:Kat14		Nvec_v1g244688
+Nvec_vc1.1_XM_001629517.3	chr.CupinJmjC.HG1.9:like:Gm28042/Hif1an/Hr/Hspbap1/Jmjd1c/Jmjd4/Jmjd6/Jmjd7/Jmjd8/Kdm2a/Kdm2b/Kdm3a/Kdm3b/Kdm7a/Kdm8/Phf2/Phf8/Riox1/Riox2/Tyw5		Nvec_v1g244906
+Nvec_vc1.1_XM_001629266.3	chr.CupinJmjC.HG1.15:like:Gm28042/Hif1an/Hr/Hspbap1/Jmjd1c/Jmjd4/Jmjd6/Jmjd7/Jmjd8/Kdm2a/Kdm2b/Kdm3a/Kdm3b/Kdm7a/Kdm8/Phf2/Phf8/Riox1/Riox2/Tyw5		Nvec_v1g245101
+Nvec_v1g245146	chr.PHD.HG1.40:Kmt2e		Nvec_v1g245146
+Nvec_vc1.1_XM_032376714.2	chr.YEATS.HG1.1:Yeats2	Yeats2	Nvec_v1g245474
+Nvec_vc1.1_XM_048726124.1	chr.TUDOR.HG1.43:like:Tdrd1		Nvec_v1g245679
+Nvec_vc1.1_XM_032376162.2	chr.TUDOR.HG1.25:like:Akap1/Tdrd5/Tdrkh		Nvec_v1g245715
+Nvec_vc1.1_XM_001627799.3	chr.BIR.HG1.4:Birc2/Birc3/Birc7/Naip1/Naip2/Naip5/Naip6/Xiap	Naip1/Naip2/Naip5/Naip6	Nvec_v1g245886
+Nvec_vc1.1_XM_032375421.2	chr.TUDOR.HG1.45:Akap1	Akap1	Nvec_v1g245986
+Nvec_vc1.1_XM_048729113.1	chr.CupinJmjC.HG2.1:Kdm4a/Kdm4b/Kdm4c/Kdm4d	Kdm4a/Kdm4b/Kdm4c/Kdm4d	Nvec_v1g246202
+Nvec_vc1.1_XM_001626477.3	chr.CupinJmjC.HG1.6:like:Gm28042/Jmjd7		Nvec_v1g246564
+Nvec_vc1.1_XM_001625273.3	chr.SET.HG1.23:Setd4	Setd4	Nvec_v1g247208
+Nvec_vc1.1_XM_001624696.3	chr.BIR.HG1.7:Birc5	Birc5	Nvec_v1g247481
+Nvec_vc1.1_XM_001624609.3	chr.Hist_deacetyl.HG1.6:Hdac8	Hdac8	Nvec_v1g247517
+Nvec_vc1.1_XM_001624509.3	chr.Rtt106.HG2.0:Supt16;chr.SPT16.HG1.0:Supt16	""	Nvec_v1g247576
+Nvec_vc1.1_XM_001624401.3	chr.PWWP.HG1.0:Pwwp2a/Pwwp2b	Pwwp2a/Pwwp2b	Nvec_v1g247627
+Nvec_vc1.1_XM_032369492.2	chr.BIR.HG1.1:like:Birc2/Birc3/Birc5/Birc6/Birc7/Naip1/Naip2/Naip5/Naip6/Xiap		Nvec_v1g248420
+Nvec_vc1.1_XM_001621928.3	chr.SET.HG1.1:like:Ash1l/Ehmt1/Ehmt2/Ezh1/Ezh2/Gm49388/Kmt2a/Kmt2b/Kmt2c/Kmt2d/Kmt2e/Kmt5a/Nsd1/Nsd2/Setd1a/Setd1b/Setd2/Setd5/Setdb1/Setdb2/Setmar/Suv39h1/Suv39h2		Nvec_v1g248598
+Nvec_vc1.1_XM_048721827.1	chr.MBT.HG1.3:Scmh1/Scml2	Scmh1/Scml2	Nvec_v1g25760
+Nvec_vc1.1_XM_032361853.2	chr.SET.HG1.4:Kmt2e/Setd5	Kmt2e/Setd5	Nvec_v1g28133
+Nvec_vc1.1_XM_032377553.2	chr.LinkerHistone.HG1.3:like:H1f0/H1f1/H1f2/H1f3/H1f4/H1f5/H1f6/H1f8/H1f9/H1f10/Hp1bp3/Shprh		Nvec_v1g29518
+Nvec_vc1.1_XM_032375358.2	chr.LinkerHistone.HG1.1:like:H1f0/H1f1/H1f2/H1f3/H1f4/H1f5/H1f6/H1f8/H1f9/H1f10/Hp1bp3/Shprh		Nvec_v1g29793
+Nvec_vc1.1_XM_048722183.1	chr.Bromodomain.HG1.0:like:Ash1l/Atad2/Atad2b/Baz1a/Baz1b/Baz2a/Baz2b/Bptf/Brd1/Brd2/Brd3/Brd4/Brd7/Brd8/Brd8dc/Brd9/Brdt/Brpf1/Brpf3/Brwd1/Brwd3/Cecr2/Crebbp/Ep300/Kat2a/Kat2b/Pbrm1/Phip/Smarca2/Smarca4/Sp100/Sp140/Taf1/Trim24/Trim33/Trim66/Zmynd8/Zmynd11		Nvec_v1g30007
+Nvec_vc1.1_XM_032364382.2	chr.Chromo.HG1.16:Chd6/Chd7/Chd8/Chd9;chr.SNF2_N.HG1.22:Chd6/Chd7/Chd8/Chd9	""	Nvec_v1g30104
+Nvec_vc1.1_XM_048723584.1	chr.SWIRM.HG1.1:Smarcc1/Smarcc2	Smarcc1/Smarcc2	Nvec_v1g30373
+Nvec_vc1.1_XM_032387255.2	chr.SWIRM.HG1.0:Mysm1	Mysm1	Nvec_v1g31202
+Nvec_vc1.1_XM_032385814.2	chr.Bromodomain.HG1.17:Baz1a;chr.PHD.HG1.36:Baz1a	""	Nvec_v1g36194
+Nvec_vc1.1_XM_032379971.2	chr.CupinJmjC.HG1.34:Riox1	Riox1	Nvec_v1g39428
+Nvec_vc1.1_XM_048734715.1	chr.PHD.HG1.46:Dido1	Dido1	Nvec_v1g39881
+Nvec_vc1.1_XM_048727822.1	chr.SET.HG2.0:Prdm6/Prdm14		Nvec_v1g41788
+Nvec_vc1.1_XM_048732170.1	chr.PHD.HG1.71:Kmt2a/Kmt2b	Kmt2a/Kmt2b	Nvec_v1g4240
+Nvec_v1g46544	chr.TUDOR.HG1.34:Tdrd5	Tdrd5	Nvec_v1g46544
+Nvec_vc1.1_XM_001638410.3	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_v1g47042
+Nvec_vc1.1_XM_048720505.1	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_v1g47042
+Nvec_vc1.1_XM_048719489.1	chr.Histone.HG3.4:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15	H3c15	Nvec_v1g48395
+Nvec_vc1.1_XM_048719489.1	chr.Histone.HG3.1:like:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15/H3f3a/H3f3b		Nvec_v1g49685
+Nvec_vc1.1_XM_048719547.1	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_v1g49725
+Nvec_vc1.1_XM_001628244.3	chr.SET.HG1.18:Suv39h1/Suv39h2	Suv39h1/Suv39h2	Nvec_v1g53017
+Nvec_vc1.1_XM_001634325.3	chr.SET.HG2.0:Prdm6/Prdm14	Prdm6	Nvec_v1g54602
+Nvec_vc1.1_XM_001630751.3	chr.CupinJmjC.HG1.16:like:Gm28042/Hif1an/Hr/Hspbap1/Jmjd1c/Jmjd4/Jmjd6/Jmjd7/Jmjd8/Kdm2a/Kdm2b/Kdm3a/Kdm3b/Kdm7a/Kdm8/Phf2/Phf8/Riox1/Riox2/Tyw5		Nvec_v1g57796
+Nvec_vc1.1_XM_001629098.3	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g58200
+Nvec_vc1.1_XM_001622833.3	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g59503
+Nvec_vc1.1_XM_032369259.2	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_v1g6652
+Nvec_vc1.1_XM_032376311.2	chr.TUDOR.HG1.51:like:Stk31		Nvec_v1g76452
+Nvec_vc1.1_XM_001641933.3	chr.Hist_deacetyl.HG1.8:Hdac1/Hdac2	Hdac1/Hdac2	Nvec_v1g79092
+Nvec_vc1.1_XM_032367333.2	chr.PHD.HG1.21:Jade1/Jade2/Jade3	Jade1/Jade2/Jade3	Nvec_v1g80159
+Nvec_vc1.1_XM_001641821.3	chr.SET.HG1.10:Setmar	Setmar	Nvec_v1g80162
+Nvec_vc1.1_XM_001641594.3	chr.SNF2_N.HG1.6:Smarcal1	Smarcal1	Nvec_v1g80671
+Nvec_vc1.1_XM_032365678.2	chr.LinkerHistone.HG1.2:like:H1f0/H1f1/H1f2/H1f3/H1f4/H1f5/H1f6/H1f8/H1f9/H1f10/Hp1bp3/Shprh		Nvec_v1g8097
+Nvec_vc1.1_XM_032363299.2	chr.LinkerHistone.HG1.2:like:H1f0/H1f1/H1f2/H1f3/H1f4/H1f5/H1f6/H1f8/H1f9/H1f10/Hp1bp3/Shprh		Nvec_v1g8099
+Nvec_vc1.1_XM_048720394.1	chr.LinkerHistone.HG1.2:like:H1f0/H1f1/H1f2/H1f3/H1f4/H1f5/H1f6/H1f8/H1f9/H1f10/Hp1bp3/Shprh		Nvec_v1g8100
+Nvec_vc1.1_XM_032376958.2	chr.LinkerHistone.HG1.2:like:H1f0/H1f1/H1f2/H1f3/H1f4/H1f5/H1f6/H1f8/H1f9/H1f10/Hp1bp3/Shprh		Nvec_v1g8103
+Nvec_vc1.1_XM_032366803.2	chr.Bromodomain.HG1.32:Brd8/Brd8dc	Brd8/Brd8dc	Nvec_v1g81185
+Nvec_vc1.1_XM_032366825.2	chr.Bromodomain.HG1.13:Cecr2	Cecr2	Nvec_v1g81314
+Nvec_vc1.1_XM_032376958.2	chr.LinkerHistone.HG1.2:like:H1f0/H1f1/H1f2/H1f3/H1f4/H1f5/H1f6/H1f8/H1f9/H1f10/Hp1bp3/Shprh		Nvec_v1g8134
+Nvec_vc1.1_XM_048729157.1	chr.GNAT_acetyltr_2.HG1.0:Nat10	Nat10	Nvec_v1g81635
+Nvec_vc1.1_XM_032365679.2	chr.LinkerHistone.HG1.2:like:H1f0/H1f1/H1f2/H1f3/H1f4/H1f5/H1f6/H1f8/H1f9/H1f10/Hp1bp3/Shprh		Nvec_v1g8176
+Nvec_vc1.1_XM_032365679.2	chr.LinkerHistone.HG1.2:like:H1f0/H1f1/H1f2/H1f3/H1f4/H1f5/H1f6/H1f8/H1f9/H1f10/Hp1bp3/Shprh		Nvec_v1g8223
+Nvec_vc1.1_XM_032365679.2	chr.LinkerHistone.HG1.2:like:H1f0/H1f1/H1f2/H1f3/H1f4/H1f5/H1f6/H1f8/H1f9/H1f10/Hp1bp3/Shprh		Nvec_v1g8248
+Nvec_vc1.1_XM_001640299.3	chr.LinkerHistone.HG1.2:like:H1f0/H1f1/H1f2/H1f3/H1f4/H1f5/H1f6/H1f8/H1f9/H1f10/Hp1bp3/Shprh		Nvec_v1g8260
+Nvec_vc1.1_XM_048730522.1	chr.SIR2.HG1.10:Sirt2	Sirt2	Nvec_v1g83259
+Nvec_vc1.1_XM_048720395.1	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_v1g83638
+Nvec_vc1.1_XM_001640296.3	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_v1g83640
+Nvec_vc1.1_XM_001640295.3	chr.Histone.HG3.4:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15	H3c2/H3c3/H3c6	Nvec_v1g83663
+Nvec_vc1.1_XM_001640430.3	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18		Nvec_v1g83716
+Nvec_vc1.1_XM_001640317.3	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_v1g83730
+Nvec_vc1.1_XM_048720395.1	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_v1g83731
+Nvec_vc1.1_XM_001640293.3	chr.Hist_deacetyl.HG1.2:like:Hdac11		Nvec_v1g83795
+Nvec_vc1.1_XM_001640411.3	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g83818
+Nvec_vc1.1_XM_001640317.3	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_v1g83819
+Nvec_vc1.1_XM_001639326.3	chr.Histone.HG3.4:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15	H3c4/H3c7	Nvec_v1g83858
+Nvec_vc1.1_XM_032381636.2	chr.LinkerHistone.HG1.2:like:H1f0/H1f1/H1f2/H1f3/H1f4/H1f5/H1f6/H1f8/H1f9/H1f10/Hp1bp3/Shprh		Nvec_v1g8391
+Nvec_vc1.1_XM_048719985.1	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_v1g83910
+Nvec_vc1.1_XM_001640306.3	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18		Nvec_v1g83913
+Nvec_vc1.1_XM_048720394.1	chr.LinkerHistone.HG1.2:like:H1f0/H1f1/H1f2/H1f3/H1f4/H1f5/H1f6/H1f8/H1f9/H1f10/Hp1bp3/Shprh		Nvec_v1g8394
+Nvec_vc1.1_XM_001640419.3	chr.Histone.HG3.4:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15	H3c4/H3c7	Nvec_v1g83955
+Nvec_vc1.1_XM_001640411.3	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g83997
+Nvec_vc1.1_XM_001640409.3	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18		Nvec_v1g84003
+Nvec_vc1.1_XM_032365297.2	chr.SET.HG2.0:Prdm6/Prdm14	Prdm6	Nvec_v1g84066
+Nvec_vc1.1_XM_048719892.1	chr.BAH.HG1.4:Tnrc18	Tnrc18	Nvec_v1g84801
+Nvec_vc1.1_XM_048720395.1	chr.Histone.HG2.7:like:H2az1/H2az2/Macroh2a1/Macroh2a2		Nvec_v1g8499
+Nvec_vc1.1_XM_048724709.1	chr.SNF2_N.HG1.24:Chd3/Chd4/Chd5	Chd3/Chd4/Chd5	Nvec_v1g85376
+Nvec_vc1.1_XM_032364641.2	chr.Bromodomain.HG1.28:Trim24/Trim33/Trim66;chr.PHD.HG1.4:Trim24/Trim28/Trim33/Trim66	""	Nvec_v1g86153
+Nvec_vc1.1_XM_048720943.1	chr.SIR2.HG1.2:Sirt5	Sirt5	Nvec_v1g86891
+Nvec_vc1.1_XM_032363951.2	chr.Histone.HG5.2:Nfyb	Nfyb	Nvec_v1g88215
+Nvec_vc1.1_XM_032363630.2	chr.BIR.HG1.6:Birc6	Birc6	Nvec_v1g88429
+Nvec_vc1.1_XM_048724583.1	chr.CupinJmjC.HG1.0:like:Gm28042/Hif1an/Hr/Hspbap1/Jmjd1c/Jmjd4/Jmjd6/Jmjd7/Jmjd8/Kdm2a/Kdm2b/Kdm3a/Kdm3b/Kdm7a/Kdm8/Phf2/Phf8/Riox1/Riox2/Tyw5		Nvec_v1g89164
+Nvec_vc1.1_XM_001638473.3	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18		Nvec_v1g89425
+Nvec_vc1.1_XM_001638411.3	chr.Histone.HG3.4:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15	H3c2/H3c3/H3c6	Nvec_v1g89555
+Nvec_vc1.1_XM_048720505.1	chr.Histone.HG3.4:H3c1/H3c2/H3c3/H3c4/H3c6/H3c7/H3c8/H3c10/H3c11/H3c13/H3c14/H3c15	H3c2/H3c3/H3c6	Nvec_v1g89555
+Nvec_vc1.1_XM_032362875.2	chr.SET.HG2.0:Prdm6/Prdm14	Prdm6	Nvec_v1g90196
+Nvec_vc1.1_XM_032362858.2	chr.SNF2_N.HG1.2:Ercc6l2;chr.TUDOR.HG1.34:Tdrd5	""	Nvec_v1g90246
+Nvec_vc1.1_XM_001618359.3	chr.Histone.HG1.9:H2bw2/H4c1/H4c2/H4c3/H4c4/H4c6/H4c8/H4c9/H4c11/H4c12/H4c14/H4c16/H4c17/H4c18	H2bw2	Nvec_v1g9075
+Nvec_vc1.1_XM_032381662.2	chr.LinkerHistone.HG1.2:like:H1f0/H1f1/H1f2/H1f3/H1f4/H1f5/H1f6/H1f8/H1f9/H1f10/Hp1bp3/Shprh		Nvec_v1g9120
+Nvec_vc1.1_XM_032362120.2	chr.LinkerHistone.HG1.7:H1f8/Hp1bp3/Shprh	H1f8/Hp1bp3/Shprh	Nvec_v1g91732
+Nvec_vc1.1_XM_001637584.3	chr.YEATS.HG1.0:Mllt1/Mllt3	Mllt1/Mllt3	Nvec_v1g91924
+Nvec_vc1.1_XM_032382326.2	chr.LinkerHistone.HG1.2:like:H1f0/H1f1/H1f2/H1f3/H1f4/H1f5/H1f6/H1f8/H1f9/H1f10/Hp1bp3/Shprh		Nvec_v1g9280
+Nvec_vc1.1_XM_001636971.3	chr.BAH.HG1.6:Rere	Rere	Nvec_v1g93577
+Nvec_vc1.1_XM_032386921.2	chr.CupinJmjC.HG1.0:like:Gm28042/Hif1an/Hr/Hspbap1/Jmjd1c/Jmjd4/Jmjd6/Jmjd7/Jmjd8/Kdm2a/Kdm2b/Kdm3a/Kdm3b/Kdm7a/Kdm8/Phf2/Phf8/Riox1/Riox2/Tyw5		Nvec_v1g93732
+Nvec_vc1.1_XM_001636916.3	chr.Bromodomain.HG1.25:Bptf;chr.PHD.HG1.47:Bptf	""	Nvec_v1g93956
+Nvec_vc1.1_XM_001636916.3	chr.PHD.HG1.0:like:Aire/Chd3/Chd4/Chd5/Phf12/Phf21a/Phf21b/Trim24/Trim28/Trim33/Trim66		Nvec_v1g93974
+Nvec_vc1.1_XM_048724172.1	chr.PHD.HG1.23:Baz2a/Baz2b	Baz2a/Baz2b	Nvec_v1g94026
+Nvec_vc1.1_XM_032386423.2	chr.SET.HG1.32:Gm49388/Setd1a/Setd1b	Gm49388/Setd1a/Setd1b	Nvec_v1g94595
+Nvec_vc1.1_XM_048733287.1	chr.SNF2_N.HG1.14:Atrx	Atrx	Nvec_v1g94894
+Nvec_vc1.1_XM_048733882.1	chr.MBT.HG1.4:L3mbtl2/Mbtd1/Sfmbt1/Sfmbt2	L3mbtl2/Mbtd1	Nvec_v1g95089
+Nvec_vc1.1_XM_048723252.1	chr.PHD.HG1.42:Mllt6/Mllt10	Mllt10/Mllt6	Nvec_v1g96791
+Nvec_vc1.1_XM_048723661.1	chr.SNF2_N.HG2.0:NA		Nvec_v1g96883
+Nvec_vc1.1_XM_032385504.2	chr.Acetyltransf_1.HG3.0:Kat2a/Kat2b;chr.Bromodomain.HG1.26:Kat2a/Kat2b	""	Nvec_v1g96946
+Nvec_vc1.1_XM_048723664.1	chr.PHD.HG1.43:Kdm4a/Kdm4b/Kdm4c/Phf14	Phf14	Nvec_v1g96987
+Nvec_vc1.1_XM_001635573.3	chr.BAH.HG1.5:Bahd1	Bahd1	Nvec_v1g97320
+Nvec_vc1.1_XM_048723824.1	chr.Acetyltransf_1.HG1.9:like:Aanat/Kat14/Naa10/Naa11/Naa12/Naa20/Naa30/Naa50/Naa60/Naa80/Nat8/Nat8f1/Nat8f2/Nat8f3/Nat8f4/Nat8f5/Nat8f6/Nat8f7/Nat8l		Nvec_v1g97556
+Nvec_vc1.1_XM_001634984.3	chr.CupinJmjC.HG1.13:Tyw5	Tyw5	Nvec_v1g99611

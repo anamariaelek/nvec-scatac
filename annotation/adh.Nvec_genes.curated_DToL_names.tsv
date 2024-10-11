@@ -1,0 +1,773 @@
+gene	og	name	ID_JGI_Vienna
+Nvec_vc1.1_XM_032373763.2	Nvec_NVE10242:HG.Unclassified	""	Nvec_NVE10242
+Nvec_vc1.1_XM_048732951.1	Nvec_NVE10315:HG.Unclassified	""	Nvec_NVE10315
+Nvec_vc1.1_XM_032362784.2	Nvec_NVE10353:HG.Unclassified	""	Nvec_NVE10353
+Nvec_vc1.1_XM_032362661.2	adh.fibronectin.HG2.43:Ncam1/Ncam2		Nvec_NVE10380
+Nvec_vc1.1_XM_032362682.2	Nvec_NVE10386:HG.Unclassified	""	Nvec_NVE10386
+Nvec_NVE10454	Nvec_NVE10454:HG.Unclassified	""	Nvec_NVE10454
+Nvec_vc1.1_XM_032379887.2	adh.Collagen.HG13.0:NA		Nvec_NVE1047
+Nvec_vc1.1_XM_048732730.1	adh.fibronectin.HG2.43:Ncam1/Ncam2		Nvec_NVE10618
+Nvec_vc1.1_XM_032373522.2	Nvec_NVE10701:HG.Unclassified	""	Nvec_NVE10701
+Nvec_vc1.1_XM_032373513.2	adh.fibronectin.HG2.43:Ncam1/Ncam2		Nvec_NVE10707
+Nvec_vc1.1_XM_032362600.2	adh.Collagen.HG5.3:Fcna/Fcnb		Nvec_NVE10843
+Nvec_vc1.1_XM_048730279.1	adh.Collagen.HG55.0:NA		Nvec_NVE10917
+Nvec_vc1.1_XM_048729762.1	adh.fibronectin.HG13.0:Epha1/Epha2/Epha3/Epha4/Epha5/Epha6/Epha7/Epha8/Epha10/Ephb1/Ephb2/Ephb4/Ephb6	Epha1/Epha10/Epha2/Epha3/Epha4/Epha5/Epha6/Epha7/Epha8/Ephb1/Ephb2/Ephb4/Ephb6	Nvec_NVE11037
+Nvec_vc1.1_XM_032362439.2	adh.immunoglobin.HG2.11:like:Flt4		Nvec_NVE11360
+Nvec_vc1.1_XM_048723642.1	Nvec_NVE11435:HG.Unclassified	""	Nvec_NVE11435
+Nvec_vc1.1_XM_048732738.1	Nvec_NVE11544:HG.Unclassified	""	Nvec_NVE11544
+Nvec_NVE11545	adh.fibronectin.HG2.43:Ncam1/Ncam2		Nvec_NVE11545
+Nvec_vc1.1_XM_048732021.1	adh.fibronectin.HG2.43:Ncam1/Ncam2		Nvec_NVE11554
+Nvec_vc1.1_XM_048732930.1	adh.fibronectin.HG2.43:Ncam1/Ncam2		Nvec_NVE11554
+Nvec_vc1.1_XM_048733032.1	Nvec_NVE11617:HG.Unclassified	""	Nvec_NVE11617
+Nvec_vc1.1_XM_048727880.1	adh.Laminin.HG4.8:like:Adgrd1		Nvec_NVE11668
+Nvec_vc1.1_XM_032362308.2	adh.Collagen.HG6.4:NA		Nvec_NVE11740
+Nvec_NVE11911	Nvec_NVE11911:HG.Unclassified	""	Nvec_NVE11911
+Nvec_vc1.1_XM_032372769.2	adh.fibronectin.HG2.34:like:Igsf9/Igsf9b		Nvec_NVE11967
+Nvec_vc1.1_XM_048730230.1	adh.fibronectin.HG6.2:Bsph1/Bsph2/Igf2r/Ly75/Mmp2/Mmp9/Mrc1/Mrc2/Pla2r1/Sel1l		Nvec_NVE11982
+Nvec_vc1.1_XM_048730602.1	Nvec_NVE11993:HG.Unclassified	""	Nvec_NVE11993
+Nvec_vc1.1_XM_048725727.1	adh.fibronectin.HG2.27:like:Epor/Igsf9/Igsf9b/Ncam1/Ncam2/Nphs1/Trim42		Nvec_NVE12212
+Nvec_vc1.1_XM_048731381.1	Nvec_NVE12462:HG.Unclassified	""	Nvec_NVE12462
+Nvec_vc1.1_XM_048726038.1	adh.immunoglobin.HG2.5:Kalrn/Trio	Kalrn/Trio	Nvec_NVE12757
+Nvec_vc1.1_XM_048724035.1	Nvec_NVE12831:HG.Unclassified	""	Nvec_NVE12831
+Nvec_vc1.1_XM_032367057.2	Nvec_NVE12948:HG.Unclassified	""	Nvec_NVE12948
+Nvec_vc1.1_XM_048729342.1	adh.Collagen.HG5.3:Fcna/Fcnb	Fcna/Fcnb	Nvec_NVE13115
+Nvec_vc1.1_XM_032366631.2	adh.immunoglobin.HG12.9:like:Fgfr1/Fgfr2/Fgfr3/Fgfr4/Fgfrl1		Nvec_NVE13296
+Nvec_vc1.1_XM_032387292.2	adh.fibronectin.HG2.46:Nphs1	Nphs1	Nvec_NVE13499
+Nvec_vc1.1_XM_048725127.1	Nvec_NVE1360:HG.Unclassified	""	Nvec_NVE1360
+Nvec_vc1.1_XM_001637113.3	Nvec_NVE13934:HG.Unclassified	""	Nvec_NVE13934
+Nvec_vc1.1_XM_048728868.1	Nvec_NVE14092:HG.Unclassified	""	Nvec_NVE14092
+Nvec_vc1.1_XM_048727478.1	Nvec_NVE14162:HG.Unclassified	""	Nvec_NVE14162
+Nvec_vc1.1_XM_032386961.2	Nvec_NVE14311:HG.Unclassified	""	Nvec_NVE14311
+Nvec_vc1.1_XM_048734206.1	adh.Laminin.HG1.47:like:Hspg2		Nvec_NVE14393
+Nvec_NVE14631	Nvec_NVE14631:HG.Unclassified	""	Nvec_NVE14631
+Nvec_vc1.1_XM_048722171.1	adh.Collagen.HG4.0:NA		Nvec_NVE14661
+Nvec_vc1.1_XM_048724280.1	adh.Integrin_alpha.HG1.0:Gm49368/Itga1/Itga2/Itga2b/Itga3/Itga4/Itga5/Itga6/Itga7/Itga8/Itga9/Itga10/Itga11/Itgad/Itgae/Itgal/Itgam/Itgav/Itgax	Gm49368/Itga1/Itga10/Itga11/Itga2/Itga4/Itga9/Itgad/Itgae/Itgal/Itgam/Itgax	Nvec_NVE14923
+Nvec_vc1.1_XM_048724280.1	adh.Integrin_alpha.HG1.0:Gm49368/Itga1/Itga2/Itga2b/Itga3/Itga4/Itga5/Itga6/Itga7/Itga8/Itga9/Itga10/Itga11/Itgad/Itgae/Itgal/Itgam/Itgav/Itgax	Gm49368/Itga1/Itga10/Itga11/Itga2/Itga4/Itga9/Itgad/Itgae/Itgal/Itgam/Itgax	Nvec_NVE14924
+Nvec_vc1.1_XM_048732394.1	Nvec_NVE14952:HG.Unclassified	""	Nvec_NVE14952
+Nvec_vc1.1_XM_048732394.1	Nvec_NVE14953:HG.Unclassified	""	Nvec_NVE14953
+Nvec_vc1.1_XM_048723486.1	Nvec_NVE15574:HG.Unclassified	""	Nvec_NVE15574
+Nvec_vc1.1_XM_032386267.2	Nvec_NVE15858:HG.Unclassified	""	Nvec_NVE15858
+Nvec_vc1.1_XM_032386320.2	adh.Laminin.HG2.9:like:Apcs/Crp/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_NVE15881
+Nvec_vc1.1_XM_048720712.1	adh.Laminin.HG4.0:Adgrd1		Nvec_NVE16499
+Nvec_vc1.1_XM_048720712.1	adh.Laminin.HG4.0:Adgrd1		Nvec_NVE16500
+Nvec_vc1.1_XM_048727293.1	Nvec_NVE16738:HG.Unclassified	""	Nvec_NVE16738
+Nvec_vc1.1_XM_032385290.2	Nvec_NVE18041:HG.Unclassified	""	Nvec_NVE18041
+Nvec_vc1.1_XM_032384891.2	adh.Collagen.HG6.4:NA		Nvec_NVE18733
+Nvec_vc1.1_XM_048720968.1	Nvec_NVE18956:HG.Unclassified	""	Nvec_NVE18956
+Nvec_vc1.1_XM_048720966.1	Nvec_NVE18959:HG.Unclassified	""	Nvec_NVE18959
+Nvec_vc1.1_XM_032366470.2	adh.Lectin_C.HG49.0:NA		Nvec_NVE19005
+Nvec_vc1.1_XM_048732930.1	Nvec_NVE19298:HG.Unclassified	""	Nvec_NVE19298
+Nvec_vc1.1_XM_032384615.2	adh.Laminin.HG16.1:NA		Nvec_NVE19371
+Nvec_vc1.1_XM_032384627.2	Nvec_NVE19423:HG.Unclassified	""	Nvec_NVE19423
+Nvec_vc1.1_XM_048724774.1	Nvec_NVE1964:HG.Unclassified	""	Nvec_NVE1964
+Nvec_vc1.1_XM_032384381.2	adh.Laminin.HG7.8:NA		Nvec_NVE19744
+Nvec_vc1.1_XM_048727419.1	Nvec_NVE20069:HG.Unclassified	""	Nvec_NVE20069
+Nvec_vc1.1_XM_048732394.1	Nvec_NVE20360:HG.Unclassified	""	Nvec_NVE20360
+Nvec_vc1.1_XM_048732738.1	Nvec_NVE20582:HG.Unclassified	""	Nvec_NVE20582
+Nvec_vc1.1_XM_048720504.1	adh.fibronectin.HG9.1:like:Csf3r		Nvec_NVE20652
+Nvec_vc1.1_XM_032383871.2	adh.Integrin_alpha.HG1.0:Gm49368/Itga1/Itga2/Itga2b/Itga3/Itga4/Itga5/Itga6/Itga7/Itga8/Itga9/Itga10/Itga11/Itgad/Itgae/Itgal/Itgam/Itgav/Itgax	Gm49368/Itga1/Itga10/Itga11/Itga2/Itga4/Itga9/Itgad/Itgae/Itgal/Itgam/Itgax	Nvec_NVE20681
+Nvec_vc1.1_XM_048724742.1	Nvec_NVE20788:HG.Unclassified	""	Nvec_NVE20788
+Nvec_vc1.1_XM_048729452.1	Nvec_NVE20921:HG.Unclassified	""	Nvec_NVE20921
+Nvec_vc1.1_XM_048722132.1	adh.Collagen.HG4.0:NA		Nvec_NVE21805
+Nvec_vc1.1_XM_032383171.2	Nvec_NVE21880:HG.Unclassified	""	Nvec_NVE21880
+Nvec_vc1.1_XM_048733726.1	adh.Laminin.HG15.0:Lrba/Nbea	Lrba/Nbea	Nvec_NVE21985
+Nvec_vc1.1_XM_048720906.1	adh.Collagen.HG5.1:like:Fcna/Fcnb		Nvec_NVE22260
+Nvec_vc1.1_XM_032372522.2	Nvec_NVE22356:HG.Unclassified	""	Nvec_NVE22356
+Nvec_vc1.1_XM_032382759.2	adh.CD20.HG1.1:Ms4a1/Ms4a2/Ms4a3/Ms4a4a/Ms4a4b/Ms4a4c/Ms4a4d/Ms4a5/Ms4a6b/Ms4a6c/Ms4a6d/Ms4a7/Ms4a8a/Ms4a12/Ms4a13/Ms4a14/Ms4a15/Ms4a18/Ms4a19/Tmem176a/Tmem176b	Ms4a1/Ms4a12/Ms4a13/Ms4a14/Ms4a15/Ms4a18/Ms4a19/Ms4a2/Ms4a3/Ms4a4a/Ms4a4b/Ms4a4c/Ms4a4d/Ms4a5/Ms4a6b/Ms4a6c/Ms4a6d/Ms4a7/Ms4a8a/Tmem176a/Tmem176b	Nvec_NVE22718
+Nvec_vc1.1_XM_032382761.2	adh.fibronectin.HG27.0:Lrrn3/Lrrn4/Lrrn4cl	Lrrn3/Lrrn4/Lrrn4cl	Nvec_NVE22738
+Nvec_vc1.1_XM_032375078.2	adh.Integrin_beta.HG1.1:Itgb1/Itgb2/Itgb2l/Itgb3/Itgb4/Itgb5/Itgb6/Itgb7/Itgb8	Itgb1/Itgb2/Itgb2l/Itgb3/Itgb4/Itgb5/Itgb6/Itgb7/Itgb8	Nvec_NVE22909
+Nvec_vc1.1_XM_032379013.2	adh.fibronectin.HG2.18:like:Boc/Cdon/Fnd3c2/Fndc3a/Fndc3b/Fndc3c1/Kalrn/Robo1/Robo2/Robo3		Nvec_NVE2320
+Nvec_vc1.1_XM_048732690.1	adh.Laminin.HG29.0:NA		Nvec_NVE2346
+Nvec_vc1.1_XM_048720034.1	adh.Laminin.HG4.0:Adgrd1		Nvec_NVE24094
+Nvec_vc1.1_XM_048723137.1	Nvec_NVE2419:HG.Unclassified	""	Nvec_NVE2419
+Nvec_vc1.1_XM_048729427.1	Nvec_NVE24258:HG.Unclassified	""	Nvec_NVE24258
+Nvec_vc1.1_XM_032381894.2	adh.Laminin.HG7.2:NA		Nvec_NVE24261
+Nvec_vc1.1_XM_048725831.1	adh.Laminin.HG1.45:like:Hspg2		Nvec_NVE24825
+Nvec_vc1.1_XM_048732730.1	Nvec_NVE25162:HG.Unclassified	""	Nvec_NVE25162
+Nvec_vc1.1_XM_048732730.1	Nvec_NVE25403:HG.Unclassified	""	Nvec_NVE25403
+Nvec_vc1.1_XM_048726592.1	Nvec_NVE25676:HG.Unclassified	""	Nvec_NVE25676
+Nvec_vc1.1_XM_048726927.1	adh.Laminin.HG4.12:like:Adgrd1		Nvec_NVE257
+Nvec_vc1.1_XM_032378651.2	Nvec_NVE2580:HG.Unclassified	""	Nvec_NVE2580
+Nvec_vc1.1_XM_032380853.2	adh.Lectin_C.HG66.0:NA		Nvec_NVE25816
+Nvec_vc1.1_XM_048734354.1	adh.fibronectin.HG6.2:Bsph1/Bsph2/Igf2r/Ly75/Mmp2/Mmp9/Mrc1/Mrc2/Pla2r1/Sel1l		Nvec_NVE25900
+Nvec_vc1.1_XM_048733120.1	adh.immunoglobin.HG139.1:NA		Nvec_NVE2737
+Nvec_vc1.1_XM_032364508.2	adh.fibronectin.HG6.2:Bsph1/Bsph2/Igf2r/Ly75/Mmp2/Mmp9/Mrc1/Mrc2/Pla2r1/Sel1l	Igf2r/Ly75/Mmp2/Mmp9/Mrc1/Mrc2/Pla2r1/Sel1l	Nvec_NVE2958
+Nvec_vc1.1_XM_032378353.2	adh.DAG1.HG1.4:like:Dag1		Nvec_NVE3213
+Nvec_vc1.1_XM_001635867.3	Nvec_NVE3429:HG.Unclassified	""	Nvec_NVE3429
+Nvec_vc1.1_XM_048723516.1	Nvec_NVE3612:HG.Unclassified	""	Nvec_NVE3612
+Nvec_vc1.1_XM_048723516.1	Nvec_NVE3613:HG.Unclassified	""	Nvec_NVE3613
+Nvec_vc1.1_XM_048732614.1	Nvec_NVE4149:HG.Unclassified	""	Nvec_NVE4149
+Nvec_vc1.1_XM_048724413.1	Nvec_NVE4194:HG.Unclassified	""	Nvec_NVE4194
+Nvec_vc1.1_XM_032377572.2	adh.Collagen.HG32.1:NA		Nvec_NVE4226
+Nvec_vc1.1_XM_032364155.2	Nvec_NVE4723;Nvec_NVE4723:HG.Unclassified	""	Nvec_NVE4723
+Nvec_vc1.1_XM_048732828.1	Nvec_NVE5696:HG.Unclassified	""	Nvec_NVE5696
+Nvec_NVE5804	adh.fibronectin.HG2.43:Ncam1/Ncam2		Nvec_NVE5804
+Nvec_vc1.1_XM_048732213.1	adh.fibronectin.HG2.8:like:Boc/Cdon/Epor/Fnd3c2/Fndc3a/Fndc3b/Fndc3c1/Igfn1/Igsf9/Igsf9b/Kalrn/Mertk/Mybpc1/Mybpc2/Mybpc3/Mybph/Mybphl/Mylk/Myom1/Myom2/Myom3/Ncam1/Ncam2/Nphs1/Obscn/Robo1/Robo2/Robo3/Trim9/Trim42/Trim67/Ttn		Nvec_NVE618
+Nvec_vc1.1_XM_048732210.1	Nvec_NVE620:HG.Unclassified	""	Nvec_NVE620
+Nvec_vc1.1_XM_032363803.2	Nvec_NVE6249:HG.Unclassified	""	Nvec_NVE6249
+Nvec_vc1.1_XM_048727284.1	adh.Laminin.HG2.14:Npcd/Nptx1/Nptx2/Nptxr	Npcd/Nptx1/Nptx2/Nptxr	Nvec_NVE6276
+Nvec_vc1.1_XM_032376197.2	adh.Laminin.HG2.10:like:Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Svep1		Nvec_NVE6475
+Nvec_vc1.1_XM_048731026.1	Nvec_NVE7035:HG.Unclassified	""	Nvec_NVE7035
+Nvec_vc1.1_XM_032375692.2	adh.Laminin.HG2.4:like:Apcs/Crp/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_NVE7139
+Nvec_vc1.1_XM_048730610.1	Nvec_NVE7200:HG.Unclassified	""	Nvec_NVE7200
+Nvec_vc1.1_XM_048732345.1	adh.fibronectin.HG2.33:Igsf9/Igsf9b	Igsf9/Igsf9b	Nvec_NVE7894
+Nvec_vc1.1_XM_032367401.2	adh.Collagen.HG6.3:NA		Nvec_NVE8117
+Nvec_vc1.1_XM_032363431.2	adh.fibronectin.HG2.28:like:Epor/Igsf9/Igsf9b/Ncam1/Ncam2/Nphs1/Trim42		Nvec_NVE8391
+Nvec_vc1.1_XM_048732448.1	Nvec_NVE8407:HG.Unclassified	""	Nvec_NVE8407
+Nvec_NVE8410	Nvec_NVE8410:HG.Unclassified	""	Nvec_NVE8410
+Nvec_vc1.1_XM_048725163.1	adh.fibronectin.HG13.0:Epha1/Epha2/Epha3/Epha4/Epha5/Epha6/Epha7/Epha8/Epha10/Ephb1/Ephb2/Ephb4/Ephb6	Epha1/Epha10/Epha2/Epha3/Epha4/Epha5/Epha6/Epha7/Epha8/Ephb1/Ephb2/Ephb4/Ephb6	Nvec_NVE9062
+Nvec_vc1.1_XM_032363026.2	adh.Collagen.HG28.0:NA		Nvec_NVE9976
+Nvec_vc1.1_XM_032384174.2	adh.Laminin.HG2.2:like:Apcs/Crp/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g100150
+Nvec_vc1.1_XM_048720504.1	Nvec_v1g100890;Nvec_v1g100890:HG.Unclassified	""	Nvec_v1g100890
+Nvec_vc1.1_XM_048731417.1	adh.Laminin.HG6.1:Pappa/Pappa2	Pappa/Pappa2	Nvec_v1g10113
+Nvec_vc1.1_XM_048721903.1	adh.Laminin.HG2.0:like:Apcs/Crp/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g101543
+Nvec_vc1.1_XM_032383658.2	Nvec_v1g101677:HG.Unclassified	""	Nvec_v1g101677
+Nvec_vc1.1_XM_001633843.3	Nvec_v1g102786:HG.Unclassified	""	Nvec_v1g102786
+Nvec_vc1.1_XM_048722875.1	Nvec_v1g103399:HG.Unclassified	""	Nvec_v1g103399
+Nvec_vc1.1_XM_048726782.1	Nvec_v1g104479:HG.Unclassified	""	Nvec_v1g104479
+Nvec_vc1.1_XM_048726782.1	adh.Laminin.HG2.0:like:Apcs/Crp/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g104551
+Nvec_vc1.1_XM_032382475.2	adh.fibronectin.HG2.20:Trim9/Trim67	Trim67/Trim9	Nvec_v1g104795
+Nvec_vc1.1_XM_032382475.2	adh.fibronectin.HG2.20:Trim9/Trim67	Trim67/Trim9	Nvec_v1g104862
+Nvec_vc1.1_XM_048721549.1	Nvec_v1g105174:HG.Unclassified	""	Nvec_v1g105174
+Nvec_vc1.1_XM_032380377.2	Nvec_v1g10520:HG.Unclassified	""	Nvec_v1g10520
+Nvec_vc1.1_XM_032382310.2	adh.EF-hand.HG1.4:Dmd/Drp2/Utrn	Dmd/Drp2/Utrn	Nvec_v1g105253
+Nvec_vc1.1_XM_032382310.2	Nvec_v1g105300:HG.Unclassified	""	Nvec_v1g105300
+Nvec_vc1.1_XM_032382233.2	Nvec_v1g105427;Nvec_v1g105427:HG.Unclassified	""	Nvec_v1g105427
+Nvec_vc1.1_XM_048732880.1	Nvec_v1g106489:HG.Unclassified	""	Nvec_v1g106489
+Nvec_vc1.1_XM_032381538.2	Nvec_v1g107177:HG.Unclassified	""	Nvec_v1g107177
+Nvec_vc1.1_XM_048725473.1	Nvec_v1g10792:HG.Unclassified	""	Nvec_v1g10792
+Nvec_vc1.1_XM_048729790.1	Nvec_v1g108202:HG.Unclassified	""	Nvec_v1g108202
+Nvec_vc1.1_XM_048732730.1	Nvec_v1g108506:HG.Unclassified	""	Nvec_v1g108506
+Nvec_vc1.1_XM_032381046.2	Nvec_v1g108749:HG.Unclassified	""	Nvec_v1g108749
+Nvec_vc1.1_XM_048732905.1	Nvec_v1g108822:HG.Unclassified	""	Nvec_v1g108822
+Nvec_vc1.1_XM_032381046.2	Nvec_v1g108927:HG.Unclassified	""	Nvec_v1g108927
+Nvec_vc1.1_XM_032380816.2	Nvec_v1g109257:HG.Unclassified	""	Nvec_v1g109257
+Nvec_vc1.1_XM_032380600.2	adh.fibronectin.HG43.0:NA		Nvec_v1g109942
+Nvec_vc1.1_XM_001631601.3	adh.Collagen.HG4.0:NA		Nvec_v1g110131
+Nvec_vc1.1_XM_048733677.1	adh.Laminin.HG7.0:NA		Nvec_v1g110258
+Nvec_vc1.1_XM_032380377.2	Nvec_v1g110347:HG.Unclassified	""	Nvec_v1g110347
+Nvec_vc1.1_XM_048726263.1	Nvec_v1g110667:HG.Unclassified	""	Nvec_v1g110667
+Nvec_vc1.1_XM_048725908.1	adh.Laminin.HG1.19:like:Lama4		Nvec_v1g110991
+Nvec_vc1.1_XM_048730092.1	adh.fibronectin.HG13.0:Epha1/Epha2/Epha3/Epha4/Epha5/Epha6/Epha7/Epha8/Epha10/Ephb1/Ephb2/Ephb4/Ephb6	Epha1/Epha10/Epha2/Epha3/Epha4/Epha5/Epha6/Epha7/Epha8/Ephb1/Ephb2/Ephb4/Ephb6	Nvec_v1g111563
+Nvec_vc1.1_XM_048730084.1	adh.fibronectin.HG13.0:Epha1/Epha2/Epha3/Epha4/Epha5/Epha6/Epha7/Epha8/Epha10/Ephb1/Ephb2/Ephb4/Ephb6	Epha1/Epha10/Epha2/Epha3/Epha4/Epha5/Epha6/Epha7/Epha8/Ephb1/Ephb2/Ephb4/Ephb6	Nvec_v1g111583
+Nvec_vc1.1_XM_032379837.2	adh.Laminin.HG2.9:like:Apcs/Crp/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g111835
+Nvec_vc1.1_XM_048727983.1	Nvec_v1g112664:HG.Unclassified	""	Nvec_v1g112664
+Nvec_vc1.1_XM_048722169.1	adh.Collagen.HG4.0:NA		Nvec_v1g112968
+Nvec_vc1.1_XM_001630628.3	Nvec_v1g113354:HG.Unclassified	""	Nvec_v1g113354
+Nvec_vc1.1_XM_048734142.1	adh.Laminin.HG2.5:Apcs/Crp/Ptx4	Ptx4	Nvec_v1g113368
+Nvec_vc1.1_XM_048723104.1	Nvec_v1g113743:HG.Unclassified	""	Nvec_v1g113743
+Nvec_vc1.1_XM_048722639.1	adh.Laminin.HG2.5:Apcs/Crp/Ptx4	Apcs/Crp	Nvec_v1g113789
+Nvec_vc1.1_XM_048723091.1	adh.Laminin.HG2.5:Apcs/Crp/Ptx4	Apcs/Crp	Nvec_v1g113816
+Nvec_v1g113956	Nvec_v1g113956:HG.Unclassified	""	Nvec_v1g113956
+Nvec_v1g114239	adh.Laminin.HG2.9:like:Apcs/Crp/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g114239
+Nvec_vc1.1_XM_032378771.2	adh.Collagen.HG6.0:NA		Nvec_v1g114261
+Nvec_vc1.1_XM_048733117.1	Nvec_v1g114638:HG.Unclassified	""	Nvec_v1g114638
+Nvec_vc1.1_XM_032378393.2	Nvec_v1g115283:HG.Unclassified	""	Nvec_v1g115283
+Nvec_vc1.1_XM_032378366.2	Nvec_v1g115371:HG.Unclassified	""	Nvec_v1g115371
+Nvec_vc1.1_XM_048726018.1	Nvec_v1g116060:HG.Unclassified	""	Nvec_v1g116060
+Nvec_vc1.1_XM_001629550.3	adh.fibronectin.HG6.9:like:F12/Hgfac/Plat		Nvec_v1g116411
+Nvec_vc1.1_XM_032377731.2	Nvec_v1g116716:HG.Unclassified	""	Nvec_v1g116716
+Nvec_vc1.1_XM_032377728.2	Nvec_v1g116780:HG.Unclassified	""	Nvec_v1g116780
+Nvec_vc1.1_XM_001628849.3	adh.Laminin.HG1.14:Lamc1/Lamc2/Lamc3/Ntn1/Ntn3	Ntn1/Ntn3	Nvec_v1g118526
+Nvec_vc1.1_XM_001628785.3	Nvec_v1g118814:HG.Unclassified	""	Nvec_v1g118814
+Nvec_vc1.1_XM_048730160.1	Nvec_v1g118816:HG.Unclassified	""	Nvec_v1g118816
+Nvec_vc1.1_XM_001628791.3	Nvec_v1g118816:HG.Unclassified	""	Nvec_v1g118816
+Nvec_vc1.1_XM_048720452.1	Nvec_v1g118913:HG.Unclassified	""	Nvec_v1g118913
+Nvec_vc1.1_XM_001628553.3	Nvec_v1g119405:HG.Unclassified	""	Nvec_v1g119405
+Nvec_vc1.1_XM_032376695.2	adh.Laminin.HG1.14:Lamc1/Lamc2/Lamc3/Ntn1/Ntn3	Lamc1/Lamc2/Lamc3	Nvec_v1g119462
+Nvec_vc1.1_XM_001628432.3	adh.Laminin.HG1.3:like:Agrn/Celsr1/Celsr2/Celsr3/Cntnap1/Cntnap2/Cntnap3/Cntnap4/Cntnap5a/Cntnap5b/Cntnap5c/Crb1/Crb2/Cspg4/Cspg4b/Egflam/Fat4/Hspg2/Lama4/Nrxn1/Nrxn2/Nrxn3/Pros1/Shbg/Slit1/Slit2/Slit3		Nvec_v1g119818
+Nvec_vc1.1_XM_048727284.1	adh.Laminin.HG2.9:like:Apcs/Crp/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g120415
+Nvec_vc1.1_XM_048728386.1	Nvec_v1g120490:HG.Unclassified	""	Nvec_v1g120490
+Nvec_vc1.1_XM_001627998.3	adh.Collagen.HG3.0:NA		Nvec_v1g121086
+Nvec_vc1.1_XM_048731026.1	Nvec_v1g121631:HG.Unclassified	""	Nvec_v1g121631
+Nvec_vc1.1_XM_048725035.1	Nvec_v1g121718:HG.Unclassified	""	Nvec_v1g121718
+Nvec_vc1.1_XM_048733504.1	adh.Laminin.HG7.0:NA		Nvec_v1g122783
+Nvec_vc1.1_XM_001627462.3	Nvec_v1g122785:HG.Unclassified	""	Nvec_v1g122785
+Nvec_vc1.1_XM_032375068.2	Nvec_v1g123251:HG.Unclassified	""	Nvec_v1g123251
+Nvec_vc1.1_XM_032375078.2	adh.Integrin_beta.HG1.1:Itgb1/Itgb2/Itgb2l/Itgb3/Itgb4/Itgb5/Itgb6/Itgb7/Itgb8	Itgb1/Itgb2/Itgb2l/Itgb3/Itgb4/Itgb5/Itgb6/Itgb7/Itgb8	Nvec_v1g123281
+Nvec_vc1.1_XM_032374848.2	Nvec_v1g123737:HG.Unclassified	""	Nvec_v1g123737
+Nvec_vc1.1_XM_048731549.1	Nvec_v1g12396:HG.Unclassified	""	Nvec_v1g12396
+Nvec_vc1.1_XM_048719694.1	adh.Collagen.HG5.1:like:Fcna/Fcnb;adh.Laminin.HG2.11:like:Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Svep1	""	Nvec_v1g124015
+Nvec_vc1.1_XM_048726370.1	adh.fibronectin.HG6.4:like:Bsph1/Bsph2/F12/Hgfac/Igf2r/Ly75/Mmp2/Mmp9/Mrc1/Mrc2/Pla2r1/Plat/Sel1l		Nvec_v1g124247
+Nvec_vc1.1_XM_032374578.2	adh.Collagen.HG3.0:NA		Nvec_v1g124455
+Nvec_vc1.1_XM_048724529.1	Nvec_v1g124570:HG.Unclassified	""	Nvec_v1g124570
+Nvec_vc1.1_XM_048733324.1	adh.Laminin.HG2.18:like:Svep1		Nvec_v1g125015
+Nvec_vc1.1_XM_048727478.1	Nvec_v1g12529:HG.Unclassified	""	Nvec_v1g12529
+Nvec_vc1.1_XM_032374172.2	Nvec_v1g125819:HG.Unclassified	""	Nvec_v1g125819
+Nvec_vc1.1_XM_048731952.1	Nvec_v1g127124:HG.Unclassified	""	Nvec_v1g127124
+Nvec_vc1.1_XM_048731958.1	Nvec_v1g127136:HG.Unclassified	""	Nvec_v1g127136
+Nvec_vc1.1_XM_048731958.1	adh.Collagen.HG2.1:Col4a1/Col4a2/Col4a3/Col4a4/Col4a5/Col4a6	Col4a1/Col4a2/Col4a3/Col4a4/Col4a5/Col4a6	Nvec_v1g127140
+Nvec_vc1.1_XM_048731958.1	Nvec_v1g127144:HG.Unclassified	""	Nvec_v1g127144
+Nvec_vc1.1_XM_048733294.1	adh.Laminin.HG2.18:like:Svep1		Nvec_v1g127166
+Nvec_vc1.1_XM_048729443.1	Nvec_v1g127187:HG.Unclassified	""	Nvec_v1g127187
+Nvec_vc1.1_XM_048729443.1	Nvec_v1g127202:HG.Unclassified	""	Nvec_v1g127202
+Nvec_vc1.1_XM_048732643.1	Nvec_v1g127554:HG.Unclassified	""	Nvec_v1g127554
+Nvec_vc1.1_XM_048732643.1	Nvec_v1g127555:HG.Unclassified	""	Nvec_v1g127555
+Nvec_vc1.1_XM_001625853.3	adh.Collagen.HG55.0:NA		Nvec_v1g128383
+Nvec_vc1.1_XM_048730279.1	adh.Collagen.HG55.0:NA		Nvec_v1g128410
+Nvec_vc1.1_XM_032373435.2	Nvec_v1g128449:HG.Unclassified	""	Nvec_v1g128449
+Nvec_vc1.1_XM_001625853.3	adh.Collagen.HG55.0:NA		Nvec_v1g128456
+Nvec_vc1.1_XM_001625853.3	Nvec_v1g128468:HG.Unclassified	""	Nvec_v1g128468
+Nvec_vc1.1_XM_048732131.1	Nvec_v1g12872:HG.Unclassified	""	Nvec_v1g12872
+Nvec_vc1.1_XM_001625522.3	Nvec_v1g129425:HG.Unclassified	""	Nvec_v1g129425
+Nvec_vc1.1_XM_048724363.1	Nvec_v1g129879:HG.Unclassified	""	Nvec_v1g129879
+Nvec_vc1.1_XM_048724363.1	Nvec_v1g129882:HG.Unclassified	""	Nvec_v1g129882
+Nvec_vc1.1_XM_048729910.1	adh.fibronectin.HG6.2:Bsph1/Bsph2/Igf2r/Ly75/Mmp2/Mmp9/Mrc1/Mrc2/Pla2r1/Sel1l		Nvec_v1g130221
+Nvec_vc1.1_XM_048728010.1	Nvec_v1g13061;Nvec_v1g13061:HG.Unclassified	""	Nvec_v1g13061
+Nvec_vc1.1_XM_001625097.3	adh.fibronectin.HG6.2:Bsph1/Bsph2/Igf2r/Ly75/Mmp2/Mmp9/Mrc1/Mrc2/Pla2r1/Sel1l	Igf2r/Ly75/Mmp2/Mmp9/Mrc1/Mrc2/Pla2r1/Sel1l	Nvec_v1g130895
+Nvec_vc1.1_XM_032372068.2	Nvec_v1g132135:HG.Unclassified	""	Nvec_v1g132135
+Nvec_vc1.1_XM_048727478.1	Nvec_v1g134122:HG.Unclassified	""	Nvec_v1g134122
+Nvec_vc1.1_XM_048727478.1	Nvec_v1g134128:HG.Unclassified	""	Nvec_v1g134128
+Nvec_vc1.1_XM_048732730.1	Nvec_v1g134519:HG.Unclassified	""	Nvec_v1g134519
+Nvec_vc1.1_XM_048722177.1	adh.Collagen.HG4.0:NA		Nvec_v1g134595
+Nvec_vc1.1_XM_048731475.1	adh.fibronectin.HG6.2:Bsph1/Bsph2/Igf2r/Ly75/Mmp2/Mmp9/Mrc1/Mrc2/Pla2r1/Sel1l		Nvec_v1g134613
+Nvec_vc1.1_XM_048732131.1	Nvec_v1g135045:HG.Unclassified	""	Nvec_v1g135045
+Nvec_vc1.1_XM_048723486.1	Nvec_v1g136247:HG.Unclassified	""	Nvec_v1g136247
+Nvec_vc1.1_XM_048723456.1	Nvec_v1g136261:HG.Unclassified	""	Nvec_v1g136261
+Nvec_vc1.1_XM_048732643.1	Nvec_v1g136983:HG.Unclassified	""	Nvec_v1g136983
+Nvec_vc1.1_XM_001625522.3	Nvec_v1g137796:HG.Unclassified	""	Nvec_v1g137796
+Nvec_vc1.1_XM_048723032.1	Nvec_v1g138198:HG.Unclassified	""	Nvec_v1g138198
+Nvec_vc1.1_XM_001623206.3	Nvec_v1g138199:HG.Unclassified	""	Nvec_v1g138199
+Nvec_vc1.1_XM_032370292.2	Nvec_v1g138217:HG.Unclassified	""	Nvec_v1g138217
+Nvec_vc1.1_XM_048728130.1	adh.Laminin.HG2.5:Apcs/Crp/Ptx4	Ptx4	Nvec_v1g138442
+Nvec_vc1.1_XM_048723373.1	Nvec_v1g138616:HG.Unclassified	""	Nvec_v1g138616
+Nvec_v1g138909	Nvec_v1g138909:HG.Unclassified	""	Nvec_v1g138909
+Nvec_vc1.1_XM_048722153.1	adh.Collagen.HG4.0:NA		Nvec_v1g139700
+Nvec_vc1.1_XM_048732730.1	adh.fibronectin.HG2.43:Ncam1/Ncam2		Nvec_v1g140156
+Nvec_vc1.1_XM_048732941.1	Nvec_v1g140735:HG.Unclassified	""	Nvec_v1g140735
+Nvec_vc1.1_XM_048734253.1	Nvec_v1g140821:HG.Unclassified	""	Nvec_v1g140821
+Nvec_vc1.1_XM_032369519.2	adh.Laminin.HG2.4:like:Apcs/Crp/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g140859
+Nvec_vc1.1_XM_048731381.1	Nvec_v1g141762:HG.Unclassified	""	Nvec_v1g141762
+Nvec_vc1.1_XM_048729033.1	adh.Laminin.HG2.9:like:Apcs/Crp/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g142117
+Nvec_vc1.1_XM_048729314.1	adh.Laminin.HG2.9:like:Apcs/Crp/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g142128
+Nvec_vc1.1_XM_048729314.1	adh.Laminin.HG2.9:like:Apcs/Crp/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g142130
+Nvec_vc1.1_XM_048729033.1	adh.Laminin.HG2.10:like:Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Svep1		Nvec_v1g142132
+Nvec_vc1.1_XM_048731476.1	adh.fibronectin.HG6.2:Bsph1/Bsph2/Igf2r/Ly75/Mmp2/Mmp9/Mrc1/Mrc2/Pla2r1/Sel1l	Igf2r/Ly75/Mmp2/Mmp9/Mrc1/Mrc2/Pla2r1/Sel1l	Nvec_v1g142575
+Nvec_vc1.1_XM_048723889.1	adh.Integrin_beta.HG1.1:Itgb1/Itgb2/Itgb2l/Itgb3/Itgb4/Itgb5/Itgb6/Itgb7/Itgb8		Nvec_v1g143492
+Nvec_v1g143804	Nvec_v1g143804:HG.Unclassified	""	Nvec_v1g143804
+Nvec_vc1.1_XM_048726782.1	Nvec_v1g144346:HG.Unclassified	""	Nvec_v1g144346
+Nvec_vc1.1_XM_001621470.3	adh.Collagen.HG3.0:NA		Nvec_v1g144549
+Nvec_v1g144703	adh.Laminin.HG2.9:like:Apcs/Crp/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g144703
+Nvec_vc1.1_XM_048732614.1	Nvec_v1g145476:HG.Unclassified	""	Nvec_v1g145476
+Nvec_vc1.1_XM_048723642.1	Nvec_v1g145699:HG.Unclassified	""	Nvec_v1g145699
+Nvec_vc1.1_XM_032377266.2	Nvec_v1g145810:HG.Unclassified	""	Nvec_v1g145810
+Nvec_vc1.1_XM_032373422.2	adh.Collagen.HG13.1:NA		Nvec_v1g146022
+Nvec_vc1.1_XM_048725163.1	adh.fibronectin.HG2.1:like:Ankfn1/Boc/Cdon/Cmya5/Egflam/Epor/Fnd3c2/Fndc3a/Fndc3b/Fndc3c1/Fsd2/Igfn1/Igsf9/Igsf9b/Kalrn/Mertk/Mybpc1/Mybpc2/Mybpc3/Mybph/Mybphl/Mylk/Myom1/Myom2/Myom3/Ncam1/Ncam2/Nphs1/Obscn/Robo1/Robo2/Robo3/Trim9/Trim36/Trim42/Trim67/Ttn		Nvec_v1g146932
+Nvec_vc1.1_XM_048728428.1	adh.Laminin.HG2.10:like:Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Svep1		Nvec_v1g147459
+Nvec_vc1.1_XM_001638497.3	Nvec_v1g148827:HG.Unclassified	""	Nvec_v1g148827
+Nvec_vc1.1_XM_048732730.1	Nvec_v1g14907:HG.Unclassified	""	Nvec_v1g14907
+Nvec_vc1.1_XM_048730106.1	Nvec_v1g149329:HG.Unclassified	""	Nvec_v1g149329
+Nvec_vc1.1_XM_048734617.1	Nvec_v1g149561:HG.Unclassified	""	Nvec_v1g149561
+Nvec_vc1.1_XM_048731549.1	Nvec_v1g150734:HG.Unclassified	""	Nvec_v1g150734
+Nvec_vc1.1_XM_032363362.2	adh.Laminin.HG2.10:like:Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Svep1		Nvec_v1g150957
+Nvec_vc1.1_XM_048731237.1	Nvec_v1g151187:HG.Unclassified	""	Nvec_v1g151187
+Nvec_vc1.1_XM_048734247.1	adh.Laminin.HG2.10:like:Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Svep1		Nvec_v1g151622
+Nvec_vc1.1_XM_048728420.1	adh.Laminin.HG2.9:like:Apcs/Crp/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g151668
+Nvec_vc1.1_XM_048731026.1	Nvec_v1g153193:HG.Unclassified	""	Nvec_v1g153193
+Nvec_vc1.1_XM_048720765.1	Nvec_v1g153449:HG.Unclassified	""	Nvec_v1g153449
+Nvec_vc1.1_XM_001625522.3	Nvec_v1g154303:HG.Unclassified	""	Nvec_v1g154303
+Nvec_vc1.1_XM_048723032.1	Nvec_v1g154334:HG.Unclassified	""	Nvec_v1g154334
+Nvec_vc1.1_XM_032374578.2	Nvec_v1g154768:HG.Unclassified	""	Nvec_v1g154768
+Nvec_vc1.1_XM_048725035.1	adh.Laminin.HG1.48:Hspg2	Hspg2	Nvec_v1g157460
+Nvec_v1g157527	Nvec_v1g157527:HG.Unclassified	""	Nvec_v1g157527
+Nvec_vc1.1_XM_001641250.3	Nvec_v1g158493:HG.Unclassified	""	Nvec_v1g158493
+Nvec_vc1.1_XM_048725127.1	Nvec_v1g160028:HG.Unclassified	""	Nvec_v1g160028
+Nvec_vc1.1_XM_001622867.3	adh.fibronectin.HG2.10:like:Cmya5/Egflam/Fsd2/Trim36		Nvec_v1g1620
+Nvec_vc1.1_XM_032383957.2	Nvec_v1g165235:HG.Unclassified	""	Nvec_v1g165235
+Nvec_vc1.1_XM_032383126.2	adh.Lectin_C.HG5.2:NA		Nvec_v1g165983
+Nvec_vc1.1_XM_001632392.3	adh.Laminin.HG20.0:Clstn1	Clstn1	Nvec_v1g167342
+Nvec_vc1.1_XM_001628437.3	Nvec_v1g17054:HG.Unclassified	""	Nvec_v1g17054
+Nvec_vc1.1_XM_032374093.2	adh.Collagen.HG15.0:NA		Nvec_v1g17292
+Nvec_vc1.1_XM_048723605.1	adh.Collagen.HG1.6:like:Col1a1/Col1a2/Col2a1/Col3a1/Col5a2		Nvec_v1g177989
+Nvec_vc1.1_XM_001639785.3	adh.Laminin.HG2.15:like:Ptx3		Nvec_v1g179157
+Nvec_vc1.1_XM_048729791.1	Nvec_v1g17962:HG.Unclassified	""	Nvec_v1g17962
+Nvec_vc1.1_XM_048734247.1	adh.Laminin.HG2.10:like:Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Svep1		Nvec_v1g18127
+Nvec_vc1.1_XM_048723222.1	Nvec_v1g182:HG.Unclassified	""	Nvec_v1g182
+Nvec_vc1.1_XM_048731381.1	adh.Collagen.HG1.4:Col5a1/Col5a3/Col11a1/Col11a2	Col11a1/Col11a2/Col5a1/Col5a3	Nvec_v1g184625
+Nvec_vc1.1_XM_032375068.2	Nvec_v1g18539:HG.Unclassified	""	Nvec_v1g18539
+Nvec_vc1.1_XM_032382699.2	Nvec_v1g185528;Nvec_v1g185528:HG.Unclassified	""	Nvec_v1g185528
+Nvec_vc1.1_XM_048729443.1	Nvec_v1g18675:HG.Unclassified	""	Nvec_v1g18675
+Nvec_vc1.1_XM_048730287.1	adh.Laminin.HG1.18:Lamb1/Lamb2/Lamb3	Lamb1/Lamb2	Nvec_v1g187372
+Nvec_vc1.1_XM_048734474.1	adh.Laminin.HG2.10:like:Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Svep1		Nvec_v1g18807
+Nvec_vc1.1_XM_001630097.3	Nvec_v1g188642:HG.Unclassified	""	Nvec_v1g188642
+Nvec_vc1.1_XM_048726027.1	Nvec_v1g189121:HG.Unclassified	""	Nvec_v1g189121
+Nvec_vc1.1_XM_032365290.2	Nvec_v1g19108:HG.Unclassified	""	Nvec_v1g19108
+Nvec_vc1.1_XM_048726927.1	adh.Laminin.HG4.11:like:Adgrd1		Nvec_v1g196376
+Nvec_vc1.1_XM_048723350.1	adh.Integrin_alpha.HG1.0:Gm49368/Itga1/Itga2/Itga2b/Itga3/Itga4/Itga5/Itga6/Itga7/Itga8/Itga9/Itga10/Itga11/Itgad/Itgae/Itgal/Itgam/Itgav/Itgax	Gm49368/Itga1/Itga10/Itga11/Itga2/Itga4/Itga9/Itgad/Itgae/Itgal/Itgam/Itgax	Nvec_v1g196726
+Nvec_vc1.1_XM_001641496.3	Nvec_v1g196737:HG.Unclassified	""	Nvec_v1g196737
+Nvec_vc1.1_XM_048723900.1	adh.Laminin.HG4.0:Adgrd1		Nvec_v1g196785
+Nvec_vc1.1_XM_032366881.2	adh.Lectin_C.HG49.0:NA		Nvec_v1g196789
+Nvec_vc1.1_XM_032366788.2	Nvec_v1g196946:HG.Unclassified	""	Nvec_v1g196946
+Nvec_vc1.1_XM_048729221.1	adh.immunoglobin.HG12.9:like:Fgfr1/Fgfr2/Fgfr3/Fgfr4/Fgfrl1		Nvec_v1g197128
+Nvec_vc1.1_XM_048723576.1	Nvec_v1g197457:HG.Unclassified	""	Nvec_v1g197457
+Nvec_vc1.1_XM_048720773.1	adh.Laminin.HG1.21:Celsr1/Celsr2/Celsr3/Fat4/Slit1/Slit2/Slit3		Nvec_v1g197466
+Nvec_vc1.1_XM_032366056.2	adh.Laminin.HG7.9:NA		Nvec_v1g197501
+Nvec_vc1.1_XM_048731381.1	Nvec_v1g19792:HG.Unclassified	""	Nvec_v1g19792
+Nvec_vc1.1_XM_001619797.3	Nvec_v1g197952:HG.Unclassified	""	Nvec_v1g197952
+Nvec_vc1.1_XM_048720049.1	adh.Laminin.HG2.10:like:Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Svep1		Nvec_v1g198428
+Nvec_vc1.1_XM_048724504.1	adh.fibronectin.HG6.7:like:Bsph1/Bsph2/Igf2r/Ly75/Mmp2/Mmp9/Mrc1/Mrc2/Pla2r1/Sel1l		Nvec_v1g198667
+Nvec_vc1.1_XM_032382310.2	Nvec_v1g19874:HG.Unclassified	""	Nvec_v1g19874
+Nvec_vc1.1_XM_048728676.1	Nvec_v1g198924:HG.Unclassified	""	Nvec_v1g198924
+Nvec_vc1.1_XM_032364509.2	adh.Laminin.HG1.26:like:Pros1/Shbg		Nvec_v1g199083
+Nvec_vc1.1_XM_048726079.1	adh.Laminin.HG1.26:like:Pros1/Shbg		Nvec_v1g199084
+Nvec_vc1.1_XM_048726079.1	adh.Laminin.HG1.26:like:Pros1/Shbg		Nvec_v1g199085
+Nvec_vc1.1_XM_032364277.2	adh.Collagen.HG17.2:NA		Nvec_v1g199302
+Nvec_vc1.1_XM_032364196.2	Nvec_v1g199450:HG.Unclassified	""	Nvec_v1g199450
+Nvec_vc1.1_XM_032363977.2	Nvec_v1g199615:HG.Unclassified	""	Nvec_v1g199615
+Nvec_v1g199622	adh.immunoglobin.HG130.0:NA		Nvec_v1g199622
+Nvec_vc1.1_XM_048725834.1	adh.fibronectin.HG9.2:like:Csf3r		Nvec_v1g199785
+Nvec_vc1.1_XM_032363887.2	Nvec_v1g199870:HG.Unclassified	""	Nvec_v1g199870
+Nvec_vc1.1_XM_048729751.1	adh.Laminin.HG1.11:Ush2a	Ush2a	Nvec_v1g199903
+Nvec_vc1.1_XM_048729751.1	adh.fibronectin.HG15.4:Ush2a;adh.Laminin.HG1.11:Ush2a	""	Nvec_v1g199904
+Nvec_vc1.1_XM_048730608.1	adh.Laminin.HG4.6:like:Adgrd1		Nvec_v1g199911
+Nvec_vc1.1_XM_032363362.2	adh.Laminin.HG2.10:like:Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Svep1		Nvec_v1g200030
+Nvec_vc1.1_XM_032363362.2	adh.Laminin.HG2.10:like:Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Svep1		Nvec_v1g200031
+Nvec_vc1.1_XM_032363583.2	adh.Laminin.HG16.1:NA		Nvec_v1g200110
+Nvec_vc1.1_XM_032363362.2	adh.Laminin.HG2.10:like:Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Svep1		Nvec_v1g200166
+Nvec_vc1.1_XM_032363450.2	Nvec_v1g200176:HG.Unclassified	""	Nvec_v1g200176
+Nvec_vc1.1_XM_001638445.3	adh.Laminin.HG2.10:like:Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Svep1		Nvec_v1g200442
+Nvec_vc1.1_XM_032363259.2	adh.Laminin.HG2.10:like:Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Svep1		Nvec_v1g200452
+Nvec_vc1.1_XM_001638518.3	adh.Laminin.HG2.10:like:Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Svep1		Nvec_v1g200454
+Nvec_vc1.1_XM_048734059.1	Nvec_v1g200560:HG.Unclassified	""	Nvec_v1g200560
+Nvec_vc1.1_XM_032362893.2	adh.Laminin.HG4.0:Adgrd1		Nvec_v1g200729
+Nvec_vc1.1_XM_001627462.3	adh.Laminin.HG1.21:Celsr1/Celsr2/Celsr3/Fat4/Slit1/Slit2/Slit3	Fat4	Nvec_v1g20073
+Nvec_vc1.1_XM_048732422.1	adh.Collagen.HG47.2:NA		Nvec_v1g200880
+Nvec_vc1.1_XM_048720559.1	adh.fibronectin.HG6.5:like:F12/Hgfac/Plat		Nvec_v1g201172
+Nvec_vc1.1_XM_032362338.2	adh.Laminin.HG4.0:Adgrd1		Nvec_v1g201175
+Nvec_vc1.1_XM_032362345.2	adh.Laminin.HG4.0:Adgrd1		Nvec_v1g201179
+Nvec_vc1.1_XM_032383036.2	adh.Laminin.HG1.28:like:Agrn/Cntnap1/Cntnap2/Cntnap3/Cntnap4/Cntnap5a/Cntnap5b/Cntnap5c/Cspg4/Cspg4b/Egflam/Hspg2/Nrxn1/Nrxn2/Nrxn3		Nvec_v1g20161
+Nvec_vc1.1_XM_032361825.2	Nvec_v1g201669:HG.Unclassified	""	Nvec_v1g201669
+Nvec_v1g201718	adh.fibronectin.HG6.10:like:F12/Hgfac/Plat		Nvec_v1g201718
+Nvec_vc1.1_XM_048725506.1	Nvec_v1g201761:HG.Unclassified	""	Nvec_v1g201761
+Nvec_vc1.1_XM_048732517.1	Nvec_v1g201931:HG.Unclassified	""	Nvec_v1g201931
+Nvec_vc1.1_XM_048732518.1	Nvec_v1g201938:HG.Unclassified	""	Nvec_v1g201938
+Nvec_vc1.1_XM_048733120.1	adh.immunoglobin.HG139.1:NA		Nvec_v1g201944
+Nvec_vc1.1_XM_048733113.1	adh.immunoglobin.HG139.1:NA		Nvec_v1g201949
+Nvec_vc1.1_XM_048733110.1	Nvec_v1g201955:HG.Unclassified	""	Nvec_v1g201955
+Nvec_vc1.1_XM_048732369.1	Nvec_v1g201957:HG.Unclassified	""	Nvec_v1g201957
+Nvec_vc1.1_XM_048732840.1	Nvec_v1g201958:HG.Unclassified	""	Nvec_v1g201958
+Nvec_vc1.1_XM_048732840.1	adh.fibronectin.HG2.43:Ncam1/Ncam2		Nvec_v1g201959
+Nvec_vc1.1_XM_032387133.2	adh.fibronectin.HG2.43:Ncam1/Ncam2	Ncam1/Ncam2	Nvec_v1g202038
+Nvec_vc1.1_XM_048731186.1	adh.immunoglobin.HG29.0:NA		Nvec_v1g202077
+Nvec_vc1.1_XM_001637113.3	Nvec_v1g202086:HG.Unclassified	""	Nvec_v1g202086
+Nvec_vc1.1_XM_032386789.2	Nvec_v1g202325:HG.Unclassified	""	Nvec_v1g202325
+Nvec_vc1.1_XM_032386623.2	Nvec_v1g202417:HG.Unclassified	""	Nvec_v1g202417
+Nvec_vc1.1_XM_048732901.1	Nvec_v1g202424:HG.Unclassified	""	Nvec_v1g202424
+Nvec_vc1.1_XM_048723642.1	Nvec_v1g202682:HG.Unclassified	""	Nvec_v1g202682
+Nvec_vc1.1_XM_048733785.1	Nvec_v1g202884:HG.Unclassified	""	Nvec_v1g202884
+Nvec_vc1.1_XM_032385828.2	Nvec_v1g203353;Nvec_v1g203353:HG.Unclassified	""	Nvec_v1g203353
+Nvec_vc1.1_XM_048730324.1	Nvec_v1g203358:HG.Unclassified	""	Nvec_v1g203358
+Nvec_vc1.1_XM_048724245.1	adh.Laminin.HG2.12:like:Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Svep1		Nvec_v1g203857
+Nvec_vc1.1_XM_032385044.2	adh.immunoglobin.HG2.2:like:Flt4		Nvec_v1g203987
+Nvec_vc1.1_XM_032362681.2	Nvec_v1g203990:HG.Unclassified	""	Nvec_v1g203990
+Nvec_vc1.1_XM_032385176.2	Nvec_v1g204009:HG.Unclassified	""	Nvec_v1g204009
+Nvec_vc1.1_XM_048729440.1	adh.fibronectin.HG2.22:like:Igsf9/Igsf9b		Nvec_v1g204215
+Nvec_vc1.1_XM_032370178.2	Nvec_v1g2043:HG.Unclassified	""	Nvec_v1g2043
+Nvec_vc1.1_XM_048728490.1	Nvec_v1g204357:HG.Unclassified	""	Nvec_v1g204357
+Nvec_vc1.1_XM_001635262.3	adh.Laminin.HG4.0:Adgrd1		Nvec_v1g204386
+Nvec_vc1.1_XM_032384620.2	adh.fibronectin.HG2.3:like:Cmya5/Egflam/Fsd2/Trim36		Nvec_v1g204514
+Nvec_vc1.1_XM_001635184.3	adh.immunoglobin.HG12.7:like:Fgfr1/Fgfr2/Fgfr3/Fgfr4/Fgfrl1		Nvec_v1g204525
+Nvec_vc1.1_XM_048720234.1	adh.Laminin.HG4.0:Adgrd1		Nvec_v1g20472
+Nvec_vc1.1_XM_048724297.1	adh.Collagen.HG1.6:like:Col1a1/Col1a2/Col2a1/Col3a1/Col5a2		Nvec_v1g204742
+Nvec_vc1.1_XM_032384307.2	adh.Lectin_C.HG2.0:NA		Nvec_v1g204814
+Nvec_vc1.1_XM_048731381.1	Nvec_v1g205488:HG.Unclassified	""	Nvec_v1g205488
+Nvec_vc1.1_XM_048731381.1	adh.Laminin.HG13.4:Col5a1/Col11a1/Col11a2	Col11a1/Col11a2/Col5a1	Nvec_v1g205490
+Nvec_vc1.1_XM_032383593.2	Nvec_v1g205600:HG.Unclassified	""	Nvec_v1g205600
+Nvec_vc1.1_XM_032383644.2	adh.Collagen.HG1.6:like:Col1a1/Col1a2/Col2a1/Col3a1/Col5a2		Nvec_v1g205652
+Nvec_vc1.1_XM_032383567.2	adh.Laminin.HG27.0:NA		Nvec_v1g205696
+Nvec_vc1.1_XM_048728160.1	adh.Laminin.HG2.5:Apcs/Crp/Ptx4	Ptx4	Nvec_v1g205741
+Nvec_vc1.1_XM_048727478.1	Nvec_v1g205787:HG.Unclassified	""	Nvec_v1g205787
+Nvec_vc1.1_XM_048722875.1	adh.Laminin.HG4.5:like:Adgrd1		Nvec_v1g206329
+Nvec_vc1.1_XM_048725640.1	Nvec_v1g206603:HG.Unclassified	""	Nvec_v1g206603
+Nvec_vc1.1_XM_001633469.3	adh.CD20.HG1.0:Entrep1/Entrep2/Entrep3/Sspn	Entrep1/Entrep2/Entrep3	Nvec_v1g206625
+Nvec_vc1.1_XM_048727713.1	adh.Laminin.HG2.5:Apcs/Crp/Ptx4	Apcs/Crp	Nvec_v1g206705
+Nvec_vc1.1_XM_048730239.1	Nvec_v1g206807:HG.Unclassified	""	Nvec_v1g206807
+Nvec_vc1.1_XM_032382489.2	Nvec_v1g206855:HG.Unclassified	""	Nvec_v1g206855
+Nvec_vc1.1_XM_048722964.1	adh.Laminin.HG7.11:NA		Nvec_v1g206995
+Nvec_vc1.1_XM_048721914.1	adh.Laminin.HG16.1:NA		Nvec_v1g207088
+Nvec_vc1.1_XM_001633007.3	adh.fibronectin.HG42.0:NA		Nvec_v1g207152
+Nvec_vc1.1_XM_048725489.1	Nvec_v1g207189:HG.Unclassified	""	Nvec_v1g207189
+Nvec_vc1.1_XM_048725481.1	Nvec_v1g207195:HG.Unclassified	""	Nvec_v1g207195
+Nvec_vc1.1_XM_048724733.1	Nvec_v1g207296:HG.Unclassified	""	Nvec_v1g207296
+Nvec_vc1.1_XM_032381925.2	adh.Collagen.HG3.0:NA		Nvec_v1g207415
+Nvec_vc1.1_XM_001632689.3	Nvec_v1g207612:HG.Unclassified	""	Nvec_v1g207612
+Nvec_vc1.1_XM_048728428.1	adh.Laminin.HG2.10:like:Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Svep1		Nvec_v1g207680
+Nvec_vc1.1_XM_048720450.1	adh.Laminin.HG4.3:like:Adgrd1		Nvec_v1g207779
+Nvec_vc1.1_XM_048720447.1	adh.Laminin.HG4.3:like:Adgrd1		Nvec_v1g207781
+Nvec_vc1.1_XM_048720449.1	adh.Laminin.HG4.3:like:Adgrd1		Nvec_v1g207782
+Nvec_vc1.1_XM_032381518.2	Nvec_v1g207840:HG.Unclassified	""	Nvec_v1g207840
+Nvec_vc1.1_XM_032381524.2	adh.Cadherin.HG2.7:Frem2/Frem3	Frem2/Frem3	Nvec_v1g207897
+Nvec_vc1.1_XM_048734115.1	Nvec_v1g208243;Nvec_v1g208243:HG.Unclassified	""	Nvec_v1g208243
+Nvec_vc1.1_XM_048727682.1	adh.Laminin.HG1.0:like:Agrn/Celsr1/Celsr2/Celsr3/Cntnap1/Cntnap2/Cntnap3/Cntnap4/Cntnap5a/Cntnap5b/Cntnap5c/Crb1/Crb2/Cspg4/Cspg4b/Egflam/Fat1/Fat2/Fat3/Fat4/Hspg2/Lama1/Lama2/Lama3/Lama4/Lama5/Lamb1/Lamb2/Lamb3/Lamc1/Lamc2/Lamc3/Nrxn1/Nrxn2/Nrxn3/Ntn1/Ntn3/Ntn4/Ntng1/Ntng2/Pros1/Shbg/Slit1/Slit2/Slit3/Ush2a		Nvec_v1g208267
+Nvec_vc1.1_XM_048720074.1	adh.Laminin.HG16.1:NA		Nvec_v1g208381
+Nvec_vc1.1_XM_032380902.2	adh.Laminin.HG1.3:like:Agrn/Celsr1/Celsr2/Celsr3/Cntnap1/Cntnap2/Cntnap3/Cntnap4/Cntnap5a/Cntnap5b/Cntnap5c/Crb1/Crb2/Cspg4/Cspg4b/Egflam/Fat4/Hspg2/Lama4/Nrxn1/Nrxn2/Nrxn3/Pros1/Shbg/Slit1/Slit2/Slit3		Nvec_v1g208491
+Nvec_vc1.1_XM_032380902.2	adh.Laminin.HG1.26:like:Pros1/Shbg		Nvec_v1g208492
+Nvec_vc1.1_XM_001631884.3	adh.Laminin.HG1.26:like:Pros1/Shbg		Nvec_v1g208524
+Nvec_vc1.1_XM_001631274.3	adh.Laminin.HG1.44:like:Cntnap1/Cntnap2/Cntnap3/Cntnap4/Cntnap5a/Cntnap5b/Cntnap5c		Nvec_v1g209351
+Nvec_vc1.1_XM_032380031.2	Nvec_v1g209397:HG.Unclassified	""	Nvec_v1g209397
+Nvec_vc1.1_XM_001631195.3	adh.Laminin.HG2.14:Npcd/Nptx1/Nptx2/Nptxr	Npcd/Nptx1/Nptx2/Nptxr	Nvec_v1g209400
+Nvec_v1g209449	adh.fibronectin.HG13.0:Epha1/Epha2/Epha3/Epha4/Epha5/Epha6/Epha7/Epha8/Epha10/Ephb1/Ephb2/Ephb4/Ephb6	Epha1/Epha10/Epha2/Epha3/Epha4/Epha5/Epha6/Epha7/Epha8/Ephb1/Ephb2/Ephb4/Ephb6	Nvec_v1g209449
+Nvec_vc1.1_XM_048730092.1	adh.fibronectin.HG13.0:Epha1/Epha2/Epha3/Epha4/Epha5/Epha6/Epha7/Epha8/Epha10/Ephb1/Ephb2/Ephb4/Ephb6	Epha1/Epha10/Epha2/Epha3/Epha4/Epha5/Epha6/Epha7/Epha8/Ephb1/Ephb2/Ephb4/Ephb6	Nvec_v1g209451
+Nvec_vc1.1_XM_048721636.1	adh.Collagen.HG6.2:NA		Nvec_v1g209947
+Nvec_vc1.1_XM_001630614.3	adh.Laminin.HG2.5:Apcs/Crp/Ptx4	Ptx4	Nvec_v1g210134
+Nvec_vc1.1_XM_048734618.1	Nvec_v1g210164:HG.Unclassified	""	Nvec_v1g210164
+Nvec_vc1.1_XM_032378993.2	adh.Lectin_C.HG49.0:NA		Nvec_v1g210418
+Nvec_vc1.1_XM_048732875.1	adh.Lectin_C.HG49.0:NA		Nvec_v1g210420
+Nvec_vc1.1_XM_048732726.1	adh.Lectin_C.HG49.0:NA		Nvec_v1g210422
+Nvec_v1g210423	adh.Lectin_C.HG49.0:NA		Nvec_v1g210423
+Nvec_vc1.1_XM_048723137.1	Nvec_v1g210515:HG.Unclassified	""	Nvec_v1g210515
+Nvec_vc1.1_XM_048730193.1	adh.Collagen.HG24.0:NA		Nvec_v1g210726
+Nvec_vc1.1_XM_001629965.3	Nvec_v1g210881:HG.Unclassified	""	Nvec_v1g210881
+Nvec_vc1.1_XM_001629902.3	adh.DAG1.HG1.3:like:Dag1		Nvec_v1g211047
+Nvec_vc1.1_XM_048726027.1	Nvec_v1g211305:HG.Unclassified	""	Nvec_v1g211305
+Nvec_vc1.1_XM_048727640.1	adh.immunoglobin.HG20.1:Malt1	Malt1	Nvec_v1g211581
+Nvec_vc1.1_XM_048734232.1	adh.Lectin_C.HG50.0:NA		Nvec_v1g211772
+Nvec_v1g211915	Nvec_v1g211915:HG.Unclassified	""	Nvec_v1g211915
+Nvec_vc1.1_XM_032376886.2	adh.fibronectin.HG29.1:NA		Nvec_v1g212583
+Nvec_vc1.1_XM_048730601.1	Nvec_v1g212709:HG.Unclassified	""	Nvec_v1g212709
+Nvec_vc1.1_XM_032376764.2	adh.Laminin.HG4.6:like:Adgrd1		Nvec_v1g212711
+Nvec_vc1.1_XM_048727283.1	Nvec_v1g213154:HG.Unclassified	""	Nvec_v1g213154
+Nvec_vc1.1_XM_001628224.3	adh.Laminin.HG2.1:like:Apcs/Crp/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g213160
+Nvec_vc1.1_XM_001628167.3	Nvec_v1g213198:HG.Unclassified	""	Nvec_v1g213198
+Nvec_vc1.1_XM_001628122.3	adh.Laminin.HG1.26:like:Pros1/Shbg		Nvec_v1g213239
+Nvec_vc1.1_XM_048726628.1	Nvec_v1g213259:HG.Unclassified	""	Nvec_v1g213259
+Nvec_vc1.1_XM_032376020.2	Nvec_v1g213449:HG.Unclassified	""	Nvec_v1g213449
+Nvec_vc1.1_XM_032374152.2	adh.Laminin.HG6.0:like:Pappa/Pappa2		Nvec_v1g213546
+Nvec_vc1.1_XM_032375761.2	adh.fibronectin.HG3.3:Cntfr	Cntfr	Nvec_v1g213652
+Nvec_vc1.1_XM_048730732.1	Nvec_v1g213814:HG.Unclassified	""	Nvec_v1g213814
+Nvec_vc1.1_XM_032375542.2	Nvec_v1g213889:HG.Unclassified	""	Nvec_v1g213889
+Nvec_vc1.1_XM_048732153.1	Nvec_v1g213890:HG.Unclassified	""	Nvec_v1g213890
+Nvec_vc1.1_XM_032374987.2	Nvec_v1g214434:HG.Unclassified	""	Nvec_v1g214434
+Nvec_vc1.1_XM_032374997.2	adh.fibronectin.HG6.2:Bsph1/Bsph2/Igf2r/Ly75/Mmp2/Mmp9/Mrc1/Mrc2/Pla2r1/Sel1l		Nvec_v1g214437
+Nvec_vc1.1_XM_032385636.2	adh.immunoglobin.HG2.6:Il1rl2/Myom1/Myom2/Myom3/Nrg1/Nrg2/Ror1/Ror2	Ror1/Ror2	Nvec_v1g21450
+Nvec_vc1.1_XM_048732608.1	Nvec_v1g214858:HG.Unclassified	""	Nvec_v1g214858
+Nvec_vc1.1_XM_048724529.1	Nvec_v1g214866:HG.Unclassified	""	Nvec_v1g214866
+Nvec_vc1.1_XM_048725798.1	adh.Laminin.HG4.6:like:Adgrd1		Nvec_v1g214886
+Nvec_vc1.1_XM_032374403.2	adh.fibronectin.HG2.6:like:Cmya5/Egflam/Fsd2/Trim36		Nvec_v1g215036
+Nvec_vc1.1_XM_048731311.1	adh.Laminin.HG1.32:Crb1	Crb1	Nvec_v1g215051
+Nvec_vc1.1_XM_048727842.1	adh.Laminin.HG2.5:Apcs/Crp/Ptx4	Apcs/Crp	Nvec_v1g215125
+Nvec_vc1.1_XM_032374152.2	adh.Laminin.HG6.0:like:Pappa/Pappa2		Nvec_v1g215302
+Nvec_vc1.1_XM_032373961.2	adh.immunoglobin.HG59.0:NA		Nvec_v1g215547
+Nvec_vc1.1_XM_048731952.1	Nvec_v1g215690:HG.Unclassified	""	Nvec_v1g215690
+Nvec_vc1.1_XM_048731710.1	adh.Laminin.HG10.0:NA		Nvec_v1g215748
+Nvec_vc1.1_XM_048732394.1	Nvec_v1g215805:HG.Unclassified	""	Nvec_v1g215805
+Nvec_v1g216294	Nvec_v1g216294:HG.Unclassified	""	Nvec_v1g216294
+Nvec_vc1.1_XM_001625730.3	adh.immunoglobin.HG21.0:NA		Nvec_v1g216320
+Nvec_vc1.1_XM_032373178.2	adh.fibronectin.HG2.43:Ncam1/Ncam2		Nvec_v1g216378
+Nvec_vc1.1_XM_048732608.1	Nvec_v1g216407:HG.Unclassified	""	Nvec_v1g216407
+Nvec_v1g216592	adh.fibronectin.HG2.43:Ncam1/Ncam2		Nvec_v1g216592
+Nvec_vc1.1_XM_048732941.1	adh.fibronectin.HG2.43:Ncam1/Ncam2		Nvec_v1g216597
+Nvec_vc1.1_XM_001625454.3	adh.Collagen.HG3.0:NA		Nvec_v1g216666
+Nvec_vc1.1_XM_001625213.3	Nvec_v1g216996:HG.Unclassified	""	Nvec_v1g216996
+Nvec_vc1.1_XM_048731231.1	Nvec_v1g217186:HG.Unclassified	""	Nvec_v1g217186
+Nvec_vc1.1_XM_048730631.1	adh.Laminin.HG4.0:Adgrd1	Adgrd1	Nvec_v1g21744
+Nvec_vc1.1_XM_048732803.1	Nvec_v1g217642:HG.Unclassified	""	Nvec_v1g217642
+Nvec_vc1.1_XM_032372042.2	Nvec_v1g217643:HG.Unclassified	""	Nvec_v1g217643
+Nvec_vc1.1_XM_048728130.1	adh.Laminin.HG2.5:Apcs/Crp/Ptx4	Ptx4	Nvec_v1g217956
+Nvec_vc1.1_XM_001624458.3	adh.Laminin.HG2.5:Apcs/Crp/Ptx4	Ptx4	Nvec_v1g217960
+Nvec_v1g218066	Nvec_v1g218066:HG.Unclassified	""	Nvec_v1g218066
+Nvec_vc1.1_XM_048727287.1	adh.Laminin.HG2.5:Apcs/Crp/Ptx4	Ptx4	Nvec_v1g218100
+Nvec_vc1.1_XM_048730618.1	adh.Laminin.HG2.10:like:Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Svep1		Nvec_v1g218152
+Nvec_v1g218290	adh.fibronectin.HG2.43:Ncam1/Ncam2		Nvec_v1g218290
+Nvec_vc1.1_XM_048732730.1	Nvec_v1g218291:HG.Unclassified	""	Nvec_v1g218291
+Nvec_vc1.1_XM_048732941.1	Nvec_v1g218294:HG.Unclassified	""	Nvec_v1g218294
+Nvec_vc1.1_XM_048732941.1	Nvec_v1g218298:HG.Unclassified	""	Nvec_v1g218298
+Nvec_vc1.1_XM_032374093.2	Nvec_v1g2183:HG.Unclassified	""	Nvec_v1g2183
+Nvec_vc1.1_XM_048732394.1	Nvec_v1g218476:HG.Unclassified	""	Nvec_v1g218476
+Nvec_vc1.1_XM_048732941.1	adh.fibronectin.HG2.43:Ncam1/Ncam2		Nvec_v1g218534
+Nvec_vc1.1_XM_048732941.1	Nvec_v1g218562:HG.Unclassified	""	Nvec_v1g218562
+Nvec_v1g218565	Nvec_v1g218565:HG.Unclassified	""	Nvec_v1g218565
+Nvec_vc1.1_XM_048732021.1	adh.fibronectin.HG2.43:Ncam1/Ncam2		Nvec_v1g218823
+Nvec_vc1.1_XM_048723549.1	Nvec_v1g218840:HG.Unclassified	""	Nvec_v1g218840
+Nvec_vc1.1_XM_048723486.1	Nvec_v1g218840:HG.Unclassified	""	Nvec_v1g218840
+Nvec_v1g219493	Nvec_v1g219493:HG.Unclassified	""	Nvec_v1g219493
+Nvec_v1g219496	Nvec_v1g219496:HG.Unclassified	""	Nvec_v1g219496
+Nvec_v1g219500	Nvec_v1g219500:HG.Unclassified	""	Nvec_v1g219500
+Nvec_vc1.1_XM_001624458.3	adh.Laminin.HG2.5:Apcs/Crp/Ptx4	Ptx4	Nvec_v1g219703
+Nvec_vc1.1_XM_032363362.2	adh.Laminin.HG2.10:like:Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Svep1		Nvec_v1g219784
+Nvec_vc1.1_XM_048733109.1	Nvec_v1g219947:HG.Unclassified	""	Nvec_v1g219947
+Nvec_vc1.1_XM_048733112.1	Nvec_v1g219947:HG.Unclassified	""	Nvec_v1g219947
+Nvec_vc1.1_XM_032387363.2	Nvec_v1g219948:HG.Unclassified	""	Nvec_v1g219948
+Nvec_vc1.1_XM_048720865.1	adh.Collagen.HG17.1:NA		Nvec_v1g220309
+Nvec_vc1.1_XM_048728010.1	Nvec_v1g220325:HG.Unclassified	""	Nvec_v1g220325
+Nvec_vc1.1_XM_048732901.1	Nvec_v1g220356:HG.Unclassified	""	Nvec_v1g220356
+Nvec_v1g220577	Nvec_v1g220577:HG.Unclassified	""	Nvec_v1g220577
+Nvec_vc1.1_XM_048732370.1	Nvec_v1g220644:HG.Unclassified	""	Nvec_v1g220644
+Nvec_v1g220645	Nvec_v1g220645:HG.Unclassified	""	Nvec_v1g220645
+Nvec_vc1.1_XM_048734581.1	Nvec_v1g220674:HG.Unclassified	""	Nvec_v1g220674
+Nvec_vc1.1_XM_048723373.1	Nvec_v1g220991:HG.Unclassified	""	Nvec_v1g220991
+Nvec_v1g221265	Nvec_v1g221265:HG.Unclassified	""	Nvec_v1g221265
+Nvec_vc1.1_XM_048734062.1	Nvec_v1g221269:HG.Unclassified	""	Nvec_v1g221269
+Nvec_vc1.1_XM_048734059.1	Nvec_v1g221270:HG.Unclassified	""	Nvec_v1g221270
+Nvec_vc1.1_XM_048726027.1	Nvec_v1g221287:HG.Unclassified	""	Nvec_v1g221287
+Nvec_vc1.1_XM_048726027.1	Nvec_v1g221291:HG.Unclassified	""	Nvec_v1g221291
+Nvec_vc1.1_XM_048731742.1	Nvec_v1g221388:HG.Unclassified	""	Nvec_v1g221388
+Nvec_vc1.1_XM_048725481.1	Nvec_v1g221587:HG.Unclassified	""	Nvec_v1g221587
+Nvec_vc1.1_XM_048732938.1	Nvec_v1g221619:HG.Unclassified	""	Nvec_v1g221619
+Nvec_vc1.1_XM_048731952.1	adh.Collagen.HG2.1:Col4a1/Col4a2/Col4a3/Col4a4/Col4a5/Col4a6		Nvec_v1g221793
+Nvec_vc1.1_XM_001629886.3	Nvec_v1g221825:HG.Unclassified	""	Nvec_v1g221825
+Nvec_vc1.1_XM_032387194.2	adh.EF-hand.HG1.3:like:Dmd/Drp2/Utrn		Nvec_v1g221874
+Nvec_v1g222098	Nvec_v1g222098:HG.Unclassified	""	Nvec_v1g222098
+Nvec_vc1.1_XM_048729033.1	adh.Laminin.HG2.8:like:Apcs/Crp/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g222196
+Nvec_vc1.1_XM_032377266.2	Nvec_v1g222305:HG.Unclassified	""	Nvec_v1g222305
+Nvec_vc1.1_XM_048732730.1	Nvec_v1g222311:HG.Unclassified	""	Nvec_v1g222311
+Nvec_vc1.1_XM_048726027.1	Nvec_v1g222349:HG.Unclassified	""	Nvec_v1g222349
+Nvec_vc1.1_XM_048729762.1	adh.fibronectin.HG13.0:Epha1/Epha2/Epha3/Epha4/Epha5/Epha6/Epha7/Epha8/Epha10/Ephb1/Ephb2/Ephb4/Ephb6	Epha1/Epha10/Epha2/Epha3/Epha4/Epha5/Epha6/Epha7/Epha8/Ephb1/Ephb2/Ephb4/Ephb6	Nvec_v1g222388
+Nvec_vc1.1_XM_048732730.1	Nvec_v1g222456:HG.Unclassified	""	Nvec_v1g222456
+Nvec_vc1.1_XM_048724413.1	Nvec_v1g222512:HG.Unclassified	""	Nvec_v1g222512
+Nvec_vc1.1_XM_048734422.1	adh.CD20.HG1.4:like:Entrep1/Entrep2/Entrep3/Ms4a1/Ms4a2/Ms4a3/Ms4a4a/Ms4a4b/Ms4a4c/Ms4a4d/Ms4a5/Ms4a6b/Ms4a6c/Ms4a6d/Ms4a7/Ms4a8a/Ms4a12/Ms4a13/Ms4a14/Ms4a15/Ms4a18/Ms4a19/Sspn/Tmem176a/Tmem176b		Nvec_v1g222535
+Nvec_vc1.1_XM_048723402.1	Nvec_v1g222556:HG.Unclassified	""	Nvec_v1g222556
+Nvec_vc1.1_XM_032363362.2	adh.Laminin.HG2.10:like:Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Svep1		Nvec_v1g222646
+Nvec_vc1.1_XM_048726027.1	Nvec_v1g223229:HG.Unclassified	""	Nvec_v1g223229
+Nvec_vc1.1_XM_048731710.1	adh.Laminin.HG10.0:NA		Nvec_v1g223268
+Nvec_vc1.1_XM_048720774.1	Nvec_v1g223294:HG.Unclassified	""	Nvec_v1g223294
+Nvec_vc1.1_XM_048733954.1	adh.fibronectin.HG28.0:NA		Nvec_v1g223329
+Nvec_vc1.1_XM_048722964.1	adh.Laminin.HG7.5:NA		Nvec_v1g223433
+Nvec_vc1.1_XM_048720774.1	Nvec_v1g223469:HG.Unclassified	""	Nvec_v1g223469
+Nvec_vc1.1_XM_001619797.3	Nvec_v1g223756:HG.Unclassified	""	Nvec_v1g223756
+Nvec_vc1.1_XM_048732941.1	Nvec_v1g224086:HG.Unclassified	""	Nvec_v1g224086
+Nvec_vc1.1_XM_048728010.1	Nvec_v1g224185:HG.Unclassified	""	Nvec_v1g224185
+Nvec_vc1.1_XM_048732643.1	Nvec_v1g224531;Nvec_v1g224531:HG.Unclassified	""	Nvec_v1g224531
+Nvec_vc1.1_XM_048724297.1	Nvec_v1g224974:HG.Unclassified	""	Nvec_v1g224974
+Nvec_vc1.1_XM_048728628.1	adh.Collagen.HG3.0:NA		Nvec_v1g225009
+Nvec_vc1.1_XM_001625454.3	adh.Collagen.HG3.0:NA		Nvec_v1g225075
+Nvec_vc1.1_XM_048732159.1	Nvec_v1g225345:HG.Unclassified	""	Nvec_v1g225345
+Nvec_vc1.1_XM_048724529.1	Nvec_v1g225510:HG.Unclassified	""	Nvec_v1g225510
+Nvec_vc1.1_XM_048732941.1	Nvec_v1g225534:HG.Unclassified	""	Nvec_v1g225534
+Nvec_vc1.1_XM_048723137.1	Nvec_v1g225659:HG.Unclassified	""	Nvec_v1g225659
+Nvec_v1g225762	adh.fibronectin.HG4.4:like:Abi3bp		Nvec_v1g225762
+Nvec_vc1.1_XM_032380377.2	Nvec_v1g225928:HG.Unclassified	""	Nvec_v1g225928
+Nvec_vc1.1_XM_032370178.2	Nvec_v1g226074:HG.Unclassified	""	Nvec_v1g226074
+Nvec_vc1.1_XM_048720968.1	Nvec_v1g228028:HG.Unclassified	""	Nvec_v1g228028
+Nvec_vc1.1_XM_001633249.3	Nvec_v1g229403:HG.Unclassified	""	Nvec_v1g229403
+Nvec_vc1.1_XM_032381520.2	adh.Lectin_C.HG5.2:NA		Nvec_v1g229557
+Nvec_vc1.1_XM_032366633.2	adh.immunoglobin.HG12.8:like:Fgfr1/Fgfr2/Fgfr3/Fgfr4/Fgfrl1		Nvec_v1g231802
+Nvec_vc1.1_XM_001639370.3	adh.Collagen.HG17.0:NA		Nvec_v1g232014
+Nvec_vc1.1_XM_001639293.3	adh.Collagen.HG17.3:NA		Nvec_v1g232015
+Nvec_vc1.1_XM_001630881.3	Nvec_v1g232982;Nvec_v1g232982:HG.Unclassified	""	Nvec_v1g232982
+Nvec_vc1.1_XM_001626148.3	adh.Laminin.HG1.3:like:Agrn/Celsr1/Celsr2/Celsr3/Cntnap1/Cntnap2/Cntnap3/Cntnap4/Cntnap5a/Cntnap5b/Cntnap5c/Crb1/Crb2/Cspg4/Cspg4b/Egflam/Fat4/Hspg2/Lama4/Nrxn1/Nrxn2/Nrxn3/Pros1/Shbg/Slit1/Slit2/Slit3		Nvec_v1g233459
+Nvec_vc1.1_XM_048726227.1	Nvec_v1g233708:HG.Unclassified	""	Nvec_v1g233708
+Nvec_vc1.1_XM_048729806.1	Nvec_v1g234466:HG.Unclassified	""	Nvec_v1g234466
+Nvec_vc1.1_XM_032385114.2	adh.fibronectin.HG2.43:Ncam1/Ncam2	Ncam1/Ncam2	Nvec_v1g236748
+Nvec_vc1.1_XM_032366874.2	adh.Laminin.HG4.0:Adgrd1		Nvec_v1g238062
+Nvec_vc1.1_XM_048723642.1	Nvec_v1g238120:HG.Unclassified	""	Nvec_v1g238120
+Nvec_vc1.1_XM_048723642.1	Nvec_v1g238121:HG.Unclassified	""	Nvec_v1g238121
+Nvec_vc1.1_XM_032366504.2	adh.Integrin_alpha.HG1.0:Gm49368/Itga1/Itga2/Itga2b/Itga3/Itga4/Itga5/Itga6/Itga7/Itga8/Itga9/Itga10/Itga11/Itgad/Itgae/Itgal/Itgam/Itgav/Itgax	Itga3/Itga6/Itga7	Nvec_v1g238305
+Nvec_vc1.1_XM_048720966.1	Nvec_v1g238343:HG.Unclassified	""	Nvec_v1g238343
+Nvec_vc1.1_XM_048720966.1	adh.Collagen.HG28.1:NA		Nvec_v1g238344
+Nvec_vc1.1_XM_001640910.3	Nvec_v1g238353:HG.Unclassified	""	Nvec_v1g238353
+Nvec_vc1.1_XM_048725489.1	Nvec_v1g238641:HG.Unclassified	""	Nvec_v1g238641
+Nvec_vc1.1_XM_032365290.2	Nvec_v1g238858:HG.Unclassified	""	Nvec_v1g238858
+Nvec_vc1.1_XM_001640218.3	adh.Laminin.HG7.7:NA		Nvec_v1g238889
+Nvec_vc1.1_XM_032365244.2	adh.Laminin.HG4.0:Adgrd1		Nvec_v1g238942
+Nvec_vc1.1_XM_032364977.2	Nvec_v1g239025:HG.Unclassified	""	Nvec_v1g239025
+Nvec_vc1.1_XM_001639553.3	Nvec_v1g239289:HG.Unclassified	""	Nvec_v1g239289
+Nvec_vc1.1_XM_032364244.2	adh.Collagen.HG5.0:like:Fcna/Fcnb		Nvec_v1g239485
+Nvec_vc1.1_XM_032363916.2	adh.Laminin.HG1.42:Agrn/Egflam	Egflam	Nvec_v1g239609
+Nvec_vc1.1_XM_048720774.1	adh.Laminin.HG1.21:Celsr1/Celsr2/Celsr3/Fat4/Slit1/Slit2/Slit3		Nvec_v1g239897
+Nvec_vc1.1_XM_001638497.3	Nvec_v1g239898:HG.Unclassified	""	Nvec_v1g239898
+Nvec_vc1.1_XM_048720765.1	Nvec_v1g239899:HG.Unclassified	""	Nvec_v1g239899
+Nvec_vc1.1_XM_048732319.1	adh.fibronectin.HG2.43:Ncam1/Ncam2		Nvec_v1g240082
+Nvec_vc1.1_XM_032362639.2	adh.Collagen.HG47.1:NA		Nvec_v1g240088
+Nvec_vc1.1_XM_032362392.2	adh.Laminin.HG1.27:like:Agrn/Cntnap1/Cntnap2/Cntnap3/Cntnap4/Cntnap5a/Cntnap5b/Cntnap5c/Cspg4/Cspg4b/Egflam/Hspg2/Nrxn1/Nrxn2/Nrxn3		Nvec_v1g240263
+Nvec_vc1.1_XM_048728530.1	Nvec_v1g240518;Nvec_v1g240518:HG.Unclassified	""	Nvec_v1g240518
+Nvec_vc1.1_XM_048732575.1	adh.immunoglobin.HG139.0:NA		Nvec_v1g240549
+Nvec_vc1.1_XM_048732495.1	adh.fibronectin.HG10.2:Fndc8	Fndc8	Nvec_v1g240569
+Nvec_vc1.1_XM_048732495.1	Nvec_v1g240570:HG.Unclassified	""	Nvec_v1g240570
+Nvec_vc1.1_XM_048731237.1	adh.Collagen.HG1.0:like:Col1a1/Col1a2/Col2a1/Col3a1/Col5a1/Col5a2/Col5a3/Col11a1/Col11a2/Col24a1/Col27a1		Nvec_v1g240903
+Nvec_vc1.1_XM_048731231.1	adh.Collagen.HG1.1:Col24a1/Col27a1	Col24a1/Col27a1	Nvec_v1g240904
+Nvec_vc1.1_XM_032386270.2	Nvec_v1g241032:HG.Unclassified	""	Nvec_v1g241032
+Nvec_vc1.1_XM_032386268.2	adh.immunoglobin.HG42.0:Lag3	Lag3	Nvec_v1g241043
+Nvec_vc1.1_XM_001636460.3	Nvec_v1g241044:HG.Unclassified	""	Nvec_v1g241044
+Nvec_vc1.1_XM_001636461.3	Nvec_v1g241045:HG.Unclassified	""	Nvec_v1g241045
+Nvec_vc1.1_XM_048730424.1	adh.Collagen.HG5.1:like:Fcna/Fcnb		Nvec_v1g241253
+Nvec_vc1.1_XM_032385110.2	adh.fibronectin.HG2.9:Igfn1	Igfn1	Nvec_v1g241554
+Nvec_vc1.1_XM_032385119.2	adh.fibronectin.HG2.43:Ncam1/Ncam2	Ncam1/Ncam2	Nvec_v1g241555
+Nvec_vc1.1_XM_032385118.2	adh.fibronectin.HG2.43:Ncam1/Ncam2	Ncam1/Ncam2	Nvec_v1g241557
+Nvec_vc1.1_XM_048732159.1	adh.fibronectin.HG2.43:Ncam1/Ncam2		Nvec_v1g241594
+Nvec_vc1.1_XM_048730859.1	Nvec_v1g241670:HG.Unclassified	""	Nvec_v1g241670
+Nvec_vc1.1_XM_048728910.1	Nvec_v1g242037:HG.Unclassified	""	Nvec_v1g242037
+Nvec_vc1.1_XM_048728288.1	adh.Laminin.HG9.1:Adgrv1	Adgrv1	Nvec_v1g242264
+Nvec_vc1.1_XM_048727804.1	adh.Laminin.HG2.5:Apcs/Crp/Ptx4	Ptx4	Nvec_v1g242374
+Nvec_vc1.1_XM_048726072.1	Nvec_v1g242500:HG.Unclassified	""	Nvec_v1g242500
+Nvec_vc1.1_XM_032383110.2	adh.Sarcoglycan.HG1.0:Sgcb	Sgcb	Nvec_v1g242600
+Nvec_vc1.1_XM_048730233.1	adh.Collagen.HG13.0:NA		Nvec_v1g242908
+Nvec_vc1.1_XM_048725481.1	Nvec_v1g243040:HG.Unclassified	""	Nvec_v1g243040
+Nvec_vc1.1_XM_001631758.3	adh.Laminin.HG7.4:NA		Nvec_v1g243708
+Nvec_vc1.1_XM_032380582.2	adh.fibronectin.HG6.2:Bsph1/Bsph2/Igf2r/Ly75/Mmp2/Mmp9/Mrc1/Mrc2/Pla2r1/Sel1l	Bsph1/Bsph2	Nvec_v1g243754
+Nvec_vc1.1_XM_032380303.2	Nvec_v1g243882:HG.Unclassified	""	Nvec_v1g243882
+Nvec_vc1.1_XM_048732328.1	adh.fibronectin.HG2.25:Fnd3c2/Fndc3a/Fndc3b/Fndc3c1	Fndc3a/Fndc3b	Nvec_v1g243939
+Nvec_vc1.1_XM_032380092.2	adh.Laminin.HG1.21:Celsr1/Celsr2/Celsr3/Fat4/Slit1/Slit2/Slit3		Nvec_v1g244010
+Nvec_vc1.1_XM_048720612.1	adh.Laminin.HG1.44:like:Cntnap1/Cntnap2/Cntnap3/Cntnap4/Cntnap5a/Cntnap5b/Cntnap5c		Nvec_v1g244013
+Nvec_vc1.1_XM_048733612.1	Nvec_v1g244261:HG.Unclassified	""	Nvec_v1g244261
+Nvec_vc1.1_XM_032378446.2	adh.Laminin.HG1.4:like:Agrn/Celsr1/Celsr2/Celsr3/Cntnap1/Cntnap2/Cntnap3/Cntnap4/Cntnap5a/Cntnap5b/Cntnap5c/Crb1/Crb2/Cspg4/Cspg4b/Egflam/Fat4/Hspg2/Lama4/Nrxn1/Nrxn2/Nrxn3/Pros1/Shbg/Slit1/Slit2/Slit3		Nvec_v1g244643
+Nvec_vc1.1_XM_032378335.2	Nvec_v1g244693:HG.Unclassified	""	Nvec_v1g244693
+Nvec_vc1.1_XM_001629886.3	adh.DAG1.HG1.2:Dag1	Dag1	Nvec_v1g244701
+Nvec_vc1.1_XM_032386160.2	adh.fibronectin.HG4.5:like:Fn1/Fndc4/Ptprv		Nvec_v1g24490
+Nvec_vc1.1_XM_048727635.1	adh.immunoglobin.HG20.1:Malt1	Malt1	Nvec_v1g244962
+Nvec_vc1.1_XM_001628819.3	adh.Laminin.HG1.27:like:Agrn/Cntnap1/Cntnap2/Cntnap3/Cntnap4/Cntnap5a/Cntnap5b/Cntnap5c/Cspg4/Cspg4b/Egflam/Hspg2/Nrxn1/Nrxn2/Nrxn3		Nvec_v1g245332
+Nvec_vc1.1_XM_048730886.1	adh.Laminin.HG1.13:Ntng1/Ntng2	Ntng1/Ntng2	Nvec_v1g245480
+Nvec_vc1.1_XM_048730885.1	adh.Laminin.HG1.13:Ntng1/Ntng2	Ntng1/Ntng2	Nvec_v1g245481
+Nvec_vc1.1_XM_032376509.2	adh.Laminin.HG4.6:like:Adgrd1		Nvec_v1g245573
+Nvec_vc1.1_XM_001627471.3	adh.Sarcoglycan.HG1.1:Sgcd/Sgcg/Sgcz	Sgcd/Sgcg/Sgcz	Nvec_v1g246044
+Nvec_vc1.1_XM_048732610.1	Nvec_v1g246329:HG.Unclassified	""	Nvec_v1g246329
+Nvec_vc1.1_XM_032373960.2	adh.immunoglobin.HG59.0:NA		Nvec_v1g246644
+Nvec_vc1.1_XM_032373959.2	adh.immunoglobin.HG59.0:NA		Nvec_v1g246645
+Nvec_vc1.1_XM_001626231.3	adh.CD20.HG1.3:like:Entrep1/Entrep2/Entrep3/Ms4a1/Ms4a2/Ms4a3/Ms4a4a/Ms4a4b/Ms4a4c/Ms4a4d/Ms4a5/Ms4a6b/Ms4a6c/Ms4a6d/Ms4a7/Ms4a8a/Ms4a12/Ms4a13/Ms4a14/Ms4a15/Ms4a18/Ms4a19/Sspn/Tmem176a/Tmem176b		Nvec_v1g246691
+Nvec_vc1.1_XM_048731958.1	adh.Collagen.HG2.1:Col4a1/Col4a2/Col4a3/Col4a4/Col4a5/Col4a6	Col4a1/Col4a2/Col4a3/Col4a4/Col4a5/Col4a6	Nvec_v1g246705
+Nvec_vc1.1_XM_032373641.2	Nvec_v1g246793:HG.Unclassified	""	Nvec_v1g246793
+Nvec_vc1.1_XM_048730717.1	adh.Collagen.HG13.1:NA		Nvec_v1g246866
+Nvec_vc1.1_XM_001625856.3	adh.Collagen.HG13.1:NA		Nvec_v1g246870
+Nvec_vc1.1_XM_048721523.1	Nvec_v1g247587:HG.Unclassified	""	Nvec_v1g247587
+Nvec_vc1.1_XM_048727678.1	Nvec_v1g247910:HG.Unclassified	""	Nvec_v1g247910
+Nvec_vc1.1_XM_048719846.1	Nvec_v1g248083:HG.Unclassified	""	Nvec_v1g248083
+Nvec_vc1.1_XM_048730973.1	adh.Laminin.HG1.12:like:Lamb1/Lamb2/Lamb3/Ntn4		Nvec_v1g248148
+Nvec_vc1.1_XM_048730974.1	adh.Laminin.HG16.0:NA		Nvec_v1g248149
+Nvec_vc1.1_XM_048724381.1	Nvec_v1g248172:HG.Unclassified	""	Nvec_v1g248172
+Nvec_vc1.1_XM_048731601.1	Nvec_v1g248219:HG.Unclassified	""	Nvec_v1g248219
+Nvec_vc1.1_XM_001622639.3	adh.CD20.HG1.3:like:Entrep1/Entrep2/Entrep3/Ms4a1/Ms4a2/Ms4a3/Ms4a4a/Ms4a4b/Ms4a4c/Ms4a4d/Ms4a5/Ms4a6b/Ms4a6c/Ms4a6d/Ms4a7/Ms4a8a/Ms4a12/Ms4a13/Ms4a14/Ms4a15/Ms4a18/Ms4a19/Sspn/Tmem176a/Tmem176b		Nvec_v1g248333
+Nvec_vc1.1_XM_048733578.1	adh.Lectin_C.HG5.1:NA		Nvec_v1g248367
+Nvec_vc1.1_XM_048723837.1	adh.Laminin.HG2.9:like:Apcs/Crp/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g248399
+Nvec_vc1.1_XM_048734576.1	Nvec_v1g248422:HG.Unclassified	""	Nvec_v1g248422
+Nvec_vc1.1_XM_048732575.1	adh.immunoglobin.HG139.0:NA		Nvec_v1g248822
+Nvec_vc1.1_XM_048728718.1	adh.Laminin.HG4.0:Adgrd1		Nvec_v1g25584
+Nvec_vc1.1_XM_048727983.1	Nvec_v1g26602:HG.Unclassified	""	Nvec_v1g26602
+Nvec_vc1.1_XM_048729314.1	adh.Laminin.HG2.8:like:Apcs/Crp/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g26894
+Nvec_vc1.1_XM_048728991.1	adh.Laminin.HG2.7:like:Apcs/Crp/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g27192
+Nvec_vc1.1_XM_048722043.1	adh.Laminin.HG2.10:like:Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Svep1		Nvec_v1g27545
+Nvec_vc1.1_XM_032387420.2	adh.fibronectin.HG6.2:Bsph1/Bsph2/Igf2r/Ly75/Mmp2/Mmp9/Mrc1/Mrc2/Pla2r1/Sel1l		Nvec_v1g28616
+Nvec_vc1.1_XM_032362886.2	Nvec_v1g30053:HG.Unclassified	""	Nvec_v1g30053
+Nvec_vc1.1_XM_032366633.2	adh.immunoglobin.HG12.9:like:Fgfr1/Fgfr2/Fgfr3/Fgfr4/Fgfrl1		Nvec_v1g31143
+Nvec_vc1.1_XM_001640200.3	Nvec_v1g31844:HG.Unclassified	""	Nvec_v1g31844
+Nvec_vc1.1_XM_048729314.1	adh.Laminin.HG2.8:like:Apcs/Crp/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g3461
+Nvec_vc1.1_XM_048732930.1	adh.fibronectin.HG2.43:Ncam1/Ncam2		Nvec_v1g35325
+Nvec_vc1.1_XM_048729033.1	adh.Laminin.HG2.8:like:Apcs/Crp/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g3612
+Nvec_vc1.1_XM_032385717.2	adh.Laminin.HG2.14:Npcd/Nptx1/Nptx2/Nptxr	Npcd/Nptx1/Nptx2/Nptxr	Nvec_v1g38084
+Nvec_vc1.1_XM_048727478.1	Nvec_v1g384:HG.Unclassified	""	Nvec_v1g384
+Nvec_v1g39112	Nvec_v1g39112:HG.Unclassified	""	Nvec_v1g39112
+Nvec_vc1.1_XM_001636033.3	adh.Laminin.HG2.10:like:Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Svep1		Nvec_v1g39280
+Nvec_vc1.1_XM_048731003.1	Nvec_v1g39429:HG.Unclassified	""	Nvec_v1g39429
+Nvec_vc1.1_XM_001637090.3	Nvec_v1g39708:HG.Unclassified	""	Nvec_v1g39708
+Nvec_vc1.1_XM_048724529.1	Nvec_v1g40082:HG.Unclassified	""	Nvec_v1g40082
+Nvec_vc1.1_XM_048728043.1	adh.immunoglobin.HG112.0:NA		Nvec_v1g40600
+Nvec_v1g40605	Nvec_v1g40605:HG.Unclassified	""	Nvec_v1g40605
+Nvec_vc1.1_XM_048732948.1	adh.fibronectin.HG2.20:Trim9/Trim67		Nvec_v1g41034
+Nvec_vc1.1_XM_048724363.1	Nvec_v1g41182:HG.Unclassified	""	Nvec_v1g41182
+Nvec_vc1.1_XM_048723486.1	Nvec_v1g41631:HG.Unclassified	""	Nvec_v1g41631
+Nvec_vc1.1_XM_048723564.1	Nvec_v1g41631:HG.Unclassified	""	Nvec_v1g41631
+Nvec_vc1.1_XM_048731549.1	Nvec_v1g41698:HG.Unclassified	""	Nvec_v1g41698
+Nvec_vc1.1_XM_048732941.1	Nvec_v1g42333:HG.Unclassified	""	Nvec_v1g42333
+Nvec_vc1.1_XM_048732643.1	Nvec_v1g42416:HG.Unclassified	""	Nvec_v1g42416
+Nvec_vc1.1_XM_048727606.1	Nvec_v1g43311:HG.Unclassified	""	Nvec_v1g43311
+Nvec_vc1.1_XM_048732938.1	Nvec_v1g43787:HG.Unclassified	""	Nvec_v1g43787
+Nvec_vc1.1_XM_048730717.1	adh.Collagen.HG13.1:NA		Nvec_v1g45213
+Nvec_vc1.1_XM_001623828.3	Nvec_v1g45368:HG.Unclassified	""	Nvec_v1g45368
+Nvec_vc1.1_XM_048724529.1	Nvec_v1g4597:HG.Unclassified	""	Nvec_v1g4597
+Nvec_vc1.1_XM_048731381.1	Nvec_v1g4603:HG.Unclassified	""	Nvec_v1g4603
+Nvec_vc1.1_XM_048728043.1	Nvec_v1g47008:HG.Unclassified	""	Nvec_v1g47008
+Nvec_vc1.1_XM_048732948.1	Nvec_v1g47055:HG.Unclassified	""	Nvec_v1g47055
+Nvec_vc1.1_XM_032370178.2	Nvec_v1g47418:HG.Unclassified	""	Nvec_v1g47418
+Nvec_vc1.1_XM_032372106.2	adh.fibronectin.HG6.8:like:Bsph1/Bsph2/Igf2r/Ly75/Mmp2/Mmp9/Mrc1/Mrc2/Pla2r1/Sel1l		Nvec_v1g47430
+Nvec_vc1.1_XM_048731530.1	Nvec_v1g50586:HG.Unclassified	""	Nvec_v1g50586
+Nvec_vc1.1_XM_048731310.1	adh.Laminin.HG1.32:Crb1	Crb1	Nvec_v1g51468
+Nvec_vc1.1_XM_048724413.1	Nvec_v1g5160:HG.Unclassified	""	Nvec_v1g5160
+Nvec_vc1.1_XM_048724181.1	adh.fibronectin.HG6.10:like:F12/Hgfac/Plat		Nvec_v1g52233
+Nvec_vc1.1_XM_048725489.1	Nvec_v1g52838:HG.Unclassified	""	Nvec_v1g52838
+Nvec_vc1.1_XM_048734139.1	adh.Laminin.HG2.5:Apcs/Crp/Ptx4	Ptx4	Nvec_v1g53623
+Nvec_vc1.1_XM_001628209.3	adh.Laminin.HG2.5:Apcs/Crp/Ptx4	Apcs/Crp	Nvec_v1g53825
+Nvec_vc1.1_XM_048722788.1	adh.Laminin.HG4.0:Adgrd1		Nvec_v1g54962
+Nvec_vc1.1_XM_032377730.2	Nvec_v1g57985:HG.Unclassified	""	Nvec_v1g57985
+Nvec_vc1.1_XM_048728257.1	adh.Laminin.HG1.10:like:Ush2a		Nvec_v1g59273
+Nvec_vc1.1_XM_048729751.1	adh.fibronectin.HG15.4:Ush2a	Ush2a	Nvec_v1g59990
+Nvec_vc1.1_XM_048727061.1	Nvec_v1g6023:HG.Unclassified	""	Nvec_v1g6023
+Nvec_vc1.1_XM_048723605.1	Nvec_v1g60560:HG.Unclassified	""	Nvec_v1g60560
+Nvec_v1g60863	adh.immunoglobin.HG2.22:like:Alpk2/Mylk/Myot/Mypn/Nexn/Obsl1/Palld		Nvec_v1g60863
+Nvec_v1g6164	adh.Laminin.HG2.6:like:Apcs/Crp/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g6164
+Nvec_v1g61775	adh.immunoglobin.HG2.16:like:Alpk2/Mylk/Myot/Mypn/Nexn/Obsl1/Palld		Nvec_v1g61775
+Nvec_vc1.1_XM_032363532.2	Nvec_v1g63233:HG.Unclassified	""	Nvec_v1g63233
+Nvec_vc1.1_XM_048731725.1	Nvec_v1g64326:HG.Unclassified	""	Nvec_v1g64326
+Nvec_vc1.1_XM_048730352.1	Nvec_v1g6574:HG.Unclassified	""	Nvec_v1g6574
+Nvec_vc1.1_XM_032364046.2	Nvec_v1g66064:HG.Unclassified	""	Nvec_v1g66064
+Nvec_vc1.1_XM_048721289.1	Nvec_v1g66344:HG.Unclassified	""	Nvec_v1g66344
+Nvec_vc1.1_XM_032380377.2	Nvec_v1g67148:HG.Unclassified	""	Nvec_v1g67148
+Nvec_vc1.1_XM_032362558.2	adh.Laminin.HG1.43:like:Cntnap1/Cntnap2/Cntnap3/Cntnap4/Cntnap5a/Cntnap5b/Cntnap5c		Nvec_v1g68155
+Nvec_vc1.1_XM_032362067.2	Nvec_v1g70073:HG.Unclassified	""	Nvec_v1g70073
+Nvec_vc1.1_XM_032380377.2	Nvec_v1g70250:HG.Unclassified	""	Nvec_v1g70250
+Nvec_vc1.1_XM_032384612.2	adh.Laminin.HG4.4:like:Adgrd1		Nvec_v1g71351
+Nvec_vc1.1_XM_032377266.2	Nvec_v1g72600:HG.Unclassified	""	Nvec_v1g72600
+Nvec_vc1.1_XM_048732905.1	Nvec_v1g7363:HG.Unclassified	""	Nvec_v1g7363
+Nvec_vc1.1_XM_032367439.2	Nvec_v1g78993:HG.Unclassified	""	Nvec_v1g78993
+Nvec_vc1.1_XM_032367102.2	adh.Laminin.HG2.18:like:Svep1		Nvec_v1g79796
+Nvec_vc1.1_XM_032385717.2	adh.Laminin.HG2.14:Npcd/Nptx1/Nptx2/Nptxr	Npcd/Nptx1/Nptx2/Nptxr	Nvec_v1g8037
+Nvec_vc1.1_XM_048723222.1	adh.Collagen.HG1.6:like:Col1a1/Col1a2/Col2a1/Col3a1/Col5a2		Nvec_v1g80481
+Nvec_vc1.1_XM_048723307.1	adh.immunoglobin.HG2.22:like:Alpk2/Mylk/Myot/Mypn/Nexn/Obsl1/Palld		Nvec_v1g80526
+Nvec_vc1.1_XM_048723307.1	adh.immunoglobin.HG2.22:like:Alpk2/Mylk/Myot/Mypn/Nexn/Obsl1/Palld		Nvec_v1g80596
+Nvec_v1g80630	adh.immunoglobin.HG2.22:like:Alpk2/Mylk/Myot/Mypn/Nexn/Obsl1/Palld		Nvec_v1g80630
+Nvec_vc1.1_XM_048723307.1	adh.immunoglobin.HG2.22:like:Alpk2/Mylk/Myot/Mypn/Nexn/Obsl1/Palld		Nvec_v1g80685
+Nvec_vc1.1_XM_048723307.1	adh.immunoglobin.HG2.22:like:Alpk2/Mylk/Myot/Mypn/Nexn/Obsl1/Palld		Nvec_v1g80686
+Nvec_vc1.1_XM_048723307.1	adh.immunoglobin.HG2.22:like:Alpk2/Mylk/Myot/Mypn/Nexn/Obsl1/Palld		Nvec_v1g80763
+Nvec_vc1.1_XM_032366875.2	adh.Integrin_beta.HG1.1:Itgb1/Itgb2/Itgb2l/Itgb3/Itgb4/Itgb5/Itgb6/Itgb7/Itgb8	Itgb1/Itgb2/Itgb2l/Itgb3/Itgb4/Itgb5/Itgb6/Itgb7/Itgb8	Nvec_v1g80868
+Nvec_vc1.1_XM_048724413.1	adh.Collagen.HG1.6:like:Col1a1/Col1a2/Col2a1/Col3a1/Col5a2		Nvec_v1g80945
+Nvec_vc1.1_XM_048723307.1	adh.immunoglobin.HG2.22:like:Alpk2/Mylk/Myot/Mypn/Nexn/Obsl1/Palld		Nvec_v1g81066
+Nvec_vc1.1_XM_048723307.1	adh.immunoglobin.HG2.22:like:Alpk2/Mylk/Myot/Mypn/Nexn/Obsl1/Palld		Nvec_v1g81070
+Nvec_vc1.1_XM_032366631.2	adh.immunoglobin.HG12.9:like:Fgfr1/Fgfr2/Fgfr3/Fgfr4/Fgfrl1		Nvec_v1g81258
+Nvec_vc1.1_XM_048723285.1	Nvec_v1g81937:HG.Unclassified	""	Nvec_v1g81937
+Nvec_vc1.1_XM_048723911.1	adh.Collagen.HG32.0:NA		Nvec_v1g81941
+Nvec_vc1.1_XM_001641048.3	adh.fibronectin.HG2.41:like:Nphs1		Nvec_v1g82372
+Nvec_vc1.1_XM_048721111.1	adh.Laminin.HG4.0:Adgrd1		Nvec_v1g82427
+Nvec_vc1.1_XM_048729033.1	adh.Laminin.HG2.10:like:Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Svep1		Nvec_v1g82892
+Nvec_vc1.1_XM_048730602.1	Nvec_v1g82974:HG.Unclassified	""	Nvec_v1g82974
+Nvec_vc1.1_XM_032365954.2	Nvec_v1g83039:HG.Unclassified	""	Nvec_v1g83039
+Nvec_vc1.1_XM_048731958.1	Nvec_v1g83445:HG.Unclassified	""	Nvec_v1g83445
+Nvec_vc1.1_XM_048730567.1	Nvec_v1g83478:HG.Unclassified	""	Nvec_v1g83478
+Nvec_vc1.1_XM_001640394.3	adh.Collagen.HG5.0:like:Fcna/Fcnb		Nvec_v1g83827
+Nvec_vc1.1_XM_048728420.1	adh.Laminin.HG2.9:like:Apcs/Crp/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g8416
+Nvec_vc1.1_XM_032365472.2	adh.Laminin.HG1.21:Celsr1/Celsr2/Celsr3/Fat4/Slit1/Slit2/Slit3	Celsr1/Celsr2/Celsr3	Nvec_v1g84228
+Nvec_vc1.1_XM_048729427.1	Nvec_v1g84420:HG.Unclassified	""	Nvec_v1g84420
+Nvec_vc1.1_XM_048719653.1	adh.fibronectin.HG2.8:like:Boc/Cdon/Epor/Fnd3c2/Fndc3a/Fndc3b/Fndc3c1/Igfn1/Igsf9/Igsf9b/Kalrn/Mertk/Mybpc1/Mybpc2/Mybpc3/Mybph/Mybphl/Mylk/Myom1/Myom2/Myom3/Ncam1/Ncam2/Nphs1/Obscn/Robo1/Robo2/Robo3/Trim9/Trim42/Trim67/Ttn		Nvec_v1g85090
+Nvec_vc1.1_XM_001639924.3	adh.Collagen.HG4.0:NA		Nvec_v1g85102
+Nvec_vc1.1_XM_032365024.2	adh.EF-hand.HG1.2:Dtna/Dtnb	Dtna/Dtnb	Nvec_v1g85254
+Nvec_vc1.1_XM_032364946.2	adh.Laminin.HG11.0:NA		Nvec_v1g85341
+Nvec_vc1.1_XM_032364834.2	Nvec_v1g85784:HG.Unclassified	""	Nvec_v1g85784
+Nvec_vc1.1_XM_032364508.2	adh.fibronectin.HG6.2:Bsph1/Bsph2/Igf2r/Ly75/Mmp2/Mmp9/Mrc1/Mrc2/Pla2r1/Sel1l	Igf2r/Ly75/Mmp2/Mmp9/Mrc1/Mrc2/Pla2r1/Sel1l	Nvec_v1g86166
+Nvec_vc1.1_XM_032363979.2	Nvec_v1g87445:HG.Unclassified	""	Nvec_v1g87445
+Nvec_vc1.1_XM_048726967.1	Nvec_v1g87913:HG.Unclassified	""	Nvec_v1g87913
+Nvec_v1g87968	Nvec_v1g87968:HG.Unclassified	""	Nvec_v1g87968
+Nvec_vc1.1_XM_032363827.2	Nvec_v1g88020;Nvec_v1g88020:HG.Unclassified	""	Nvec_v1g88020
+Nvec_vc1.1_XM_048723402.1	Nvec_v1g88022:HG.Unclassified	""	Nvec_v1g88022
+Nvec_vc1.1_XM_048726967.1	Nvec_v1g88142:HG.Unclassified	""	Nvec_v1g88142
+Nvec_vc1.1_XM_048730247.1	Nvec_v1g88266:HG.Unclassified	""	Nvec_v1g88266
+Nvec_vc1.1_XM_032363598.2	adh.Collagen.HG4.0:NA		Nvec_v1g88931
+Nvec_vc1.1_XM_048720765.1	Nvec_v1g89517:HG.Unclassified	""	Nvec_v1g89517
+Nvec_vc1.1_XM_048734678.1	adh.fibronectin.HG28.0:NA		Nvec_v1g8987
+Nvec_vc1.1_XM_048723889.1	adh.Integrin_beta.HG1.1:Itgb1/Itgb2/Itgb2l/Itgb3/Itgb4/Itgb5/Itgb6/Itgb7/Itgb8		Nvec_v1g90281
+Nvec_vc1.1_XM_032362819.2	Nvec_v1g90597:HG.Unclassified	""	Nvec_v1g90597
+Nvec_vc1.1_XM_048724390.1	adh.Integrin_beta.HG1.1:Itgb1/Itgb2/Itgb2l/Itgb3/Itgb4/Itgb5/Itgb6/Itgb7/Itgb8		Nvec_v1g91193
+Nvec_vc1.1_XM_032362290.2	Nvec_v1g91648:HG.Unclassified	""	Nvec_v1g91648
+Nvec_vc1.1_XM_048728292.1	adh.Lectin_C.HG24.1:NA		Nvec_v1g91746
+Nvec_vc1.1_XM_032387420.2	adh.fibronectin.HG6.2:Bsph1/Bsph2/Igf2r/Ly75/Mmp2/Mmp9/Mrc1/Mrc2/Pla2r1/Sel1l		Nvec_v1g92494
+Nvec_vc1.1_XM_032387420.2	adh.fibronectin.HG6.2:Bsph1/Bsph2/Igf2r/Ly75/Mmp2/Mmp9/Mrc1/Mrc2/Pla2r1/Sel1l		Nvec_v1g92581
+Nvec_vc1.1_XM_048732847.1	Nvec_v1g92750:HG.Unclassified	""	Nvec_v1g92750
+Nvec_vc1.1_XM_048733117.1	Nvec_v1g92961:HG.Unclassified	""	Nvec_v1g92961
+Nvec_vc1.1_XM_032387125.2	Nvec_v1g93134;Nvec_v1g93134:HG.Unclassified	""	Nvec_v1g93134
+Nvec_vc1.1_XM_032387194.2	adh.EF-hand.HG1.3:like:Dmd/Drp2/Utrn		Nvec_v1g93170
+Nvec_vc1.1_XM_048728420.1	adh.Laminin.HG2.9:like:Apcs/Crp/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g94449
+Nvec_vc1.1_XM_048726725.1	Nvec_v1g94771:HG.Unclassified	""	Nvec_v1g94771
+Nvec_vc1.1_XM_032386268.2	adh.immunoglobin.HG35.0:NA		Nvec_v1g94990
+Nvec_vc1.1_XM_032386265.2	adh.immunoglobin.HG35.0:NA		Nvec_v1g94997
+Nvec_vc1.1_XM_032385858.2	adh.Collagen.HG6.1:NA		Nvec_v1g96136
+Nvec_vc1.1_XM_032385859.2	adh.Collagen.HG6.1:NA		Nvec_v1g96400
+Nvec_vc1.1_XM_032385457.2	Nvec_v1g96749:HG.Unclassified	""	Nvec_v1g96749
+Nvec_vc1.1_XM_032385457.2	adh.fibronectin.HG2.39:Kalrn	Kalrn	Nvec_v1g96771
+Nvec_vc1.1_XM_001635867.3	Nvec_v1g96774:HG.Unclassified	""	Nvec_v1g96774
+Nvec_vc1.1_XM_032380902.2	adh.Laminin.HG1.26:like:Pros1/Shbg		Nvec_v1g9681
+Nvec_vc1.1_XM_048723619.1	adh.Laminin.HG36.0:NA		Nvec_v1g96874
+Nvec_vc1.1_XM_048731237.1	Nvec_v1g971:HG.Unclassified	""	Nvec_v1g971
+Nvec_vc1.1_XM_048731618.1	Nvec_v1g98014:HG.Unclassified	""	Nvec_v1g98014
+Nvec_vc1.1_XM_001635420.3	Nvec_v1g98237:HG.Unclassified	""	Nvec_v1g98237
+Nvec_v1g98274	adh.fibronectin.HG6.10:like:F12/Hgfac/Plat		Nvec_v1g98274
+Nvec_v1g98570	adh.immunoglobin.HG12.3:like:Fgfr1/Fgfr2/Fgfr3/Fgfr4/Fgfrl1		Nvec_v1g98570
+Nvec_vc1.1_XM_048730372.1	Nvec_v1g99126:HG.Unclassified	""	Nvec_v1g99126
+Nvec_vc1.1_XM_048730189.1	Nvec_v1g99167:HG.Unclassified	""	Nvec_v1g99167
+Nvec_vc1.1_XM_048730352.1	Nvec_v1g99266:HG.Unclassified	""	Nvec_v1g99266
+Nvec_vc1.1_XM_048734496.1	adh.immunoglobin.HG2.15:Obsl1	Obsl1	Nvec_v1g99878

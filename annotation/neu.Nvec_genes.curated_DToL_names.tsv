@@ -1,0 +1,1087 @@
+gene	og	name	ID_JGI_Vienna
+Nvec_NVE1025	Nvec_NVE1025:HG.Unclassified	""	Nvec_NVE1025
+Nvec_vc1.1_XM_032373236.2	Nvec_NVE11118:HG.Unclassified	""	Nvec_NVE11118
+Nvec_NVE11418	neu.MFS_1.HG1.9:Slc16a2/Slc16a10	Slc16a10/Slc16a2	Nvec_NVE11418
+Nvec_vc1.1_XM_048721740.1	neu.Synaptotagmin.HG1.25:Sytl1/Sytl2/Sytl3/Sytl4/Sytl5	Sytl1/Sytl2/Sytl3/Sytl4/Sytl5	Nvec_NVE11468
+Nvec_vc1.1_XM_032373047.2	neu.ANF_receptor.HG1.25:like:Casr/Gprc6a/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r128		Nvec_NVE11505
+Nvec_vc1.1_XM_048727742.1	neu.Sec1.HG1.2:Vps33b	Vps33b	Nvec_NVE11797
+Nvec_vc1.1_XM_048727359.1	neu.Homer.HG1.2:Was/Wasl	Was/Wasl	Nvec_NVE11999
+Nvec_vc1.1_XM_032372710.2	neu.Syndecan.HG1.1:Nrxn1/Nrxn3	Nrxn1/Nrxn3	Nvec_NVE12021
+Nvec_vc1.1_XM_048727359.1	neu.Homer.HG1.2:Was/Wasl	Was/Wasl	Nvec_NVE12186
+Nvec_vc1.1_XM_048723267.1	neu.Citron.HG1.1:Cdc42bpa/Cdc42bpb/Cdc42bpg	Cdc42bpa/Cdc42bpb/Cdc42bpg	Nvec_NVE12339
+Nvec_vc1.1_XM_032372185.2	neu.Aa_trans.HG1.2:Slc32a1		Nvec_NVE13231
+Nvec_vc1.1_XM_048731600.1	neu.Aa_trans.HG1.2:Slc32a1		Nvec_NVE13234
+Nvec_vc1.1_XM_048723622.1	neu.ANF_receptor.HG1.7:Grin2a/Grin2b/Grin2c/Grin2d/Grin3a	Grin2a/Grin2b/Grin2c/Grin2d/Grin3a	Nvec_NVE13328
+Nvec_vc1.1_XM_001624665.3	neu.Sugar_tr.HG3.4:Slc2a6/Slc2a8		Nvec_NVE13455
+Nvec_vc1.1_XM_048733991.1	neu.ANF_receptor.HG1.23:like:Casr/Gprc6a/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r128		Nvec_NVE13464
+Nvec_NVE13521	neu.PID.HG1.1:Eps8/Eps8l2/Pid1	Eps8/Eps8l2/Pid1	Nvec_NVE13521
+Nvec_vc1.1_XM_048725804.1	neu.ANF_receptor.HG1.25:like:Casr/Gprc6a/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r128		Nvec_NVE14100
+Nvec_vc1.1_XM_032381755.2	neu.ANF_receptor.HG2.36:like:Gabbr1/Gabbr2		Nvec_NVE1439
+Nvec_vc1.1_XM_048731539.1	neu.MFS_1.HG5.1:Slc18a1/Slc18a2/Slc18a3/Slc18b1	Slc18b1	Nvec_NVE15221
+Nvec_vc1.1_XM_048723486.1	neu.Y_phosphatase.HG1.35:Ptprk/Ptprm/Ptprt/Ptpru	Ptprk/Ptprm/Ptprt/Ptpru	Nvec_NVE15574
+Nvec_vc1.1_XM_032386320.2	neu.Pentaxin.HG1.10:like:Npcd/Nptx1/Nptx2/Nptxr/Ptx4/Svep1		Nvec_NVE15881
+Nvec_vc1.1_XM_032370764.2	neu.RhoGEF.HG1.10:Arhgef33	Arhgef33	Nvec_NVE15925
+Nvec_vc1.1_XM_032386130.2	neu.Guanylate_kin.HG1.3:Lrguk	Lrguk	Nvec_NVE16121
+Nvec_vc1.1_XM_048729501.1	neu.MFS_1.HG6.0:Slc17a1/Slc17a2/Slc17a3/Slc17a4/Slc17a5/Slc17a6/Slc17a7/Slc17a8/Slc17a9		Nvec_NVE16311
+Nvec_vc1.1_XM_032366751.2	neu.MFS_1.HG4.4:Slc46a1/Slc46a2/Slc46a3		Nvec_NVE16496
+Nvec_vc1.1_XM_048723186.1	neu.Ras.HG3.16:Rnd1/Rnd2/Rnd3	Rnd1/Rnd2/Rnd3	Nvec_NVE16741
+Nvec_vc1.1_XM_048720080.1	neu.ANF_receptor.HG2.7:like:Npr1/Npr2/Npr3		Nvec_NVE17792
+Nvec_vc1.1_XM_048720080.1	neu.ANF_receptor.HG2.7:like:Npr1/Npr2/Npr3		Nvec_NVE17793
+Nvec_vc1.1_XM_032370047.2	neu.PID.HG1.5:Nos1ap	Nos1ap	Nvec_NVE18004
+Nvec_vc1.1_XM_032384593.2	neu.Ras.HG4.17:like:Arl4a/Arl4c/Arl4d/Arl11/Arl14		Nvec_NVE19557
+Nvec_vc1.1_XM_048724403.1	neu.ANF_receptor.HG2.29:like:Gabbr1/Gabbr2		Nvec_NVE19776
+Nvec_NVE19889	neu.ANF_receptor.HG1.17:like:Casr/Gprc6a/Grm1/Grm2/Grm3/Grm4/Grm5/Grm6/Grm7/Grm8/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r128		Nvec_NVE19889
+Nvec_vc1.1_XM_048734644.1	neu.MFS_1.HG1.15:like:Slc16a2/Slc16a10		Nvec_NVE19971
+Nvec_NVE20907	neu.Synaphin.HG1.0:Cplx1/Cplx2/Cplx3/Cplx4	Cplx1/Cplx2	Nvec_NVE20907
+Nvec_vc1.1_XM_048729452.1	neu.MFS_1.HG9.3:like:Flvcr1/Flvcr2/Mfsd7a		Nvec_NVE20921
+Nvec_vc1.1_XM_048729041.1	neu.Synaptotagmin.HG1.38:like:Itsn2		Nvec_NVE20994
+Nvec_vc1.1_XM_048729579.1	neu.MFS_1.HG1.9:Slc16a2/Slc16a10	Slc16a10/Slc16a2	Nvec_NVE21201
+Nvec_vc1.1_XM_048721169.1	neu.Ras.HG4.19:Arf1/Arf2/Arf3		Nvec_NVE21221
+Nvec_vc1.1_XM_048724989.1	neu.RhoGEF.HG1.37:Arhgef10/Arhgef10l	Arhgef10/Arhgef10l	Nvec_NVE21865
+Nvec_vc1.1_XM_048728750.1	neu.Pyridoxal_deC.HG1.2:like:Sgpl1		Nvec_NVE21977
+Nvec_vc1.1_XM_032382897.2	Nvec_NVE22297:HG.Unclassified	""	Nvec_NVE22297
+Nvec_vc1.1_XM_032379075.2	neu.Syndecan.HG1.1:Nrxn1/Nrxn3	Nrxn1/Nrxn3	Nvec_NVE2262
+Nvec_vc1.1_XM_032382754.2	neu.MFS_1.HG6.0:Slc17a1/Slc17a2/Slc17a3/Slc17a4/Slc17a5/Slc17a6/Slc17a7/Slc17a8/Slc17a9	Slc17a9	Nvec_NVE22746
+Nvec_vc1.1_XM_048733325.1	Nvec_NVE22928:HG.Unclassified	""	Nvec_NVE22928
+Nvec_vc1.1_XM_048731701.1	neu.SSF.HG1.2:Slc5a7	Slc5a7	Nvec_NVE22942
+Nvec_vc1.1_XM_048726672.1	neu.ANF_receptor.HG5.0:NA		Nvec_NVE22966
+Nvec_vc1.1_XM_048725497.1	Nvec_NVE23602:HG.Unclassified	""	Nvec_NVE23602
+Nvec_vc1.1_XM_001637730.3	neu.Ras.HG4.4:Sar1a/Sar1b	Sar1a/Sar1b	Nvec_NVE23649
+Nvec_vc1.1_XM_048729915.1	neu.Aa_trans.HG1.2:Slc32a1	Slc32a1	Nvec_NVE24524
+Nvec_vc1.1_XM_032381484.2	neu.Ephrin.HG1.0:Efna1/Efna2/Efna3/Efna4/Efna5/Efnb1/Efnb2/Efnb3	Efna1/Efna2/Efna3/Efna4/Efna5/Efnb1/Efnb2/Efnb3	Nvec_NVE24833
+Nvec_vc1.1_XM_032381424.2	neu.Ephrin.HG1.0:Efna1/Efna2/Efna3/Efna4/Efna5/Efnb1/Efnb2/Efnb3	Efna1/Efna2/Efna3/Efna4/Efna5/Efnb1/Efnb2/Efnb3	Nvec_NVE24834
+Nvec_vc1.1_XM_001625221.3	Nvec_NVE25749:HG.Unclassified	""	Nvec_NVE25749
+Nvec_vc1.1_XM_032380857.2	neu.Y_phosphatase.HG1.9:Ptpn5/Ptpn7/Ptprr	Ptpn5/Ptpn7/Ptprr	Nvec_NVE25827
+Nvec_vc1.1_XM_048729219.1	Nvec_NVE25829:HG.Unclassified	""	Nvec_NVE25829
+Nvec_vc1.1_XM_048734354.1	neu.Pentaxin.HG1.13:Npcd/Nptx1/Nptx2/Nptxr	Npcd/Nptx1/Nptx2/Nptxr	Nvec_NVE25900
+Nvec_vc1.1_XM_048726013.1	Nvec_NVE25993:HG.Unclassified	""	Nvec_NVE25993
+Nvec_vc1.1_XM_032378662.2	neu.Synaptotagmin.HG1.14:C2cd4c/C2cd4d/Syt14/Syt16/Tc2n		Nvec_NVE2603
+Nvec_vc1.1_XM_032380528.2	neu.Y_phosphatase.HG1.16:Ptpn6/Ptpn11	Ptpn11/Ptpn6	Nvec_NVE26076
+Nvec_vc1.1_XM_032364435.2	neu.MFS_1.HG8.4:Slc2a10/Slc2a12;neu.Sugar_tr.HG3.1:Slc2a10/Slc2a12	""	Nvec_NVE3004
+Nvec_vc1.1_XM_032364435.2	neu.Sugar_tr.HG3.1:Slc2a10/Slc2a12	Slc2a10/Slc2a12	Nvec_NVE3005
+Nvec_vc1.1_XM_032364424.2	neu.FERM_M.HG2.2:Ptk2/Ptk2b	Ptk2/Ptk2b	Nvec_NVE3082
+Nvec_vc1.1_XM_032378311.2	Nvec_NVE3270:HG.Unclassified	""	Nvec_NVE3270
+Nvec_vc1.1_XM_032378200.2	Nvec_NVE3350:HG.Unclassified	""	Nvec_NVE3350
+Nvec_vc1.1_XM_032377872.2	Nvec_NVE3713:HG.Unclassified	""	Nvec_NVE3713
+Nvec_vc1.1_XM_048719609.1	neu.Synaptotagmin.HG1.21:Baiap3/Unc13d		Nvec_NVE394
+Nvec_vc1.1_XM_048726510.1	neu.MFS_1.HG16.0:NA		Nvec_NVE4136
+Nvec_vc1.1_XM_048723209.1	neu.Y_phosphatase.HG1.17:Ptpn23	Ptpn23	Nvec_NVE4213
+Nvec_vc1.1_XM_032377445.2	neu.Ras.HG6.6:Rab32/Rab38	Rab32/Rab38	Nvec_NVE4434
+Nvec_vc1.1_XM_032380835.2	neu.Ras.HG2.1:Rasl11a/Rasl11b/Rerg/Rergl	Rasl11a/Rasl11b	Nvec_NVE4935
+Nvec_vc1.1_XM_048726931.1	neu.MFS_1.HG3.31:Svop/Svopl;neu.Sugar_tr.HG2.3:Svop/Svopl	""	Nvec_NVE533
+Nvec_vc1.1_XM_048727574.1	neu.RhoGEF.HG1.23:Rasgrf1	Rasgrf1	Nvec_NVE5347
+Nvec_vc1.1_XM_048733907.1	neu.MFS_1.HG1.15:like:Slc16a2/Slc16a10		Nvec_NVE5397
+Nvec_vc1.1_XM_048726522.1	neu.RasGAP.HG1.3:Nf1	Nf1	Nvec_NVE568
+Nvec_vc1.1_XM_048724554.1	Nvec_NVE5749:HG.Unclassified	""	Nvec_NVE5749
+Nvec_vc1.1_XM_032376616.2	neu.PID.HG1.16:like:Apbb1/Apbb2/Apbb3		Nvec_NVE5787
+Nvec_vc1.1_XM_048727284.1	neu.Pentaxin.HG1.21:like:Svep1		Nvec_NVE6276
+Nvec_vc1.1_XM_048727187.1	Nvec_NVE6403:HG.Unclassified	""	Nvec_NVE6403
+Nvec_vc1.1_XM_032376197.2	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_NVE6475
+Nvec_vc1.1_XM_048721154.1	neu.ANF_receptor.HG1.6:like:Grin2a/Grin2b/Grin2c/Grin2d/Grin3a		Nvec_NVE6618
+Nvec_vc1.1_XM_032375701.2	neu.Ephrin.HG1.0:Efna1/Efna2/Efna3/Efna4/Efna5/Efnb1/Efnb2/Efnb3	Efna1/Efna2/Efna3/Efna4/Efna5/Efnb1/Efnb2/Efnb3	Nvec_NVE7071
+Nvec_vc1.1_XM_032375692.2	neu.Pentaxin.HG1.1:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_NVE7139
+Nvec_vc1.1_XM_032375322.2	neu.ANF_receptor.HG2.8:like:Gabbr1/Gabbr2		Nvec_NVE7660
+Nvec_vc1.1_XM_032375209.2	neu.RhoGEF.HG1.34:Ect2	Ect2	Nvec_NVE7740
+Nvec_vc1.1_XM_048724854.1	neu.PTB.HG1.0:Eps8/Eps8l1/Eps8l2/Eps8l3	Eps8/Eps8l1/Eps8l2/Eps8l3	Nvec_NVE8469
+Nvec_vc1.1_XM_032374809.2	neu.MFS_1.HG6.0:Slc17a1/Slc17a2/Slc17a3/Slc17a4/Slc17a5/Slc17a6/Slc17a7/Slc17a8/Slc17a9;neu.Sugar_tr.HG4.2:like:Slc37a3	""	Nvec_NVE8595
+Nvec_vc1.1_XM_048723130.1	neu.SNF.HG1.12:like:Slc6a1/Slc6a2/Slc6a3/Slc6a4/Slc6a5/Slc6a6/Slc6a7/Slc6a8/Slc6a9/Slc6a11/Slc6a12/Slc6a13/Slc6a14		Nvec_NVE8662
+Nvec_vc1.1_XM_048723130.1	neu.SNF.HG1.12:like:Slc6a1/Slc6a2/Slc6a3/Slc6a4/Slc6a5/Slc6a6/Slc6a7/Slc6a8/Slc6a9/Slc6a11/Slc6a12/Slc6a13/Slc6a14		Nvec_NVE8663
+Nvec_vc1.1_XM_032367713.2	neu.MFS_1.HG1.15:like:Slc16a2/Slc16a10		Nvec_NVE91
+Nvec_vc1.1_XM_048722989.1	neu.MFS_1.HG17.1:like:Slc45a1/Slc45a2/Slc45a3		Nvec_NVE9191
+Nvec_vc1.1_XM_048731313.1	neu.MFS_1.HG11.2:like:Spns1/Spns2/Spns3		Nvec_NVE9270
+Nvec_vc1.1_XM_032362942.2	neu.SSF.HG1.11:like:Gm5134/Slc5a1/Slc5a2/Slc5a4a/Slc5a4b/Slc5a9/Slc5a10/Slc5a11		Nvec_NVE9911
+Nvec_vc1.1_XM_032384174.2	neu.Pentaxin.HG1.1:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g100150
+Nvec_vc1.1_XM_048722326.1	neu.MFS_1.HG8.5:Slc2a1/Slc2a2/Slc2a3/Slc2a4/Slc2a5/Slc2a7/Slc2a9;neu.Sugar_tr.HG3.3:Slc2a1/Slc2a2/Slc2a3/Slc2a4/Slc2a5/Slc2a7/Slc2a9	""	Nvec_v1g100165
+Nvec_vc1.1_XM_048734077.1	Nvec_v1g10117:HG.Unclassified	""	Nvec_v1g10117
+Nvec_vc1.1_XM_001623034.3	neu.MFS_1.HG6.0:Slc17a1/Slc17a2/Slc17a3/Slc17a4/Slc17a5/Slc17a6/Slc17a7/Slc17a8/Slc17a9	Slc17a6/Slc17a7/Slc17a8	Nvec_v1g10128
+Nvec_vc1.1_XM_048721903.1	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g101543
+Nvec_vc1.1_XM_048721915.1	neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30		Nvec_v1g101713
+Nvec_vc1.1_XM_032383593.2	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g101715
+Nvec_vc1.1_XM_048727865.1	Nvec_v1g101792:HG.Unclassified	""	Nvec_v1g101792
+Nvec_vc1.1_XM_032383521.2	neu.Ras.HG2.0:like:Gem/Rasl12/Rem1/Rem2/Rrad		Nvec_v1g101945
+Nvec_vc1.1_XM_048726403.1	Nvec_v1g101975:HG.Unclassified	""	Nvec_v1g101975
+Nvec_vc1.1_XM_048727098.1	neu.RabphilinRIM.HG1.2:Rph3a/Rph3al	Rph3a/Rph3al	Nvec_v1g102493
+Nvec_vc1.1_XM_048727098.1	neu.RabphilinRIM.HG1.2:Rph3a/Rph3al	Rph3a/Rph3al	Nvec_v1g102666
+Nvec_vc1.1_XM_048725381.1	Nvec_v1g102827:HG.Unclassified	""	Nvec_v1g102827
+Nvec_vc1.1_XM_048724029.1	neu.MFS_1.HG14.2:Mfsd12		Nvec_v1g102846
+Nvec_vc1.1_XM_048724996.1	neu.MFS_1.HG6.0:Slc17a1/Slc17a2/Slc17a3/Slc17a4/Slc17a5/Slc17a6/Slc17a7/Slc17a8/Slc17a9	Slc17a9	Nvec_v1g102865
+Nvec_vc1.1_XM_048724843.1	Nvec_v1g102874:HG.Unclassified	""	Nvec_v1g102874
+Nvec_vc1.1_XM_048721213.1	neu.Y_phosphatase.HG1.40:Ptpn1/Ptpn2	Ptpn1/Ptpn2	Nvec_v1g103643
+Nvec_vc1.1_XM_048726782.1	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g104551
+Nvec_vc1.1_XM_048725886.1	neu.Sugar_tr.HG2.3:Svop/Svopl	Svopl	Nvec_v1g104560
+Nvec_vc1.1_XM_032382471.2	neu.RhoGEF.HG2.0:Sos1/Sos2	Sos1/Sos2	Nvec_v1g104774
+Nvec_vc1.1_XM_001633221.3	neu.Homer.HG1.4:Enah/Evl/Vasp	Enah/Evl/Vasp	Nvec_v1g104827
+Nvec_vc1.1_XM_032382350.2	neu.MFS_1.HG7.3:like:Gm5724/Gm6614/Slco1a1/Slco1a4/Slco1a5/Slco1a6/Slco1b2/Slco1c1/Slco2a1/Slco2b1/Slco3a1/Slco5a1		Nvec_v1g104948
+Nvec_vc1.1_XM_048725935.1	neu.MFS_1.HG7.3:like:Gm5724/Gm6614/Slco1a1/Slco1a4/Slco1a5/Slco1a6/Slco1b2/Slco1c1/Slco2a1/Slco2b1/Slco3a1/Slco5a1		Nvec_v1g105114
+Nvec_vc1.1_XM_048724778.1	Nvec_v1g105524:HG.Unclassified	""	Nvec_v1g105524
+Nvec_vc1.1_XM_048732891.1	neu.Citron.HG1.3:Map4k4/Mink1/Nrk/Tnik	Nrk	Nvec_v1g105673
+Nvec_vc1.1_XM_048724949.1	Nvec_v1g105778:HG.Unclassified	""	Nvec_v1g105778
+Nvec_vc1.1_XM_048725804.1	neu.ANF_receptor.HG1.25:like:Casr/Gprc6a/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r128		Nvec_v1g105783
+Nvec_vc1.1_XM_032381913.2	neu.MFS_1.HG14.2:Mfsd12		Nvec_v1g105998
+Nvec_vc1.1_XM_032371675.2	neu.RhoGEF.HG1.17:Mcf2/Mcf2l	Mcf2/Mcf2l	Nvec_v1g10632
+Nvec_vc1.1_XM_048726925.1	neu.MFS_1.HG3.31:Svop/Svopl;neu.Sugar_tr.HG2.3:Svop/Svopl	""	Nvec_v1g10639
+Nvec_vc1.1_XM_001621588.3	neu.Aa_trans.HG1.2:Slc32a1	Slc32a1	Nvec_v1g1064
+Nvec_vc1.1_XM_001632654.3	neu.Y_phosphatase.HG4.0:like:Dusp1/Dusp2/Dusp3/Dusp4/Dusp5/Dusp14/Dusp15		Nvec_v1g106562
+Nvec_vc1.1_XM_048729871.1	neu.MFS_1.HG1.15:like:Slc16a2/Slc16a10		Nvec_v1g106650
+Nvec_vc1.1_XM_048725473.1	neu.Y_phosphatase.HG1.24:Ptprz1	Ptprz1	Nvec_v1g10792
+Nvec_vc1.1_XM_001632178.3	neu.MFS_1.HG1.15:like:Slc16a2/Slc16a10		Nvec_v1g108152
+Nvec_vc1.1_XM_001632219.3	neu.MFS_1.HG1.15:like:Slc16a2/Slc16a10		Nvec_v1g108162
+Nvec_vc1.1_XM_048726299.1	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g109102
+Nvec_vc1.1_XM_048726548.1	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g109190
+Nvec_vc1.1_XM_048734130.1	neu.MFS_1.HG1.15:like:Slc16a2/Slc16a10		Nvec_v1g109484
+Nvec_vc1.1_XM_048722338.1	neu.SNF.HG1.12:like:Slc6a1/Slc6a2/Slc6a3/Slc6a4/Slc6a5/Slc6a6/Slc6a7/Slc6a8/Slc6a9/Slc6a11/Slc6a12/Slc6a13/Slc6a14		Nvec_v1g109800
+Nvec_vc1.1_XM_048733654.1	neu.Synapsin.HG1.0:Syn1/Syn2/Syn3	Syn1/Syn2/Syn3	Nvec_v1g110232
+Nvec_vc1.1_XM_032380333.2	neu.SDF.HG1.1:Slc1a1/Slc1a2/Slc1a3/Slc1a4/Slc1a5/Slc1a6/Slc1a7	Slc1a1/Slc1a2/Slc1a3/Slc1a4/Slc1a5/Slc1a6/Slc1a7	Nvec_v1g110362
+Nvec_vc1.1_XM_032380369.2	Nvec_v1g110405:HG.Unclassified	""	Nvec_v1g110405
+Nvec_vc1.1_XM_032380288.2	Nvec_v1g110546:HG.Unclassified	""	Nvec_v1g110546
+Nvec_vc1.1_XM_032380288.2	neu.NO_synthase.HG1.0:Nos1/Nos2/Nos3	Nos1/Nos2/Nos3	Nvec_v1g110599
+Nvec_vc1.1_XM_001630929.3	neu.MFS_1.HG4.4:Slc46a1/Slc46a2/Slc46a3		Nvec_v1g11092
+Nvec_vc1.1_XM_048726911.1	neu.MFS_1.HG3.31:Svop/Svopl;neu.Sugar_tr.HG2.3:Svop/Svopl	""	Nvec_v1g111000
+Nvec_vc1.1_XM_048726908.1	neu.MFS_1.HG3.31:Svop/Svopl;neu.Sugar_tr.HG2.3:Svop/Svopl	""	Nvec_v1g111069
+Nvec_vc1.1_XM_001630284.3	neu.Y_phosphatase.HG2.8:Cdc14a/Cdc14b	Cdc14a/Cdc14b	Nvec_v1g11161
+Nvec_vc1.1_XM_001631150.3	Nvec_v1g111641:HG.Unclassified	""	Nvec_v1g111641
+Nvec_vc1.1_XM_032379837.2	neu.Pentaxin.HG1.13:Npcd/Nptx1/Nptx2/Nptxr		Nvec_v1g111835
+Nvec_vc1.1_XM_048731734.1	neu.COesterase.HG1.11:like:Ache/Bche/Tg		Nvec_v1g112355
+Nvec_vc1.1_XM_048726234.1	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g1130
+Nvec_vc1.1_XM_048734714.1	neu.MFS_1.HG4.9:Slc22a18		Nvec_v1g113330
+Nvec_vc1.1_XM_048734142.1	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g113368
+Nvec_vc1.1_XM_032379210.2	neu.Ras.HG3.0:Rhot1/Rhot2	Rhot1/Rhot2	Nvec_v1g113475
+Nvec_vc1.1_XM_048722639.1	neu.Pentaxin.HG1.9:like:Npcd/Nptx1/Nptx2/Nptxr/Ptx4/Svep1		Nvec_v1g113789
+Nvec_vc1.1_XM_048723091.1	neu.Pentaxin.HG1.13:Npcd/Nptx1/Nptx2/Nptxr	Npcd/Nptx1/Nptx2/Nptxr	Nvec_v1g113816
+Nvec_vc1.1_XM_001630326.3	neu.ANF_receptor.HG1.25:like:Casr/Gprc6a/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r128		Nvec_v1g114044
+Nvec_vc1.1_XM_048722856.1	neu.Y_phosphatase.HG1.18:Ptpn13/Ptpn20	Ptpn13/Ptpn20	Nvec_v1g114126
+Nvec_vc1.1_XM_048722856.1	Nvec_v1g114137:HG.Unclassified	""	Nvec_v1g114137
+Nvec_vc1.1_XM_048722558.1	neu.Sec1.HG1.0:Scfd2	Scfd2	Nvec_v1g114149
+Nvec_v1g114239	neu.Pentaxin.HG1.13:Npcd/Nptx1/Nptx2/Nptxr		Nvec_v1g114239
+Nvec_vc1.1_XM_048731086.1	Nvec_v1g114391:HG.Unclassified	""	Nvec_v1g114391
+Nvec_vc1.1_XM_001629949.3	neu.COesterase.HG1.2:Aadac/Aadacl2/Aadacl2fm2/Aadacl2fm3		Nvec_v1g115178
+Nvec_vc1.1_XM_032378328.2	neu.MFS_1.HG1.15:like:Slc16a2/Slc16a10		Nvec_v1g115540
+Nvec_vc1.1_XM_048726234.1	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g115717
+Nvec_vc1.1_XM_032378192.2	neu.Synaptotagmin.HG1.34:Syt1/Syt2/Syt3/Syt4/Syt5/Syt6/Syt7/Syt8/Syt9/Syt10/Syt11/Syt12/Syt13/Syt15/Syt17	Syt13	Nvec_v1g115870
+Nvec_vc1.1_XM_048727217.1	neu.Citron.HG1.0:Cit	Cit	Nvec_v1g115977
+Nvec_vc1.1_XM_032378078.2	neu.PID.HG1.11:Apba1/Apba2/Apba3	Apba1/Apba2/Apba3	Nvec_v1g116118
+Nvec_vc1.1_XM_032377911.2	neu.Guanylate_kin.HG1.14:Mpp2/Pals2;neu.PDZ.HG2.4:Mpp2/Pals2	""	Nvec_v1g116416
+Nvec_vc1.1_XM_032377911.2	neu.Guanylate_kin.HG1.14:Mpp2/Pals2	Mpp2/Pals2	Nvec_v1g116440
+Nvec_vc1.1_XM_032377751.2	neu.MFS_1.HG12.4:Mfsd6l	Mfsd6l	Nvec_v1g116714
+Nvec_vc1.1_XM_032377631.2	neu.MFS_1.HG21.0:like:Mfsd5		Nvec_v1g117076
+Nvec_vc1.1_XM_032375572.2	neu.MFS_1.HG1.9:Slc16a2/Slc16a10	Slc16a10/Slc16a2	Nvec_v1g11737
+Nvec_vc1.1_XM_001629091.3	Nvec_v1g117826:HG.Unclassified	""	Nvec_v1g117826
+Nvec_vc1.1_XM_001628847.3	neu.Aa_trans.HG1.7:like:Slc36a1/Slc36a2/Slc36a3/Slc36a4		Nvec_v1g118574
+Nvec_vc1.1_XM_048722932.1	neu.SNF.HG1.12:like:Slc6a1/Slc6a2/Slc6a3/Slc6a4/Slc6a5/Slc6a6/Slc6a7/Slc6a8/Slc6a9/Slc6a11/Slc6a12/Slc6a13/Slc6a14		Nvec_v1g118697
+Nvec_vc1.1_XM_001628709.3	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g118993
+Nvec_vc1.1_XM_032376892.2	neu.MFS_1.HG7.8:like:Gm5724/Gm6614/Slco1a1/Slco1a4/Slco1a5/Slco1a6/Slco1b2/Slco1c1/Slco2a1/Slco2b1/Slco3a1/Slco5a1		Nvec_v1g119016
+Nvec_vc1.1_XM_048721095.1	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g119271
+Nvec_vc1.1_XM_032376820.2	neu.Ras.HG2.12:Rasd1/Rasd2/Rasl10a/Rasl10b	Rasl10a/Rasl10b	Nvec_v1g119290
+Nvec_vc1.1_XM_032376742.2	neu.Ras.HG3.12:like:4930544G11Rik/Cdc42/Rac1/Rac2/Rac3/Rhoa/Rhob/Rhoc/Rhod/Rhof/Rhog/Rhoh/Rhoj/Rhoq/Rhou/Rhov/Rnd1/Rnd2/Rnd3		Nvec_v1g119329
+Nvec_vc1.1_XM_001628548.3	neu.Ras.HG3.6:like:4930544G11Rik/Cdc42/Rac1/Rac2/Rac3/Rhoa/Rhob/Rhoc/Rhod/Rhof/Rhog/Rhoh/Rhoj/Rhoq/Rhou/Rhov/Rnd1/Rnd2/Rnd3		Nvec_v1g119350
+Nvec_vc1.1_XM_032376698.2	neu.Citron.HG1.4:Garnl3	Garnl3	Nvec_v1g119459
+Nvec_vc1.1_XM_032376522.2	neu.COesterase.HG1.1:like:Ache/Bche/Cel/Ces1a/Ces1b/Ces1c/Ces1d/Ces1e/Ces1f/Ces1g/Ces1h/Ces2a/Ces2b/Ces2c/Ces2e/Ces2f/Ces2g/Ces2h/Ces3a/Ces3b/Ces4a/Ces5a/Nlgn1/Nlgn2/Nlgn3/Tg		Nvec_v1g119959
+Nvec_vc1.1_XM_048731968.1	neu.SSF.HG1.5:Slc5a5/Slc5a6/Slc5a8/Slc5a12	Slc5a12/Slc5a5/Slc5a6/Slc5a8	Nvec_v1g119982
+Nvec_vc1.1_XM_032376461.2	Nvec_v1g120214:HG.Unclassified	""	Nvec_v1g120214
+Nvec_vc1.1_XM_048727284.1	neu.Pentaxin.HG1.13:Npcd/Nptx1/Nptx2/Nptxr		Nvec_v1g120415
+Nvec_vc1.1_XM_048728300.1	neu.ANF_receptor.HG2.12:like:Npr1/Npr2/Npr3		Nvec_v1g120436
+Nvec_vc1.1_XM_032376323.2	neu.ANF_receptor.HG2.12:like:Npr1/Npr2/Npr3		Nvec_v1g120467
+Nvec_vc1.1_XM_048724149.1	neu.Synaptotagmin.HG1.34:Syt1/Syt2/Syt3/Syt4/Syt5/Syt6/Syt7/Syt8/Syt9/Syt10/Syt11/Syt12/Syt13/Syt15/Syt17		Nvec_v1g121857
+Nvec_vc1.1_XM_048730388.1	neu.RAB3GAP2_N.HG1.0:Rab3gap2	Rab3gap2	Nvec_v1g122016
+Nvec_vc1.1_XM_048732152.1	neu.FERM_M.HG1.22:Myo7a/Myo7b	Myo7a/Myo7b	Nvec_v1g122088
+Nvec_vc1.1_XM_032375382.2	neu.Aa_trans.HG1.5:Tmem104	Tmem104	Nvec_v1g122626
+Nvec_vc1.1_XM_032375317.2	neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30		Nvec_v1g122742
+Nvec_vc1.1_XM_032375169.2	Nvec_v1g123088:HG.Unclassified	""	Nvec_v1g123088
+Nvec_vc1.1_XM_001627288.3	neu.MFS_1.HG1.9:Slc16a2/Slc16a10	Slc16a10/Slc16a2	Nvec_v1g123237
+Nvec_vc1.1_XM_001627279.3	neu.MFS_1.HG13.1:Mfsd1	Mfsd1	Nvec_v1g123420
+Nvec_vc1.1_XM_048726437.1	neu.MFS_1.HG1.9:Slc16a2/Slc16a10	Slc16a10/Slc16a2	Nvec_v1g123460
+Nvec_vc1.1_XM_032374828.2	neu.Y_phosphatase.HG1.35:Ptprk/Ptprm/Ptprt/Ptpru	Ptprk/Ptprm/Ptprt/Ptpru	Nvec_v1g123758
+Nvec_vc1.1_XM_032374848.2	neu.Y_phosphatase.HG1.30:Ptprc	Ptprc	Nvec_v1g123777
+Nvec_vc1.1_XM_048719694.1	neu.Pentaxin.HG1.10:like:Npcd/Nptx1/Nptx2/Nptxr/Ptx4/Svep1		Nvec_v1g124015
+Nvec_vc1.1_XM_048720726.1	neu.Y_phosphatase.HG4.6:Dusp15	Dusp15	Nvec_v1g124302
+Nvec_vc1.1_XM_001626970.3	neu.Y_phosphatase.HG4.6:Dusp15	Dusp15	Nvec_v1g124302
+Nvec_vc1.1_XM_048733324.1	neu.Pentaxin.HG1.20:Svep1		Nvec_v1g125015
+Nvec_v1g125243	neu.MFS_1.HG7.11:like:Gm5724/Gm6614/Slco1a1/Slco1a4/Slco1a5/Slco1a6/Slco1b2/Slco1c1/Slco2a1/Slco2b1/Slco3a1/Slco5a1		Nvec_v1g125243
+Nvec_vc1.1_XM_048727505.1	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g125326
+Nvec_vc1.1_XM_032374307.2	neu.MFS_1.HG14.2:Mfsd12	Mfsd12	Nvec_v1g125342
+Nvec_vc1.1_XM_032374258.2	Nvec_v1g125561:HG.Unclassified	""	Nvec_v1g125561
+Nvec_vc1.1_XM_032374226.2	neu.Aa_trans.HG1.5:Tmem104		Nvec_v1g125631
+Nvec_vc1.1_XM_001626441.3	neu.FERM_M.HG1.31:Epb41l4a/Epb41l4b/Epb41l5/Frmd3/Frmd5/Ptpn3/Ptpn4	Frmd3/Frmd5	Nvec_v1g126053
+Nvec_vc1.1_XM_032384881.2	neu.Synaptotagmin.HG1.34:Syt1/Syt2/Syt3/Syt4/Syt5/Syt6/Syt7/Syt8/Syt9/Syt10/Syt11/Syt12/Syt13/Syt15/Syt17		Nvec_v1g126140
+Nvec_vc1.1_XM_048733294.1	neu.Pentaxin.HG1.20:Svep1		Nvec_v1g127166
+Nvec_vc1.1_XM_048728848.1	neu.Synaptotagmin.HG1.26:Dysf/Myof	Dysf/Myof	Nvec_v1g127177
+Nvec_vc1.1_XM_048728010.1	neu.Y_phosphatase.HG1.43:like:Ptprc		Nvec_v1g127769
+Nvec_vc1.1_XM_048723636.1	neu.Guanylate_kin.HG2.0:Cacnb1/Cacnb2/Cacnb3/Cacnb4	Cacnb1/Cacnb2/Cacnb3/Cacnb4	Nvec_v1g127874
+Nvec_vc1.1_XM_032373236.2	neu.RhoGEF.HG1.29:Arhgef1/Arhgef11/Arhgef12	Arhgef1/Arhgef11/Arhgef12	Nvec_v1g128857
+Nvec_vc1.1_XM_032373215.2	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g128952
+Nvec_vc1.1_XM_048721740.1	neu.RabphilinRIM.HG1.0:Mlph/Mobp/Myrip/Sytl3/Sytl4/Sytl5;neu.Synaptotagmin.HG1.6:like:C2cd4c/C2cd4d/Doc2a/Doc2b/Doc2g/Pik3c2a/Pik3c2b/Rims2/Rims3/Rims4/Rph3a/Syt1/Syt2/Syt3/Syt4/Syt5/Syt6/Syt7/Syt8/Syt9/Syt10/Syt11/Syt12/Syt13/Syt14/Syt15/Syt16/Syt17/Sytl1/Sytl2/Sytl3/Sytl4/Sytl5/Tc2n/Wwc2	""	Nvec_v1g129234
+Nvec_vc1.1_XM_032373058.2	neu.RhoGEF.HG1.5:Tiam1/Tiam2		Nvec_v1g129286
+Nvec_vc1.1_XM_032373045.1	neu.ANF_receptor.HG1.25:like:Casr/Gprc6a/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r128		Nvec_v1g129319
+Nvec_vc1.1_XM_001625381.3	neu.Y_phosphatase.HG2.5:Ptpdc1	Ptpdc1	Nvec_v1g129991
+Nvec_vc1.1_XM_032372557.2	neu.Synaptotagmin.HG1.34:Syt1/Syt2/Syt3/Syt4/Syt5/Syt6/Syt7/Syt8/Syt9/Syt10/Syt11/Syt12/Syt13/Syt15/Syt17		Nvec_v1g130783
+Nvec_vc1.1_XM_032372444.2	Nvec_v1g131020:HG.Unclassified	""	Nvec_v1g131020
+Nvec_vc1.1_XM_001625044.3	neu.Ras.HG4.11:Arl2	Arl2	Nvec_v1g131042
+Nvec_vc1.1_XM_032373119.2	neu.Guanylate_kin.HG1.9:Mpp3/Mpp4/Mpp7/Pals1	Pals1	Nvec_v1g131394
+Nvec_vc1.1_XM_032372339.2	neu.MFS_1.HG4.4:Slc46a1/Slc46a2/Slc46a3		Nvec_v1g131488
+Nvec_vc1.1_XM_048726378.1	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g131775
+Nvec_vc1.1_XM_001624849.3	neu.MFS_1.HG1.9:Slc16a2/Slc16a10	Slc16a10/Slc16a2	Nvec_v1g131805
+Nvec_vc1.1_XM_001624849.3	neu.MFS_1.HG1.9:Slc16a2/Slc16a10	Slc16a10/Slc16a2	Nvec_v1g131809
+Nvec_vc1.1_XM_048727772.1	neu.Aa_trans.HG1.2:Slc32a1		Nvec_v1g131848
+Nvec_vc1.1_XM_032372092.2	neu.SDF.HG1.1:Slc1a1/Slc1a2/Slc1a3/Slc1a4/Slc1a5/Slc1a6/Slc1a7	Slc1a1/Slc1a2/Slc1a3/Slc1a4/Slc1a5/Slc1a6/Slc1a7	Nvec_v1g132052
+Nvec_vc1.1_XM_032372092.2	neu.SDF.HG1.1:Slc1a1/Slc1a2/Slc1a3/Slc1a4/Slc1a5/Slc1a6/Slc1a7	Slc1a1/Slc1a2/Slc1a3/Slc1a4/Slc1a5/Slc1a6/Slc1a7	Nvec_v1g132063
+Nvec_vc1.1_XM_048727355.1	neu.GKAP.HG2.0:Ubqln1/Ubqln2/Ubqln3/Ubqln4	Ubqln1/Ubqln2/Ubqln3/Ubqln4	Nvec_v1g132153
+Nvec_vc1.1_XM_032371997.2	neu.ANF_receptor.HG1.3:like:Gria1/Gria2/Gria3/Gria4/Grid1/Grid2/Grik1/Grik2/Grik3/Grik4/Grik5		Nvec_v1g132356
+Nvec_vc1.1_XM_001624584.3	neu.MFS_1.HG1.9:Slc16a2/Slc16a10	Slc16a10/Slc16a2	Nvec_v1g132893
+Nvec_vc1.1_XM_032371913.2	neu.Aa_trans.HG1.11:Slc38a7/Slc38a8	Slc38a7/Slc38a8	Nvec_v1g132896
+Nvec_vc1.1_XM_001624546.3	neu.RhoGEF.HG1.22:Arhgef39	Arhgef39	Nvec_v1g133049
+Nvec_vc1.1_XM_001624387.3	neu.Ras.HG2.1:Rasl11a/Rasl11b/Rerg/Rergl		Nvec_v1g133940
+Nvec_vc1.1_XM_001624283.3	neu.COesterase.HG1.1:like:Ache/Bche/Cel/Ces1a/Ces1b/Ces1c/Ces1d/Ces1e/Ces1f/Ces1g/Ces1h/Ces2a/Ces2b/Ces2c/Ces2e/Ces2f/Ces2g/Ces2h/Ces3a/Ces3b/Ces4a/Ces5a/Nlgn1/Nlgn2/Nlgn3/Tg		Nvec_v1g134282
+Nvec_vc1.1_XM_032371581.2	neu.COesterase.HG1.1:like:Ache/Bche/Cel/Ces1a/Ces1b/Ces1c/Ces1d/Ces1e/Ces1f/Ces1g/Ces1h/Ces2a/Ces2b/Ces2c/Ces2e/Ces2f/Ces2g/Ces2h/Ces3a/Ces3b/Ces4a/Ces5a/Nlgn1/Nlgn2/Nlgn3/Tg		Nvec_v1g134283
+Nvec_vc1.1_XM_048728203.1	neu.Caps.HG1.1:Unc13a/Unc13b/Unc13c;neu.Synaptotagmin.HG1.18:Unc13a/Unc13c	""	Nvec_v1g134873
+Nvec_vc1.1_XM_048727892.1	neu.FERM_M.HG1.31:Epb41l4a/Epb41l4b/Epb41l5/Frmd3/Frmd5/Ptpn3/Ptpn4	Epb41l4a	Nvec_v1g134878
+Nvec_vc1.1_XM_048728149.1	neu.Synaptotagmin.HG1.14:C2cd4c/C2cd4d/Syt14/Syt16/Tc2n		Nvec_v1g135177
+Nvec_vc1.1_XM_048727470.1	neu.Ras.HG5.10:Lrrk1	Lrrk1	Nvec_v1g135193
+Nvec_vc1.1_XM_048728149.1	neu.Synaptotagmin.HG1.14:C2cd4c/C2cd4d/Syt14/Syt16/Tc2n		Nvec_v1g135204
+Nvec_vc1.1_XM_032371193.2	neu.MFS_1.HG1.15:like:Slc16a2/Slc16a10		Nvec_v1g135421
+Nvec_vc1.1_XM_032370981.2	neu.Synaptotagmin.HG1.34:Syt1/Syt2/Syt3/Syt4/Syt5/Syt6/Syt7/Syt8/Syt9/Syt10/Syt11/Syt12/Syt13/Syt15/Syt17	Syt12	Nvec_v1g136167
+Nvec_vc1.1_XM_032370987.2	neu.COesterase.HG1.1:like:Ache/Bche/Cel/Ces1a/Ces1b/Ces1c/Ces1d/Ces1e/Ces1f/Ces1g/Ces1h/Ces2a/Ces2b/Ces2c/Ces2e/Ces2f/Ces2g/Ces2h/Ces3a/Ces3b/Ces4a/Ces5a/Nlgn1/Nlgn2/Nlgn3/Tg		Nvec_v1g136183
+Nvec_vc1.1_XM_001623796.3	neu.Synaptotagmin.HG1.34:Syt1/Syt2/Syt3/Syt4/Syt5/Syt6/Syt7/Syt8/Syt9/Syt10/Syt11/Syt12/Syt13/Syt15/Syt17	Syt1/Syt2/Syt5/Syt8	Nvec_v1g136185
+Nvec_vc1.1_XM_048723456.1	neu.Y_phosphatase.HG1.35:Ptprk/Ptprm/Ptprt/Ptpru	Ptprk/Ptprm/Ptprt/Ptpru	Nvec_v1g136198
+Nvec_vc1.1_XM_048723629.1	neu.Y_phosphatase.HG1.35:Ptprk/Ptprm/Ptprt/Ptpru	Ptprk/Ptprm/Ptprt/Ptpru	Nvec_v1g136198
+Nvec_vc1.1_XM_048723486.1	neu.Y_phosphatase.HG1.35:Ptprk/Ptprm/Ptprt/Ptpru	Ptprk/Ptprm/Ptprt/Ptpru	Nvec_v1g136220
+Nvec_vc1.1_XM_048723486.1	neu.Y_phosphatase.HG1.35:Ptprk/Ptprm/Ptprt/Ptpru	Ptprk/Ptprm/Ptprt/Ptpru	Nvec_v1g136229
+Nvec_vc1.1_XM_048723486.1	neu.Y_phosphatase.HG1.35:Ptprk/Ptprm/Ptprt/Ptpru	Ptprk/Ptprm/Ptprt/Ptpru	Nvec_v1g136247
+Nvec_vc1.1_XM_032370915.2	neu.MFS_1.HG7.10:like:Gm5724/Gm6614/Slco1a1/Slco1a4/Slco1a5/Slco1a6/Slco1b2/Slco1c1/Slco2a1/Slco2b1/Slco3a1/Slco5a1		Nvec_v1g136329
+Nvec_vc1.1_XM_032370846.2	neu.PID.HG1.17:Apbb1/Apbb2/Apbb3	Apbb1/Apbb2/Apbb3	Nvec_v1g136532
+Nvec_v1g136570	neu.Synaptotagmin.HG1.14:C2cd4c/C2cd4d/Syt14/Syt16/Tc2n		Nvec_v1g136570
+Nvec_vc1.1_XM_048727871.1	neu.Synaptotagmin.HG1.14:C2cd4c/C2cd4d/Syt14/Syt16/Tc2n		Nvec_v1g136571
+Nvec_v1g136591	neu.Synaptotagmin.HG1.14:C2cd4c/C2cd4d/Syt14/Syt16/Tc2n		Nvec_v1g136591
+Nvec_vc1.1_XM_032370839.2	neu.Synaptotagmin.HG1.14:C2cd4c/C2cd4d/Syt14/Syt16/Tc2n		Nvec_v1g136599
+Nvec_vc1.1_XM_048721256.1	neu.RhoGEF.HG1.24:Plekhg4	Plekhg4	Nvec_v1g137344
+Nvec_vc1.1_XM_001623372.3	Nvec_v1g137684:HG.Unclassified	""	Nvec_v1g137684
+Nvec_vc1.1_XM_032370338.2	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g138108
+Nvec_vc1.1_XM_048728130.1	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g138442
+Nvec_vc1.1_XM_001623035.3	neu.ANF_receptor.HG2.7:like:Npr1/Npr2/Npr3		Nvec_v1g138852
+Nvec_vc1.1_XM_048720075.1	neu.MFS_1.HG6.0:Slc17a1/Slc17a2/Slc17a3/Slc17a4/Slc17a5/Slc17a6/Slc17a7/Slc17a8/Slc17a9	Slc17a6/Slc17a7/Slc17a8	Nvec_v1g138860
+Nvec_vc1.1_XM_048724742.1	neu.Y_phosphatase.HG1.35:Ptprk/Ptprm/Ptprt/Ptpru	Ptprk/Ptprm/Ptprt/Ptpru	Nvec_v1g138872
+Nvec_vc1.1_XM_001622889.3	neu.Ras.HG2.4:like:Gem/Rasl12/Rem1/Rem2/Rrad		Nvec_v1g139295
+Nvec_vc1.1_XM_032369648.2	neu.MFS_1.HG1.9:Slc16a2/Slc16a10	Slc16a10/Slc16a2	Nvec_v1g140505
+Nvec_vc1.1_XM_048733373.1	neu.Y_phosphatase.HG1.34:like:Ptprk/Ptprm/Ptprt/Ptpru		Nvec_v1g140565
+Nvec_vc1.1_XM_032369519.2	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g140859
+Nvec_vc1.1_XM_048728203.1	neu.Unc13.HG1.0:Unc13a/Unc13b/Unc13c/Unc13d	Unc13a/Unc13b/Unc13c	Nvec_v1g141652
+Nvec_vc1.1_XM_048734267.1	Nvec_v1g141689:HG.Unclassified	""	Nvec_v1g141689
+Nvec_vc1.1_XM_001622253.3	neu.ANF_receptor.HG1.11:like:Gria1/Gria2/Gria3/Gria4/Grid1/Grid2/Grik1/Grik2/Grik3/Grik4/Grik5		Nvec_v1g141731
+Nvec_vc1.1_XM_001629561.3	neu.COesterase.HG1.7:like:Ache/Bche/Cel/Ces1a/Ces1b/Ces1c/Ces1d/Ces1e/Ces1f/Ces1g/Ces1h/Ces2a/Ces2b/Ces2c/Ces2e/Ces2f/Ces2g/Ces2h/Ces3a/Ces3b/Ces4a/Ces5a/Nlgn1/Nlgn2/Nlgn3/Tg		Nvec_v1g14178
+Nvec_vc1.1_XM_048729033.1	neu.Pentaxin.HG1.13:Npcd/Nptx1/Nptx2/Nptxr		Nvec_v1g142117
+Nvec_vc1.1_XM_048729314.1	neu.Pentaxin.HG1.13:Npcd/Nptx1/Nptx2/Nptxr		Nvec_v1g142128
+Nvec_vc1.1_XM_048729314.1	neu.Pentaxin.HG1.13:Npcd/Nptx1/Nptx2/Nptxr		Nvec_v1g142130
+Nvec_vc1.1_XM_048729033.1	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g142132
+Nvec_vc1.1_XM_001624849.3	neu.MFS_1.HG1.9:Slc16a2/Slc16a10	Slc16a10/Slc16a2	Nvec_v1g142306
+Nvec_vc1.1_XM_048727924.1	neu.Pentaxin.HG1.9:like:Npcd/Nptx1/Nptx2/Nptxr/Ptx4/Svep1		Nvec_v1g142447
+Nvec_vc1.1_XM_048733814.1	neu.Aa_trans.HG1.2:Slc32a1		Nvec_v1g142801
+Nvec_vc1.1_XM_048721475.1	neu.RhoGEF.HG1.8:Itsn1/Itsn2	Itsn1/Itsn2	Nvec_v1g143432
+Nvec_vc1.1_XM_001621716.3	neu.Y_phosphatase.HG4.8:Dusp3	Dusp3	Nvec_v1g143743
+Nvec_vc1.1_XM_032363464.2	neu.SNF.HG1.7:Slc6a15/Slc6a16/Slc6a17/Slc6a18/Slc6a19/Slc6a20a/Slc6a20b/Slc6a21	Slc6a15/Slc6a16/Slc6a17/Slc6a18/Slc6a19/Slc6a20a/Slc6a20b/Slc6a21	Nvec_v1g143792
+Nvec_vc1.1_XM_032363425.2	neu.SNF.HG1.7:Slc6a15/Slc6a16/Slc6a17/Slc6a18/Slc6a19/Slc6a20a/Slc6a20b/Slc6a21	Slc6a15/Slc6a16/Slc6a17/Slc6a18/Slc6a19/Slc6a20a/Slc6a20b/Slc6a21	Nvec_v1g143800
+Nvec_vc1.1_XM_001632421.3	Nvec_v1g144236:HG.Unclassified	""	Nvec_v1g144236
+Nvec_vc1.1_XM_032379210.2	neu.Ras.HG3.0:Rhot1/Rhot2	Rhot1/Rhot2	Nvec_v1g144500
+Nvec_vc1.1_XM_032370482.2	neu.MFS_1.HG1.15:like:Slc16a2/Slc16a10		Nvec_v1g144566
+Nvec_v1g144703	neu.Pentaxin.HG1.13:Npcd/Nptx1/Nptx2/Nptxr		Nvec_v1g144703
+Nvec_vc1.1_XM_048726271.1	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g14487
+Nvec_v1g144970	neu.SDF.HG1.0:like:Slc1a1/Slc1a2/Slc1a3/Slc1a4/Slc1a5/Slc1a6/Slc1a7		Nvec_v1g144970
+Nvec_vc1.1_XM_001634828.3	neu.ANF_receptor.HG1.26:like:Casr/Gprc6a/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r128		Nvec_v1g145351
+Nvec_vc1.1_XM_048720025.1	Nvec_v1g145377:HG.Unclassified	""	Nvec_v1g145377
+Nvec_vc1.1_XM_032373215.2	neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30		Nvec_v1g145688
+Nvec_vc1.1_XM_001635717.3	neu.Synaptotagmin.HG1.34:Syt1/Syt2/Syt3/Syt4/Syt5/Syt6/Syt7/Syt8/Syt9/Syt10/Syt11/Syt12/Syt13/Syt15/Syt17	Syt7	Nvec_v1g146041
+Nvec_vc1.1_XM_032372092.2	neu.SDF.HG1.1:Slc1a1/Slc1a2/Slc1a3/Slc1a4/Slc1a5/Slc1a6/Slc1a7	Slc1a1/Slc1a2/Slc1a3/Slc1a4/Slc1a5/Slc1a6/Slc1a7	Nvec_v1g146235
+Nvec_vc1.1_XM_032372092.2	neu.SDF.HG1.1:Slc1a1/Slc1a2/Slc1a3/Slc1a4/Slc1a5/Slc1a6/Slc1a7	Slc1a1/Slc1a2/Slc1a3/Slc1a4/Slc1a5/Slc1a6/Slc1a7	Nvec_v1g146238
+Nvec_vc1.1_XM_048730497.1	neu.SNF.HG1.12:like:Slc6a1/Slc6a2/Slc6a3/Slc6a4/Slc6a5/Slc6a6/Slc6a7/Slc6a8/Slc6a9/Slc6a11/Slc6a12/Slc6a13/Slc6a14		Nvec_v1g146244
+Nvec_vc1.1_XM_048725713.1	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g146442
+Nvec_vc1.1_XM_032371913.2	neu.Aa_trans.HG1.11:Slc38a7/Slc38a8	Slc38a7/Slc38a8	Nvec_v1g146474
+Nvec_vc1.1_XM_001638987.3	Nvec_v1g146703:HG.Unclassified	""	Nvec_v1g146703
+Nvec_vc1.1_XM_048734077.1	Nvec_v1g146855:HG.Unclassified	""	Nvec_v1g146855
+Nvec_vc1.1_XM_048721740.1	neu.Synaptotagmin.HG1.25:Sytl1/Sytl2/Sytl3/Sytl4/Sytl5	Sytl1/Sytl2/Sytl3/Sytl4/Sytl5	Nvec_v1g147022
+Nvec_vc1.1_XM_001640575.3	neu.MFS_1.HG4.4:Slc46a1/Slc46a2/Slc46a3		Nvec_v1g147317
+Nvec_vc1.1_XM_048728428.1	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g147459
+Nvec_vc1.1_XM_048729079.1	neu.SNF.HG1.12:like:Slc6a1/Slc6a2/Slc6a3/Slc6a4/Slc6a5/Slc6a6/Slc6a7/Slc6a8/Slc6a9/Slc6a11/Slc6a12/Slc6a13/Slc6a14		Nvec_v1g147776
+Nvec_vc1.1_XM_032364895.2	Nvec_v1g147958:HG.Unclassified	""	Nvec_v1g147958
+Nvec_vc1.1_XM_048728847.1	Nvec_v1g148264:HG.Unclassified	""	Nvec_v1g148264
+Nvec_vc1.1_XM_048730494.1	neu.Sec1.HG1.1:Scfd1	Scfd1	Nvec_v1g148511
+Nvec_vc1.1_XM_048725576.1	neu.Y_phosphatase.HG1.35:Ptprk/Ptprm/Ptprt/Ptpru	Ptprk/Ptprm/Ptprt/Ptpru	Nvec_v1g148785
+Nvec_vc1.1_XM_048726548.1	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g149554
+Nvec_vc1.1_XM_001628781.3	neu.MFS_1.HG4.4:Slc46a1/Slc46a2/Slc46a3;neu.Sugar_tr.HG6.0:NA	""	Nvec_v1g150599
+Nvec_vc1.1_XM_032363362.2	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g150957
+Nvec_vc1.1_XM_032387280.2	neu.RhoGEF.HG1.4:Arhgef4/Arhgef9/Spata13	Arhgef4/Arhgef9/Spata13	Nvec_v1g150958
+Nvec_vc1.1_XM_032375428.2	neu.ANF_receptor.HG1.5:Grin1	Grin1	Nvec_v1g15144
+Nvec_vc1.1_XM_048734247.1	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g151622
+Nvec_vc1.1_XM_048727675.1	Nvec_v1g151639:HG.Unclassified	""	Nvec_v1g151639
+Nvec_vc1.1_XM_048727675.1	Nvec_v1g151640:HG.Unclassified	""	Nvec_v1g151640
+Nvec_vc1.1_XM_048728420.1	neu.Pentaxin.HG1.13:Npcd/Nptx1/Nptx2/Nptxr		Nvec_v1g151668
+Nvec_vc1.1_XM_001622886.3	neu.Ras.HG2.14:Gm266/Rap2a/Rap2b/Rap2c	Gm266/Rap2a/Rap2b/Rap2c	Nvec_v1g151849
+Nvec_vc1.1_XM_001622886.3	neu.Ras.HG2.14:Gm266/Rap2a/Rap2b/Rap2c	Gm266/Rap2a/Rap2b/Rap2c	Nvec_v1g151852
+Nvec_vc1.1_XM_032375572.2	neu.MFS_1.HG1.9:Slc16a2/Slc16a10	Slc16a10/Slc16a2	Nvec_v1g152010
+Nvec_vc1.1_XM_048730607.1	Nvec_v1g152143:HG.Unclassified	""	Nvec_v1g152143
+Nvec_vc1.1_XM_032370839.2	neu.Synaptotagmin.HG1.14:C2cd4c/C2cd4d/Syt14/Syt16/Tc2n		Nvec_v1g152417
+Nvec_vc1.1_XM_032374848.2	neu.Y_phosphatase.HG1.10:like:Ptpn12/Ptpn18/Ptpn22		Nvec_v1g152942
+Nvec_vc1.1_XM_048721213.1	neu.Y_phosphatase.HG1.40:Ptpn1/Ptpn2	Ptpn1/Ptpn2	Nvec_v1g153157
+Nvec_vc1.1_XM_048734714.1	neu.MFS_1.HG4.9:Slc22a18		Nvec_v1g1539
+Nvec_vc1.1_XM_001624849.3	neu.MFS_1.HG1.9:Slc16a2/Slc16a10	Slc16a10/Slc16a2	Nvec_v1g154233
+Nvec_v1g154498	neu.SNF.HG1.11:like:Slc6a1/Slc6a2/Slc6a3/Slc6a4/Slc6a5/Slc6a6/Slc6a7/Slc6a8/Slc6a9/Slc6a11/Slc6a12/Slc6a13/Slc6a14		Nvec_v1g154498
+Nvec_vc1.1_XM_001627422.3	neu.COesterase.HG1.1:like:Ache/Bche/Cel/Ces1a/Ces1b/Ces1c/Ces1d/Ces1e/Ces1f/Ces1g/Ces1h/Ces2a/Ces2b/Ces2c/Ces2e/Ces2f/Ces2g/Ces2h/Ces3a/Ces3b/Ces4a/Ces5a/Nlgn1/Nlgn2/Nlgn3/Tg		Nvec_v1g155866
+Nvec_vc1.1_XM_048724961.1	Nvec_v1g157705:HG.Unclassified	""	Nvec_v1g157705
+Nvec_vc1.1_XM_001641911.3	neu.CaMKII.HG1.1:Camk2a/Camk2b/Camk2d/Camk2g	Camk2a/Camk2b/Camk2d/Camk2g	Nvec_v1g157808
+Nvec_vc1.1_XM_001641495.3	Nvec_v1g158216:HG.Unclassified	""	Nvec_v1g158216
+Nvec_vc1.1_XM_001641064.3	neu.ANF_receptor.HG2.29:like:Gabbr1/Gabbr2		Nvec_v1g158857
+Nvec_vc1.1_XM_001639852.3	neu.Pyridoxal_deC.HG1.5:Sgpl1	Sgpl1	Nvec_v1g159899
+Nvec_vc1.1_XM_032365045.2	neu.MFS_1.HG21.1:Mfsd5	Mfsd5	Nvec_v1g159908
+Nvec_vc1.1_XM_032365047.2	neu.FERM_M.HG1.18:Tln1/Tln2	Tln1/Tln2	Nvec_v1g159935
+Nvec_vc1.1_XM_048725127.1	neu.Y_phosphatase.HG1.35:Ptprk/Ptprm/Ptprt/Ptpru	Ptprk/Ptprm/Ptprt/Ptpru	Nvec_v1g160028
+Nvec_vc1.1_XM_048724774.1	neu.Y_phosphatase.HG1.35:Ptprk/Ptprm/Ptprt/Ptpru	Ptprk/Ptprm/Ptprt/Ptpru	Nvec_v1g160033
+Nvec_vc1.1_XM_048724554.1	neu.FERM_M.HG1.1:Frmd6/Frmpd2/Ptpn13		Nvec_v1g16015
+Nvec_vc1.1_XM_001639478.3	neu.PMCA.HG1.3:Atp2a1/Atp2a2/Atp2a3	Atp2a1/Atp2a2/Atp2a3	Nvec_v1g160437
+Nvec_vc1.1_XM_032364504.2	Nvec_v1g160457:HG.Unclassified	""	Nvec_v1g160457
+Nvec_vc1.1_XM_001639581.3	Nvec_v1g160464:HG.Unclassified	""	Nvec_v1g160464
+Nvec_vc1.1_XM_032364346.2	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g160661
+Nvec_vc1.1_XM_032364145.2	neu.COesterase.HG1.1:like:Ache/Bche/Cel/Ces1a/Ces1b/Ces1c/Ces1d/Ces1e/Ces1f/Ces1g/Ces1h/Ces2a/Ces2b/Ces2c/Ces2e/Ces2f/Ces2g/Ces2h/Ces3a/Ces3b/Ces4a/Ces5a/Nlgn1/Nlgn2/Nlgn3/Tg		Nvec_v1g160761
+Nvec_vc1.1_XM_032363819.2	neu.MFS_1.HG10.3:Slc37a3	Slc37a3	Nvec_v1g161025
+Nvec_vc1.1_XM_032363519.2	neu.MFS_1.HG4.10:Mfsd9	Mfsd9	Nvec_v1g161245
+Nvec_vc1.1_XM_032363425.2	neu.SNF.HG1.7:Slc6a15/Slc6a16/Slc6a17/Slc6a18/Slc6a19/Slc6a20a/Slc6a20b/Slc6a21	Slc6a15/Slc6a16/Slc6a17/Slc6a18/Slc6a19/Slc6a20a/Slc6a20b/Slc6a21	Nvec_v1g161287
+Nvec_vc1.1_XM_001638073.3	neu.Guanylate_kin.HG1.11:Dlg1/Dlg2/Dlg3/Dlg4	Dlg1/Dlg2/Dlg3/Dlg4	Nvec_v1g161775
+Nvec_vc1.1_XM_032362711.2	neu.Synaptotagmin.HG1.0:Nedd4l	Nedd4l	Nvec_v1g161803
+Nvec_vc1.1_XM_048727372.1	neu.Y_phosphatase.HG1.0:Ptpn9	Ptpn9	Nvec_v1g162155
+Nvec_vc1.1_XM_032361858.2	neu.Caps.HG1.0:Cadps/Cadps2	Cadps/Cadps2	Nvec_v1g162421
+Nvec_vc1.1_XM_001636882.3	neu.Ras.HG4.16:Arl4a/Arl4c/Arl4d/Arl11/Arl14	Arl4a/Arl4c/Arl4d	Nvec_v1g162886
+Nvec_vc1.1_XM_048721430.1	neu.FERM_M.HG1.17:Myo10/Plekhh3	Myo10/Plekhh3	Nvec_v1g162932
+Nvec_vc1.1_XM_048720422.1	neu.SSF.HG1.8:like:Slc5a3		Nvec_v1g163024
+Nvec_vc1.1_XM_001635747.3	Nvec_v1g163982:HG.Unclassified	""	Nvec_v1g163982
+Nvec_vc1.1_XM_001635332.3	Nvec_v1g164354:HG.Unclassified	""	Nvec_v1g164354
+Nvec_vc1.1_XM_001635177.3	Nvec_v1g164553:HG.Unclassified	""	Nvec_v1g164553
+Nvec_vc1.1_XM_001634318.3	neu.Synaptobrevin.HG1.5:Sec22b	Sec22b	Nvec_v1g165401
+Nvec_vc1.1_XM_001633949.3	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g165851
+Nvec_vc1.1_XM_032383152.2	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g165915
+Nvec_vc1.1_XM_048733485.1	neu.PMCA.HG1.2:Atp2b1/Atp2b2/Atp2b3/Atp2b4	Atp2b1/Atp2b2/Atp2b3/Atp2b4	Nvec_v1g166010
+Nvec_vc1.1_XM_032383067.2	neu.PMCA.HG1.2:Atp2b1/Atp2b2/Atp2b3/Atp2b4	Atp2b1/Atp2b2/Atp2b3/Atp2b4	Nvec_v1g166011
+Nvec_vc1.1_XM_001633237.3	neu.Synaptotagmin.HG1.14:C2cd4c/C2cd4d/Syt14/Syt16/Tc2n	Syt14/Syt16	Nvec_v1g166469
+Nvec_vc1.1_XM_001633031.3	Nvec_v1g166681:HG.Unclassified	""	Nvec_v1g166681
+Nvec_vc1.1_XM_001632915.3	neu.Ras.HG4.15:Arf6		Nvec_v1g166872
+Nvec_vc1.1_XM_001632421.3	Nvec_v1g167351:HG.Unclassified	""	Nvec_v1g167351
+Nvec_vc1.1_XM_001632326.3	neu.SSF.HG1.5:Slc5a5/Slc5a6/Slc5a8/Slc5a12		Nvec_v1g167395
+Nvec_vc1.1_XM_001632169.3	neu.Ras.HG3.18:Rhou/Rhov	Rhou/Rhov	Nvec_v1g167553
+Nvec_vc1.1_XM_001632180.3	Nvec_v1g167582:HG.Unclassified	""	Nvec_v1g167582
+Nvec_vc1.1_XM_001631932.3	Nvec_v1g167835:HG.Unclassified	""	Nvec_v1g167835
+Nvec_vc1.1_XM_032380505.2	neu.RhoGEF.HG1.7:Arhgef5/Arhgef15/Arhgef16/Arhgef19/Arhgef26/Ngef	Arhgef15/Arhgef16/Arhgef19/Arhgef26/Arhgef5/Ngef	Nvec_v1g168046
+Nvec_vc1.1_XM_001631279.3	neu.MFS_1.HG16.0:NA		Nvec_v1g168335
+Nvec_vc1.1_XM_001630662.3	neu.SSF.HG1.5:Slc5a5/Slc5a6/Slc5a8/Slc5a12	Slc5a12/Slc5a5/Slc5a6/Slc5a8	Nvec_v1g168881
+Nvec_vc1.1_XM_001630152.3	neu.Ras.HG4.17:like:Arl4a/Arl4c/Arl4d/Arl11/Arl14		Nvec_v1g169415
+Nvec_vc1.1_XM_032376790.2	neu.Ras.HG2.12:Rasd1/Rasd2/Rasl10a/Rasl10b	Rasl10a/Rasl10b	Nvec_v1g16994
+Nvec_vc1.1_XM_032377870.2	Nvec_v1g170051:HG.Unclassified	""	Nvec_v1g170051
+Nvec_vc1.1_XM_001629388.3	Nvec_v1g170199:HG.Unclassified	""	Nvec_v1g170199
+Nvec_vc1.1_XM_001629063.3	Nvec_v1g170518:HG.Unclassified	""	Nvec_v1g170518
+Nvec_vc1.1_XM_048731086.1	Nvec_v1g170634:HG.Unclassified	""	Nvec_v1g170634
+Nvec_vc1.1_XM_048722932.1	neu.SNF.HG1.12:like:Slc6a1/Slc6a2/Slc6a3/Slc6a4/Slc6a5/Slc6a6/Slc6a7/Slc6a8/Slc6a9/Slc6a11/Slc6a12/Slc6a13/Slc6a14		Nvec_v1g170725
+Nvec_vc1.1_XM_001628781.3	neu.MFS_1.HG4.4:Slc46a1/Slc46a2/Slc46a3		Nvec_v1g170737
+Nvec_vc1.1_XM_001628736.3	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g170798
+Nvec_vc1.1_XM_001628618.3	Nvec_v1g170908:HG.Unclassified	""	Nvec_v1g170908
+Nvec_vc1.1_XM_001628386.3	neu.Ras.HG4.21:like:Arf4/Arf5		Nvec_v1g171050
+Nvec_vc1.1_XM_032375743.2	neu.MFS_1.HG5.1:Slc18a1/Slc18a2/Slc18a3/Slc18b1	Slc18b1	Nvec_v1g171569
+Nvec_vc1.1_XM_001629487.3	neu.Ras.HG3.4:like:4930544G11Rik/Cdc42/Rac1/Rac2/Rac3/Rhoa/Rhob/Rhoc/Rhod/Rhof/Rhog/Rhoh/Rhoj/Rhoq/Rhou/Rhov/Rnd1/Rnd2/Rnd3		Nvec_v1g17158
+Nvec_vc1.1_XM_032375428.2	neu.ANF_receptor.HG1.5:Grin1	Grin1	Nvec_v1g171792
+Nvec_vc1.1_XM_001627440.3	neu.COesterase.HG1.1:like:Ache/Bche/Cel/Ces1a/Ces1b/Ces1c/Ces1d/Ces1e/Ces1f/Ces1g/Ces1h/Ces2a/Ces2b/Ces2c/Ces2e/Ces2f/Ces2g/Ces2h/Ces3a/Ces3b/Ces4a/Ces5a/Nlgn1/Nlgn2/Nlgn3/Tg		Nvec_v1g171912
+Nvec_vc1.1_XM_048727157.1	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g172071
+Nvec_vc1.1_XM_048719696.1	neu.Ras.HG3.36:Rac1/Rac2/Rac3		Nvec_v1g172175
+Nvec_vc1.1_XM_001627041.3	Nvec_v1g172228:HG.Unclassified	""	Nvec_v1g172228
+Nvec_vc1.1_XM_032373212.2	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g173562
+Nvec_vc1.1_XM_001625670.3	neu.SDF.HG1.1:Slc1a1/Slc1a2/Slc1a3/Slc1a4/Slc1a5/Slc1a6/Slc1a7	Slc1a1/Slc1a2/Slc1a3/Slc1a4/Slc1a5/Slc1a6/Slc1a7	Nvec_v1g173595
+Nvec_vc1.1_XM_032373119.2	neu.Guanylate_kin.HG1.9:Mpp3/Mpp4/Mpp7/Pals1;neu.PDZ.HG2.1:Pals1	""	Nvec_v1g173637
+Nvec_vc1.1_XM_001625124.3	Nvec_v1g174073:HG.Unclassified	""	Nvec_v1g174073
+Nvec_vc1.1_XM_048730138.1	neu.MFS_1.HG1.15:like:Slc16a2/Slc16a10		Nvec_v1g174285
+Nvec_vc1.1_XM_048719709.1	neu.MFS_1.HG16.0:NA		Nvec_v1g174383
+Nvec_vc1.1_XM_001624665.3	neu.MFS_1.HG8.6:Slc2a6/Slc2a8;neu.Sugar_tr.HG3.4:Slc2a6/Slc2a8	""	Nvec_v1g174480
+Nvec_vc1.1_XM_032371824.2	Nvec_v1g174672:HG.Unclassified	""	Nvec_v1g174672
+Nvec_vc1.1_XM_001622377.3	neu.Ras.HG2.12:Rasd1/Rasd2/Rasl10a/Rasl10b	Rasl10a/Rasl10b	Nvec_v1g176098
+Nvec_vc1.1_XM_048734342.1	neu.FERM_M.HG1.29:Epb41/Epb41l1/Epb41l2		Nvec_v1g176215
+Nvec_vc1.1_XM_001621930.3	Nvec_v1g176370:HG.Unclassified	""	Nvec_v1g176370
+Nvec_vc1.1_XM_001620571.3	neu.Homer.HG1.1:like:Enah/Evl/Spred1/Spred2/Spred3/Vasp/Was/Wasl		Nvec_v1g176677
+Nvec_vc1.1_XM_048724257.1	neu.Synaptotagmin.HG1.34:Syt1/Syt2/Syt3/Syt4/Syt5/Syt6/Syt7/Syt8/Syt9/Syt10/Syt11/Syt12/Syt13/Syt15/Syt17		Nvec_v1g177691
+Nvec_vc1.1_XM_001641130.3	Nvec_v1g177723:HG.Unclassified	""	Nvec_v1g177723
+Nvec_vc1.1_XM_001641265.3	neu.MFS_1.HG4.11:Mfsd10	Mfsd10	Nvec_v1g177762
+Nvec_vc1.1_XM_001641176.3	neu.Ras.HG2.1:Rasl11a/Rasl11b/Rerg/Rergl		Nvec_v1g177859
+Nvec_vc1.1_XM_048724124.1	neu.FERM_M.HG1.14:Ptpn14/Ptpn21	Ptpn14/Ptpn21	Nvec_v1g178061
+Nvec_vc1.1_XM_048724124.1	neu.Y_phosphatase.HG1.38:Ptpn14/Ptpn21	Ptpn14/Ptpn21	Nvec_v1g178063
+Nvec_vc1.1_XM_048723090.1	neu.Ras.HG3.5:like:4930544G11Rik/Cdc42/Rac1/Rac2/Rac3/Rhoa/Rhob/Rhoc/Rhod/Rhof/Rhog/Rhoh/Rhoj/Rhoq/Rhou/Rhov/Rnd1/Rnd2/Rnd3		Nvec_v1g178220
+Nvec_vc1.1_XM_048729461.1	neu.MFS_1.HG6.0:Slc17a1/Slc17a2/Slc17a3/Slc17a4/Slc17a5/Slc17a6/Slc17a7/Slc17a8/Slc17a9		Nvec_v1g178276
+Nvec_vc1.1_XM_001640405.3	neu.Ras.HG4.14:like:Arf1/Arf2/Arf3/Arf4/Arf5/Arf6/Arfrp1/Arl1/Arl2/Arl3/Arl4a/Arl4c/Arl4d/Arl5a/Arl5b/Arl5c/Arl6/Arl9/Arl11/Arl13b/Arl14/Arl15/Trim23		Nvec_v1g178803
+Nvec_vc1.1_XM_001639785.3	neu.Pentaxin.HG1.22:like:Svep1		Nvec_v1g179157
+Nvec_vc1.1_XM_001639787.3	neu.MFS_1.HG1.9:Slc16a2/Slc16a10	Slc16a10/Slc16a2	Nvec_v1g179171
+Nvec_vc1.1_XM_001639888.3	neu.Synaptotagmin.HG1.14:C2cd4c/C2cd4d/Syt14/Syt16/Tc2n		Nvec_v1g179227
+Nvec_vc1.1_XM_048734247.1	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g18127
+Nvec_vc1.1_XM_001637840.3	neu.Ras.HG2.24:Rala/Ralb	Rala/Ralb	Nvec_v1g181274
+Nvec_vc1.1_XM_001637345.3	Nvec_v1g181611:HG.Unclassified	""	Nvec_v1g181611
+Nvec_vc1.1_XM_032386767.2	neu.FERM_M.HG1.31:Epb41l4a/Epb41l4b/Epb41l5/Frmd3/Frmd5/Ptpn3/Ptpn4;neu.Y_phosphatase.HG1.29:Ptpn3/Ptpn4	""	Nvec_v1g182236
+Nvec_vc1.1_XM_001636541.3	Nvec_v1g182353:HG.Unclassified	""	Nvec_v1g182353
+Nvec_vc1.1_XM_032386248.2	neu.PMCA.HG1.2:Atp2b1/Atp2b2/Atp2b3/Atp2b4	Atp2b1/Atp2b2/Atp2b3/Atp2b4	Nvec_v1g182548
+Nvec_vc1.1_XM_048729864.1	neu.MFS_1.HG4.12:Gm43191/Mfsd14a/Mfsd14b	Gm43191/Mfsd14a/Mfsd14b	Nvec_v1g182583
+Nvec_vc1.1_XM_001636405.3	neu.MARVEL.HG1.3:Synpr/Syp/Sypl/Sypl2	Synpr/Syp/Sypl/Sypl2	Nvec_v1g182641
+Nvec_vc1.1_XM_001635751.3	neu.Synaptobrevin.HG1.2:Vamp8	Vamp8	Nvec_v1g183227
+Nvec_vc1.1_XM_001635542.3	neu.PDZ.HG3.0:Psmd9	Psmd9	Nvec_v1g183435
+Nvec_vc1.1_XM_048729083.1	neu.PID.HG1.10:Anks1/Anks1b	Anks1/Anks1b	Nvec_v1g183746
+Nvec_vc1.1_XM_032384374.2	neu.Ras.HG2.10:Agap1/Agap2/Agap3	Agap1/Agap2/Agap3	Nvec_v1g184029
+Nvec_vc1.1_XM_001634508.3	Nvec_v1g184492:HG.Unclassified	""	Nvec_v1g184492
+Nvec_v1g184554	neu.Aa_trans.HG1.2:Slc32a1		Nvec_v1g184554
+Nvec_vc1.1_XM_001634382.3	neu.Citron.HG1.6:Tgfbrap1	Tgfbrap1	Nvec_v1g184615
+Nvec_vc1.1_XM_001633929.3	neu.Homer.HG1.0:like:Enah/Evl/Spred1/Spred2/Spred3/Vasp/Was/Wasl		Nvec_v1g185023
+Nvec_vc1.1_XM_032382944.2	neu.Syntaxin.HG1.1:Stx16	Stx16	Nvec_v1g185304
+Nvec_vc1.1_XM_001633581.3	neu.FERM_M.HG1.7:Mylip	Mylip	Nvec_v1g185341
+Nvec_vc1.1_XM_001627149.3	Nvec_v1g18606:HG.Unclassified	""	Nvec_v1g18606
+Nvec_vc1.1_XM_032381807.2	neu.PMCA.HG1.4:Atp1a1/Atp1a2/Atp1a3/Atp1a4/Atp4a/Atp12a	Atp12a/Atp1a1/Atp1a2/Atp1a3/Atp1a4/Atp4a	Nvec_v1g186331
+Nvec_vc1.1_XM_032381579.2	neu.PID.HG1.23:Tbc1d1/Tbc1d4	Tbc1d1/Tbc1d4	Nvec_v1g186523
+Nvec_vc1.1_XM_001631720.3	neu.SNF.HG1.12:like:Slc6a1/Slc6a2/Slc6a3/Slc6a4/Slc6a5/Slc6a6/Slc6a7/Slc6a8/Slc6a9/Slc6a11/Slc6a12/Slc6a13/Slc6a14		Nvec_v1g187148
+Nvec_vc1.1_XM_001631184.3	neu.Ras.HG2.23:Rras/Rras2	Rras/Rras2	Nvec_v1g187679
+Nvec_vc1.1_XM_001631060.3	neu.Ras.HG2.19:like:Gm266/Rap1a/Rap1b/Rap2a/Rap2b/Rap2c		Nvec_v1g187791
+Nvec_vc1.1_XM_048734474.1	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g18807
+Nvec_vc1.1_XM_001629948.3	neu.Ras.HG7.0:Rraga/Rragb	Rraga/Rragb	Nvec_v1g188861
+Nvec_vc1.1_XM_001629485.3	neu.Ras.HG3.28:Cdc42		Nvec_v1g189251
+Nvec_vc1.1_XM_048721066.1	Nvec_v1g189731:HG.Unclassified	""	Nvec_v1g189731
+Nvec_vc1.1_XM_001628700.3	Nvec_v1g189983:HG.Unclassified	""	Nvec_v1g189983
+Nvec_vc1.1_XM_032376354.2	neu.RasGAP.HG1.4:Rasa1	Rasa1	Nvec_v1g190378
+Nvec_vc1.1_XM_032375518.2	neu.PMCA.HG1.1:Atp2c1/Atp2c2	Atp2c1/Atp2c2	Nvec_v1g190967
+Nvec_vc1.1_XM_001627422.3	neu.COesterase.HG1.1:like:Ache/Bche/Cel/Ces1a/Ces1b/Ces1c/Ces1d/Ces1e/Ces1f/Ces1g/Ces1h/Ces2a/Ces2b/Ces2c/Ces2e/Ces2f/Ces2g/Ces2h/Ces3a/Ces3b/Ces4a/Ces5a/Nlgn1/Nlgn2/Nlgn3/Tg		Nvec_v1g191125
+Nvec_vc1.1_XM_001627170.3	neu.MFS_1.HG8.5:Slc2a1/Slc2a2/Slc2a3/Slc2a4/Slc2a5/Slc2a7/Slc2a9;neu.Sugar_tr.HG3.3:Slc2a1/Slc2a2/Slc2a3/Slc2a4/Slc2a5/Slc2a7/Slc2a9	""	Nvec_v1g191325
+Nvec_vc1.1_XM_032374705.2	Nvec_v1g191466:HG.Unclassified	""	Nvec_v1g191466
+Nvec_vc1.1_XM_032372991.1	neu.ANF_receptor.HG1.27:like:Casr/Gprc6a/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r128		Nvec_v1g19149
+Nvec_vc1.1_XM_001626745.3	Nvec_v1g191733:HG.Unclassified	""	Nvec_v1g191733
+Nvec_vc1.1_XM_032374190.2	neu.Aa_trans.HG1.4:Slc38a9	Slc38a9	Nvec_v1g191972
+Nvec_vc1.1_XM_048731705.1	neu.PID.HG1.18:Rabgap1	Rabgap1	Nvec_v1g192360
+Nvec_vc1.1_XM_032373732.2	neu.MFS_1.HG22.0:like:Mfsd3		Nvec_v1g192413
+Nvec_vc1.1_XM_048730543.1	Nvec_v1g192832:HG.Unclassified	""	Nvec_v1g192832
+Nvec_vc1.1_XM_001625221.3	Nvec_v1g193205:HG.Unclassified	""	Nvec_v1g193205
+Nvec_vc1.1_XM_048730494.1	neu.Sec1.HG1.1:Scfd1	Scfd1	Nvec_v1g193946
+Nvec_vc1.1_XM_001623762.3	neu.MFS_1.HG6.0:Slc17a1/Slc17a2/Slc17a3/Slc17a4/Slc17a5/Slc17a6/Slc17a7/Slc17a8/Slc17a9		Nvec_v1g194407
+Nvec_vc1.1_XM_001622886.3	neu.Ras.HG2.14:Gm266/Rap2a/Rap2b/Rap2c	Gm266/Rap2a/Rap2b/Rap2c	Nvec_v1g195002
+Nvec_vc1.1_XM_001629283.3	neu.Ras.HG4.13:Arl5a/Arl5b/Arl5c	Arl5a/Arl5b/Arl5c	Nvec_v1g195794
+Nvec_vc1.1_XM_032367616.2	Nvec_v1g196107:HG.Unclassified	""	Nvec_v1g196107
+Nvec_v1g196131	neu.SNF.HG1.5:like:Slc6a1/Slc6a2/Slc6a3/Slc6a4/Slc6a5/Slc6a6/Slc6a7/Slc6a8/Slc6a9/Slc6a11/Slc6a12/Slc6a13/Slc6a14		Nvec_v1g196131
+Nvec_vc1.1_XM_032366911.2	neu.MFS_1.HG1.15:like:Slc16a2/Slc16a10		Nvec_v1g196772
+Nvec_vc1.1_XM_001640961.3	neu.MFS_1.HG12.3:like:Mfsd6l		Nvec_v1g197412
+Nvec_vc1.1_XM_032366206.2	neu.MFS_1.HG9.3:like:Flvcr1/Flvcr2/Mfsd7a		Nvec_v1g197491
+Nvec_vc1.1_XM_032366056.2	neu.Pentaxin.HG1.0:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Ptx3	Adgrd1/Apcs/Crp/Mptx1/Mptx2/Ptx3	Nvec_v1g197501
+Nvec_vc1.1_XM_048729451.1	neu.ANF_receptor.HG1.22:Grm1/Grm2/Grm3/Grm4/Grm5/Grm6/Grm7/Grm8	Grm1/Grm5	Nvec_v1g197524
+Nvec_vc1.1_XM_001640575.3	neu.MFS_1.HG4.4:Slc46a1/Slc46a2/Slc46a3		Nvec_v1g197737
+Nvec_vc1.1_XM_032365880.2	neu.MFS_1.HG1.15:like:Slc16a2/Slc16a10		Nvec_v1g197861
+Nvec_vc1.1_XM_032365746.2	neu.MFS_1.HG1.15:like:Slc16a2/Slc16a10		Nvec_v1g197876
+Nvec_vc1.1_XM_032365747.2	neu.MFS_1.HG1.15:like:Slc16a2/Slc16a10		Nvec_v1g197883
+Nvec_vc1.1_XM_048730784.1	neu.Aa_trans.HG1.2:Slc32a1		Nvec_v1g197940
+Nvec_vc1.1_XM_001631310.3	Nvec_v1g19795:HG.Unclassified	""	Nvec_v1g19795
+Nvec_vc1.1_XM_048719352.1	neu.RhoGEF.HG1.20:like:Arhgef39/Farp1/Farp2/Fgd1/Fgd2/Fgd3/Fgd4/Fgd5/Fgd6		Nvec_v1g198139
+Nvec_vc1.1_XM_048720351.1	Nvec_v1g198410:HG.Unclassified	""	Nvec_v1g198410
+Nvec_vc1.1_XM_048720049.1	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g198428
+Nvec_vc1.1_XM_048719609.1	neu.Synaptotagmin.HG1.21:Baiap3/Unc13d	Baiap3/Unc13d	Nvec_v1g198562
+Nvec_vc1.1_XM_032364662.2	neu.ANF_receptor.HG1.22:Grm1/Grm2/Grm3/Grm4/Grm5/Grm6/Grm7/Grm8	Grm1/Grm5	Nvec_v1g198894
+Nvec_vc1.1_XM_032364793.2	neu.Ras.HG2.1:Rasl11a/Rasl11b/Rerg/Rergl		Nvec_v1g198907
+Nvec_vc1.1_XM_001639735.3	Nvec_v1g198917:HG.Unclassified	""	Nvec_v1g198917
+Nvec_vc1.1_XM_048725804.1	neu.ANF_receptor.HG1.25:like:Casr/Gprc6a/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r128		Nvec_v1g19898
+Nvec_vc1.1_XM_032364272.2	neu.Guanylate_kin.HG1.9:Mpp3/Mpp4/Mpp7/Pals1;neu.PDZ.HG2.2:Mpp3/Mpp4/Mpp7	""	Nvec_v1g199299
+Nvec_vc1.1_XM_032363362.2	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g200030
+Nvec_vc1.1_XM_032363362.2	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g200031
+Nvec_vc1.1_XM_032363362.2	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g200166
+Nvec_vc1.1_XM_048725326.1	neu.ANF_receptor.HG1.11:like:Gria1/Gria2/Gria3/Gria4/Grid1/Grid2/Grik1/Grik2/Grik3/Grik4/Grik5		Nvec_v1g200214
+Nvec_vc1.1_XM_032363268.2	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g200404
+Nvec_vc1.1_XM_001638503.3	neu.MARVEL.HG2.0:like:Cmtm3/Cmtm4/Cmtm6/Cmtm7/Cmtm8/Gm6169/Mal/Mal2/Mall/Marveld1/Marveld2/Myadm/Myadml2/Pllp/Plp2		Nvec_v1g200416
+Nvec_vc1.1_XM_001638445.3	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g200442
+Nvec_vc1.1_XM_032363259.2	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g200452
+Nvec_vc1.1_XM_001638518.3	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g200454
+Nvec_vc1.1_XM_001638452.3	neu.MFS_1.HG1.15:like:Slc16a2/Slc16a10		Nvec_v1g200462
+Nvec_vc1.1_XM_001638271.3	neu.MFS_1.HG12.6:like:Mfsd6l		Nvec_v1g200504
+Nvec_vc1.1_XM_001638290.3	neu.Synaptotagmin.HG1.4:like:Esyt1/Esyt2/Esyt3		Nvec_v1g200561
+Nvec_vc1.1_XM_048733072.1	neu.Ras.HG6.3:Rab29		Nvec_v1g200891
+Nvec_vc1.1_XM_032362733.2	neu.ANF_receptor.HG1.25:like:Casr/Gprc6a/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r128		Nvec_v1g200922
+Nvec_vc1.1_XM_032362351.2	neu.MFS_1.HG4.22:like:Mfsd8		Nvec_v1g201119
+Nvec_vc1.1_XM_032362373.2	neu.ANF_receptor.HG1.24:Casr/Gprc6a/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r128	Casr/Gprc6a/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r128/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7	Nvec_v1g201150
+Nvec_vc1.1_XM_048723832.1	Nvec_v1g201212:HG.Unclassified	""	Nvec_v1g201212
+Nvec_vc1.1_XM_001637923.3	neu.Synaptotagmin.HG1.34:Syt1/Syt2/Syt3/Syt4/Syt5/Syt6/Syt7/Syt8/Syt9/Syt10/Syt11/Syt12/Syt13/Syt15/Syt17		Nvec_v1g201235
+Nvec_vc1.1_XM_001637786.3	neu.ANF_receptor.HG1.25:like:Casr/Gprc6a/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r128		Nvec_v1g201378
+Nvec_vc1.1_XM_048728082.1	neu.Ras.HG2.3:like:Agap1/Agap2/Agap3/Diras1/Diras2/Eras/Gm266/Hras/Kras/Mras/Nkiras1/Nkiras2/Nras/Rala/Ralb/Rap1a/Rap1b/Rap2a/Rap2b/Rap2c/Rasd1/Rasd2/Rasl10a/Rasl10b/Rheb/Rhebl1/Rit1/Rit2/Rras/Rras2		Nvec_v1g201388
+Nvec_vc1.1_XM_048728082.1	neu.Ras.HG2.17:like:Gm266/Rap1a/Rap1b/Rap2a/Rap2b/Rap2c		Nvec_v1g201389
+Nvec_v1g201448	neu.GKAP.HG1.0:Gkap1	Gkap1	Nvec_v1g201448
+Nvec_vc1.1_XM_048724742.1	neu.Y_phosphatase.HG1.35:Ptprk/Ptprm/Ptprt/Ptpru	Ptprk/Ptprm/Ptprt/Ptpru	Nvec_v1g2016
+Nvec_vc1.1_XM_032361833.2	neu.Pentaxin.HG1.10:like:Npcd/Nptx1/Nptx2/Nptxr/Ptx4/Svep1		Nvec_v1g201652
+Nvec_vc1.1_XM_032361876.2	neu.MFS_1.HG15.0:Mfsd4a/Mfsd4b1/Mfsd4b4/Mfsd4b5	Mfsd4a	Nvec_v1g201686
+Nvec_vc1.1_XM_001637260.3	neu.PID.HG1.1:Eps8/Eps8l2/Pid1	Eps8/Eps8l2/Pid1	Nvec_v1g201851
+Nvec_vc1.1_XM_001637269.3	neu.MFS_1.HG1.9:Slc16a2/Slc16a10	Slc16a10/Slc16a2	Nvec_v1g201883
+Nvec_vc1.1_XM_048725049.1	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g202226
+Nvec_vc1.1_XM_032383990.2	neu.Guanylate_kin.HG1.1:Magi1/Magi2/Magi3	Magi1/Magi2/Magi3	Nvec_v1g20232
+Nvec_vc1.1_XM_032386783.2	neu.Synaptotagmin.HG1.39:like:Syt1/Syt2/Syt3/Syt4/Syt5/Syt6/Syt7/Syt8/Syt9/Syt10/Syt11/Syt12/Syt13/Syt15/Syt17		Nvec_v1g202487
+Nvec_vc1.1_XM_048721475.1	neu.Synaptotagmin.HG1.37:Itsn2	Itsn2	Nvec_v1g202524
+Nvec_vc1.1_XM_032386590.2	neu.Ras.HG6.1:like:Rab29/Rab32/Rab38		Nvec_v1g202545
+Nvec_vc1.1_XM_001636409.3	neu.Synaptobrevin.HG1.12:Vamp4	Vamp4	Nvec_v1g202774
+Nvec_vc1.1_XM_032385679.2	neu.MFS_1.HG22.1:like:Mfsd3		Nvec_v1g203447
+Nvec_vc1.1_XM_001636018.3	Nvec_v1g203554:HG.Unclassified	""	Nvec_v1g203554
+Nvec_vc1.1_XM_048724245.1	neu.Pentaxin.HG1.8:like:Npcd/Nptx1/Nptx2/Nptxr/Ptx4/Svep1		Nvec_v1g203857
+Nvec_vc1.1_XM_032384970.2	neu.Pyridoxal_deC.HG1.7:Ddc/Hdc	Ddc/Hdc	Nvec_v1g204120
+Nvec_vc1.1_XM_032384838.2	neu.Ras.HG2.12:Rasd1/Rasd2/Rasl10a/Rasl10b		Nvec_v1g204358
+Nvec_vc1.1_XM_032384643.2	neu.Ras.HG2.1:Rasl11a/Rasl11b/Rerg/Rergl		Nvec_v1g204438
+Nvec_vc1.1_XM_001635167.3	neu.ANF_receptor.HG1.25:like:Casr/Gprc6a/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r128		Nvec_v1g204466
+Nvec_vc1.1_XM_032384465.2	neu.Aa_trans.HG1.6:like:Slc38a1/Slc38a2/Slc38a3/Slc38a4/Slc38a5/Slc38a6/Slc38a7/Slc38a8/Slc38a11		Nvec_v1g204678
+Nvec_vc1.1_XM_032384348.2	neu.Pentaxin.HG1.1:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g204809
+Nvec_vc1.1_XM_001634874.3	neu.MFS_1.HG8.6:Slc2a6/Slc2a8;neu.Sugar_tr.HG3.4:Slc2a6/Slc2a8	""	Nvec_v1g204860
+Nvec_vc1.1_XM_048734644.1	neu.MFS_1.HG1.15:like:Slc16a2/Slc16a10		Nvec_v1g204874
+Nvec_vc1.1_XM_032384239.2	neu.Ras.HG2.1:Rasl11a/Rasl11b/Rerg/Rergl		Nvec_v1g204926
+Nvec_vc1.1_XM_048728906.1	neu.ANF_receptor.HG1.25:like:Casr/Gprc6a/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r128		Nvec_v1g204939
+Nvec_vc1.1_XM_001634705.3	neu.ANF_receptor.HG1.25:like:Casr/Gprc6a/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r128		Nvec_v1g204940
+Nvec_v1g205215	neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30		Nvec_v1g205215
+Nvec_vc1.1_XM_048724027.1	neu.MFS_1.HG1.15:like:Slc16a2/Slc16a10		Nvec_v1g205284
+Nvec_vc1.1_XM_001634329.3	neu.ANF_receptor.HG1.25:like:Casr/Gprc6a/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r128		Nvec_v1g205522
+Nvec_vc1.1_XM_048727458.1	neu.Synaptotagmin.HG1.14:C2cd4c/C2cd4d/Syt14/Syt16/Tc2n		Nvec_v1g205523
+Nvec_vc1.1_XM_032383747.2	neu.Synaptotagmin.HG1.14:C2cd4c/C2cd4d/Syt14/Syt16/Tc2n	C2cd4c/C2cd4d	Nvec_v1g205524
+Nvec_vc1.1_XM_032383593.2	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g205600
+Nvec_vc1.1_XM_032383618.2	Nvec_v1g205626:HG.Unclassified	""	Nvec_v1g205626
+Nvec_vc1.1_XM_032383615.2	neu.Guanylate_kin.HG1.7:Guk1	Guk1	Nvec_v1g205628
+Nvec_vc1.1_XM_001634203.3	neu.Ras.HG3.6:like:4930544G11Rik/Cdc42/Rac1/Rac2/Rac3/Rhoa/Rhob/Rhoc/Rhod/Rhof/Rhog/Rhoh/Rhoj/Rhoq/Rhou/Rhov/Rnd1/Rnd2/Rnd3		Nvec_v1g205642
+Nvec_vc1.1_XM_001634127.3	neu.MFS_1.HG1.9:Slc16a2/Slc16a10	Slc16a10/Slc16a2	Nvec_v1g205684
+Nvec_vc1.1_XM_048728160.1	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g205741
+Nvec_vc1.1_XM_048727489.1	neu.MFS_1.HG7.11:like:Gm5724/Gm6614/Slco1a1/Slco1a4/Slco1a5/Slco1a6/Slco1b2/Slco1c1/Slco2a1/Slco2b1/Slco3a1/Slco5a1		Nvec_v1g205781
+Nvec_vc1.1_XM_001634086.3	neu.PID.HG1.7:Ldlrap1	Ldlrap1	Nvec_v1g205864
+Nvec_vc1.1_XM_048727098.1	neu.Synaptotagmin.HG1.13:Doc2a/Doc2b/Doc2g/Rph3a	Doc2a/Doc2b/Doc2g/Rph3a	Nvec_v1g206051
+Nvec_vc1.1_XM_032383210.2	neu.Pentaxin.HG1.9:like:Npcd/Nptx1/Nptx2/Nptxr/Ptx4/Svep1		Nvec_v1g206075
+Nvec_vc1.1_XM_001633854.3	neu.ANF_receptor.HG2.7:like:Npr1/Npr2/Npr3		Nvec_v1g206093
+Nvec_vc1.1_XM_048725454.1	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g206126
+Nvec_vc1.1_XM_032383051.2	neu.Aa_trans.HG1.12:like:Slc36a1/Slc36a2/Slc36a3/Slc36a4		Nvec_v1g206160
+Nvec_vc1.1_XM_032383243.2	neu.MFS_1.HG7.3:like:Gm5724/Gm6614/Slco1a1/Slco1a4/Slco1a5/Slco1a6/Slco1b2/Slco1c1/Slco2a1/Slco2b1/Slco3a1/Slco5a1		Nvec_v1g20640
+Nvec_vc1.1_XM_001633502.3	neu.Synaptotagmin.HG1.32:like:Syt1/Syt2/Syt3/Syt4/Syt5/Syt6/Syt7/Syt8/Syt9/Syt10/Syt11/Syt12/Syt13/Syt15/Syt17		Nvec_v1g206596
+Nvec_vc1.1_XM_048729871.1	neu.MFS_1.HG1.15:like:Slc16a2/Slc16a10		Nvec_v1g206632
+Nvec_vc1.1_XM_048727713.1	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g206705
+Nvec_vc1.1_XM_032382630.2	neu.Aa_trans.HG1.2:Slc32a1		Nvec_v1g206710
+Nvec_vc1.1_XM_048722964.1	neu.Pentaxin.HG1.0:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Ptx3	Adgrd1/Apcs/Crp/Mptx1/Mptx2/Ptx3	Nvec_v1g206995
+Nvec_vc1.1_XM_032382212.2	neu.MFS_1.HG1.9:Slc16a2/Slc16a10	Slc16a10/Slc16a2	Nvec_v1g207149
+Nvec_vc1.1_XM_048724999.1	neu.SNF.HG1.7:Slc6a15/Slc6a16/Slc6a17/Slc6a18/Slc6a19/Slc6a20a/Slc6a20b/Slc6a21		Nvec_v1g207197
+Nvec_vc1.1_XM_048731968.1	neu.SSF.HG1.5:Slc5a5/Slc5a6/Slc5a8/Slc5a12	Slc5a12/Slc5a5/Slc5a6/Slc5a8	Nvec_v1g207200
+Nvec_vc1.1_XM_032381760.2	neu.MFS_1.HG1.15:like:Slc16a2/Slc16a10		Nvec_v1g207626
+Nvec_vc1.1_XM_048728428.1	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g207680
+Nvec_vc1.1_XM_001632482.3	neu.MFS_1.HG1.15:like:Slc16a2/Slc16a10		Nvec_v1g207856
+Nvec_vc1.1_XM_048733482.1	neu.FERM_M.HG2.0:Frmpd1/Frmpd3/Frmpd4	Frmpd1/Frmpd3/Frmpd4	Nvec_v1g207870
+Nvec_vc1.1_XM_001632422.3	Nvec_v1g207949:HG.Unclassified	""	Nvec_v1g207949
+Nvec_vc1.1_XM_048724827.1	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g207968
+Nvec_vc1.1_XM_048728750.1	neu.Pyridoxal_deC.HG1.2:like:Sgpl1		Nvec_v1g208016
+Nvec_vc1.1_XM_048730358.1	neu.FERM_M.HG1.3:Frmd8	Frmd8	Nvec_v1g208073
+Nvec_vc1.1_XM_048730497.1	neu.SNF.HG1.12:like:Slc6a1/Slc6a2/Slc6a3/Slc6a4/Slc6a5/Slc6a6/Slc6a7/Slc6a8/Slc6a9/Slc6a11/Slc6a12/Slc6a13/Slc6a14		Nvec_v1g208080
+Nvec_vc1.1_XM_048720070.1	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30		Nvec_v1g208384
+Nvec_vc1.1_XM_032380550.2	Nvec_v1g208892:HG.Unclassified	""	Nvec_v1g208892
+Nvec_vc1.1_XM_032384105.2	Nvec_v1g20907:HG.Unclassified	""	Nvec_v1g20907
+Nvec_vc1.1_XM_048724742.1	neu.Y_phosphatase.HG1.35:Ptprk/Ptprm/Ptprt/Ptpru	Ptprk/Ptprm/Ptprt/Ptpru	Nvec_v1g2091
+Nvec_vc1.1_XM_032380198.2	neu.Guanylate_kin.HG1.13:Cask/Mpp1;neu.PDZ.HG2.3:Cask/Mpp1	""	Nvec_v1g209174
+Nvec_vc1.1_XM_001631195.3	neu.Pentaxin.HG1.19:like:Svep1		Nvec_v1g209400
+Nvec_vc1.1_XM_048730093.1	neu.SNF.HG1.11:like:Slc6a1/Slc6a2/Slc6a3/Slc6a4/Slc6a5/Slc6a6/Slc6a7/Slc6a8/Slc6a9/Slc6a11/Slc6a12/Slc6a13/Slc6a14		Nvec_v1g209450
+Nvec_vc1.1_XM_048730093.1	neu.SNF.HG1.11:like:Slc6a1/Slc6a2/Slc6a3/Slc6a4/Slc6a5/Slc6a6/Slc6a7/Slc6a8/Slc6a9/Slc6a11/Slc6a12/Slc6a13/Slc6a14		Nvec_v1g209454
+Nvec_vc1.1_XM_032379762.2	neu.COesterase.HG1.1:like:Ache/Bche/Cel/Ces1a/Ces1b/Ces1c/Ces1d/Ces1e/Ces1f/Ces1g/Ces1h/Ces2a/Ces2b/Ces2c/Ces2e/Ces2f/Ces2g/Ces2h/Ces3a/Ces3b/Ces4a/Ces5a/Nlgn1/Nlgn2/Nlgn3/Tg		Nvec_v1g209664
+Nvec_vc1.1_XM_001631026.3	neu.Synaptobrevin.HG1.4:like:Sec22b/Ykt6		Nvec_v1g209672
+Nvec_vc1.1_XM_048729514.1	neu.Ras.HG2.1:Rasl11a/Rasl11b/Rerg/Rergl		Nvec_v1g209715
+Nvec_vc1.1_XM_001630849.3	neu.MFS_1.HG1.15:like:Slc16a2/Slc16a10		Nvec_v1g209821
+Nvec_vc1.1_XM_001630742.3	neu.ANF_receptor.HG1.18:like:Grm1/Grm2/Grm3/Grm4/Grm5/Grm6/Grm7/Grm8		Nvec_v1g209965
+Nvec_vc1.1_XM_032379452.2	neu.RhoGEF.HG1.21:like:Arhgef39/Farp1/Farp2/Fgd1/Fgd2/Fgd3/Fgd4/Fgd5/Fgd6		Nvec_v1g209966
+Nvec_vc1.1_XM_048721981.1	neu.MFS_1.HG7.9:like:Gm5724/Gm6614/Slco1a1/Slco1a4/Slco1a5/Slco1a6/Slco1b2/Slco1c1/Slco2a1/Slco2b1/Slco3a1/Slco5a1		Nvec_v1g210013
+Nvec_vc1.1_XM_001630614.3	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g210134
+Nvec_vc1.1_XM_048719913.1	neu.IMD.HG1.0:Baiap2/Baiap2l1/Baiap2l2	Baiap2/Baiap2l1/Baiap2l2	Nvec_v1g210210
+Nvec_vc1.1_XM_001630539.3	neu.Ras.HG3.6:like:4930544G11Rik/Cdc42/Rac1/Rac2/Rac3/Rhoa/Rhob/Rhoc/Rhod/Rhof/Rhog/Rhoh/Rhoj/Rhoq/Rhou/Rhov/Rnd1/Rnd2/Rnd3		Nvec_v1g210228
+Nvec_vc1.1_XM_048721600.1	neu.ANF_receptor.HG2.29:like:Gabbr1/Gabbr2		Nvec_v1g210496
+Nvec_vc1.1_XM_001634759.3	neu.ANF_receptor.HG1.26:like:Casr/Gprc6a/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r128		Nvec_v1g21060
+Nvec_vc1.1_XM_001630056.3	neu.Y_phosphatase.HG2.7:like:Cdc14a/Cdc14b/Ptp4a1/Ptp4a2/Ptp4a3/Ptpdc1		Nvec_v1g210849
+Nvec_vc1.1_XM_001629852.3	neu.MFS_1.HG12.4:Mfsd6l	Mfsd6l	Nvec_v1g211086
+Nvec_vc1.1_XM_048726235.1	neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30		Nvec_v1g211165
+Nvec_vc1.1_XM_032378213.2	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g211167
+Nvec_vc1.1_XM_048727778.1	neu.MFS_1.HG7.11:like:Gm5724/Gm6614/Slco1a1/Slco1a4/Slco1a5/Slco1a6/Slco1b2/Slco1c1/Slco2a1/Slco2b1/Slco3a1/Slco5a1		Nvec_v1g211340
+Nvec_vc1.1_XM_001629620.3	neu.MFS_1.HG12.3:like:Mfsd6l		Nvec_v1g211378
+Nvec_vc1.1_XM_048722808.1	neu.COesterase.HG1.7:like:Ache/Bche/Cel/Ces1a/Ces1b/Ces1c/Ces1d/Ces1e/Ces1f/Ces1g/Ces1h/Ces2a/Ces2b/Ces2c/Ces2e/Ces2f/Ces2g/Ces2h/Ces3a/Ces3b/Ces4a/Ces5a/Nlgn1/Nlgn2/Nlgn3/Tg		Nvec_v1g211382
+Nvec_vc1.1_XM_001629564.3	neu.ANF_receptor.HG1.14:like:Grin1		Nvec_v1g211456
+Nvec_vc1.1_XM_048726365.1	Nvec_v1g211566:HG.Unclassified	""	Nvec_v1g211566
+Nvec_vc1.1_XM_001629359.3	neu.PID.HG1.8:like:Ldlrap1		Nvec_v1g211681
+Nvec_vc1.1_XM_048724371.1	neu.Synaptotagmin.HG1.15:like:Dysf/Mctp1/Mctp2/Myof		Nvec_v1g211786
+Nvec_vc1.1_XM_032377365.2	neu.Ras.HG3.3:Rhobtb1/Rhobtb2	Rhobtb1/Rhobtb2	Nvec_v1g212034
+Nvec_vc1.1_XM_032379765.2	neu.FERM_M.HG1.13:Frmd4a/Frmd4b	Frmd4a/Frmd4b	Nvec_v1g21219
+Nvec_vc1.1_XM_048728882.1	neu.Synaptotagmin.HG1.1:Gm28042/Pla2g4b/Pla2g4d	Gm28042/Pla2g4b/Pla2g4d	Nvec_v1g212291
+Nvec_vc1.1_XM_048730160.1	neu.MFS_1.HG5.1:Slc18a1/Slc18a2/Slc18a3/Slc18b1	Slc18b1	Nvec_v1g212458
+Nvec_vc1.1_XM_048734614.1	Nvec_v1g212569:HG.Unclassified	""	Nvec_v1g212569
+Nvec_vc1.1_XM_032376757.2	neu.FERM_M.HG1.24:Fermt1/Fermt2/Fermt3	Fermt1/Fermt2/Fermt3	Nvec_v1g212713
+Nvec_vc1.1_XM_048724522.1	neu.Ephrin.HG1.0:Efna1/Efna2/Efna3/Efna4/Efna5/Efnb1/Efnb2/Efnb3	Efna1/Efna2/Efna3/Efna4/Efna5/Efnb1/Efnb2/Efnb3	Nvec_v1g212995
+Nvec_vc1.1_XM_001628223.3	neu.FERM_M.HG1.29:Epb41/Epb41l1/Epb41l2		Nvec_v1g213159
+Nvec_vc1.1_XM_001628224.3	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g213160
+Nvec_vc1.1_XM_032376236.2	Nvec_v1g213263:HG.Unclassified	""	Nvec_v1g213263
+Nvec_vc1.1_XM_032374152.2	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g213546
+Nvec_vc1.1_XM_032375752.2	neu.MFS_1.HG5.1:Slc18a1/Slc18a2/Slc18a3/Slc18b1	Slc18b1	Nvec_v1g213661
+Nvec_vc1.1_XM_048728990.1	neu.SSF.HG1.5:Slc5a5/Slc5a6/Slc5a8/Slc5a12		Nvec_v1g21386
+Nvec_vc1.1_XM_032375241.2	neu.COesterase.HG1.9:Ache/Bche/Tg	Ache/Bche	Nvec_v1g214176
+Nvec_vc1.1_XM_048726438.1	neu.MFS_1.HG1.9:Slc16a2/Slc16a10	Slc16a10/Slc16a2	Nvec_v1g214435
+Nvec_vc1.1_XM_032374857.2	neu.MFS_1.HG5.1:Slc18a1/Slc18a2/Slc18a3/Slc18b1	Slc18b1	Nvec_v1g214544
+Nvec_vc1.1_XM_032374799.2	neu.Aa_trans.HG1.2:Slc32a1	Slc32a1	Nvec_v1g214632
+Nvec_vc1.1_XM_048727842.1	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g215125
+Nvec_vc1.1_XM_032374219.2	Nvec_v1g215218:HG.Unclassified	""	Nvec_v1g215218
+Nvec_vc1.1_XM_032374152.2	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g215302
+Nvec_vc1.1_XM_048720204.1	neu.ANF_receptor.HG2.7:like:Npr1/Npr2/Npr3		Nvec_v1g215562
+Nvec_vc1.1_XM_048720078.1	neu.MFS_1.HG6.0:Slc17a1/Slc17a2/Slc17a3/Slc17a4/Slc17a5/Slc17a6/Slc17a7/Slc17a8/Slc17a9	Slc17a6/Slc17a7/Slc17a8	Nvec_v1g215784
+Nvec_vc1.1_XM_032373531.2	neu.MFS_1.HG1.15:like:Slc16a2/Slc16a10		Nvec_v1g216045
+Nvec_vc1.1_XM_001625916.3	neu.Ras.HG4.5:Arl6	Arl6	Nvec_v1g216064
+Nvec_vc1.1_XM_048728431.1	Nvec_v1g216282:HG.Unclassified	""	Nvec_v1g216282
+Nvec_vc1.1_XM_032373187.2	neu.FERM_M.HG1.30:Farp1/Farp2/Frmd7;neu.RhoGEF.HG1.39:Farp1/Farp2	""	Nvec_v1g216385
+Nvec_vc1.1_XM_001625612.3	neu.ANF_receptor.HG1.17:like:Casr/Gprc6a/Grm1/Grm2/Grm3/Grm4/Grm5/Grm6/Grm7/Grm8/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r128		Nvec_v1g216511
+Nvec_vc1.1_XM_048720368.1	neu.ANF_receptor.HG2.7:like:Npr1/Npr2/Npr3		Nvec_v1g216603
+Nvec_vc1.1_XM_001637149.3	neu.Ras.HG2.27:like:Eras		Nvec_v1g217041
+Nvec_vc1.1_XM_048730631.1	neu.MFS_1.HG9.3:like:Flvcr1/Flvcr2/Mfsd7a		Nvec_v1g21744
+Nvec_vc1.1_XM_048728115.1	neu.RhoGEF.HG1.28:Akap13/Arhgef2/Arhgef18/Arhgef28	Akap13/Arhgef18/Arhgef2/Arhgef28	Nvec_v1g217462
+Nvec_vc1.1_XM_048727355.1	neu.GKAP.HG2.0:Ubqln1/Ubqln2/Ubqln3/Ubqln4	Ubqln1/Ubqln2/Ubqln3/Ubqln4	Nvec_v1g217624
+Nvec_vc1.1_XM_048734462.1	neu.ANF_receptor.HG1.3:like:Gria1/Gria2/Gria3/Gria4/Grid1/Grid2/Grik1/Grik2/Grik3/Grik4/Grik5		Nvec_v1g217727
+Nvec_vc1.1_XM_048728130.1	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g217956
+Nvec_vc1.1_XM_001624458.3	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g217960
+Nvec_vc1.1_XM_001624398.3	neu.Ras.HG4.10:Arl3	Arl3	Nvec_v1g218041
+Nvec_vc1.1_XM_001628143.3	neu.FERM_M.HG1.29:Epb41/Epb41l1/Epb41l2	Epb41/Epb41l1/Epb41l2	Nvec_v1g21807
+Nvec_vc1.1_XM_048727287.1	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g218100
+Nvec_vc1.1_XM_048730618.1	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g218152
+Nvec_vc1.1_XM_032371581.2	neu.COesterase.HG1.1:like:Ache/Bche/Cel/Ces1a/Ces1b/Ces1c/Ces1d/Ces1e/Ces1f/Ces1g/Ces1h/Ces2a/Ces2b/Ces2c/Ces2e/Ces2f/Ces2g/Ces2h/Ces3a/Ces3b/Ces4a/Ces5a/Nlgn1/Nlgn2/Nlgn3/Tg		Nvec_v1g218179
+Nvec_vc1.1_XM_032371581.2	neu.COesterase.HG1.1:like:Ache/Bche/Cel/Ces1a/Ces1b/Ces1c/Ces1d/Ces1e/Ces1f/Ces1g/Ces1h/Ces2a/Ces2b/Ces2c/Ces2e/Ces2f/Ces2g/Ces2h/Ces3a/Ces3b/Ces4a/Ces5a/Nlgn1/Nlgn2/Nlgn3/Tg		Nvec_v1g218182
+Nvec_vc1.1_XM_001624023.3	neu.MFS_1.HG7.11:like:Gm5724/Gm6614/Slco1a1/Slco1a4/Slco1a5/Slco1a6/Slco1b2/Slco1c1/Slco2a1/Slco2b1/Slco3a1/Slco5a1		Nvec_v1g218525
+Nvec_vc1.1_XM_001623817.3	neu.ANF_receptor.HG1.22:Grm1/Grm2/Grm3/Grm4/Grm5/Grm6/Grm7/Grm8	Grm1/Grm5	Nvec_v1g218792
+Nvec_vc1.1_XM_048727348.1	neu.RasGAP.HG1.2:Iqgap1/Iqgap2/Iqgap3	Iqgap1/Iqgap2/Iqgap3	Nvec_v1g218988
+Nvec_vc1.1_XM_032370771.2	neu.RhoGEF.HG1.10:Arhgef33	Arhgef33	Nvec_v1g219039
+Nvec_vc1.1_XM_001638073.3	neu.Guanylate_kin.HG1.11:Dlg1/Dlg2/Dlg3/Dlg4	Dlg1/Dlg2/Dlg3/Dlg4	Nvec_v1g219453
+Nvec_vc1.1_XM_048730844.1	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g219492
+Nvec_vc1.1_XM_001624458.3	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g219703
+Nvec_vc1.1_XM_048722932.1	neu.SNF.HG1.12:like:Slc6a1/Slc6a2/Slc6a3/Slc6a4/Slc6a5/Slc6a6/Slc6a7/Slc6a8/Slc6a9/Slc6a11/Slc6a12/Slc6a13/Slc6a14		Nvec_v1g21978
+Nvec_vc1.1_XM_032363362.2	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g219784
+Nvec_vc1.1_XM_048725577.1	neu.Y_phosphatase.HG1.35:Ptprk/Ptprm/Ptprt/Ptpru	Ptprk/Ptprm/Ptprt/Ptpru	Nvec_v1g219858
+Nvec_v1g220201	neu.MFS_1.HG1.15:like:Slc16a2/Slc16a10		Nvec_v1g220201
+Nvec_vc1.1_XM_048734068.1	neu.Y_phosphatase.HG1.35:Ptprk/Ptprm/Ptprt/Ptpru	Ptprk/Ptprm/Ptprt/Ptpru	Nvec_v1g220328
+Nvec_vc1.1_XM_032369679.2	neu.CaMKII.HG1.1:Camk2a/Camk2b/Camk2d/Camk2g	Camk2a/Camk2b/Camk2d/Camk2g	Nvec_v1g220432
+Nvec_v1g220528	neu.RabphilinRIM.HG1.1:Rims2		Nvec_v1g220528
+Nvec_vc1.1_XM_001622418.3	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g220670
+Nvec_vc1.1_XM_032369390.2	neu.Pyridoxal_deC.HG1.2:like:Sgpl1		Nvec_v1g220800
+Nvec_v1g221505	neu.SSF.HG1.3:like:Gm5134/Slc5a1/Slc5a2/Slc5a3/Slc5a4a/Slc5a4b/Slc5a5/Slc5a6/Slc5a8/Slc5a9/Slc5a10/Slc5a11/Slc5a12		Nvec_v1g221505
+Nvec_vc1.1_XM_032363466.2	neu.SNF.HG1.7:Slc6a15/Slc6a16/Slc6a17/Slc6a18/Slc6a19/Slc6a20a/Slc6a20b/Slc6a21	Slc6a15/Slc6a16/Slc6a17/Slc6a18/Slc6a19/Slc6a20a/Slc6a20b/Slc6a21	Nvec_v1g221614
+Nvec_vc1.1_XM_048727742.1	neu.Sec1.HG1.2:Vps33b	Vps33b	Nvec_v1g221730
+Nvec_vc1.1_XM_048728043.1	neu.Y_phosphatase.HG1.35:Ptprk/Ptprm/Ptprt/Ptpru	Ptprk/Ptprm/Ptprt/Ptpru	Nvec_v1g222148
+Nvec_vc1.1_XM_048729033.1	neu.Pentaxin.HG1.21:like:Svep1		Nvec_v1g222196
+Nvec_vc1.1_XM_001629925.3	neu.PID.HG1.3:like:Ldlrap1		Nvec_v1g222275
+Nvec_vc1.1_XM_048732332.1	neu.Aa_trans.HG1.2:Slc32a1		Nvec_v1g222356
+Nvec_vc1.1_XM_048732338.1	neu.Aa_trans.HG1.2:Slc32a1		Nvec_v1g222356
+Nvec_vc1.1_XM_032381054.2	neu.MFS_1.HG1.9:Slc16a2/Slc16a10	Slc16a10/Slc16a2	Nvec_v1g22254
+Nvec_vc1.1_XM_048724932.1	neu.ANF_receptor.HG2.12:like:Npr1/Npr2/Npr3		Nvec_v1g222590
+Nvec_vc1.1_XM_032363362.2	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g222646
+Nvec_vc1.1_XM_032365352.2	neu.RhoGEF.HG1.40:Fgd5/Fgd6	Fgd5/Fgd6	Nvec_v1g222726
+Nvec_vc1.1_XM_032375209.2	neu.RhoGEF.HG1.34:Ect2	Ect2	Nvec_v1g222801
+Nvec_v1g222924	neu.MFS_1.HG1.15:like:Slc16a2/Slc16a10		Nvec_v1g222924
+Nvec_vc1.1_XM_048722790.1	neu.Ras.HG2.1:Rasl11a/Rasl11b/Rerg/Rergl	Rergl	Nvec_v1g222961
+Nvec_vc1.1_XM_032364435.2	neu.Sugar_tr.HG3.1:Slc2a10/Slc2a12	Slc2a10/Slc2a12	Nvec_v1g222989
+Nvec_vc1.1_XM_048728847.1	Nvec_v1g223150:HG.Unclassified	""	Nvec_v1g223150
+Nvec_vc1.1_XM_048727505.1	neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30		Nvec_v1g223187
+Nvec_vc1.1_XM_032376698.2	neu.Citron.HG1.4:Garnl3	Garnl3	Nvec_v1g223496
+Nvec_vc1.1_XM_032364346.2	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g223668
+Nvec_vc1.1_XM_001634696.3	neu.Ras.HG4.12:Arl1	Arl1	Nvec_v1g223751
+Nvec_vc1.1_XM_032374226.2	neu.Aa_trans.HG1.5:Tmem104		Nvec_v1g223897
+Nvec_vc1.1_XM_001633949.3	neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30		Nvec_v1g224087
+Nvec_vc1.1_XM_048724875.1	neu.ANF_receptor.HG2.12:like:Npr1/Npr2/Npr3		Nvec_v1g224148
+Nvec_vc1.1_XM_032363827.2	neu.Y_phosphatase.HG1.48:Ptprd/Ptprf/Ptprs	Ptprd/Ptprf/Ptprs	Nvec_v1g224273
+Nvec_vc1.1_XM_032363425.2	neu.SNF.HG1.7:Slc6a15/Slc6a16/Slc6a17/Slc6a18/Slc6a19/Slc6a20a/Slc6a20b/Slc6a21	Slc6a15/Slc6a16/Slc6a17/Slc6a18/Slc6a19/Slc6a20a/Slc6a20b/Slc6a21	Nvec_v1g2243
+Nvec_vc1.1_XM_048724989.1	neu.RhoGEF.HG1.37:Arhgef10/Arhgef10l	Arhgef10/Arhgef10l	Nvec_v1g224325
+Nvec_vc1.1_XM_001627170.3	neu.Sugar_tr.HG3.3:Slc2a1/Slc2a2/Slc2a3/Slc2a4/Slc2a5/Slc2a7/Slc2a9		Nvec_v1g224375
+Nvec_vc1.1_XM_001635878.2	neu.Homer.HG1.2:Was/Wasl	Was/Wasl	Nvec_v1g224549
+Nvec_vc1.1_XM_001631951.3	Nvec_v1g224851:HG.Unclassified	""	Nvec_v1g224851
+Nvec_vc1.1_XM_048723209.1	neu.Y_phosphatase.HG1.17:Ptpn23	Ptpn23	Nvec_v1g224910
+Nvec_vc1.1_XM_048731313.1	neu.MFS_1.HG11.2:like:Spns1/Spns2/Spns3		Nvec_v1g225133
+Nvec_vc1.1_XM_032375241.2	neu.COesterase.HG1.9:Ache/Bche/Tg	Ache/Bche	Nvec_v1g225299
+Nvec_vc1.1_XM_001627440.3	neu.COesterase.HG1.1:like:Ache/Bche/Cel/Ces1a/Ces1b/Ces1c/Ces1d/Ces1e/Ces1f/Ces1g/Ces1h/Ces2a/Ces2b/Ces2c/Ces2e/Ces2f/Ces2g/Ces2h/Ces3a/Ces3b/Ces4a/Ces5a/Nlgn1/Nlgn2/Nlgn3/Tg		Nvec_v1g225300
+Nvec_vc1.1_XM_001637764.3	neu.Y_phosphatase.HG1.21:like:Ptpn5/Ptpn7/Ptprr		Nvec_v1g225402
+Nvec_v1g225517	neu.Pentaxin.HG1.10:like:Npcd/Nptx1/Nptx2/Nptxr/Ptx4/Svep1		Nvec_v1g225517
+Nvec_vc1.1_XM_048724257.1	neu.Synaptotagmin.HG1.34:Syt1/Syt2/Syt3/Syt4/Syt5/Syt6/Syt7/Syt8/Syt9/Syt10/Syt11/Syt12/Syt13/Syt15/Syt17		Nvec_v1g225587
+Nvec_v1g225638	Nvec_v1g225638;Nvec_v1g225638:HG.Unclassified	""	Nvec_v1g225638
+Nvec_v1g225906	neu.SSF.HG1.4:like:Gm5134/Slc5a1/Slc5a2/Slc5a3/Slc5a4a/Slc5a4b/Slc5a5/Slc5a6/Slc5a8/Slc5a9/Slc5a10/Slc5a11/Slc5a12		Nvec_v1g225906
+Nvec_v1g226108	neu.MFS_1.HG5.1:Slc18a1/Slc18a2/Slc18a3/Slc18b1		Nvec_v1g226108
+Nvec_vc1.1_XM_001629180.3	neu.Y_phosphatase.HG2.6:Ptp4a1/Ptp4a2/Ptp4a3	Ptp4a1/Ptp4a2/Ptp4a3	Nvec_v1g227192
+Nvec_vc1.1_XM_048727021.1	neu.Syntaxin.HG1.0:Stx7/Stx12		Nvec_v1g227259
+Nvec_v1g227762	neu.Aa_trans.HG1.2:Slc32a1		Nvec_v1g227762
+Nvec_vc1.1_XM_032367616.2	Nvec_v1g227824:HG.Unclassified	""	Nvec_v1g227824
+Nvec_vc1.1_XM_048729119.1	neu.Synaptotagmin.HG1.26:Dysf/Myof	Dysf/Myof	Nvec_v1g228000
+Nvec_vc1.1_XM_032366596.2	neu.SNF.HG1.12:like:Slc6a1/Slc6a2/Slc6a3/Slc6a4/Slc6a5/Slc6a6/Slc6a7/Slc6a8/Slc6a9/Slc6a11/Slc6a12/Slc6a13/Slc6a14		Nvec_v1g228010
+Nvec_vc1.1_XM_032366290.2	neu.Arfaptin.HG1.1:Ica1/Ica1l	Ica1/Ica1l	Nvec_v1g228048
+Nvec_vc1.1_XM_032365512.2	neu.Ras.HG4.22:Arf4/Arf5	Arf4/Arf5	Nvec_v1g228132
+Nvec_vc1.1_XM_001638915.3	neu.MFS_1.HG8.8:Slc2a13;neu.Sugar_tr.HG3.2:Slc2a13	""	Nvec_v1g228429
+Nvec_vc1.1_XM_032362039.2	neu.MFS_1.HG6.0:Slc17a1/Slc17a2/Slc17a3/Slc17a4/Slc17a5/Slc17a6/Slc17a7/Slc17a8/Slc17a9;neu.Sugar_tr.HG4.2:like:Slc37a3	""	Nvec_v1g228652
+Nvec_vc1.1_XM_001637013.3	Nvec_v1g228748:HG.Unclassified	""	Nvec_v1g228748
+Nvec_vc1.1_XM_032385202.2	neu.SSF.HG1.8:like:Slc5a3		Nvec_v1g228981
+Nvec_vc1.1_XM_032384628.2	Nvec_v1g229065:HG.Unclassified	""	Nvec_v1g229065
+Nvec_vc1.1_XM_032384369.2	neu.SNAP-25.HG1.0:Snap23/Snap25	Snap23/Snap25	Nvec_v1g229104
+Nvec_vc1.1_XM_048727865.1	Nvec_v1g229235:HG.Unclassified	""	Nvec_v1g229235
+Nvec_vc1.1_XM_032382634.2	neu.ANF_receptor.HG1.22:Grm1/Grm2/Grm3/Grm4/Grm5/Grm6/Grm7/Grm8		Nvec_v1g229374
+Nvec_vc1.1_XM_032381259.2	neu.SNF.HG1.11:like:Slc6a1/Slc6a2/Slc6a3/Slc6a4/Slc6a5/Slc6a6/Slc6a7/Slc6a8/Slc6a9/Slc6a11/Slc6a12/Slc6a13/Slc6a14		Nvec_v1g229612
+Nvec_vc1.1_XM_032380420.2	neu.Sec1.HG1.4:Vps45	Vps45	Nvec_v1g229729
+Nvec_vc1.1_XM_001631310.3	Nvec_v1g229767:HG.Unclassified	""	Nvec_v1g229767
+Nvec_vc1.1_XM_032378419.2	neu.SDF.HG1.1:Slc1a1/Slc1a2/Slc1a3/Slc1a4/Slc1a5/Slc1a6/Slc1a7	Slc1a1/Slc1a2/Slc1a3/Slc1a4/Slc1a5/Slc1a6/Slc1a7	Nvec_v1g230013
+Nvec_vc1.1_XM_001626995.3	Nvec_v1g230545:HG.Unclassified	""	Nvec_v1g230545
+Nvec_vc1.1_XM_032379450.2	neu.MFS_1.HG1.9:Slc16a2/Slc16a10	Slc16a10/Slc16a2	Nvec_v1g23072
+Nvec_vc1.1_XM_048728010.1	neu.Y_phosphatase.HG1.43:like:Ptprc		Nvec_v1g230727
+Nvec_vc1.1_XM_032372550.2	neu.Synaptotagmin.HG1.34:Syt1/Syt2/Syt3/Syt4/Syt5/Syt6/Syt7/Syt8/Syt9/Syt10/Syt11/Syt12/Syt13/Syt15/Syt17		Nvec_v1g230884
+Nvec_vc1.1_XM_001623754.3	neu.MFS_1.HG6.0:Slc17a1/Slc17a2/Slc17a3/Slc17a4/Slc17a5/Slc17a6/Slc17a7/Slc17a8/Slc17a9;neu.Sugar_tr.HG4.2:like:Slc37a3	""	Nvec_v1g231086
+Nvec_v1g231507	neu.Ras.HG10.0:like:Guf1		Nvec_v1g231507
+Nvec_vc1.1_XM_048726526.1	neu.Ras.HG5.0:like:Lrrk1/Lrrk2		Nvec_v1g231898
+Nvec_vc1.1_XM_032364819.2	neu.Ras.HG4.9:Arl9	Arl9	Nvec_v1g231967
+Nvec_vc1.1_XM_001638542.3	neu.MFS_1.HG6.0:Slc17a1/Slc17a2/Slc17a3/Slc17a4/Slc17a5/Slc17a6/Slc17a7/Slc17a8/Slc17a9	Slc17a9	Nvec_v1g232090
+Nvec_vc1.1_XM_032363089.2	neu.PDZ.HG2.1:Pals1		Nvec_v1g232122
+Nvec_vc1.1_XM_001638002.3	neu.MARVEL.HG2.0:like:Cmtm3/Cmtm4/Cmtm6/Cmtm7/Cmtm8/Gm6169/Mal/Mal2/Mall/Marveld1/Marveld2/Myadm/Myadml2/Pllp/Plp2		Nvec_v1g232154
+Nvec_vc1.1_XM_001634800.3	Nvec_v1g232540:HG.Unclassified	""	Nvec_v1g232540
+Nvec_vc1.1_XM_048722217.1	Nvec_v1g233657:HG.Unclassified	""	Nvec_v1g233657
+Nvec_vc1.1_XM_032364782.2	Nvec_v1g234148:HG.Unclassified	""	Nvec_v1g234148
+Nvec_vc1.1_XM_032362615.2	Nvec_v1g234362:HG.Unclassified	""	Nvec_v1g234362
+Nvec_vc1.1_XM_001637730.3	neu.Ras.HG4.4:Sar1a/Sar1b	Sar1a/Sar1b	Nvec_v1g234402
+Nvec_vc1.1_XM_048726141.1	neu.FERM_M.HG1.27:Nf2	Nf2	Nvec_v1g234576
+Nvec_vc1.1_XM_001631292.3	neu.Ras.HG4.7:Arfrp1	Arfrp1	Nvec_v1g235187
+Nvec_vc1.1_XM_001630110.3	neu.Arfaptin.HG1.2:Gm49486/Pick1	Gm49486/Pick1	Nvec_v1g235323
+Nvec_vc1.1_XM_001629367.3	neu.Syntaxin.HG1.2:Stx1a/Stx1b/Stx2/Stx3/Stx4a/Stx11/Stx19	Stx1a/Stx1b/Stx2/Stx3	Nvec_v1g235418
+Nvec_vc1.1_XM_001629283.3	neu.Ras.HG4.13:Arl5a/Arl5b/Arl5c	Arl5a/Arl5b/Arl5c	Nvec_v1g235432
+Nvec_vc1.1_XM_032376583.2	neu.Ras.HG2.21:Rit1/Rit2	Rit1/Rit2	Nvec_v1g235524
+Nvec_vc1.1_XM_048722496.1	neu.Citron.HG1.5:Vps39	Vps39	Nvec_v1g235773
+Nvec_vc1.1_XM_048726137.1	neu.SNF.HG1.12:like:Slc6a1/Slc6a2/Slc6a3/Slc6a4/Slc6a5/Slc6a6/Slc6a7/Slc6a8/Slc6a9/Slc6a11/Slc6a12/Slc6a13/Slc6a14		Nvec_v1g236066
+Nvec_vc1.1_XM_001623139.3	neu.Synaptobrevin.HG1.6:Ykt6	Ykt6	Nvec_v1g236106
+Nvec_vc1.1_XM_001639817.3	neu.Ephrin.HG1.0:Efna1/Efna2/Efna3/Efna4/Efna5/Efnb1/Efnb2/Efnb3	Efna1/Efna2/Efna3/Efna4/Efna5/Efnb1/Efnb2/Efnb3	Nvec_v1g236436
+Nvec_vc1.1_XM_001637346.2	neu.Ras.HG4.2:Arl8a/Arl8b	Arl8a/Arl8b	Nvec_v1g236613
+Nvec_vc1.1_XM_001635650.3	neu.Ras.HG2.8:Rheb/Rhebl1	Rheb/Rhebl1	Nvec_v1g236736
+Nvec_vc1.1_XM_032385114.2	neu.NCam.HG1.0:Ncam1/Ncam2	Ncam1/Ncam2	Nvec_v1g236748
+Nvec_vc1.1_XM_032384555.2	Nvec_v1g236786:HG.Unclassified	""	Nvec_v1g236786
+Nvec_vc1.1_XM_001634220.3	neu.Ras.HG3.16:Rnd1/Rnd2/Rnd3	Rnd1/Rnd2/Rnd3	Nvec_v1g236847
+Nvec_vc1.1_XM_032382001.2	neu.Ras.HG4.15:Arf6	Arf6	Nvec_v1g236955
+Nvec_vc1.1_XM_048733220.1	neu.MFS_1.HG4.6:like:Mfsd8		Nvec_v1g237905
+Nvec_vc1.1_XM_032367191.2	neu.RhoGEF.HG1.27:like:Plekhg5/Plekhg6		Nvec_v1g237981
+Nvec_vc1.1_XM_032366957.2	neu.PID.HG1.1:Eps8/Eps8l2/Pid1	Eps8/Eps8l2/Pid1	Nvec_v1g238102
+Nvec_vc1.1_XM_032366783.2	neu.FERM_M.HG1.5:like:Fermt1/Fermt2/Fermt3/Tln1/Tln2		Nvec_v1g238189
+Nvec_vc1.1_XM_032366469.2	neu.MFS_1.HG4.4:Slc46a1/Slc46a2/Slc46a3		Nvec_v1g238374
+Nvec_vc1.1_XM_001641080.3	neu.MFS_1.HG12.3:like:Mfsd6l		Nvec_v1g238419
+Nvec_vc1.1_XM_001640533.3	neu.MFS_1.HG1.15:like:Slc16a2/Slc16a10		Nvec_v1g238678
+Nvec_vc1.1_XM_032365512.2	neu.Ras.HG4.22:Arf4/Arf5	Arf4/Arf5	Nvec_v1g238733
+Nvec_vc1.1_XM_048720351.1	Nvec_v1g238741:HG.Unclassified	""	Nvec_v1g238741
+Nvec_vc1.1_XM_048719352.1	neu.RhoGEF.HG1.20:like:Arhgef39/Farp1/Farp2/Fgd1/Fgd2/Fgd3/Fgd4/Fgd5/Fgd6		Nvec_v1g238793
+Nvec_vc1.1_XM_048725811.1	neu.Ras.HG6.3:Rab29		Nvec_v1g238852
+Nvec_vc1.1_XM_032365241.2	Nvec_v1g238931:HG.Unclassified	""	Nvec_v1g238931
+Nvec_vc1.1_XM_032364836.2	neu.Synaptotagmin.HG1.8:C2cd5	C2cd5	Nvec_v1g239114
+Nvec_vc1.1_XM_048728615.1	Nvec_v1g239158:HG.Unclassified	""	Nvec_v1g239158
+Nvec_vc1.1_XM_001639658.3	neu.MFS_1.HG9.3:like:Flvcr1/Flvcr2/Mfsd7a		Nvec_v1g239183
+Nvec_vc1.1_XM_048725869.1	neu.RhoGEF.HG1.35:Abr/Bcr	Abr/Bcr	Nvec_v1g239294
+Nvec_vc1.1_XM_001639153.3	neu.Aa_trans.HG1.13:Slc36a1/Slc36a2/Slc36a3/Slc36a4	Slc36a1/Slc36a2/Slc36a3/Slc36a4	Nvec_v1g239583
+Nvec_vc1.1_XM_001638981.3	neu.MFS_1.HG12.3:like:Mfsd6l		Nvec_v1g239633
+Nvec_vc1.1_XM_032363891.2	neu.COesterase.HG1.1:like:Ache/Bche/Cel/Ces1a/Ces1b/Ces1c/Ces1d/Ces1e/Ces1f/Ces1g/Ces1h/Ces2a/Ces2b/Ces2c/Ces2e/Ces2f/Ces2g/Ces2h/Ces3a/Ces3b/Ces4a/Ces5a/Nlgn1/Nlgn2/Nlgn3/Tg		Nvec_v1g239659
+Nvec_vc1.1_XM_001638824.3	neu.MFS_1.HG4.5:like:Mfsd8;neu.Sugar_tr.HG2.5:Mfsd8	""	Nvec_v1g239663
+Nvec_vc1.1_XM_048730607.1	Nvec_v1g239679:HG.Unclassified	""	Nvec_v1g239679
+Nvec_vc1.1_XM_032363618.2	neu.MFS_1.HG12.4:Mfsd6l	Mfsd6l	Nvec_v1g239725
+Nvec_vc1.1_XM_032363362.2	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g239726
+Nvec_vc1.1_XM_001638679.3	neu.MFS_1.HG1.9:Slc16a2/Slc16a10	Slc16a10/Slc16a2	Nvec_v1g239751
+Nvec_vc1.1_XM_032363362.2	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g239787
+Nvec_vc1.1_XM_032363378.2	Nvec_v1g239815:HG.Unclassified	""	Nvec_v1g239815
+Nvec_vc1.1_XM_032363397.2	neu.ANF_receptor.HG2.50:like:Gabbr1/Gabbr2		Nvec_v1g239821
+Nvec_vc1.1_XM_001638646.3	neu.ANF_receptor.HG1.11:like:Gria1/Gria2/Gria3/Gria4/Grid1/Grid2/Grik1/Grik2/Grik3/Grik4/Grik5		Nvec_v1g239847
+Nvec_vc1.1_XM_032363143.2	Nvec_v1g239945:HG.Unclassified	""	Nvec_v1g239945
+Nvec_vc1.1_XM_001638364.3	neu.Synaptotagmin.HG1.5:like:Esyt1/Esyt2/Esyt3		Nvec_v1g239955
+Nvec_vc1.1_XM_032363153.2	neu.MFS_1.HG6.0:Slc17a1/Slc17a2/Slc17a3/Slc17a4/Slc17a5/Slc17a6/Slc17a7/Slc17a8/Slc17a9;neu.Sugar_tr.HG4.2:like:Slc37a3	""	Nvec_v1g239967
+Nvec_vc1.1_XM_001638220.3	neu.MFS_1.HG1.15:like:Slc16a2/Slc16a10		Nvec_v1g240018
+Nvec_vc1.1_XM_032362647.2	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g240064
+Nvec_vc1.1_XM_001637999.3	neu.MARVEL.HG2.0:like:Cmtm3/Cmtm4/Cmtm6/Cmtm7/Cmtm8/Gm6169/Mal/Mal2/Mall/Marveld1/Marveld2/Myadm/Myadml2/Pllp/Plp2		Nvec_v1g240132
+Nvec_vc1.1_XM_048721046.1	neu.MARVEL.HG2.0:like:Cmtm3/Cmtm4/Cmtm6/Cmtm7/Cmtm8/Gm6169/Mal/Mal2/Mall/Marveld1/Marveld2/Myadm/Myadml2/Pllp/Plp2		Nvec_v1g240133
+Nvec_vc1.1_XM_048720625.1	Nvec_v1g240134:HG.Unclassified	""	Nvec_v1g240134
+Nvec_vc1.1_XM_032362594.2	neu.MARVEL.HG2.0:like:Cmtm3/Cmtm4/Cmtm6/Cmtm7/Cmtm8/Gm6169/Mal/Mal2/Mall/Marveld1/Marveld2/Myadm/Myadml2/Pllp/Plp2		Nvec_v1g240136
+Nvec_vc1.1_XM_001638004.3	neu.MARVEL.HG2.0:like:Cmtm3/Cmtm4/Cmtm6/Cmtm7/Cmtm8/Gm6169/Mal/Mal2/Mall/Marveld1/Marveld2/Myadm/Myadml2/Pllp/Plp2		Nvec_v1g240137
+Nvec_vc1.1_XM_032362421.2	Nvec_v1g240248:HG.Unclassified	""	Nvec_v1g240248
+Nvec_vc1.1_XM_048727742.1	neu.Sec1.HG1.2:Vps33b	Vps33b	Nvec_v1g240346
+Nvec_vc1.1_XM_001637376.3	neu.PID.HG1.4:Dab1/Dab2	Dab1/Dab2	Nvec_v1g240462
+Nvec_vc1.1_XM_048728530.1	neu.Bravo_FIGEY.HG1.0:like:Chl1/L1cam/Nfasc/Nrcam		Nvec_v1g240518
+Nvec_vc1.1_XM_001637149.3	neu.Ras.HG2.27:like:Eras		Nvec_v1g240618
+Nvec_vc1.1_XM_032387083.2	neu.PID.HG1.0:like:Eps8/Eps8l2/Ldlrap1/Pid1		Nvec_v1g240697
+Nvec_vc1.1_XM_032386934.2	neu.Ephrin.HG1.0:Efna1/Efna2/Efna3/Efna4/Efna5/Efnb1/Efnb2/Efnb3	Efna1/Efna2/Efna3/Efna4/Efna5/Efnb1/Efnb2/Efnb3	Nvec_v1g240720
+Nvec_vc1.1_XM_032386919.2	neu.RhoGEF.HG1.2:Arhgef37/Arhgef38/Dnmbp	Arhgef37/Arhgef38/Dnmbp	Nvec_v1g240748
+Nvec_vc1.1_XM_048724870.1	neu.Ras.HG9.1:Arhgap5/Arhgap35	Arhgap35/Arhgap5	Nvec_v1g240750
+Nvec_vc1.1_XM_048721866.1	neu.RhoGEF.HG1.33:Ect2l	Ect2l	Nvec_v1g241218
+Nvec_vc1.1_XM_001635978.3	neu.ANF_receptor.HG1.25:like:Casr/Gprc6a/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r128		Nvec_v1g241281
+Nvec_vc1.1_XM_001635878.2	neu.Homer.HG1.2:Was/Wasl	Was/Wasl	Nvec_v1g241376
+Nvec_vc1.1_XM_032385591.2	neu.COesterase.HG1.7:like:Ache/Bche/Cel/Ces1a/Ces1b/Ces1c/Ces1d/Ces1e/Ces1f/Ces1g/Ces1h/Ces2a/Ces2b/Ces2c/Ces2e/Ces2f/Ces2g/Ces2h/Ces3a/Ces3b/Ces4a/Ces5a/Nlgn1/Nlgn2/Nlgn3/Tg		Nvec_v1g241380
+Nvec_vc1.1_XM_001635816.3	neu.Aa_trans.HG1.2:Slc32a1		Nvec_v1g241391
+Nvec_vc1.1_XM_001635817.3	neu.Aa_trans.HG1.2:Slc32a1		Nvec_v1g241392
+Nvec_vc1.1_XM_032385602.2	neu.Synaptotagmin.HG1.39:like:Syt1/Syt2/Syt3/Syt4/Syt5/Syt6/Syt7/Syt8/Syt9/Syt10/Syt11/Syt12/Syt13/Syt15/Syt17		Nvec_v1g241405
+Nvec_vc1.1_XM_001635459.3	neu.RasGAP.HG1.6:Rasa2/Rasa3;neu.Synaptotagmin.HG1.19:Rasa2/Rasa3	""	Nvec_v1g241545
+Nvec_vc1.1_XM_032385118.2	neu.NCam.HG1.0:Ncam1/Ncam2	Ncam1/Ncam2	Nvec_v1g241557
+Nvec_vc1.1_XM_001635393.3	Nvec_v1g241628:HG.Unclassified	""	Nvec_v1g241628
+Nvec_vc1.1_XM_048728477.1	Nvec_v1g241799:HG.Unclassified	""	Nvec_v1g241799
+Nvec_vc1.1_XM_032384409.2	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g241870
+Nvec_vc1.1_XM_032384313.2	neu.MFS_1.HG8.6:Slc2a6/Slc2a8;neu.Sugar_tr.HG3.4:Slc2a6/Slc2a8	""	Nvec_v1g241972
+Nvec_vc1.1_XM_001634754.3	Nvec_v1g241996:HG.Unclassified	""	Nvec_v1g241996
+Nvec_vc1.1_XM_001634761.3	neu.FERM_M.HG1.29:Epb41/Epb41l1/Epb41l2		Nvec_v1g242003
+Nvec_vc1.1_XM_048721169.1	neu.Ras.HG4.19:Arf1/Arf2/Arf3		Nvec_v1g242285
+Nvec_vc1.1_XM_032383622.2	Nvec_v1g242338:HG.Unclassified	""	Nvec_v1g242338
+Nvec_vc1.1_XM_048727804.1	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g242374
+Nvec_vc1.1_XM_048725381.1	neu.Guanylate_kin.HG1.8:Dlg5/Tjp1/Tjp2/Tjp3	Tjp1/Tjp2/Tjp3	Nvec_v1g242549
+Nvec_vc1.1_XM_032383144.2	neu.RhoGEF.HG1.18:like:Akap13/Arhgef1/Arhgef2/Arhgef3/Arhgef5/Arhgef11/Arhgef12/Arhgef15/Arhgef16/Arhgef18/Arhgef19/Arhgef26/Arhgef28/Itsn1/Itsn2/Net1/Ngef/Plekhg5/Plekhg6		Nvec_v1g242563
+Nvec_vc1.1_XM_001633302.3	neu.Aa_trans.HG1.2:Slc32a1		Nvec_v1g242799
+Nvec_vc1.1_XM_001633244.3	neu.Synaptotagmin.HG1.14:C2cd4c/C2cd4d/Syt14/Syt16/Tc2n	Tc2n	Nvec_v1g242883
+Nvec_vc1.1_XM_048732293.1	neu.RasGAP.HG1.1:like:Iqgap1/Iqgap2/Iqgap3		Nvec_v1g243068
+Nvec_vc1.1_XM_048733716.1	neu.MFS_1.HG1.15:like:Slc16a2/Slc16a10		Nvec_v1g243160
+Nvec_vc1.1_XM_032381755.2	neu.ANF_receptor.HG2.36:like:Gabbr1/Gabbr2		Nvec_v1g243252
+Nvec_vc1.1_XM_001632570.3	Nvec_v1g243307:HG.Unclassified	""	Nvec_v1g243307
+Nvec_vc1.1_XM_048726584.1	neu.MFS_1.HG4.8:like:Gm43191/Mfsd9/Mfsd10/Mfsd14a/Mfsd14b/Slc22a18		Nvec_v1g243640
+Nvec_vc1.1_XM_048726015.1	neu.MFS_1.HG1.15:like:Slc16a2/Slc16a10		Nvec_v1g243721
+Nvec_vc1.1_XM_032380628.2	neu.MFS_1.HG4.4:Slc46a1/Slc46a2/Slc46a3		Nvec_v1g243729
+Nvec_vc1.1_XM_032380512.2	neu.RhoGEF.HG1.26:Plekhg5/Plekhg6	Plekhg5/Plekhg6	Nvec_v1g243788
+Nvec_vc1.1_XM_001631478.3	neu.Ras.HG3.11:4930544G11Rik/Rhoa/Rhob/Rhoc	4930544G11Rik/Rhoa/Rhoc	Nvec_v1g243859
+Nvec_vc1.1_XM_001631446.3	neu.MFS_1.HG11.4:Spns1/Spns2/Spns3;neu.Sugar_tr.HG2.14:Spns1/Spns2/Spns3	""	Nvec_v1g243901
+Nvec_vc1.1_XM_048733202.1	neu.ANF_receptor.HG2.51:like:Gabbr1/Gabbr2		Nvec_v1g244104
+Nvec_vc1.1_XM_001631000.3	neu.COesterase.HG1.1:like:Ache/Bche/Cel/Ces1a/Ces1b/Ces1c/Ces1d/Ces1e/Ces1f/Ces1g/Ces1h/Ces2a/Ces2b/Ces2c/Ces2e/Ces2f/Ces2g/Ces2h/Ces3a/Ces3b/Ces4a/Ces5a/Nlgn1/Nlgn2/Nlgn3/Tg		Nvec_v1g244109
+Nvec_vc1.1_XM_001630809.3	neu.MFS_1.HG12.6:like:Mfsd6l		Nvec_v1g244203
+Nvec_vc1.1_XM_001630549.3	neu.Ras.HG3.36:Rac1/Rac2/Rac3	Rac1/Rac2/Rac3	Nvec_v1g244319
+Nvec_vc1.1_XM_032379011.2	neu.MFS_1.HG1.15:like:Slc16a2/Slc16a10		Nvec_v1g244424
+Nvec_vc1.1_XM_032378755.2	neu.ANF_receptor.HG1.25:like:Casr/Gprc6a/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r128		Nvec_v1g244506
+Nvec_vc1.1_XM_048720169.1	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g244617
+Nvec_vc1.1_XM_001629925.3	neu.PID.HG1.3:like:Ldlrap1		Nvec_v1g244678
+Nvec_vc1.1_XM_048733325.1	Nvec_v1g244697:HG.Unclassified	""	Nvec_v1g244697
+Nvec_vc1.1_XM_032378357.2	neu.RhoGEF.HG1.19:Arhgef3/Net1	Arhgef3/Net1	Nvec_v1g244702
+Nvec_vc1.1_XM_048723937.1	neu.RhoGEF.HG1.25:Arhgef25/Kalrn/Obscn/Trio	Arhgef25/Kalrn/Trio	Nvec_v1g244901
+Nvec_vc1.1_XM_032377469.2	Nvec_v1g245123:HG.Unclassified	""	Nvec_v1g245123
+Nvec_vc1.1_XM_001629002.3	Nvec_v1g245244:HG.Unclassified	""	Nvec_v1g245244
+Nvec_vc1.1_XM_032377004.2	neu.Ras.HG6.2:like:Rab29/Rab32/Rab38		Nvec_v1g245354
+Nvec_vc1.1_XM_001628567.3	neu.Ras.HG3.6:like:4930544G11Rik/Cdc42/Rac1/Rac2/Rac3/Rhoa/Rhob/Rhoc/Rhod/Rhof/Rhog/Rhoh/Rhoj/Rhoq/Rhou/Rhov/Rnd1/Rnd2/Rnd3		Nvec_v1g245458
+Nvec_vc1.1_XM_048732655.1	neu.PMCA.HG1.4:Atp1a1/Atp1a2/Atp1a3/Atp1a4/Atp4a/Atp12a	Atp12a/Atp1a1/Atp1a2/Atp1a3/Atp1a4/Atp4a	Nvec_v1g245490
+Nvec_vc1.1_XM_048722020.1	neu.Ras.HG3.16:Rnd1/Rnd2/Rnd3	Rnd1/Rnd2/Rnd3	Nvec_v1g24582
+Nvec_vc1.1_XM_032375729.2	neu.RasGAP.HG1.5:Dab2ip/Rasal2/Rasal3/Syngap1;neu.SynGAP.HG1.0:Dab2ip/Rasal2/Syngap1	""	Nvec_v1g245865
+Nvec_vc1.1_XM_032375548.2	neu.RhoGEF.HG1.16:Arhgef6/Arhgef7	Arhgef6/Arhgef7	Nvec_v1g245940
+Nvec_v1g246185	neu.Synaphin.HG1.0:Cplx1/Cplx2/Cplx3/Cplx4		Nvec_v1g246185
+Nvec_vc1.1_XM_001626671.3	neu.MFS_1.HG14.2:Mfsd12	Mfsd12	Nvec_v1g246446
+Nvec_vc1.1_XM_048730930.1	neu.ANF_receptor.HG1.51:like:Casr/Gprc6a/Gria1/Gria2/Gria3/Gria4/Grid1/Grid2/Grik1/Grik2/Grik3/Grik4/Grik5/Grin1/Grin2a/Grin2b/Grin2c/Grin2d/Grin3a/Grm1/Grm2/Grm3/Grm4/Grm5/Grm6/Grm7/Grm8/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r128		Nvec_v1g246961
+Nvec_vc1.1_XM_001622377.3	neu.Ras.HG2.12:Rasd1/Rasd2/Rasl10a/Rasl10b	Rasl10a/Rasl10b	Nvec_v1g247047
+Nvec_vc1.1_XM_001625257.3	neu.MFS_1.HG12.6:like:Mfsd6l		Nvec_v1g247209
+Nvec_vc1.1_XM_048723016.1	neu.Synaptotagmin.HG1.3:Esyt1/Esyt2/Esyt3	Esyt1/Esyt2/Esyt3	Nvec_v1g247335
+Nvec_vc1.1_XM_001624964.3	neu.Ras.HG2.25:Hras/Kras/Nras		Nvec_v1g247341
+Nvec_vc1.1_XM_032371726.2	neu.SNF.HG1.27:like:Slc6a6/Slc6a8/Slc6a11/Slc6a12/Slc6a13		Nvec_v1g247614
+Nvec_vc1.1_XM_001623858.3	neu.Aa_trans.HG1.2:Slc32a1		Nvec_v1g247861
+Nvec_vc1.1_XM_001623797.3	neu.Synaptotagmin.HG1.34:Syt1/Syt2/Syt3/Syt4/Syt5/Syt6/Syt7/Syt8/Syt9/Syt10/Syt11/Syt12/Syt13/Syt15/Syt17		Nvec_v1g247877
+Nvec_vc1.1_XM_032370802.2	neu.FERM_M.HG1.28:Ezr/Msn/Rdx	Ezr/Msn/Rdx	Nvec_v1g247943
+Nvec_vc1.1_XM_048723837.1	neu.Pentaxin.HG1.10:like:Npcd/Nptx1/Nptx2/Nptxr/Ptx4/Svep1		Nvec_v1g248399
+Nvec_vc1.1_XM_048731193.1	neu.RhoGEF.HG1.0:Vav1/Vav2/Vav3	Vav1/Vav2/Vav3	Nvec_v1g248472
+Nvec_vc1.1_XM_048730849.1	neu.Ras.HG4.18:Trim23	Trim23	Nvec_v1g248744
+Nvec_vc1.1_XM_032381868.2	neu.PID.HG1.21:Mapk8ip1/Mapk8ip2	Mapk8ip1/Mapk8ip2	Nvec_v1g25148
+Nvec_vc1.1_XM_032385457.2	neu.RhoGEF.HG1.25:Arhgef25/Kalrn/Obscn/Trio	Arhgef25/Kalrn/Trio	Nvec_v1g25692
+Nvec_vc1.1_XM_032382854.2	neu.FERM_M.HG1.29:Epb41/Epb41l1/Epb41l2		Nvec_v1g26234
+Nvec_vc1.1_XM_048722312.1	Nvec_v1g26812:HG.Unclassified	""	Nvec_v1g26812
+Nvec_vc1.1_XM_048720590.1	neu.Synaptotagmin.HG1.7:Pik3c2a/Pik3c2b	Pik3c2a/Pik3c2b	Nvec_v1g2683
+Nvec_vc1.1_XM_048729314.1	neu.Pentaxin.HG1.21:like:Svep1		Nvec_v1g26894
+Nvec_vc1.1_XM_032384006.2	Nvec_v1g27085:HG.Unclassified	""	Nvec_v1g27085
+Nvec_vc1.1_XM_032382614.2	neu.MFS_1.HG1.9:Slc16a2/Slc16a10	Slc16a10/Slc16a2	Nvec_v1g27397
+Nvec_vc1.1_XM_048722043.1	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g27545
+Nvec_vc1.1_XM_032384966.2	neu.ANF_receptor.HG1.12:like:Casr/Gprc6a/Gria1/Gria2/Gria3/Gria4/Grid1/Grid2/Grik1/Grik2/Grik3/Grik4/Grik5/Grin1/Grin2a/Grin2b/Grin2c/Grin2d/Grin3a/Grm1/Grm2/Grm3/Grm4/Grm5/Grm6/Grm7/Grm8/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r128		Nvec_v1g28047
+Nvec_vc1.1_XM_048721740.1	neu.Synaptotagmin.HG1.25:Sytl1/Sytl2/Sytl3/Sytl4/Sytl5	Sytl1/Sytl2/Sytl3/Sytl4/Sytl5	Nvec_v1g297
+Nvec_vc1.1_XM_032383766.2	Nvec_v1g29735:HG.Unclassified	""	Nvec_v1g29735
+Nvec_vc1.1_XM_032384966.2	neu.ANF_receptor.HG1.21:like:Grm1/Grm2/Grm3/Grm4/Grm5/Grm6/Grm7/Grm8		Nvec_v1g29887
+Nvec_vc1.1_XM_001638987.3	Nvec_v1g30743:HG.Unclassified	""	Nvec_v1g30743
+Nvec_vc1.1_XM_048724417.1	neu.MFS_1.HG9.3:like:Flvcr1/Flvcr2/Mfsd7a		Nvec_v1g30750
+Nvec_vc1.1_XM_032364177.2	neu.ANF_receptor.HG1.25:like:Casr/Gprc6a/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r128		Nvec_v1g30901
+Nvec_vc1.1_XM_032382349.2	neu.MFS_1.HG7.3:like:Gm5724/Gm6614/Slco1a1/Slco1a4/Slco1a5/Slco1a6/Slco1b2/Slco1c1/Slco2a1/Slco2b1/Slco3a1/Slco5a1		Nvec_v1g31122
+Nvec_vc1.1_XM_001638140.3	neu.ANF_receptor.HG1.25:like:Casr/Gprc6a/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r128		Nvec_v1g31331
+Nvec_vc1.1_XM_001639254.3	neu.COesterase.HG1.1:like:Ache/Bche/Cel/Ces1a/Ces1b/Ces1c/Ces1d/Ces1e/Ces1f/Ces1g/Ces1h/Ces2a/Ces2b/Ces2c/Ces2e/Ces2f/Ces2g/Ces2h/Ces3a/Ces3b/Ces4a/Ces5a/Nlgn1/Nlgn2/Nlgn3/Tg		Nvec_v1g31599
+Nvec_vc1.1_XM_001640200.3	neu.Y_phosphatase.HG1.47:like:Ptpra/Ptprd/Ptpre/Ptprf/Ptprs		Nvec_v1g31844
+Nvec_vc1.1_XM_032386883.2	neu.ANF_receptor.HG1.15:like:Grin1		Nvec_v1g31895
+Nvec_vc1.1_XM_048729573.1	neu.MFS_1.HG1.9:Slc16a2/Slc16a10	Slc16a10/Slc16a2	Nvec_v1g32911
+Nvec_vc1.1_XM_001632874.3	neu.MFS_1.HG15.0:Mfsd4a/Mfsd4b1/Mfsd4b4/Mfsd4b5		Nvec_v1g33187
+Nvec_vc1.1_XM_001641617.3	neu.Aa_trans.HG1.2:Slc32a1	Slc32a1	Nvec_v1g33294
+Nvec_vc1.1_XM_001638251.3	neu.COesterase.HG1.7:like:Ache/Bche/Cel/Ces1a/Ces1b/Ces1c/Ces1d/Ces1e/Ces1f/Ces1g/Ces1h/Ces2a/Ces2b/Ces2c/Ces2e/Ces2f/Ces2g/Ces2h/Ces3a/Ces3b/Ces4a/Ces5a/Nlgn1/Nlgn2/Nlgn3/Tg		Nvec_v1g33439
+Nvec_vc1.1_XM_001638073.3	Nvec_v1g34458:HG.Unclassified	""	Nvec_v1g34458
+Nvec_vc1.1_XM_048729314.1	neu.Pentaxin.HG1.21:like:Svep1		Nvec_v1g3461
+Nvec_vc1.1_XM_048733221.1	Nvec_v1g35477:HG.Unclassified	""	Nvec_v1g35477
+Nvec_vc1.1_XM_048725133.1	neu.Y_phosphatase.HG1.35:Ptprk/Ptprm/Ptprt/Ptpru	Ptprk/Ptprm/Ptprt/Ptpru	Nvec_v1g35794
+Nvec_vc1.1_XM_048729033.1	neu.Pentaxin.HG1.21:like:Svep1		Nvec_v1g3612
+Nvec_vc1.1_XM_001636475.3	Nvec_v1g36550:HG.Unclassified	""	Nvec_v1g36550
+Nvec_vc1.1_XM_001636476.3	Nvec_v1g37059:HG.Unclassified	""	Nvec_v1g37059
+Nvec_vc1.1_XM_032366691.2	neu.Ras.HG2.1:Rasl11a/Rasl11b/Rerg/Rergl		Nvec_v1g37606
+Nvec_vc1.1_XM_032385717.2	neu.Pentaxin.HG1.10:like:Npcd/Nptx1/Nptx2/Nptxr/Ptx4/Svep1		Nvec_v1g38084
+Nvec_vc1.1_XM_032366690.2	neu.Ras.HG2.1:Rasl11a/Rasl11b/Rerg/Rergl		Nvec_v1g38315
+Nvec_vc1.1_XM_001638552.3	Nvec_v1g38950:HG.Unclassified	""	Nvec_v1g38950
+Nvec_vc1.1_XM_032386751.2	neu.Synaptotagmin.HG1.39:like:Syt1/Syt2/Syt3/Syt4/Syt5/Syt6/Syt7/Syt8/Syt9/Syt10/Syt11/Syt12/Syt13/Syt15/Syt17		Nvec_v1g38963
+Nvec_vc1.1_XM_001636033.3	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g39280
+Nvec_vc1.1_XM_001626325.3	neu.ANF_receptor.HG2.7:like:Npr1/Npr2/Npr3		Nvec_v1g40000
+Nvec_vc1.1_XM_048724790.1	neu.ANF_receptor.HG2.36:like:Gabbr1/Gabbr2		Nvec_v1g40255
+Nvec_vc1.1_XM_001627303.3	neu.ANF_receptor.HG1.22:Grm1/Grm2/Grm3/Grm4/Grm5/Grm6/Grm7/Grm8	Grm1/Grm5	Nvec_v1g40374
+Nvec_vc1.1_XM_048728043.1	neu.Y_phosphatase.HG1.35:Ptprk/Ptprm/Ptprt/Ptpru	Ptprk/Ptprm/Ptprt/Ptpru	Nvec_v1g40600
+Nvec_vc1.1_XM_048726388.1	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g40646
+Nvec_vc1.1_XM_032373212.2	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g40753
+Nvec_vc1.1_XM_048733913.1	neu.MFS_1.HG6.0:Slc17a1/Slc17a2/Slc17a3/Slc17a4/Slc17a5/Slc17a6/Slc17a7/Slc17a8/Slc17a9;neu.Sugar_tr.HG4.2:like:Slc37a3	""	Nvec_v1g40974
+Nvec_vc1.1_XM_048725133.1	neu.Y_phosphatase.HG1.35:Ptprk/Ptprm/Ptprt/Ptpru	Ptprk/Ptprm/Ptprt/Ptpru	Nvec_v1g41992
+Nvec_vc1.1_XM_032363153.2	neu.MFS_1.HG6.0:Slc17a1/Slc17a2/Slc17a3/Slc17a4/Slc17a5/Slc17a6/Slc17a7/Slc17a8/Slc17a9;neu.Sugar_tr.HG4.2:like:Slc37a3	""	Nvec_v1g4296
+Nvec_vc1.1_XM_048733637.1	neu.MFS_1.HG4.4:Slc46a1/Slc46a2/Slc46a3		Nvec_v1g43151
+Nvec_vc1.1_XM_048728847.1	Nvec_v1g43303:HG.Unclassified	""	Nvec_v1g43303
+Nvec_vc1.1_XM_048728847.1	Nvec_v1g46592:HG.Unclassified	""	Nvec_v1g46592
+Nvec_vc1.1_XM_048728115.1	neu.RhoGEF.HG1.28:Akap13/Arhgef2/Arhgef18/Arhgef28	Akap13/Arhgef18/Arhgef2/Arhgef28	Nvec_v1g4682
+Nvec_vc1.1_XM_048726925.1	neu.MFS_1.HG3.31:Svop/Svopl;neu.Sugar_tr.HG2.3:Svop/Svopl	""	Nvec_v1g47059
+Nvec_vc1.1_XM_001629062.3	neu.Ras.HG3.9:like:Rhod/Rhof/Rnd1/Rnd2/Rnd3		Nvec_v1g47076
+Nvec_vc1.1_XM_032384593.2	neu.Ras.HG4.17:like:Arl4a/Arl4c/Arl4d/Arl11/Arl14		Nvec_v1g49613
+Nvec_vc1.1_XM_048729633.1	neu.Synaptotagmin.HG1.26:Dysf/Myof	Dysf/Myof	Nvec_v1g50027
+Nvec_vc1.1_XM_048728882.1	neu.Synaptotagmin.HG1.26:Dysf/Myof	Dysf/Myof	Nvec_v1g50268
+Nvec_vc1.1_XM_032380552.2	Nvec_v1g50431:HG.Unclassified	""	Nvec_v1g50431
+Nvec_vc1.1_XM_032370220.2	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g50785
+Nvec_vc1.1_XM_032384695.2	neu.MFS_1.HG1.9:Slc16a2/Slc16a10	Slc16a10/Slc16a2	Nvec_v1g52231
+Nvec_vc1.1_XM_032377502.2	neu.MFS_1.HG7.11:like:Gm5724/Gm6614/Slco1a1/Slco1a4/Slco1a5/Slco1a6/Slco1b2/Slco1c1/Slco2a1/Slco2b1/Slco3a1/Slco5a1		Nvec_v1g52639
+Nvec_vc1.1_XM_048734139.1	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g53623
+Nvec_vc1.1_XM_001632858.3	Nvec_v1g53664:HG.Unclassified	""	Nvec_v1g53664
+Nvec_vc1.1_XM_001628209.3	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g53825
+Nvec_vc1.1_XM_001634950.3	neu.PID.HG1.2:Numb/Numbl	Numb/Numbl	Nvec_v1g54859
+Nvec_vc1.1_XM_032377423.2	neu.Ras.HG3.7:Rhoh	Rhoh	Nvec_v1g55360
+Nvec_vc1.1_XM_048723321.1	neu.Synaptotagmin.HG1.33:like:Syt1/Syt2/Syt3/Syt4/Syt5/Syt6/Syt7/Syt8/Syt9/Syt10/Syt11/Syt12/Syt13/Syt15/Syt17		Nvec_v1g56821
+Nvec_vc1.1_XM_001634396.3	neu.Synaptobrevin.HG1.8:Vamp1/Vamp2/Vamp3		Nvec_v1g57994
+Nvec_vc1.1_XM_032378753.2	Nvec_v1g58074:HG.Unclassified	""	Nvec_v1g58074
+Nvec_vc1.1_XM_048727865.1	Nvec_v1g5879:HG.Unclassified	""	Nvec_v1g5879
+Nvec_vc1.1_XM_048728746.1	neu.Pyridoxal_deC.HG1.2:like:Sgpl1		Nvec_v1g60452
+Nvec_vc1.1_XM_048731949.1	neu.SSF.HG1.11:like:Gm5134/Slc5a1/Slc5a2/Slc5a4a/Slc5a4b/Slc5a9/Slc5a10/Slc5a11		Nvec_v1g60477
+Nvec_vc1.1_XM_032363464.2	neu.SNF.HG1.7:Slc6a15/Slc6a16/Slc6a17/Slc6a18/Slc6a19/Slc6a20a/Slc6a20b/Slc6a21	Slc6a15/Slc6a16/Slc6a17/Slc6a18/Slc6a19/Slc6a20a/Slc6a20b/Slc6a21	Nvec_v1g60521
+Nvec_vc1.1_XM_001641717.3	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g60630
+Nvec_vc1.1_XM_001641921.3	neu.Aa_trans.HG1.2:Slc32a1		Nvec_v1g60758
+Nvec_v1g61402	neu.MFS_1.HG26.1:NA		Nvec_v1g61402
+Nvec_vc1.1_XM_048724132.1	neu.FERM_M.HG1.31:Epb41l4a/Epb41l4b/Epb41l5/Frmd3/Frmd5/Ptpn3/Ptpn4	Epb41l4b/Epb41l5	Nvec_v1g61432
+Nvec_vc1.1_XM_048726074.1	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g61471
+Nvec_v1g6164	neu.Pentaxin.HG1.9:like:Npcd/Nptx1/Nptx2/Nptxr/Ptx4/Svep1		Nvec_v1g6164
+Nvec_vc1.1_XM_048725622.1	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g63188
+Nvec_vc1.1_XM_032369304.2	neu.Ras.HG6.0:like:Rab29/Rab32/Rab38		Nvec_v1g64028
+Nvec_vc1.1_XM_048734077.1	Nvec_v1g6439:HG.Unclassified	""	Nvec_v1g6439
+Nvec_vc1.1_XM_001629062.3	Nvec_v1g64522:HG.Unclassified	""	Nvec_v1g64522
+Nvec_vc1.1_XM_032376820.2	neu.Ras.HG2.12:Rasd1/Rasd2/Rasl10a/Rasl10b	Rasl10a/Rasl10b	Nvec_v1g6471
+Nvec_vc1.1_XM_032363552.2	neu.ANF_receptor.HG1.17:like:Casr/Gprc6a/Grm1/Grm2/Grm3/Grm4/Grm5/Grm6/Grm7/Grm8/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r128		Nvec_v1g6498
+Nvec_vc1.1_XM_048724778.1	Nvec_v1g68421:HG.Unclassified	""	Nvec_v1g68421
+Nvec_vc1.1_XM_001635817.3	neu.Aa_trans.HG1.2:Slc32a1		Nvec_v1g69471
+Nvec_vc1.1_XM_032369933.2	neu.Ras.HG2.12:Rasd1/Rasd2/Rasl10a/Rasl10b		Nvec_v1g69635
+Nvec_vc1.1_XM_048722492.1	neu.Ras.HG2.12:Rasd1/Rasd2/Rasl10a/Rasl10b		Nvec_v1g69635
+Nvec_vc1.1_XM_048728750.1	neu.Pyridoxal_deC.HG1.2:like:Sgpl1		Nvec_v1g70014
+Nvec_vc1.1_XM_048728743.1	neu.Pyridoxal_deC.HG1.2:like:Sgpl1		Nvec_v1g70038
+Nvec_vc1.1_XM_048728748.1	neu.Pyridoxal_deC.HG1.2:like:Sgpl1		Nvec_v1g70058
+Nvec_vc1.1_XM_048724774.1	neu.Y_phosphatase.HG1.35:Ptprk/Ptprm/Ptprt/Ptpru	Ptprk/Ptprm/Ptprt/Ptpru	Nvec_v1g7031
+Nvec_vc1.1_XM_032370760.2	neu.Ras.HG5.7:like:Lrrk1/Lrrk2		Nvec_v1g71335
+Nvec_vc1.1_XM_001632054.3	neu.Ras.HG2.4:like:Gem/Rasl12/Rem1/Rem2/Rrad		Nvec_v1g72442
+Nvec_vc1.1_XM_032363464.2	neu.SNF.HG1.7:Slc6a15/Slc6a16/Slc6a17/Slc6a18/Slc6a19/Slc6a20a/Slc6a20b/Slc6a21	Slc6a15/Slc6a16/Slc6a17/Slc6a18/Slc6a19/Slc6a20a/Slc6a20b/Slc6a21	Nvec_v1g7362
+Nvec_vc1.1_XM_001634508.3	Nvec_v1g7659:HG.Unclassified	""	Nvec_v1g7659
+Nvec_vc1.1_XM_032367646.2	neu.Synaptotagmin.HG1.34:Syt1/Syt2/Syt3/Syt4/Syt5/Syt6/Syt7/Syt8/Syt9/Syt10/Syt11/Syt12/Syt13/Syt15/Syt17	Syt10/Syt3/Syt6/Syt9	Nvec_v1g79064
+Nvec_vc1.1_XM_032367621.2	neu.RhoGEF.HG1.9:like:Arhgef39/Farp1/Farp2/Fgd1/Fgd2/Fgd3/Fgd4/Fgd5/Fgd6		Nvec_v1g79191
+Nvec_vc1.1_XM_032367447.2	neu.SNF.HG1.7:Slc6a15/Slc6a16/Slc6a17/Slc6a18/Slc6a19/Slc6a20a/Slc6a20b/Slc6a21	Slc6a15/Slc6a16/Slc6a17/Slc6a18/Slc6a19/Slc6a20a/Slc6a20b/Slc6a21	Nvec_v1g79255
+Nvec_vc1.1_XM_001641894.3	neu.Ras.HG4.0:like:Arf1/Arf2/Arf3/Arf4/Arf5/Arf6/Arfrp1/Arl1/Arl2/Arl3/Arl4a/Arl4c/Arl4d/Arl5a/Arl5b/Arl5c/Arl6/Arl8a/Arl8b/Arl9/Arl11/Arl13b/Arl14/Arl15/Sar1a/Sar1b/Trim23		Nvec_v1g79420
+Nvec_vc1.1_XM_032367264.2	neu.SNF.HG1.9:like:Slc6a15/Slc6a16/Slc6a17/Slc6a18/Slc6a19/Slc6a20a/Slc6a20b/Slc6a21		Nvec_v1g79785
+Nvec_vc1.1_XM_032367102.2	neu.Pentaxin.HG1.20:Svep1		Nvec_v1g79796
+Nvec_vc1.1_XM_032367304.2	neu.Synaptotagmin.HG1.31:like:Wwc2		Nvec_v1g79980
+Nvec_vc1.1_XM_048733517.1	neu.MFS_1.HG14.2:Mfsd12		Nvec_v1g80101
+Nvec_vc1.1_XM_032367230.2	neu.MFS_1.HG14.2:Mfsd12		Nvec_v1g80169
+Nvec_vc1.1_XM_032367366.2	neu.Aa_trans.HG1.13:Slc36a1/Slc36a2/Slc36a3/Slc36a4	Slc36a1/Slc36a2/Slc36a3/Slc36a4	Nvec_v1g80232
+Nvec_vc1.1_XM_001641818.3	neu.Arfaptin.HG1.0:Arfip1/Arfip2/Gm37240	Arfip1/Arfip2/Gm37240	Nvec_v1g80242
+Nvec_vc1.1_XM_032385717.2	neu.Pentaxin.HG1.10:like:Npcd/Nptx1/Nptx2/Nptxr/Ptx4/Svep1		Nvec_v1g8037
+Nvec_vc1.1_XM_032367010.2	neu.Ephrin.HG1.0:Efna1/Efna2/Efna3/Efna4/Efna5/Efnb1/Efnb2/Efnb3	Efna1/Efna2/Efna3/Efna4/Efna5/Efnb1/Efnb2/Efnb3	Nvec_v1g80532
+Nvec_vc1.1_XM_001641384.2	neu.PID.HG1.9:Gulp1;neu.PTB.HG1.3:Gulp1	""	Nvec_v1g80887
+Nvec_vc1.1_XM_032366775.2	neu.SNF.HG1.7:Slc6a15/Slc6a16/Slc6a17/Slc6a18/Slc6a19/Slc6a20a/Slc6a20b/Slc6a21		Nvec_v1g81233
+Nvec_vc1.1_XM_001641350.3	neu.MFS_1.HG9.0:Flvcr1/Flvcr2	Flvcr1/Flvcr2	Nvec_v1g81538
+Nvec_vc1.1_XM_032366764.2	neu.SNF.HG1.7:Slc6a15/Slc6a16/Slc6a17/Slc6a18/Slc6a19/Slc6a20a/Slc6a20b/Slc6a21		Nvec_v1g81637
+Nvec_vc1.1_XM_032366541.2	neu.Citron.HG1.2:Map4k1/Map4k2/Map4k3/Map4k5	Map4k1/Map4k2/Map4k3/Map4k5	Nvec_v1g81874
+Nvec_vc1.1_XM_032366513.2	Nvec_v1g82036:HG.Unclassified	""	Nvec_v1g82036
+Nvec_vc1.1_XM_032366449.2	neu.Y_phosphatase.HG1.22:Ptprn/Ptprn2	Ptprn/Ptprn2	Nvec_v1g82385
+Nvec_vc1.1_XM_048721111.1	neu.Pentaxin.HG1.4:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g82427
+Nvec_vc1.1_XM_048729457.1	neu.MFS_1.HG6.0:Slc17a1/Slc17a2/Slc17a3/Slc17a4/Slc17a5/Slc17a6/Slc17a7/Slc17a8/Slc17a9;neu.Sugar_tr.HG4.2:like:Slc37a3	""	Nvec_v1g82501
+Nvec_vc1.1_XM_048728923.1	neu.MFS_1.HG6.0:Slc17a1/Slc17a2/Slc17a3/Slc17a4/Slc17a5/Slc17a6/Slc17a7/Slc17a8/Slc17a9		Nvec_v1g82804
+Nvec_vc1.1_XM_048729033.1	neu.Pentaxin.HG1.5:like:Adgrd1/Apcs/Crp/Mptx1/Mptx2/Npcd/Nptx1/Nptx2/Nptxr/Ptx3/Ptx4/Svep1		Nvec_v1g82892
+Nvec_vc1.1_XM_032372444.2	Nvec_v1g8293:HG.Unclassified	""	Nvec_v1g8293
+Nvec_vc1.1_XM_032366094.2	neu.MFS_1.HG10.2:like:Slc37a1/Slc37a2/Slc37a3		Nvec_v1g83019
+Nvec_vc1.1_XM_001640463.3	neu.MFS_1.HG1.15:like:Slc16a2/Slc16a10		Nvec_v1g83078
+Nvec_vc1.1_XM_048729837.1	neu.MFS_1.HG1.15:like:Slc16a2/Slc16a10		Nvec_v1g83435
+Nvec_vc1.1_XM_032365533.2	neu.Aa_trans.HG1.0:Slc38a10	Slc38a10	Nvec_v1g83628
+Nvec_vc1.1_XM_032365542.2	neu.Y_phosphatase.HG1.5:Ptpn12/Ptpn18/Ptpn22	Ptpn12/Ptpn18/Ptpn22	Nvec_v1g83704
+Nvec_vc1.1_XM_048719784.1	neu.MFS_1.HG14.2:Mfsd12		Nvec_v1g83720
+Nvec_vc1.1_XM_032365677.2	neu.Ras.HG2.12:Rasd1/Rasd2/Rasl10a/Rasl10b		Nvec_v1g83753
+Nvec_vc1.1_XM_001639581.3	Nvec_v1g8386:HG.Unclassified	""	Nvec_v1g8386
+Nvec_vc1.1_XM_001640279.3	neu.Aa_trans.HG1.7:like:Slc36a1/Slc36a2/Slc36a3/Slc36a4		Nvec_v1g83962
+Nvec_vc1.1_XM_048725787.1	neu.Ras.HG6.3:Rab29		Nvec_v1g84100
+Nvec_vc1.1_XM_048728420.1	neu.Pentaxin.HG1.13:Npcd/Nptx1/Nptx2/Nptxr		Nvec_v1g8416
+Nvec_vc1.1_XM_001640198.3	neu.RhoGEF.HG1.30:Fgd1/Fgd2/Fgd3/Fgd4	Fgd1/Fgd2/Fgd3/Fgd4	Nvec_v1g84282
+Nvec_vc1.1_XM_032365352.2	neu.RhoGEF.HG1.40:Fgd5/Fgd6	Fgd5/Fgd6	Nvec_v1g84350
+Nvec_vc1.1_XM_032365475.2	Nvec_v1g84363:HG.Unclassified	""	Nvec_v1g84363
+Nvec_vc1.1_XM_048725811.1	neu.Ras.HG6.3:Rab29		Nvec_v1g84449
+Nvec_vc1.1_XM_001628709.3	neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30		Nvec_v1g8463
+Nvec_vc1.1_XM_048725713.1	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g85329
+Nvec_vc1.1_XM_048732926.1	neu.MFS_1.HG6.0:Slc17a1/Slc17a2/Slc17a3/Slc17a4/Slc17a5/Slc17a6/Slc17a7/Slc17a8/Slc17a9	Slc17a6/Slc17a7/Slc17a8	Nvec_v1g8551
+Nvec_vc1.1_XM_032364876.2	neu.Synaptotagmin.HG1.14:C2cd4c/C2cd4d/Syt14/Syt16/Tc2n		Nvec_v1g85537
+Nvec_vc1.1_XM_032364895.2	Nvec_v1g85562:HG.Unclassified	""	Nvec_v1g85562
+Nvec_vc1.1_XM_032364893.2	Nvec_v1g85643:HG.Unclassified	""	Nvec_v1g85643
+Nvec_vc1.1_XM_032365034.2	neu.Synaptotagmin.HG1.34:Syt1/Syt2/Syt3/Syt4/Syt5/Syt6/Syt7/Syt8/Syt9/Syt10/Syt11/Syt12/Syt13/Syt15/Syt17	Syt15	Nvec_v1g85661
+Nvec_vc1.1_XM_048728858.1	Nvec_v1g85690:HG.Unclassified	""	Nvec_v1g85690
+Nvec_vc1.1_XM_001639748.3	neu.MFS_1.HG9.3:like:Flvcr1/Flvcr2/Mfsd7a		Nvec_v1g85723
+Nvec_vc1.1_XM_001639656.3	neu.MFS_1.HG9.1:Mfsd7a		Nvec_v1g85909
+Nvec_vc1.1_XM_001639732.3	neu.Ras.HG2.1:Rasl11a/Rasl11b/Rerg/Rergl		Nvec_v1g85988
+Nvec_vc1.1_XM_048726388.1	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g86395
+Nvec_vc1.1_XM_048726737.1	neu.ANF_receptor.HG2.29:like:Gabbr1/Gabbr2		Nvec_v1g86565
+Nvec_vc1.1_XM_048720895.1	neu.IMD.HG1.1:Mtss1/Mtss2	Mtss1/Mtss2	Nvec_v1g86734
+Nvec_vc1.1_XM_032364102.2	neu.COesterase.HG1.1:like:Ache/Bche/Cel/Ces1a/Ces1b/Ces1c/Ces1d/Ces1e/Ces1f/Ces1g/Ces1h/Ces2a/Ces2b/Ces2c/Ces2e/Ces2f/Ces2g/Ces2h/Ces3a/Ces3b/Ces4a/Ces5a/Nlgn1/Nlgn2/Nlgn3/Tg		Nvec_v1g87444
+Nvec_vc1.1_XM_048733907.1	neu.MFS_1.HG1.15:like:Slc16a2/Slc16a10		Nvec_v1g87495
+Nvec_vc1.1_XM_001639124.3	neu.ANF_receptor.HG2.66:like:Gabbr1/Gabbr2		Nvec_v1g87697
+Nvec_vc1.1_XM_032364061.1	neu.Aa_trans.HG1.13:Slc36a1/Slc36a2/Slc36a3/Slc36a4	Slc36a1/Slc36a2/Slc36a3/Slc36a4	Nvec_v1g87740
+Nvec_vc1.1_XM_032363827.2	neu.Y_phosphatase.HG1.48:Ptprd/Ptprf/Ptprs	Ptprd/Ptprf/Ptprs	Nvec_v1g88020
+Nvec_vc1.1_XM_048723402.1	neu.Y_phosphatase.HG1.35:Ptprk/Ptprm/Ptprt/Ptpru	Ptprk/Ptprm/Ptprt/Ptpru	Nvec_v1g88022
+Nvec_vc1.1_XM_048729733.1	neu.MFS_1.HG1.15:like:Slc16a2/Slc16a10		Nvec_v1g88322
+Nvec_v1g88442	neu.Ras.HG4.17:like:Arl4a/Arl4c/Arl4d/Arl11/Arl14		Nvec_v1g88442
+Nvec_vc1.1_XM_001638722.3	neu.MFS_1.HG1.9:Slc16a2/Slc16a10	Slc16a10/Slc16a2	Nvec_v1g88648
+Nvec_vc1.1_XM_032363552.2	neu.ANF_receptor.HG1.17:like:Casr/Gprc6a/Grm1/Grm2/Grm3/Grm4/Grm5/Grm6/Grm7/Grm8/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r128		Nvec_v1g88728
+Nvec_vc1.1_XM_032363577.2	Nvec_v1g88882:HG.Unclassified	""	Nvec_v1g88882
+Nvec_vc1.1_XM_048725791.1	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g89058
+Nvec_vc1.1_XM_001638571.3	neu.SSF.HG1.2:Slc5a7	Slc5a7	Nvec_v1g89183
+Nvec_vc1.1_XM_032363196.2	neu.MFS_1.HG1.15:like:Slc16a2/Slc16a10		Nvec_v1g89333
+Nvec_vc1.1_XM_032363060.2	neu.Ras.HG2.1:Rasl11a/Rasl11b/Rerg/Rergl		Nvec_v1g89844
+Nvec_vc1.1_XM_048731951.1	neu.SSF.HG1.11:like:Gm5134/Slc5a1/Slc5a2/Slc5a4a/Slc5a4b/Slc5a9/Slc5a10/Slc5a11		Nvec_v1g89958
+Nvec_vc1.1_XM_032362653.2	neu.PID.HG1.13:Shc1/Shc2/Shc3/Shc4	Shc1/Shc2/Shc3/Shc4	Nvec_v1g90669
+Nvec_vc1.1_XM_048721167.1	neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30		Nvec_v1g90692
+Nvec_vc1.1_XM_048720590.1	neu.Synaptotagmin.HG1.7:Pik3c2a/Pik3c2b	Pik3c2a/Pik3c2b	Nvec_v1g90881
+Nvec_vc1.1_XM_048723894.1	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g91052
+Nvec_vc1.1_XM_001637795.3	neu.PTB.HG1.2:Tns1/Tns2/Tns3/Tns4	Tns1/Tns2/Tns3/Tns4	Nvec_v1g91231
+Nvec_vc1.1_XM_001637795.3	neu.Y_phosphatase.HG2.4:like:Cdc14a/Cdc14b/Dusp23/Ptp4a1/Ptp4a2/Ptp4a3/Ptpdc1		Nvec_v1g91247
+Nvec_vc1.1_XM_032362240.2	neu.Synaptotagmin.HG1.36:Mctp1/Mctp2	Mctp1/Mctp2	Nvec_v1g91324
+Nvec_vc1.1_XM_001637764.3	neu.Y_phosphatase.HG1.21:like:Ptpn5/Ptpn7/Ptprr		Nvec_v1g91512
+Nvec_vc1.1_XM_032362161.2	neu.Homer.HG2.1:Homer1/Homer2/Homer3	Homer1/Homer2/Homer3	Nvec_v1g91920
+Nvec_vc1.1_XM_048727675.1	Nvec_v1g91976:HG.Unclassified	""	Nvec_v1g91976
+Nvec_vc1.1_XM_001637328.3	neu.MFS_1.HG22.2:Mfsd3	Mfsd3	Nvec_v1g92368
+Nvec_vc1.1_XM_032361875.2	neu.MFS_1.HG15.0:Mfsd4a/Mfsd4b1/Mfsd4b4/Mfsd4b5	Mfsd4a	Nvec_v1g92483
+Nvec_vc1.1_XM_048731530.1	neu.Y_phosphatase.HG1.47:like:Ptpra/Ptprd/Ptpre/Ptprf/Ptprs		Nvec_v1g92641
+Nvec_vc1.1_XM_032387280.2	neu.RhoGEF.HG1.4:Arhgef4/Arhgef9/Spata13	Arhgef4/Arhgef9/Spata13	Nvec_v1g92887
+Nvec_vc1.1_XM_001637217.3	neu.Y_phosphatase.HG4.0:like:Dusp1/Dusp2/Dusp3/Dusp4/Dusp5/Dusp14/Dusp15		Nvec_v1g92927
+Nvec_vc1.1_XM_032387263.2	Nvec_v1g93093:HG.Unclassified	""	Nvec_v1g93093
+Nvec_vc1.1_XM_032387125.2	neu.Y_phosphatase.HG1.33:like:Ptprc		Nvec_v1g93134
+Nvec_vc1.1_XM_032383521.2	neu.Ras.HG2.0:like:Gem/Rasl12/Rem1/Rem2/Rrad		Nvec_v1g9338
+Nvec_vc1.1_XM_048724932.1	neu.ANF_receptor.HG2.12:like:Npr1/Npr2/Npr3		Nvec_v1g93704
+Nvec_vc1.1_XM_048724875.1	neu.ANF_receptor.HG2.12:like:Npr1/Npr2/Npr3		Nvec_v1g93709
+Nvec_vc1.1_XM_048719776.1	neu.Synaptotagmin.HG1.9:Prkca/Prkcb/Prkcg	Prkca/Prkcb/Prkcg	Nvec_v1g93932
+Nvec_vc1.1_XM_001636688.3	neu.Ras.HG4.6:Arl13b	Arl13b	Nvec_v1g94334
+Nvec_vc1.1_XM_001636669.3	neu.Synaptotagmin.HG1.37:Itsn2	Itsn2	Nvec_v1g94407
+Nvec_vc1.1_XM_048721470.1	neu.Synaptotagmin.HG1.37:Itsn2	Itsn2	Nvec_v1g94407
+Nvec_vc1.1_XM_048728420.1	neu.Pentaxin.HG1.13:Npcd/Nptx1/Nptx2/Nptxr		Nvec_v1g94449
+Nvec_vc1.1_XM_001636669.3	neu.Synaptotagmin.HG1.37:Itsn2	Itsn2	Nvec_v1g94465
+Nvec_vc1.1_XM_048721470.1	neu.Synaptotagmin.HG1.37:Itsn2	Itsn2	Nvec_v1g94465
+Nvec_vc1.1_XM_048726208.1	neu.MFS_1.HG2.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a23/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30;neu.Sugar_tr.HG1.0:Slc22a1/Slc22a2/Slc22a3/Slc22a4/Slc22a5/Slc22a6/Slc22a7/Slc22a8/Slc22a12/Slc22a13/Slc22a13b/Slc22a14/Slc22a15/Slc22a16/Slc22a19/Slc22a20/Slc22a21/Slc22a22/Slc22a26/Slc22a27/Slc22a28/Slc22a29/Slc22a30	""	Nvec_v1g94638
+Nvec_vc1.1_XM_048733791.1	neu.RhoGEF.HG1.38:Arhgef17	Arhgef17	Nvec_v1g94893
+Nvec_vc1.1_XM_032386291.2	neu.MFS_1.HG14.2:Mfsd12		Nvec_v1g95008
+Nvec_vc1.1_XM_032363552.2	neu.ANF_receptor.HG1.17:like:Casr/Gprc6a/Grm1/Grm2/Grm3/Grm4/Grm5/Grm6/Grm7/Grm8/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r128		Nvec_v1g9504
+Nvec_vc1.1_XM_048731701.1	neu.SSF.HG1.2:Slc5a7	Slc5a7	Nvec_v1g95565
+Nvec_vc1.1_XM_032386061.2	Nvec_v1g95751:HG.Unclassified	""	Nvec_v1g95751
+Nvec_v1g9583	neu.MFS_1.HG10.1:like:Slc37a1/Slc37a2/Slc37a3		Nvec_v1g9583
+Nvec_vc1.1_XM_001634828.3	neu.ANF_receptor.HG1.26:like:Casr/Gprc6a/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r128		Nvec_v1g9591
+Nvec_vc1.1_XM_048726532.1	neu.Sec1.HG1.3:Vps33a	Vps33a	Nvec_v1g95934
+Nvec_vc1.1_XM_048726533.1	Nvec_v1g96019:HG.Unclassified	""	Nvec_v1g96019
+Nvec_vc1.1_XM_048726532.1	neu.Sec1.HG1.3:Vps33a	Vps33a	Nvec_v1g96025
+Nvec_vc1.1_XM_048726533.1	Nvec_v1g96039:HG.Unclassified	""	Nvec_v1g96039
+Nvec_vc1.1_XM_032385986.2	Nvec_v1g96067:HG.Unclassified	""	Nvec_v1g96067
+Nvec_vc1.1_XM_001635978.3	neu.ANF_receptor.HG1.25:like:Casr/Gprc6a/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r128		Nvec_v1g96465
+Nvec_vc1.1_XM_032385634.2	neu.Y_phosphatase.HG2.9:like:Cdc14a/Cdc14b/Dusp23/Ptp4a1/Ptp4a2/Ptp4a3/Ptpdc1		Nvec_v1g96644
+Nvec_vc1.1_XM_048730849.1	neu.Ras.HG4.18:Trim23	Trim23	Nvec_v1g96651
+Nvec_vc1.1_XM_001635886.3	neu.Aa_trans.HG1.2:Slc32a1		Nvec_v1g96724
+Nvec_vc1.1_XM_032363552.2	neu.ANF_receptor.HG1.17:like:Casr/Gprc6a/Grm1/Grm2/Grm3/Grm4/Grm5/Grm6/Grm7/Grm8/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r128		Nvec_v1g9673
+Nvec_vc1.1_XM_032385457.2	neu.RhoGEF.HG1.25:Arhgef25/Kalrn/Obscn/Trio		Nvec_v1g96749
+Nvec_vc1.1_XM_048720984.1	neu.Ras.HG5.3:like:Lrrk1/Lrrk2		Nvec_v1g96755
+Nvec_vc1.1_XM_001635867.3	neu.Y_phosphatase.HG1.47:like:Ptpra/Ptprd/Ptpre/Ptprf/Ptprs		Nvec_v1g96888
+Nvec_vc1.1_XM_001635717.3	neu.Synaptotagmin.HG1.34:Syt1/Syt2/Syt3/Syt4/Syt5/Syt6/Syt7/Syt8/Syt9/Syt10/Syt11/Syt12/Syt13/Syt15/Syt17	Syt7	Nvec_v1g97106
+Nvec_vc1.1_XM_032385361.2	neu.FERM_M.HG1.0:like:Mylip		Nvec_v1g97258
+Nvec_vc1.1_XM_032385286.2	neu.MFS_1.HG12.2:Mfsd6	Mfsd6	Nvec_v1g97363
+Nvec_vc1.1_XM_001635572.3	neu.RhoGEF.HG1.13:Plekhg1/Plekhg2/Plekhg3	Plekhg1/Plekhg2/Plekhg3	Nvec_v1g97491
+Nvec_vc1.1_XM_032385035.2	neu.Pyridoxal_deC.HG1.7:Ddc/Hdc	Ddc/Hdc	Nvec_v1g98001
+Nvec_vc1.1_XM_048730993.1	neu.Sec1.HG1.5:Stxbp1/Stxbp2/Stxbp3	Stxbp1/Stxbp2/Stxbp3	Nvec_v1g98056
+Nvec_vc1.1_XM_048730992.1	neu.Sec1.HG1.5:Stxbp1/Stxbp2/Stxbp3	Stxbp1/Stxbp2/Stxbp3	Nvec_v1g98151
+Nvec_vc1.1_XM_032384881.2	neu.Synaptotagmin.HG1.34:Syt1/Syt2/Syt3/Syt4/Syt5/Syt6/Syt7/Syt8/Syt9/Syt10/Syt11/Syt12/Syt13/Syt15/Syt17		Nvec_v1g98430
+Nvec_vc1.1_XM_032362733.2	neu.ANF_receptor.HG1.25:like:Casr/Gprc6a/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r128		Nvec_v1g9854
+Nvec_vc1.1_XM_048729079.1	neu.SNF.HG1.12:like:Slc6a1/Slc6a2/Slc6a3/Slc6a4/Slc6a5/Slc6a6/Slc6a7/Slc6a8/Slc6a9/Slc6a11/Slc6a12/Slc6a13/Slc6a14		Nvec_v1g98540
+Nvec_vc1.1_XM_048728771.1	neu.Synaptotagmin.HG1.26:Dysf/Myof	Dysf/Myof	Nvec_v1g98802
+Nvec_vc1.1_XM_048730801.1	neu.FERM_M.HG1.16:Plekhh1/Plekhh2	Plekhh1/Plekhh2	Nvec_v1g99085
+Nvec_vc1.1_XM_001635058.3	neu.MFS_1.HG1.15:like:Slc16a2/Slc16a10		Nvec_v1g99111
+Nvec_vc1.1_XM_032384430.2	Nvec_v1g99556:HG.Unclassified	""	Nvec_v1g99556
+Nvec_vc1.1_XM_001634828.3	neu.ANF_receptor.HG1.26:like:Casr/Gprc6a/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r128		Nvec_v1g99689
+Nvec_vc1.1_XM_048734634.1	neu.ANF_receptor.HG1.27:like:Casr/Gprc6a/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r128		Nvec_v1g99708
+Nvec_vc1.1_XM_032384325.2	neu.Synaptotagmin.HG1.29:Rims2/Rims3/Rims4	Rims2	Nvec_v1g99757
+Nvec_vc1.1_XM_032384325.2	neu.RabphilinRIM.HG1.1:Rims2	Rims2	Nvec_v1g99855
+Nvec_vc1.1_XM_001634856.3	neu.COesterase.HG1.1:like:Ache/Bche/Cel/Ces1a/Ces1b/Ces1c/Ces1d/Ces1e/Ces1f/Ces1g/Ces1h/Ces2a/Ces2b/Ces2c/Ces2e/Ces2f/Ces2g/Ces2h/Ces3a/Ces3b/Ces4a/Ces5a/Nlgn1/Nlgn2/Nlgn3/Tg		Nvec_v1g99877
+Nvec_vc1.1_XM_001634721.3	neu.MFS_1.HG4.4:Slc46a1/Slc46a2/Slc46a3		Nvec_v1g99988

@@ -1,0 +1,1736 @@
+gene	og	name	ID_JGI_Vienna
+Nvec_vc1.1_XM_032373845.2	sig.GPCRrhod.HG4.2:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_NVE10184
+Nvec_vc1.1_XM_048732434.1	sig.Pkinase.HG12.1:Ryk	Ryk	Nvec_NVE10273
+Nvec_vc1.1_XM_048732434.1	sig.Pkinase.HG12.1:Ryk	Ryk	Nvec_NVE10274
+Nvec_vc1.1_XM_048734357.1	sig.GPCRsecr.HG1.11:like:Adgrd1		Nvec_NVE10940
+Nvec_vc1.1_XM_032373236.2	sig.RGS.HG1.7:Arhgef11	Arhgef11	Nvec_NVE11118
+Nvec_vc1.1_XM_048719766.1	sig.Pkinase.HG34.6:Map2k3/Map2k4/Map2k6	Map2k4	Nvec_NVE11180
+Nvec_vc1.1_XM_032373084.2	sig.FGF.HG1.2:Fgf1/Fgf2	Fgf1/Fgf2	Nvec_NVE11442
+Nvec_NVE1145	Nvec_NVE1145:HG.Unclassified	""	Nvec_NVE1145
+Nvec_vc1.1_XM_032373047.2	sig.GPCRglut.HG1.2:Grm1/Grm2/Grm3/Grm4/Grm5/Grm6/Grm7/Grm8		Nvec_NVE11505
+Nvec_vc1.1_XM_032385059.2	sig.Pkinase.HG26.12:like:Syk/Zap70		Nvec_NVE11695
+Nvec_vc1.1_XM_032362284.2	sig.GPCRrhod.HG6.5:NA		Nvec_NVE11773
+Nvec_vc1.1_XM_032372773.2	sig.GPCRrhod.HG11.1:NA		Nvec_NVE11965
+Nvec_vc1.1_XM_032372667.2	sig.Patched.HG1.2:Disp3	Disp3	Nvec_NVE12205
+Nvec_vc1.1_XM_048723267.1	sig.Pkinase.HG22.5:Cdc42bpa/Cdc42bpb/Cdc42bpg/Dmpk	Cdc42bpa/Cdc42bpb/Cdc42bpg/Dmpk	Nvec_NVE12339
+Nvec_vc1.1_XM_048723267.1	sig.Pkinase.HG22.5:Cdc42bpa/Cdc42bpb/Cdc42bpg/Dmpk	Cdc42bpa/Cdc42bpb/Cdc42bpg/Dmpk	Nvec_NVE12340
+Nvec_vc1.1_XM_048721139.1	sig.DSL.HG1.5:like:Dll1/Dll4/Jag1/Jag2		Nvec_NVE12403
+Nvec_vc1.1_XM_048725555.1	sig.GPCRrhod.HG53.1:NA		Nvec_NVE12671
+Nvec_vc1.1_XM_032372257.2	sig.Pkinase.HG2.12:like:Hunk/Nim1k		Nvec_NVE12763
+Nvec_vc1.1_XM_032366869.2	sig.GPCRrhod.HG30.16:NA		Nvec_NVE12829
+Nvec_vc1.1_XM_048731162.1	sig.GPCRsecr.HG3.0:NA		Nvec_NVE13271
+Nvec_vc1.1_XM_032372059.2	sig.Frizzled.HG1.31:like:Gpr157		Nvec_NVE13392
+Nvec_vc1.1_XM_048732198.1	sig.Frizzled.HG1.31:like:Gpr157		Nvec_NVE13394
+Nvec_vc1.1_XM_032372056.2	sig.Frizzled.HG1.31:like:Gpr157		Nvec_NVE13395
+Nvec_vc1.1_XM_048727926.1	Nvec_NVE13490:HG.Unclassified	""	Nvec_NVE13490
+Nvec_vc1.1_XM_032386739.2	sig.RGS.HG1.2:like:Arhgef11		Nvec_NVE14861
+Nvec_NVE14898	sig.GPCRrhod.HG2.12:Gpr176	Gpr176	Nvec_NVE14898
+Nvec_vc1.1_XM_048724176.1	sig.Pkinase.HG40.1:Eif2ak4	Eif2ak4	Nvec_NVE14899
+Nvec_vc1.1_XM_032386716.2	sig.FGF.HG1.2:Fgf1/Fgf2	Fgf1/Fgf2	Nvec_NVE14920
+Nvec_vc1.1_XM_048723276.1	sig.GPCRrhod.HG53.0:NA		Nvec_NVE14925
+Nvec_vc1.1_XM_032379650.2	Nvec_NVE1501:HG.Unclassified	""	Nvec_NVE1501
+Nvec_vc1.1_XM_032386339.2	sig.GPCRrhod.HG18.13:NA		Nvec_NVE15784
+Nvec_NVE15819	sig.GPCRrhod.HG4.2:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_NVE15819
+Nvec_vc1.1_XM_032366708.2	sig.GPCRrhod.HG30.18:NA		Nvec_NVE16529
+Nvec_vc1.1_XM_048719697.1	sig.Pkinase.HG25.7:Map3k2/Map3k3		Nvec_NVE16736
+Nvec_NVE17158	sig.GPCRrhod.HG4.35:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_NVE17158
+Nvec_vc1.1_XM_048729187.1	sig.GPCRrhod.HG12.16:NA		Nvec_NVE17464
+Nvec_vc1.1_XM_032370184.2	sig.GPCRrhod.HG11.1:NA		Nvec_NVE17557
+Nvec_vc1.1_XM_032385445.2	Nvec_NVE17584:HG.Unclassified	""	Nvec_NVE17584
+Nvec_vc1.1_XM_048720080.1	sig.Pkinase.HG20.14:like:Gucy2c/Npr1/Npr2		Nvec_NVE17792
+Nvec_vc1.1_XM_048721325.1	sig.Pkinase.HG41.0:NA		Nvec_NVE17967
+Nvec_vc1.1_XM_032370027.2	sig.Pkinase.HG3.11:Cdk8/Cdk19	Cdk19/Cdk8	Nvec_NVE18137
+Nvec_vc1.1_XM_048721807.1	sig.DSL.HG1.8:like:Dll1/Dll4/Jag1/Jag2		Nvec_NVE18138
+Nvec_vc1.1_XM_032385059.2	sig.Pkinase.HG26.12:like:Syk/Zap70		Nvec_NVE18332
+Nvec_vc1.1_XM_032385016.2	sig.GPCRsecr.HG1.14:like:Adgra1/Adgra2/Adgra3/Adgrv1		Nvec_NVE18530
+Nvec_vc1.1_XM_048730932.1	sig.GPCRrhod.HG53.2:NA		Nvec_NVE18731
+Nvec_vc1.1_XM_048720414.1	sig.GPCRrhod.HG4.31:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_NVE19131
+Nvec_vc1.1_XM_032366332.2	sig.GPCRrhod.HG18.11:NA		Nvec_NVE19133
+Nvec_vc1.1_XM_048732434.1	sig.Pkinase.HG12.1:Ryk	Ryk	Nvec_NVE19317
+Nvec_vc1.1_XM_048724403.1	sig.GPCRglut.HG2.13:Gabbr1/Gabbr2		Nvec_NVE19779
+Nvec_NVE19806	sig.GPCRrhod.HG12.3:NA		Nvec_NVE19806
+Nvec_vc1.1_XM_048723815.1	sig.GPCRrhod.HG24.4:NA		Nvec_NVE19835
+Nvec_vc1.1_XM_048734688.1	sig.Patched.HG1.10:Npc1/Npc1l1	Npc1/Npc1l1	Nvec_NVE19972
+Nvec_vc1.1_XM_048734496.1	sig.Pkinase.HG36.10:like:Mylk/Mylk2/Mylk3/Mylk4/Obscn/Speg/Ttn		Nvec_NVE19990
+Nvec_vc1.1_XM_001632017.3	Nvec_NVE20425:HG.Unclassified	""	Nvec_NVE20425
+Nvec_NVE20427	sig.GPCRrhod.HG53.2:NA		Nvec_NVE20427
+Nvec_vc1.1_XM_048719697.1	sig.Pkinase.HG25.7:Map3k2/Map3k3		Nvec_NVE20433
+Nvec_vc1.1_XM_032366049.2	sig.Pkinase.HG2.25:like:Camkk1/Camkk2/Chek1/Pask/Pim1/Pim2/Pim3/Sbk1/Sbk2/Sbk3/Stk11		Nvec_NVE21032
+Nvec_vc1.1_XM_032383602.2	sig.Pkinase.HG28.4:NA		Nvec_NVE21314
+Nvec_vc1.1_XM_048720830.1	sig.GPCRrhod.HG18.6:NA		Nvec_NVE21660
+Nvec_vc1.1_XM_032383223.2	Nvec_NVE21845:HG.Unclassified	""	Nvec_NVE21845
+Nvec_vc1.1_XM_032383016.2	sig.GPCRrhod.HG12.49:NA		Nvec_NVE22161
+Nvec_NVE22267	sig.GPCRrhod.HG6.0:NA		Nvec_NVE22267
+Nvec_vc1.1_XM_048723150.1	sig.GPCRrhod.HG12.11:NA		Nvec_NVE2289
+Nvec_vc1.1_XM_032382370.2	sig.GPCRrhod.HG18.0:NA		Nvec_NVE23342
+Nvec_vc1.1_XM_032382181.2	sig.GPCRrhod.HG55.0:NA		Nvec_NVE23547
+Nvec_vc1.1_XM_048726526.1	sig.TIR.HG2.4:like:Sarm1		Nvec_NVE23933
+Nvec_vc1.1_XM_032381907.2	sig.FGF.HG1.2:Fgf1/Fgf2	Fgf1/Fgf2	Nvec_NVE24177
+Nvec_vc1.1_XM_048729427.1	sig.Frizzled.HG1.27:Ror1/Ror2		Nvec_NVE24258
+Nvec_vc1.1_XM_048725014.1	sig.GPCRrhod.HG18.14:NA		Nvec_NVE24538
+Nvec_vc1.1_XM_032381481.2	sig.GPCRrhod.HG19.5:NA		Nvec_NVE24824
+Nvec_vc1.1_XM_032381416.2	sig.Activin_recp.HG1.1:Acvr1/Acvr2a/Acvr2b/Bmpr2	Acvr2a/Acvr2b	Nvec_NVE24908
+Nvec_vc1.1_XM_032381347.2	sig.Notch.HG1.5:Gnptab	Gnptab	Nvec_NVE24943
+Nvec_vc1.1_XM_032380896.2	sig.GPCRrhod.HG2.0:Brs3/Cckar/Cckbr/Ghsr/Gpr37/Gpr37l1/Gpr39/Grpr/Hcrtr1/Hcrtr2/Nmur1/Ntsr1/Ntsr2/Trhr2		Nvec_NVE25663
+Nvec_vc1.1_XM_032380789.2	sig.GPCRrhod.HG6.15:NA		Nvec_NVE25785
+Nvec_vc1.1_XM_048734678.1	sig.Frizzled.HG1.26:like:Musk/Ror1/Ror2		Nvec_NVE25876
+Nvec_vc1.1_XM_032380422.2	sig.GPCRrhod.HG30.14:NA		Nvec_NVE26217
+Nvec_vc1.1_XM_032378440.2	sig.GPCRrhod.HG4.13:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_NVE2810
+Nvec_vc1.1_XM_048733666.1	sig.wnt.HG1.2:Wnt8a/Wnt8b	Wnt8a/Wnt8b	Nvec_NVE2844
+Nvec_vc1.1_XM_048733666.1	sig.wnt.HG1.2:Wnt8a/Wnt8b	Wnt8a/Wnt8b	Nvec_NVE2849
+Nvec_vc1.1_XM_032378469.2	sig.wnt.HG1.2:Wnt8a/Wnt8b	Wnt8a/Wnt8b	Nvec_NVE2850
+Nvec_vc1.1_XM_032364424.2	sig.Pkinase.HG5.10:like:Fer/Fes		Nvec_NVE3082
+Nvec_vc1.1_XM_032378396.2	sig.Frizzled.HG1.31:like:Gpr157		Nvec_NVE3147
+Nvec_vc1.1_XM_032378310.2	sig.GPCRrhod.HG6.5:NA		Nvec_NVE3269
+Nvec_vc1.1_XM_048726086.1	sig.Pkinase.HG17.5:Gm42878/Mapkapk5	Gm42878/Mapkapk5	Nvec_NVE3314
+Nvec_vc1.1_XM_048720126.1	sig.Fringe.HG1.6:Lfng/Mfng/Rfng	Lfng/Mfng/Rfng	Nvec_NVE372
+Nvec_vc1.1_XM_048724156.1	sig.Pkinase.HG1.23:like:Styk1		Nvec_NVE4216
+Nvec_vc1.1_XM_048724156.1	sig.Pkinase.HG1.23:like:Styk1		Nvec_NVE4218
+Nvec_vc1.1_XM_032364226.2	sig.GPCRrhod.HG19.7:NA		Nvec_NVE4707
+Nvec_vc1.1_XM_032377056.2	sig.GPCRsecr.HG3.0:NA		Nvec_NVE5057
+Nvec_vc1.1_XM_032377026.2	Nvec_NVE5152:HG.Unclassified	""	Nvec_NVE5152
+Nvec_vc1.1_XM_048726936.1	sig.Pkinase.HG5.24:like:Frk		Nvec_NVE543
+Nvec_vc1.1_XM_032380328.2	sig.Pkinase.HG5.26:like:Frk		Nvec_NVE545
+Nvec_vc1.1_XM_032380299.2	sig.Pkinase.HG5.23:Blk/Fgr/Fyn/Hck/Lck/Lyn/Src/Yes1	Blk/Fgr/Fyn/Hck/Lck/Lyn/Src/Yes1	Nvec_NVE546
+Nvec_vc1.1_XM_032363983.2	Nvec_NVE5462:HG.Unclassified	""	Nvec_NVE5462
+Nvec_vc1.1_XM_048729646.1	sig.Pkinase.HG8.5:like:Aatk/Lmtk2/Lmtk3		Nvec_NVE6170
+Nvec_vc1.1_XM_048729646.1	sig.Pkinase.HG1.12:like:Csf1r/Fgfr1/Fgfr2/Fgfr3/Fgfr4/Flt1/Flt3/Flt4/Kdr/Kit/Pdgfra/Pdgfrb/Ret		Nvec_NVE6171
+Nvec_vc1.1_XM_048732210.1	sig.Pkinase.HG1.14:like:Styk1		Nvec_NVE619
+Nvec_vc1.1_XM_048732210.1	sig.Pkinase.HG1.14:like:Styk1		Nvec_NVE620
+Nvec_vc1.1_XM_048730035.1	sig.Pkinase.HG35.6:Prkaca/Prkacb	Prkaca/Prkacb	Nvec_NVE6335
+Nvec_vc1.1_XM_048730641.1	sig.Patched.HG1.5:Disp1	Disp1	Nvec_NVE6933
+Nvec_vc1.1_XM_048730641.1	sig.Patched.HG1.5:Disp1	Disp1	Nvec_NVE6934
+Nvec_vc1.1_XM_032375533.2	Nvec_NVE7261:HG.Unclassified	""	Nvec_NVE7261
+Nvec_vc1.1_XM_032375519.2	sig.GPCRglut.HG2.0:Gpr158/Gpr179	Gpr158/Gpr179	Nvec_NVE7315
+Nvec_vc1.1_XM_032375520.2	sig.GPCRglut.HG2.0:Gpr158/Gpr179	Gpr158/Gpr179	Nvec_NVE7316
+Nvec_vc1.1_XM_048729712.1	sig.GPCRrhod.HG24.13:NA		Nvec_NVE7386
+Nvec_vc1.1_XM_048724537.1	sig.Pkinase.HG7.23:like:Nek1/Nek3/Nek5		Nvec_NVE7390
+Nvec_vc1.1_XM_032375322.2	sig.Pkinase.HG8.4:Alk/Igf1r/Insr/Insrr/Ltk/Ros1		Nvec_NVE7661
+Nvec_vc1.1_XM_032380078.2	sig.GPCRrhod.HG53.2:NA		Nvec_NVE787
+Nvec_vc1.1_XM_032367326.2	sig.Pkinase.HG13.1:Ilk	Ilk	Nvec_NVE8040
+Nvec_vc1.1_XM_032367375.2	sig.GPCRrhod.HG6.12:NA		Nvec_NVE8240
+Nvec_vc1.1_XM_001638660.3	sig.Pkinase.HG2.27:Hunk	Hunk	Nvec_NVE8711
+Nvec_vc1.1_XM_032374710.2	sig.Pkinase.HG9.4:Prkcd/Prkcq	Prkcd/Prkcq	Nvec_NVE8740
+Nvec_vc1.1_XM_048725163.1	sig.Pkinase.HG4.6:Epha1/Epha2/Epha3/Epha4/Epha5/Epha6/Epha7/Epha8/Epha10/Ephb1/Ephb2/Ephb3/Ephb4/Ephb6	Epha1/Epha10/Epha2/Epha3/Epha4/Epha5/Epha6/Epha7/Epha8/Ephb1/Ephb2/Ephb3/Ephb4/Ephb6	Nvec_NVE9063
+Nvec_vc1.1_XM_032374205.2	sig.Notch.HG1.3:Notch1/Notch2/Notch3/Notch4	Notch1/Notch2/Notch3/Notch4	Nvec_NVE9611
+Nvec_vc1.1_XM_048723155.1	sig.GPCRrhod.HG11.1:NA		Nvec_NVE9711
+Nvec_vc1.1_XM_048724422.1	sig.Pkinase.HG20.11:Gucy2g	Gucy2g	Nvec_NVE9841
+Nvec_vc1.1_XM_048723613.1	sig.Pkinase.HG20.11:Gucy2g	Gucy2g	Nvec_NVE9841
+Nvec_vc1.1_XM_032384286.2	sig.Pkinase.HG22.10:Stk38/Stk38l	Stk38/Stk38l	Nvec_v1g100066
+Nvec_vc1.1_XM_032384290.2	sig.Pkinase.HG47.0:Scyl2	Scyl2	Nvec_v1g100135
+Nvec_vc1.1_XM_032379382.2	sig.wnt.HG1.1:Wnt9a/Wnt9b	Wnt9a/Wnt9b	Nvec_v1g100329
+Nvec_vc1.1_XM_032384029.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g100385
+Nvec_vc1.1_XM_048731865.1	sig.GPCRrhod.HG11.1:NA		Nvec_v1g100423
+Nvec_vc1.1_XM_032384020.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g100433
+Nvec_vc1.1_XM_032383922.2	sig.Pkinase.HG11.1:Dclk1/Dclk2/Dclk3	Dclk3	Nvec_v1g100779
+Nvec_vc1.1_XM_032383922.2	sig.Pkinase.HG11.1:Dclk1/Dclk2/Dclk3	Dclk3	Nvec_v1g100834
+Nvec_vc1.1_XM_032383841.2	sig.GPCRrhod.HG4.0:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g101008
+Nvec_vc1.1_XM_001634427.3	sig.GPCRrhod.HG12.40:NA		Nvec_v1g101072
+Nvec_vc1.1_XM_032383778.2	sig.GPCRrhod.HG12.40:NA		Nvec_v1g101120
+Nvec_vc1.1_XM_048731417.1	sig.Notch.HG1.0:like:Notch1/Notch2/Notch3/Notch4/Pappa2		Nvec_v1g10113
+Nvec_vc1.1_XM_032383720.2	sig.Pkinase.HG36.2:like:Kalrn/Mylk/Mylk2/Mylk3/Mylk4/Obscn/Speg/Stk17b/Trio/Ttn		Nvec_v1g101218
+Nvec_vc1.1_XM_001634344.3	sig.GPCRrhod.HG4.2:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g101238
+Nvec_vc1.1_XM_001634305.3	sig.GPCRrhod.HG11.1:NA		Nvec_v1g101252
+Nvec_vc1.1_XM_032383392.2	sig.GPCRsecr.HG3.0:NA		Nvec_v1g102060
+Nvec_vc1.1_XM_032383408.2	Nvec_v1g102193:HG.Unclassified	""	Nvec_v1g102193
+Nvec_vc1.1_XM_032383369.2	sig.GPCRrhod.HG23.5:like:Opn1mw/Opn1sw/Opn3/Opn4/Opn5/Rgr/Rho/Rrh		Nvec_v1g102435
+Nvec_vc1.1_XM_001633941.3	sig.GPCRrhod.HG24.5:NA		Nvec_v1g102635
+Nvec_vc1.1_XM_032383218.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g102782
+Nvec_vc1.1_XM_001633809.3	sig.Pkinase.HG26.4:like:Tnk1/Tnk2		Nvec_v1g102806
+Nvec_vc1.1_XM_032383096.2	sig.Pkinase.HG3.8:Cdkl5	Cdkl5	Nvec_v1g103103
+Nvec_vc1.1_XM_032383078.2	Nvec_v1g103151:HG.Unclassified	""	Nvec_v1g103151
+Nvec_vc1.1_XM_032383021.2	sig.GPCRrhod.HG2.0:Brs3/Cckar/Cckbr/Ghsr/Gpr37/Gpr37l1/Gpr39/Grpr/Hcrtr1/Hcrtr2/Nmur1/Ntsr1/Ntsr2/Trhr2		Nvec_v1g103243
+Nvec_vc1.1_XM_032382973.2	sig.GPCRrhod.HG12.12:NA		Nvec_v1g103257
+Nvec_vc1.1_XM_032382652.2	sig.Activin_recp.HG1.1:Acvr1/Acvr2a/Acvr2b/Bmpr2;sig.Pkinase.HG21.5:Amhr2/Bmpr2	""	Nvec_v1g104199
+Nvec_vc1.1_XM_048727517.1	sig.Pkinase.HG2.40:like:Camkk1/Camkk2/Chek1/Pask/Pim1/Pim2/Pim3/Sbk1/Sbk2/Sbk3/Stk11		Nvec_v1g104383
+Nvec_vc1.1_XM_032382691.2	sig.Pkinase.HG25.7:Map3k2/Map3k3	Map3k2/Map3k3	Nvec_v1g104385
+Nvec_v1g104802	sig.GPCRrhod.HG11.1:NA		Nvec_v1g104802
+Nvec_vc1.1_XM_032382472.2	sig.Pkinase.HG11.8:Prkd1/Prkd2/Prkd3	Prkd1/Prkd2/Prkd3	Nvec_v1g104852
+Nvec_vc1.1_XM_001633160.3	sig.Pkinase.HG3.4:Cilk1/Mak	Cilk1/Mak	Nvec_v1g104958
+Nvec_vc1.1_XM_032378463.2	sig.RGS.HG1.0:Snx25	Snx25	Nvec_v1g10501
+Nvec_vc1.1_XM_032382422.2	sig.GPCRrhod.HG4.27:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g105138
+Nvec_vc1.1_XM_032382306.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g105156
+Nvec_vc1.1_XM_048721621.1	Nvec_v1g105169:HG.Unclassified	""	Nvec_v1g105169
+Nvec_vc1.1_XM_048724778.1	sig.Pkinase.HG31.0:NA		Nvec_v1g105524
+Nvec_vc1.1_XM_032382206.2	sig.Pkinase.HG38.2:Chuk/Ikbkb	Chuk/Ikbkb	Nvec_v1g105532
+Nvec_vc1.1_XM_001632949.3	sig.GPCRrhod.HG4.32:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g105626
+Nvec_vc1.1_XM_048732891.1	sig.Pkinase.HG10.12:Map4k4/Mink1/Nrk/Tnik	Map4k4/Mink1/Nrk/Tnik	Nvec_v1g105663
+Nvec_vc1.1_XM_032382117.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g105690
+Nvec_vc1.1_XM_048725804.1	sig.GPCRglut.HG1.2:Grm1/Grm2/Grm3/Grm4/Grm5/Grm6/Grm7/Grm8		Nvec_v1g105783
+Nvec_vc1.1_XM_032382051.2	sig.Pkinase.HG3.24:Cdk11b	Cdk11b	Nvec_v1g105784
+Nvec_vc1.1_XM_032382033.2	sig.GPCRrhod.HG12.29:NA		Nvec_v1g105813
+Nvec_vc1.1_XM_001632908.3	sig.GPCRrhod.HG11.1:NA		Nvec_v1g105898
+Nvec_vc1.1_XM_048733685.1	sig.GPCRrhod.HG12.41:NA		Nvec_v1g106107
+Nvec_vc1.1_XM_001632835.3	sig.wnt.HG1.9:Wnt16	Wnt16	Nvec_v1g106241
+Nvec_vc1.1_XM_032381844.2	sig.Pkinase.HG11.13:Stk33	Stk33	Nvec_v1g106290
+Nvec_vc1.1_XM_048722718.1	sig.Pkinase.HG34.3:Map2k5	Map2k5	Nvec_v1g106419
+Nvec_v1g106420	sig.GPCRrhod.HG12.34:NA		Nvec_v1g106420
+Nvec_vc1.1_XM_001632682.3	sig.Pkinase.HG1.14:like:Styk1		Nvec_v1g106463
+Nvec_vc1.1_XM_001632645.3	sig.Patched.HG1.8:like:Npc1/Npc1l1/Ptch1/Ptch2		Nvec_v1g106504
+Nvec_vc1.1_XM_001632595.3	sig.GPCRrhod.HG12.24:NA		Nvec_v1g106757
+Nvec_vc1.1_XM_001632586.3	sig.Pkinase.HG16.8:Mapk7	Mapk7	Nvec_v1g106787
+Nvec_v1g107110	sig.GPCRrhod.HG24.5:NA		Nvec_v1g107110
+Nvec_v1g107495	sig.GPCRrhod.HG12.39:NA		Nvec_v1g107495
+Nvec_vc1.1_XM_032381347.2	sig.Notch.HG1.5:Gnptab	Gnptab	Nvec_v1g107827
+Nvec_vc1.1_XM_032381356.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g107948
+Nvec_vc1.1_XM_032381346.2	sig.Pkinase.HG3.3:Mok	Mok	Nvec_v1g108108
+Nvec_vc1.1_XM_001632119.3	sig.GPCRrhod.HG11.1:NA		Nvec_v1g108333
+Nvec_vc1.1_XM_001631969.3	sig.GPCRrhod.HG23.0:like:Opn1mw/Opn1sw/Opn3/Opn4/Opn5/Rgr/Rho/Rrh		Nvec_v1g108738
+Nvec_vc1.1_XM_048725864.1	sig.Pkinase.HG22.3:Rock1/Rock2	Rock1/Rock2	Nvec_v1g10896
+Nvec_vc1.1_XM_048726550.1	sig.GPCRrhod.HG2.14:like:Npffr1/Npffr2		Nvec_v1g108981
+Nvec_vc1.1_XM_048726099.1	sig.GPCRrhod.HG11.1:NA		Nvec_v1g109188
+Nvec_vc1.1_XM_032380790.2	Nvec_v1g109382:HG.Unclassified	""	Nvec_v1g109382
+Nvec_vc1.1_XM_048734678.1	sig.Pkinase.HG1.10:Tek/Tie1		Nvec_v1g109532
+Nvec_vc1.1_XM_048734679.1	sig.Pkinase.HG1.10:Tek/Tie1		Nvec_v1g109532
+Nvec_vc1.1_XM_048734354.1	sig.GPCRrhod.HG8.0:Rxfp1/Rxfp2	Rxfp1/Rxfp2	Nvec_v1g109558
+Nvec_vc1.1_XM_048734678.1	sig.Pkinase.HG1.10:Tek/Tie1		Nvec_v1g109586
+Nvec_vc1.1_XM_032380781.2	sig.Pkinase.HG8.11:like:Musk/Ntrk1/Ntrk2/Ntrk3/Ror1/Ror2		Nvec_v1g109636
+Nvec_vc1.1_XM_032380675.2	sig.GPCRrhod.HG2.9:Npffr1/Npffr2	Npffr1/Npffr2	Nvec_v1g109747
+Nvec_vc1.1_XM_032380470.2	sig.GPCRrhod.HG37.10:NA		Nvec_v1g110300
+Nvec_vc1.1_XM_032380410.2	sig.GPCRrhod.HG18.4:NA		Nvec_v1g110348
+Nvec_vc1.1_XM_001631362.3	sig.GPCRrhod.HG23.1:Opn1mw/Opn1sw/Opn3/Opn5/Rgr/Rho/Rrh		Nvec_v1g110885
+Nvec_vc1.1_XM_032380089.2	sig.GPCRrhod.HG4.26:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g111229
+Nvec_vc1.1_XM_001631238.3	Nvec_v1g111289:HG.Unclassified	""	Nvec_v1g111289
+Nvec_vc1.1_XM_048730092.1	sig.Pkinase.HG1.14:like:Styk1		Nvec_v1g111563
+Nvec_vc1.1_XM_001631176.3	sig.Pkinase.HG17.8:Rps6ka5	Rps6ka5	Nvec_v1g111564
+Nvec_vc1.1_XM_048730084.1	sig.Pkinase.HG1.14:like:Styk1		Nvec_v1g111583
+Nvec_vc1.1_XM_048730092.1	sig.Pkinase.HG1.14:like:Styk1		Nvec_v1g111628
+Nvec_vc1.1_XM_048730751.1	sig.Fringe.HG1.0:B3gnt4/B3gnt7/B3gnt9	B3gnt4/B3gnt7/B3gnt9	Nvec_v1g111971
+Nvec_vc1.1_XM_001631029.3	sig.GPCRrhod.HG24.0:NA		Nvec_v1g112149
+Nvec_vc1.1_XM_048729037.1	sig.Pkinase.HG2.8:Brsk1/Brsk2	Brsk1/Brsk2	Nvec_v1g112255
+Nvec_vc1.1_XM_032379665.2	sig.GPCRsecr.HG3.0:NA		Nvec_v1g112360
+Nvec_vc1.1_XM_032379553.2	sig.GPCRrhod.HG12.31:NA		Nvec_v1g112480
+Nvec_vc1.1_XM_001628455.3	sig.Pkinase.HG13.15:Map3k9/Map3k10/Map3k11/Map3k21	Map3k10/Map3k11/Map3k21/Map3k9	Nvec_v1g11279
+Nvec_v1g113133	sig.wnt.HG1.11:Wnt7a/Wnt7b	Wnt7a/Wnt7b	Nvec_v1g113133
+Nvec_vc1.1_XM_032379361.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g113178
+Nvec_v1g113494	sig.GPCRrhod.HG4.34:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g113494
+Nvec_vc1.1_XM_001630248.3	sig.GPCRrhod.HG24.3:NA		Nvec_v1g114181
+Nvec_vc1.1_XM_032378813.2	sig.Pkinase.HG13.5:Pbk	Pbk	Nvec_v1g114199
+Nvec_vc1.1_XM_032378772.2	sig.Pkinase.HG18.3:Srpk1/Srpk2/Srpk3	Srpk1/Srpk2/Srpk3	Nvec_v1g114224
+Nvec_vc1.1_XM_048729745.1	sig.GPCRrhod.HG18.7:NA		Nvec_v1g114590
+Nvec_vc1.1_XM_001630064.3	sig.GPCRrhod.HG6.0:NA		Nvec_v1g114869
+Nvec_vc1.1_XM_032378469.2	sig.wnt.HG1.2:Wnt8a/Wnt8b	Wnt8a/Wnt8b	Nvec_v1g114929
+Nvec_v1g114942	sig.wnt.HG1.2:Wnt8a/Wnt8b	Wnt8a/Wnt8b	Nvec_v1g114942
+Nvec_vc1.1_XM_048733666.1	sig.wnt.HG1.2:Wnt8a/Wnt8b	Wnt8a/Wnt8b	Nvec_v1g114959
+Nvec_vc1.1_XM_032378469.2	sig.wnt.HG1.2:Wnt8a/Wnt8b	Wnt8a/Wnt8b	Nvec_v1g115008
+Nvec_vc1.1_XM_032378469.2	sig.wnt.HG1.2:Wnt8a/Wnt8b	Wnt8a/Wnt8b	Nvec_v1g115030
+Nvec_vc1.1_XM_048733476.1	sig.wnt.HG1.2:Wnt8a/Wnt8b	Wnt8a/Wnt8b	Nvec_v1g115036
+Nvec_vc1.1_XM_048733668.1	sig.wnt.HG1.2:Wnt8a/Wnt8b	Wnt8a/Wnt8b	Nvec_v1g115055
+Nvec_vc1.1_XM_048733666.1	sig.wnt.HG1.2:Wnt8a/Wnt8b	Wnt8a/Wnt8b	Nvec_v1g115097
+Nvec_vc1.1_XM_032378366.2	sig.Pkinase.HG1.13:Csf1r/Flt1/Flt3/Flt4/Kdr/Kit/Pdgfra/Pdgfrb	Csf1r/Flt1/Flt3/Flt4/Kdr/Kit/Pdgfra/Pdgfrb	Nvec_v1g115371
+Nvec_vc1.1_XM_032378344.2	sig.GPCRrhod.HG6.11:NA		Nvec_v1g115414
+Nvec_vc1.1_XM_048726399.1	sig.Pkinase.HG9.12:Sgk1/Sgk2/Sgk3	Sgk1/Sgk2/Sgk3	Nvec_v1g115630
+Nvec_vc1.1_XM_032378239.2	sig.Pkinase.HG38.6:Ulk1/Ulk2	Ulk1/Ulk2	Nvec_v1g115643
+Nvec_vc1.1_XM_032377968.2	sig.RGS.HG1.4:Snx13	Snx13	Nvec_v1g116290
+Nvec_vc1.1_XM_001629550.3	sig.Pkinase.HG4.5:like:Epha1/Epha2/Epha3/Epha4/Epha5/Epha6/Epha7/Epha8/Epha10/Ephb1/Ephb2/Ephb3/Ephb4/Ephb6		Nvec_v1g116411
+Nvec_vc1.1_XM_032377918.2	sig.Pkinase.HG13.14:Map3k12/Map3k13	Map3k12/Map3k13	Nvec_v1g116420
+Nvec_vc1.1_XM_001629448.3	sig.Pkinase.HG16.12:Mapk1/Mapk3	Mapk1/Mapk3	Nvec_v1g116697
+Nvec_vc1.1_XM_032377728.2	sig.TIR.HG1.4:Il1r1/Il1rap/Il1rapl1/Il1rapl2/Il1rl1/Il1rl2/Il18r1/Il18rap/Sigirr/Tlr1/Tlr2/Tlr3/Tlr4/Tlr6/Tlr7/Tlr8/Tlr9/Tlr11/Tlr12/Tlr13		Nvec_v1g116780
+Nvec_vc1.1_XM_032377757.2	sig.GPCRrhod.HG34.4:like:Ptgdr/Ptger1/Ptger2/Ptger3/Ptger4/Ptgfr/Ptgir/Tbxa2r		Nvec_v1g116802
+Nvec_vc1.1_XM_001629401.3	sig.wnt.HG1.3:Wnt1/Wnt6	Wnt6	Nvec_v1g116808
+Nvec_vc1.1_XM_001629426.3	sig.Pkinase.HG7.11:Nek2	Nek2	Nvec_v1g116843
+Nvec_vc1.1_XM_032377598.2	sig.Pkinase.HG48.1:Tlk1/Tlk2	Tlk1/Tlk2	Nvec_v1g117131
+Nvec_vc1.1_XM_001629162.3	sig.GPCRrhod.HG4.10:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g117553
+Nvec_vc1.1_XM_048733957.1	sig.GPCRrhod.HG4.10:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g117553
+Nvec_vc1.1_XM_048733951.1	sig.Pkinase.HG1.10:Tek/Tie1		Nvec_v1g117565
+Nvec_vc1.1_XM_048734564.1	sig.Pkinase.HG1.10:Tek/Tie1		Nvec_v1g117570
+Nvec_vc1.1_XM_001629131.3	Nvec_v1g117699:HG.Unclassified	""	Nvec_v1g117699
+Nvec_vc1.1_XM_048729284.1	Nvec_v1g117722:HG.Unclassified	""	Nvec_v1g117722
+Nvec_v1g117779	sig.Pkinase.HG7.1:Nek11	Nek11	Nvec_v1g117779
+Nvec_v1g117891	sig.GPCRrhod.HG19.9:NA		Nvec_v1g117891
+Nvec_vc1.1_XM_001629037.3	sig.Pkinase.HG36.4:Stk17b	Stk17b	Nvec_v1g117995
+Nvec_vc1.1_XM_032377274.2	Nvec_v1g118020:HG.Unclassified	""	Nvec_v1g118020
+Nvec_vc1.1_XM_032377269.2	sig.GPCRrhod.HG2.4:Ffar4/Gpr19		Nvec_v1g118035
+Nvec_vc1.1_XM_032377109.2	sig.GPCRrhod.HG6.6:NA		Nvec_v1g118391
+Nvec_vc1.1_XM_048728882.1	sig.GPCRrhod.HG6.6:NA		Nvec_v1g118391
+Nvec_vc1.1_XM_048722022.1	sig.Pkinase.HG25.1:Map3k4	Map3k4	Nvec_v1g118591
+Nvec_vc1.1_XM_048722869.1	Nvec_v1g118705:HG.Unclassified	""	Nvec_v1g118705
+Nvec_vc1.1_XM_001628600.3	sig.Pkinase.HG2.3:Snrk	Snrk	Nvec_v1g119208
+Nvec_vc1.1_XM_001628621.3	Nvec_v1g119248:HG.Unclassified	""	Nvec_v1g119248
+Nvec_vc1.1_XM_032376738.2	sig.Pkinase.HG1.22:like:Styk1		Nvec_v1g119330
+Nvec_vc1.1_XM_048730516.1	sig.Pkinase.HG1.22:like:Styk1		Nvec_v1g119412
+Nvec_vc1.1_XM_001628466.3	sig.GPCRrhod.HG11.1:NA		Nvec_v1g119626
+Nvec_vc1.1_XM_032376684.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g119692
+Nvec_vc1.1_XM_032376569.1	sig.DSL.HG1.5:like:Dll1/Dll4/Jag1/Jag2		Nvec_v1g119841
+Nvec_v1g119905	Nvec_v1g119905:HG.Unclassified	""	Nvec_v1g119905
+Nvec_vc1.1_XM_032376423.2	sig.Pkinase.HG18.10:Dyrk4	Dyrk4	Nvec_v1g120202
+Nvec_vc1.1_XM_032376404.2	sig.Pkinase.HG11.15:Camk1/Camk1d/Camk1g/Pnck	Camk1/Camk1d/Camk1g/Pnck	Nvec_v1g120257
+Nvec_vc1.1_XM_032376390.2	sig.GPCRrhod.HG30.13:NA		Nvec_v1g120331
+Nvec_vc1.1_XM_048728300.1	sig.Pkinase.HG20.10:like:Gucy2c/Gucy2d/Gucy2e/Gucy2f/Gucy2g/Npr1/Npr2		Nvec_v1g120436
+Nvec_vc1.1_XM_032376323.2	sig.Pkinase.HG20.22:like:Gucy2c/Gucy2d/Gucy2e/Gucy2f/Gucy2g/Npr1/Npr2		Nvec_v1g120467
+Nvec_vc1.1_XM_048731906.1	sig.GPCRrhod.HG31.0:NA		Nvec_v1g120493
+Nvec_vc1.1_XM_048728422.1	sig.Pkinase.HG1.10:Tek/Tie1		Nvec_v1g120496
+Nvec_vc1.1_XM_048730101.1	sig.Pkinase.HG29.2:Vrk1/Vrk2/Vrk3	Vrk1/Vrk2/Vrk3	Nvec_v1g12051
+Nvec_vc1.1_XM_032376288.2	sig.Pkinase.HG25.0:Map3k1	Map3k1	Nvec_v1g120549
+Nvec_vc1.1_XM_001628046.3	sig.Pkinase.HG22.11:Gm49361/Lats1/Lats2	Gm49361/Lats1/Lats2	Nvec_v1g120850
+Nvec_vc1.1_XM_032376054.2	sig.GPCRrhod.HG30.35:NA		Nvec_v1g120918
+Nvec_vc1.1_XM_032374498.2	sig.Pkinase.HG29.5:Csnk1d/Csnk1e	Csnk1d/Csnk1e	Nvec_v1g12115
+Nvec_vc1.1_XM_048730031.1	sig.Pkinase.HG7.13:Nek9	Nek9	Nvec_v1g121980
+Nvec_vc1.1_XM_032375587.2	Nvec_v1g122001:HG.Unclassified	""	Nvec_v1g122001
+Nvec_vc1.1_XM_032375533.2	Nvec_v1g122133:HG.Unclassified	""	Nvec_v1g122133
+Nvec_vc1.1_XM_032375456.2	sig.GPCRrhod.HG18.20:NA		Nvec_v1g122235
+Nvec_vc1.1_XM_048729773.1	sig.Pkinase.HG1.22:like:Styk1		Nvec_v1g122252
+Nvec_vc1.1_XM_032375478.2	sig.DSL.HG1.6:like:Dll1/Dll4/Jag1/Jag2		Nvec_v1g122285
+Nvec_vc1.1_XM_048722510.1	sig.GPCRrhod.HG12.26:NA		Nvec_v1g122295
+Nvec_vc1.1_XM_048722921.1	sig.GPCRrhod.HG12.27:NA		Nvec_v1g122325
+Nvec_vc1.1_XM_032375430.2	sig.GPCRrhod.HG12.11:NA		Nvec_v1g122333
+Nvec_vc1.1_XM_032375337.2	Nvec_v1g122716:HG.Unclassified	""	Nvec_v1g122716
+Nvec_vc1.1_XM_001627458.3	sig.Pkinase.HG1.10:Tek/Tie1	Tek/Tie1	Nvec_v1g122799
+Nvec_vc1.1_XM_001627452.3	sig.Pkinase.HG3.12:Cdkl2/Cdkl3	Cdkl2/Cdkl3	Nvec_v1g122840
+Nvec_vc1.1_XM_032375046.2	Nvec_v1g123316:HG.Unclassified	""	Nvec_v1g123316
+Nvec_vc1.1_XM_032374991.2	sig.GPCRrhod.HG23.4:like:Opn1mw/Opn1sw/Opn3/Opn4/Opn5/Rgr/Rho/Rrh		Nvec_v1g123451
+Nvec_vc1.1_XM_048727155.1	sig.RGS.HG1.5:Akap10	Akap10	Nvec_v1g123505
+Nvec_vc1.1_XM_032374869.2	sig.GPCRrhod.HG23.1:Opn1mw/Opn1sw/Opn3/Opn5/Rgr/Rho/Rrh		Nvec_v1g123690
+Nvec_vc1.1_XM_032374835.2	sig.GPCRrhod.HG12.9:NA		Nvec_v1g123739
+Nvec_vc1.1_XM_048720206.1	sig.GPCRrhod.HG24.15:NA		Nvec_v1g123963
+Nvec_vc1.1_XM_001627080.3	sig.GPCRrhod.HG24.13:NA		Nvec_v1g124016
+Nvec_vc1.1_XM_032374636.2	sig.TGF_beta.HG1.9:like:Amh/Artn/Bmp2/Bmp3/Bmp4/Bmp5/Bmp6/Bmp7/Bmp8a/Bmp8b/Bmp10/Bmp15/Cers1/Gdf1/Gdf2/Gdf3/Gdf5/Gdf6/Gdf7/Gdf9/Gdf10/Gdf11/Gdf15/Gdnf/Inha/Inhba/Inhbb/Inhbc/Inhbe/Lefty1/Lefty2/Mstn/Nodal/Nrtn/Pspn/Tgfb1/Tgfb2/Tgfb3		Nvec_v1g124360
+Nvec_vc1.1_XM_048733858.1	sig.GPCRrhod.HG11.1:NA		Nvec_v1g124952
+Nvec_vc1.1_XM_001626743.3	sig.Fringe.HG1.0:B3gnt4/B3gnt7/B3gnt9		Nvec_v1g125007
+Nvec_vc1.1_XM_032374376.2	sig.Pkinase.HG7.12:Nek6/Nek7	Nek6/Nek7	Nvec_v1g125185
+Nvec_vc1.1_XM_048720592.1	sig.GPCRsecr.HG1.17:like:Adgrd1		Nvec_v1g125574
+Nvec_vc1.1_XM_048720803.1	sig.GPCRrhod.HG37.9:NA		Nvec_v1g125630
+Nvec_vc1.1_XM_048729762.1	sig.Pkinase.HG4.6:Epha1/Epha2/Epha3/Epha4/Epha5/Epha6/Epha7/Epha8/Epha10/Ephb1/Ephb2/Ephb3/Ephb4/Ephb6	Epha1/Epha10/Epha2/Epha3/Epha4/Epha5/Epha6/Epha7/Epha8/Ephb1/Ephb2/Ephb3/Ephb4/Ephb6	Nvec_v1g12570
+Nvec_vc1.1_XM_032374172.2	sig.Pkinase.HG8.13:Musk	Musk	Nvec_v1g125819
+Nvec_v1g125963	sig.GPCRrhod.HG24.0:NA		Nvec_v1g125963
+Nvec_vc1.1_XM_001626455.3	sig.GPCRrhod.HG8.0:Rxfp1/Rxfp2	Rxfp1/Rxfp2	Nvec_v1g126009
+Nvec_vc1.1_XM_032374044.2	sig.GPCRrhod.HG37.9:NA		Nvec_v1g126146
+Nvec_vc1.1_XM_048723863.1	Nvec_v1g126176:HG.Unclassified	""	Nvec_v1g126176
+Nvec_vc1.1_XM_048719865.1	sig.Pkinase.HG8.6:Aatk/Lmtk2/Lmtk3	Aatk/Lmtk2/Lmtk3	Nvec_v1g126398
+Nvec_vc1.1_XM_001626222.3	Nvec_v1g127133:HG.Unclassified	""	Nvec_v1g127133
+Nvec_v1g127328	Nvec_v1g127328:HG.Unclassified	""	Nvec_v1g127328
+Nvec_vc1.1_XM_001626142.3	Nvec_v1g127359:HG.Unclassified	""	Nvec_v1g127359
+Nvec_vc1.1_XM_032378366.2	sig.Pkinase.HG1.13:Csf1r/Flt1/Flt3/Flt4/Kdr/Kit/Pdgfra/Pdgfrb	Csf1r/Flt1/Flt3/Flt4/Kdr/Kit/Pdgfra/Pdgfrb	Nvec_v1g127426
+Nvec_vc1.1_XM_032373528.2	sig.GPCRrhod.HG24.8:NA		Nvec_v1g128258
+Nvec_vc1.1_XM_032373447.2	sig.GPCRrhod.HG18.17:NA		Nvec_v1g128393
+Nvec_vc1.1_XM_032373451.2	sig.GPCRrhod.HG18.16:NA		Nvec_v1g128422
+Nvec_vc1.1_XM_048734154.1	sig.Pkinase.HG16.4:Mapk8/Mapk9/Mapk10	Mapk10/Mapk8/Mapk9	Nvec_v1g128523
+Nvec_vc1.1_XM_048722841.1	sig.GPCRrhod.HG19.5:NA		Nvec_v1g128665
+Nvec_vc1.1_XM_048729762.1	sig.Pkinase.HG4.6:Epha1/Epha2/Epha3/Epha4/Epha5/Epha6/Epha7/Epha8/Epha10/Ephb1/Ephb2/Ephb3/Ephb4/Ephb6	Epha1/Epha10/Epha2/Epha3/Epha4/Epha5/Epha6/Epha7/Epha8/Ephb1/Ephb2/Ephb3/Ephb4/Ephb6	Nvec_v1g128719
+Nvec_vc1.1_XM_048728326.1	sig.TIR.HG2.16:like:Sarm1		Nvec_v1g128773
+Nvec_vc1.1_XM_001633854.3	sig.GPCRglut.HG2.13:Gabbr1/Gabbr2		Nvec_v1g128892
+Nvec_vc1.1_XM_032373207.2	sig.Pkinase.HG39.3:Plk2/Plk3/Plk5	Plk2/Plk3/Plk5	Nvec_v1g128941
+Nvec_vc1.1_XM_032373045.1	sig.GPCRglut.HG1.2:Grm1/Grm2/Grm3/Grm4/Grm5/Grm6/Grm7/Grm8		Nvec_v1g129319
+Nvec_v1g129540	sig.GPCRrhod.HG12.10:NA		Nvec_v1g129540
+Nvec_vc1.1_XM_001625395.3	sig.Fringe.HG1.0:B3gnt4/B3gnt7/B3gnt9		Nvec_v1g129958
+Nvec_vc1.1_XM_001625353.3	sig.GPCRrhod.HG23.1:Opn1mw/Opn1sw/Opn3/Opn5/Rgr/Rho/Rrh		Nvec_v1g130042
+Nvec_vc1.1_XM_001625326.3	sig.GPCRrhod.HG4.18:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g130146
+Nvec_vc1.1_XM_048730100.1	sig.GPCRrhod.HG4.37:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g130243
+Nvec_vc1.1_XM_001625215.3	sig.GPCRrhod.HG24.11:NA		Nvec_v1g130452
+Nvec_vc1.1_XM_001625217.3	sig.GPCRrhod.HG4.21:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g130462
+Nvec_vc1.1_XM_001625217.3	sig.GPCRrhod.HG4.21:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g130469
+Nvec_vc1.1_XM_048727794.1	sig.Pkinase.HG3.9:Cdk7	Cdk7	Nvec_v1g130552
+Nvec_vc1.1_XM_032372609.2	sig.Pkinase.HG10.3:Oxsr1/Stk39	Oxsr1/Stk39	Nvec_v1g130600
+Nvec_vc1.1_XM_032372445.2	sig.GPCRrhod.HG23.1:Opn1mw/Opn1sw/Opn3/Opn5/Rgr/Rho/Rrh		Nvec_v1g131013
+Nvec_vc1.1_XM_048729824.1	sig.GPCRrhod.HG23.1:Opn1mw/Opn1sw/Opn3/Opn5/Rgr/Rho/Rrh		Nvec_v1g131013
+Nvec_vc1.1_XM_032373695.2	sig.GPCRrhod.HG23.1:Opn1mw/Opn1sw/Opn3/Opn5/Rgr/Rho/Rrh		Nvec_v1g13116
+Nvec_vc1.1_XM_001624990.3	Nvec_v1g131304:HG.Unclassified	""	Nvec_v1g131304
+Nvec_vc1.1_XM_032372373.2	Nvec_v1g131304:HG.Unclassified	""	Nvec_v1g131304
+Nvec_vc1.1_XM_048725558.1	sig.GPCRrhod.HG44.0:NA		Nvec_v1g131347
+Nvec_vc1.1_XM_048725558.1	Nvec_v1g131388:HG.Unclassified	""	Nvec_v1g131388
+Nvec_vc1.1_XM_048721325.1	sig.Pkinase.HG41.0:NA		Nvec_v1g131691
+Nvec_vc1.1_XM_048731164.1	sig.GPCRsecr.HG3.0:NA		Nvec_v1g131887
+Nvec_vc1.1_XM_048731005.1	sig.GPCRsecr.HG3.0:NA		Nvec_v1g131939
+Nvec_vc1.1_XM_001624798.3	Nvec_v1g131951:HG.Unclassified	""	Nvec_v1g131951
+Nvec_vc1.1_XM_048732352.1	sig.GPCRrhod.HG12.22:NA		Nvec_v1g132024
+Nvec_vc1.1_XM_032372050.2	sig.GPCRrhod.HG18.6:NA		Nvec_v1g132205
+Nvec_vc1.1_XM_048734487.1	sig.Pkinase.HG1.10:Tek/Tie1		Nvec_v1g132322
+Nvec_vc1.1_XM_032371958.2	sig.Pkinase.HG6.0:NA		Nvec_v1g132865
+Nvec_vc1.1_XM_032371890.2	Nvec_v1g133021:HG.Unclassified	""	Nvec_v1g133021
+Nvec_vc1.1_XM_048727409.1	sig.Frizzled.HG1.18:Fzd1/Fzd2/Fzd3/Fzd4/Fzd5/Fzd6/Fzd7/Fzd8/Fzd9/Fzd10		Nvec_v1g133025
+Nvec_vc1.1_XM_048720893.1	sig.GPCRsecr.HG1.17:like:Adgrd1		Nvec_v1g133486
+Nvec_vc1.1_XM_032371789.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g133576
+Nvec_vc1.1_XM_001624477.3	sig.GPCRrhod.HG12.12:NA		Nvec_v1g133598
+Nvec_vc1.1_XM_032371786.2	sig.GPCRrhod.HG2.12:Gpr176	Gpr176	Nvec_v1g133635
+Nvec_vc1.1_XM_032380016.2	sig.GPCRrhod.HG12.0:NA		Nvec_v1g13425
+Nvec_vc1.1_XM_032375016.2	Nvec_v1g13440:HG.Unclassified	""	Nvec_v1g13440
+Nvec_vc1.1_XM_001624193.2	sig.GPCRrhod.HG6.0:NA		Nvec_v1g134525
+Nvec_vc1.1_XM_048732948.1	sig.Pkinase.HG1.14:like:Styk1		Nvec_v1g134557
+Nvec_vc1.1_XM_048721422.1	sig.GPCRrhod.HG31.0:NA		Nvec_v1g134599
+Nvec_vc1.1_XM_001624115.3	sig.GPCRrhod.HG6.1:NA		Nvec_v1g134818
+Nvec_v1g134852	sig.GPCRrhod.HG12.22:NA		Nvec_v1g134852
+Nvec_vc1.1_XM_001624066.3	sig.Pkinase.HG13.3:Mos		Nvec_v1g134989
+Nvec_vc1.1_XM_048727470.1	sig.Pkinase.HG15.7:Lrrk1	Lrrk1	Nvec_v1g135171
+Nvec_vc1.1_XM_048732635.1	sig.Pkinase.HG2.35:Sik1/Sik2/Sik3	Sik1/Sik2	Nvec_v1g135294
+Nvec_vc1.1_XM_001631732.3	sig.GPCRrhod.HG12.10:NA		Nvec_v1g13531
+Nvec_vc1.1_XM_032371204.2	sig.Pkinase.HG10.10:Stk24/Stk25/Stk26	Stk24/Stk25/Stk26	Nvec_v1g135318
+Nvec_vc1.1_XM_048720189.1	sig.GPCRrhod.HG24.6:NA		Nvec_v1g135398
+Nvec_vc1.1_XM_048721492.1	sig.Pkinase.HG17.10:Rps6ka1/Rps6ka2/Rps6ka3	Rps6ka1/Rps6ka2/Rps6ka3	Nvec_v1g135493
+Nvec_vc1.1_XM_032371889.2	Nvec_v1g13560:HG.Unclassified	""	Nvec_v1g13560
+Nvec_vc1.1_XM_032371142.2	sig.GPCRrhod.HG4.17:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g135618
+Nvec_vc1.1_XM_001623752.3	Nvec_v1g136356:HG.Unclassified	""	Nvec_v1g136356
+Nvec_vc1.1_XM_048726038.1	sig.GPCRsecr.HG1.4:like:Adgrb1/Adgrb2/Adgrb3		Nvec_v1g13642
+Nvec_v1g13649	sig.GPCRrhod.HG6.2:NA		Nvec_v1g13649
+Nvec_vc1.1_XM_032370850.2	sig.GPCRrhod.HG23.1:Opn1mw/Opn1sw/Opn3/Opn5/Rgr/Rho/Rrh		Nvec_v1g136537
+Nvec_vc1.1_XM_048726135.1	sig.Pkinase.HG3.6:like:Gsk3a/Gsk3b		Nvec_v1g136852
+Nvec_vc1.1_XM_032370986.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g13739
+Nvec_vc1.1_XM_048730232.1	Nvec_v1g13790:HG.Unclassified	""	Nvec_v1g13790
+Nvec_vc1.1_XM_048728181.1	sig.GPCRrhod.HG34.2:like:Ptgdr/Ptger1/Ptger2/Ptger3/Ptger4/Ptgfr/Ptgir/Tbxa2r		Nvec_v1g138185
+Nvec_vc1.1_XM_048721511.1	sig.Pkinase.HG32.6:like:Dstyk		Nvec_v1g13820
+Nvec_vc1.1_XM_032370267.2	sig.GPCRrhod.HG31.0:NA		Nvec_v1g138379
+Nvec_vc1.1_XM_032375432.2	sig.GPCRrhod.HG12.5:NA		Nvec_v1g13858
+Nvec_vc1.1_XM_048734008.1	sig.GPCRrhod.HG4.19:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g138768
+Nvec_vc1.1_XM_032370104.2	sig.GPCRrhod.HG6.12:NA		Nvec_v1g138948
+Nvec_v1g139003	sig.GPCRrhod.HG37.4:NA		Nvec_v1g139003
+Nvec_vc1.1_XM_048721325.1	sig.Pkinase.HG41.0:NA		Nvec_v1g139065
+Nvec_v1g139127	sig.GPCRrhod.HG2.4:Ffar4/Gpr19	Ffar4	Nvec_v1g139127
+Nvec_vc1.1_XM_001622951.3	Nvec_v1g139131:HG.Unclassified	""	Nvec_v1g139131
+Nvec_vc1.1_XM_048720488.1	sig.GPCRsecr.HG1.17:like:Adgrd1		Nvec_v1g139162
+Nvec_vc1.1_XM_001625374.3	sig.GPCRrhod.HG4.10:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g13917
+Nvec_vc1.1_XM_001622915.3	sig.Frizzled.HG1.18:Fzd1/Fzd2/Fzd3/Fzd4/Fzd5/Fzd6/Fzd7/Fzd8/Fzd9/Fzd10	Fzd4	Nvec_v1g139208
+Nvec_vc1.1_XM_032369987.2	Nvec_v1g139211:HG.Unclassified	""	Nvec_v1g139211
+Nvec_vc1.1_XM_032369888.2	sig.Pkinase.HG2.34:Mark1/Mark2/Mark3/Mark4	Mark1/Mark2/Mark3/Mark4	Nvec_v1g139527
+Nvec_vc1.1_XM_048732586.1	sig.Pkinase.HG2.20:Chek1	Chek1	Nvec_v1g139755
+Nvec_vc1.1_XM_001622614.3	sig.GPCRrhod.HG11.1:NA		Nvec_v1g139930
+Nvec_vc1.1_XM_001622614.3	sig.GPCRrhod.HG11.1:NA		Nvec_v1g140336
+Nvec_vc1.1_XM_048734456.1	sig.Pkinase.HG2.15:Pask	Pask	Nvec_v1g140376
+Nvec_vc1.1_XM_001622563.3	Nvec_v1g140525:HG.Unclassified	""	Nvec_v1g140525
+Nvec_vc1.1_XM_032369554.2	sig.Pkinase.HG21.13:Acvr1b/Acvr1c/Tgfbr1	Acvr1b/Acvr1c/Tgfbr1	Nvec_v1g140805
+Nvec_vc1.1_XM_001622456.3	sig.GPCRrhod.HG12.45:NA		Nvec_v1g140871
+Nvec_vc1.1_XM_032369518.2	sig.Patched.HG1.8:like:Npc1/Npc1l1/Ptch1/Ptch2		Nvec_v1g140877
+Nvec_vc1.1_XM_001628226.3	sig.GPCRrhod.HG4.34:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g14216
+Nvec_vc1.1_XM_001627321.3	sig.GPCRrhod.HG4.12:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g14237
+Nvec_vc1.1_XM_048725452.1	sig.GPCRrhod.HG6.5:NA		Nvec_v1g142416
+Nvec_vc1.1_XM_001626465.3	sig.GPCRrhod.HG12.32:NA		Nvec_v1g14306
+Nvec_vc1.1_XM_048725596.1	sig.Pkinase.HG7.7:Pkmyt1	Pkmyt1	Nvec_v1g143837
+Nvec_vc1.1_XM_048724349.1	sig.Ldl_recept_b.HG1.20:Gm19410	Gm19410	Nvec_v1g144279
+Nvec_vc1.1_XM_048724349.1	sig.Ldl_recept_b.HG1.13:Lrp1/Lrp1b	Lrp1/Lrp1b	Nvec_v1g144281
+Nvec_vc1.1_XM_048720937.1	sig.GPCRrhod.HG4.29:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g144366
+Nvec_vc1.1_XM_001625964.3	Nvec_v1g14438:HG.Unclassified	""	Nvec_v1g14438
+Nvec_vc1.1_XM_048733476.1	sig.wnt.HG1.2:Wnt8a/Wnt8b	Wnt8a/Wnt8b	Nvec_v1g144457
+Nvec_vc1.1_XM_001621430.3	sig.Pkinase.HG34.6:Map2k3/Map2k4/Map2k6	Map2k3/Map2k6	Nvec_v1g144733
+Nvec_vc1.1_XM_032386133.2	Nvec_v1g14501:HG.Unclassified	""	Nvec_v1g14501
+Nvec_vc1.1_XM_032375696.2	Nvec_v1g145099:HG.Unclassified	""	Nvec_v1g145099
+Nvec_v1g145594	Nvec_v1g145594:HG.Unclassified	""	Nvec_v1g145594
+Nvec_vc1.1_XM_001634289.3	sig.Pkinase.HG11.4:Camk4	Camk4	Nvec_v1g145659
+Nvec_vc1.1_XM_032373215.2	sig.GPCRrhod.HG37.4:NA		Nvec_v1g145688
+Nvec_vc1.1_XM_048729765.1	sig.Pkinase.HG4.6:Epha1/Epha2/Epha3/Epha4/Epha5/Epha6/Epha7/Epha8/Epha10/Ephb1/Ephb2/Ephb3/Ephb4/Ephb6	Epha1/Epha10/Epha2/Epha3/Epha4/Epha5/Epha6/Epha7/Epha8/Ephb1/Ephb2/Ephb3/Ephb4/Ephb6	Nvec_v1g146109
+Nvec_vc1.1_XM_032365472.2	sig.GPCRsecr.HG1.5:Celsr1/Celsr2/Celsr3	Celsr1/Celsr2/Celsr3	Nvec_v1g146118
+Nvec_vc1.1_XM_001635196.3	sig.GPCRrhod.HG18.3:NA		Nvec_v1g146136
+Nvec_vc1.1_XM_032370850.2	sig.GPCRrhod.HG23.1:Opn1mw/Opn1sw/Opn3/Opn5/Rgr/Rho/Rrh		Nvec_v1g146277
+Nvec_vc1.1_XM_001625326.3	sig.GPCRrhod.HG4.18:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g146413
+Nvec_vc1.1_XM_001618277.3	sig.GPCRrhod.HG4.6:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g14699
+Nvec_vc1.1_XM_048722869.1	Nvec_v1g147035:HG.Unclassified	""	Nvec_v1g147035
+Nvec_vc1.1_XM_048719865.1	sig.Pkinase.HG8.6:Aatk/Lmtk2/Lmtk3	Aatk/Lmtk2/Lmtk3	Nvec_v1g147113
+Nvec_vc1.1_XM_032365291.2	sig.Patched.HG1.9:Ptch1/Ptch2	Ptch1/Ptch2	Nvec_v1g147188
+Nvec_vc1.1_XM_032384006.2	sig.Pkinase.HG22.9:Mast1/Mast3/Mast4	Mast1/Mast3/Mast4	Nvec_v1g147631
+Nvec_vc1.1_XM_048724386.1	sig.Pkinase.HG3.22:Cdk12/Cdk13	Cdk12/Cdk13	Nvec_v1g147788
+Nvec_vc1.1_XM_048727766.1	sig.GPCRrhod.HG6.5:NA		Nvec_v1g14786
+Nvec_vc1.1_XM_001628621.3	Nvec_v1g148199:HG.Unclassified	""	Nvec_v1g148199
+Nvec_vc1.1_XM_032373207.2	sig.Pkinase.HG39.3:Plk2/Plk3/Plk5	Plk2/Plk3/Plk5	Nvec_v1g148758
+Nvec_vc1.1_XM_001629550.3	sig.Pkinase.HG4.5:like:Epha1/Epha2/Epha3/Epha4/Epha5/Epha6/Epha7/Epha8/Epha10/Ephb1/Ephb2/Ephb3/Ephb4/Ephb6		Nvec_v1g148960
+Nvec_vc1.1_XM_048721139.1	sig.DSL.HG1.5:like:Dll1/Dll4/Jag1/Jag2		Nvec_v1g148964
+Nvec_vc1.1_XM_032362342.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g14899
+Nvec_vc1.1_XM_048727626.1	sig.Pkinase.HG20.10:like:Gucy2c/Gucy2d/Gucy2e/Gucy2f/Gucy2g/Npr1/Npr2		Nvec_v1g149495
+Nvec_vc1.1_XM_032366631.2	sig.Pkinase.HG1.17:Fgfr1/Fgfr2/Fgfr3/Fgfr4	Fgfr1/Fgfr2/Fgfr3/Fgfr4	Nvec_v1g149546
+Nvec_vc1.1_XM_001619925.3	sig.GPCRrhod.HG23.0:like:Opn1mw/Opn1sw/Opn3/Opn4/Opn5/Rgr/Rho/Rrh		Nvec_v1g149621
+Nvec_vc1.1_XM_048732210.1	sig.Pkinase.HG1.14:like:Styk1		Nvec_v1g150265
+Nvec_v1g150757	sig.GPCRsecr.HG3.0:NA		Nvec_v1g150757
+Nvec_vc1.1_XM_048732478.1	sig.Pkinase.HG21.3:like:Acvr1/Acvr1b/Acvr1c/Acvr2a/Acvr2b/Acvrl1/Amhr2/Bmpr1a/Bmpr1b/Bmpr2/Tgfbr1/Tgfbr2		Nvec_v1g151755
+Nvec_v1g152271	sig.GPCRrhod.HG12.4:NA		Nvec_v1g152271
+Nvec_vc1.1_XM_001634305.3	sig.GPCRrhod.HG11.1:NA		Nvec_v1g153201
+Nvec_vc1.1_XM_032382893.2	sig.Pkinase.HG45.1:Csnk2a1/Csnk2a2	Csnk2a1/Csnk2a2	Nvec_v1g154013
+Nvec_v1g15493	Nvec_v1g15493:HG.Unclassified	""	Nvec_v1g15493
+Nvec_vc1.1_XM_048723261.1	sig.Pkinase.HG9.11:Akt1/Akt2/Akt3		Nvec_v1g155794
+Nvec_vc1.1_XM_048728292.1	sig.GPCRrhod.HG8.0:Rxfp1/Rxfp2	Rxfp1/Rxfp2	Nvec_v1g155868
+Nvec_vc1.1_XM_001641878.3	sig.Pkinase.HG3.10:Cdk20	Cdk20	Nvec_v1g156060
+Nvec_v1g156573	sig.Pkinase.HG2.31:like:Sbk1/Sbk2/Sbk3		Nvec_v1g156573
+Nvec_vc1.1_XM_032372445.2	sig.GPCRrhod.HG23.1:Opn1mw/Opn1sw/Opn3/Opn5/Rgr/Rho/Rrh		Nvec_v1g156694
+Nvec_vc1.1_XM_048729824.1	sig.GPCRrhod.HG23.1:Opn1mw/Opn1sw/Opn3/Opn5/Rgr/Rho/Rrh		Nvec_v1g156694
+Nvec_vc1.1_XM_032371789.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g157068
+Nvec_vc1.1_XM_032370541.2	sig.MH2.HG1.2:Smad4	Smad4	Nvec_v1g157164
+Nvec_vc1.1_XM_001641038.3	sig.GPCRrhod.HG24.14:NA		Nvec_v1g157238
+Nvec_vc1.1_XM_032384308.2	sig.GPCRrhod.HG24.0:NA		Nvec_v1g157362
+Nvec_vc1.1_XM_001641911.3	sig.Pkinase.HG11.20:Camk2a/Camk2b/Camk2d/Camk2g	Camk2a/Camk2b/Camk2d/Camk2g	Nvec_v1g157808
+Nvec_vc1.1_XM_001641444.3	sig.wnt.HG1.3:Wnt1/Wnt6	Wnt1	Nvec_v1g158342
+Nvec_vc1.1_XM_001641250.3	sig.Pkinase.HG1.10:Tek/Tie1	Tek/Tie1	Nvec_v1g158493
+Nvec_vc1.1_XM_032366722.2	sig.Ldl_recept_b.HG1.11:Lrp5/Lrp6	Lrp5/Lrp6	Nvec_v1g158520
+Nvec_vc1.1_XM_032366541.2	sig.Pkinase.HG10.13:Map4k1/Map4k2/Map4k3/Map4k5	Map4k1/Map4k2/Map4k3/Map4k5	Nvec_v1g158852
+Nvec_vc1.1_XM_001641064.3	sig.GPCRglut.HG2.13:Gabbr1/Gabbr2		Nvec_v1g158857
+Nvec_vc1.1_XM_032366217.2	sig.Pkinase.HG29.7:Csnk1a1	Csnk1a1	Nvec_v1g159193
+Nvec_vc1.1_XM_048730435.1	sig.Ldl_recept_b.HG1.2:Nid1/Nid2	Nid1/Nid2	Nvec_v1g15934
+Nvec_vc1.1_XM_001639240.3	sig.GPCRrhod.HG2.4:Ffar4/Gpr19	Gpr19	Nvec_v1g160731
+Nvec_vc1.1_XM_001638536.3	sig.Pkinase.HG29.7:Csnk1a1	Csnk1a1	Nvec_v1g161273
+Nvec_vc1.1_XM_001638382.3	sig.GPCRrhod.HG24.0:NA		Nvec_v1g161565
+Nvec_vc1.1_XM_001638048.3	sig.Pkinase.HG2.35:Sik1/Sik2/Sik3		Nvec_v1g161733
+Nvec_vc1.1_XM_001622867.3	sig.Pkinase.HG1.10:Tek/Tie1		Nvec_v1g1620
+Nvec_vc1.1_XM_032387450.2	sig.Pkinase.HG2.21:Stk11	Stk11	Nvec_v1g162441
+Nvec_vc1.1_XM_032384121.2	sig.GPCRrhod.HG4.4:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g16273
+Nvec_vc1.1_XM_001636626.3	sig.Pkinase.HG11.7:Chek2	Chek2	Nvec_v1g163148
+Nvec_vc1.1_XM_001636399.3	sig.Pkinase.HG38.4:Ikbke/Tbk1	Ikbke/Tbk1	Nvec_v1g163386
+Nvec_vc1.1_XM_048730960.1	sig.Pkinase.HG8.9:Ddr1/Ddr2	Ddr1/Ddr2	Nvec_v1g163453
+Nvec_vc1.1_XM_032385204.2	sig.Pkinase.HG10.11:Myo3a/Myo3b	Myo3a/Myo3b	Nvec_v1g164057
+Nvec_vc1.1_XM_001625069.3	sig.GPCRrhod.HG4.34:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g1642
+Nvec_vc1.1_XM_048729154.1	Nvec_v1g164564:HG.Unclassified	""	Nvec_v1g164564
+Nvec_vc1.1_XM_001634854.3	sig.Pkinase.HG2.7:Trib1/Trib2/Trib3	Trib1/Trib2	Nvec_v1g164837
+Nvec_vc1.1_XM_048725558.1	sig.GPCRrhod.HG44.0:NA		Nvec_v1g1652
+Nvec_vc1.1_XM_001633846.3	sig.Activin_recp.HG1.0:Acvr1c/Bmpr1a/Bmpr1b/Tgfbr1;sig.Pkinase.HG21.14:Bmpr1a/Bmpr1b	""	Nvec_v1g165860
+Nvec_vc1.1_XM_032382893.2	sig.Pkinase.HG45.1:Csnk2a1/Csnk2a2	Csnk2a1/Csnk2a2	Nvec_v1g166091
+Nvec_vc1.1_XM_048734392.1	sig.TIR.HG1.4:Il1r1/Il1rap/Il1rapl1/Il1rapl2/Il1rl1/Il1rl2/Il18r1/Il18rap/Sigirr/Tlr1/Tlr2/Tlr3/Tlr4/Tlr6/Tlr7/Tlr8/Tlr9/Tlr11/Tlr12/Tlr13		Nvec_v1g16632
+Nvec_vc1.1_XM_001633226.3	Nvec_v1g166451:HG.Unclassified	""	Nvec_v1g166451
+Nvec_vc1.1_XM_032382227.2	Nvec_v1g166669:HG.Unclassified	""	Nvec_v1g166669
+Nvec_vc1.1_XM_048722477.1	sig.GPCRrhod.HG12.8:NA		Nvec_v1g1668
+Nvec_vc1.1_XM_048722463.1	sig.GPCRrhod.HG12.8:NA		Nvec_v1g1668
+Nvec_vc1.1_XM_048727398.1	Nvec_v1g16789:HG.Unclassified	""	Nvec_v1g16789
+Nvec_vc1.1_XM_001631799.3	sig.Pkinase.HG43.2:Aak1/Bmp2k	Aak1/Bmp2k	Nvec_v1g167919
+Nvec_vc1.1_XM_001631607.3	sig.MH2.HG1.3:Smad2/Smad3	Smad2/Smad3	Nvec_v1g168041
+Nvec_vc1.1_XM_001635132.3	Nvec_v1g1683:HG.Unclassified	""	Nvec_v1g1683
+Nvec_vc1.1_XM_032379935.2	sig.TGF_beta.HG1.30:Bmp2/Bmp4	Bmp2/Bmp4	Nvec_v1g168498
+Nvec_vc1.1_XM_048734599.1	Nvec_v1g1687:HG.Unclassified	""	Nvec_v1g1687
+Nvec_vc1.1_XM_032379260.2	sig.Frizzled.HG1.18:Fzd1/Fzd2/Fzd3/Fzd4/Fzd5/Fzd6/Fzd7/Fzd8/Fzd9/Fzd10		Nvec_v1g168924
+Nvec_vc1.1_XM_032378232.2	sig.GPCRrhod.HG19.11:NA		Nvec_v1g169811
+Nvec_vc1.1_XM_048734687.1	sig.FGF.HG1.2:Fgf1/Fgf2	Fgf1/Fgf2	Nvec_v1g16985
+Nvec_vc1.1_XM_048727217.1	sig.Pkinase.HG22.7:Cit	Cit	Nvec_v1g169881
+Nvec_vc1.1_XM_048727626.1	sig.Pkinase.HG20.10:like:Gucy2c/Gucy2d/Gucy2e/Gucy2f/Gucy2g/Npr1/Npr2		Nvec_v1g171157
+Nvec_vc1.1_XM_032376302.2	sig.Pkinase.HG2.9:Prkaa1/Prkaa2	Prkaa1/Prkaa2	Nvec_v1g171208
+Nvec_vc1.1_XM_001647490.3	sig.Frizzled.HG1.18:Fzd1/Fzd2/Fzd3/Fzd4/Fzd5/Fzd6/Fzd7/Fzd8/Fzd9/Fzd10	Fzd1/Fzd2/Fzd7	Nvec_v1g171640
+Nvec_vc1.1_XM_032375416.2	sig.Pkinase.HG2.22:Camkk1/Camkk2	Camkk1/Camkk2	Nvec_v1g171810
+Nvec_vc1.1_XM_001627045.3	sig.GPCRrhod.HG12.19:NA		Nvec_v1g1720
+Nvec_vc1.1_XM_048729765.1	sig.Pkinase.HG4.6:Epha1/Epha2/Epha3/Epha4/Epha5/Epha6/Epha7/Epha8/Epha10/Ephb1/Ephb2/Ephb3/Ephb4/Ephb6	Epha1/Epha10/Epha2/Epha3/Epha4/Epha5/Epha6/Epha7/Epha8/Ephb1/Ephb2/Ephb3/Ephb4/Ephb6	Nvec_v1g17263
+Nvec_vc1.1_XM_001626584.3	sig.Pkinase.HG33.2:like:Rnasel		Nvec_v1g172697
+Nvec_vc1.1_XM_001626471.3	sig.GPCRrhod.HG4.39:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g172825
+Nvec_vc1.1_XM_032373682.2	sig.GPCRrhod.HG4.25:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g17311
+Nvec_vc1.1_XM_032373559.2	sig.Pkinase.HG38.8:Ulk4	Ulk4	Nvec_v1g173313
+Nvec_vc1.1_XM_048729765.1	sig.Pkinase.HG4.6:Epha1/Epha2/Epha3/Epha4/Epha5/Epha6/Epha7/Epha8/Epha10/Ephb1/Ephb2/Ephb3/Ephb4/Ephb6	Epha1/Epha10/Epha2/Epha3/Epha4/Epha5/Epha6/Epha7/Epha8/Ephb1/Ephb2/Ephb3/Ephb4/Ephb6	Nvec_v1g173481
+Nvec_vc1.1_XM_001623759.3	Nvec_v1g175230:HG.Unclassified	""	Nvec_v1g175230
+Nvec_vc1.1_XM_032372182.2	sig.GPCRrhod.HG24.0:NA		Nvec_v1g17538
+Nvec_vc1.1_XM_001623035.3	sig.Pkinase.HG20.14:like:Gucy2c/Npr1/Npr2		Nvec_v1g175727
+Nvec_vc1.1_XM_032369958.2	sig.Fringe.HG1.0:B3gnt4/B3gnt7/B3gnt9		Nvec_v1g175792
+Nvec_vc1.1_XM_001622802.3	sig.Pkinase.HG7.15:like:Pdik1l/Pkmyt1/Stk31/Stk35/Stkld1/Wee1/Wee2		Nvec_v1g175874
+Nvec_vc1.1_XM_048724790.1	sig.GPCRglut.HG2.13:Gabbr1/Gabbr2	Gabbr1	Nvec_v1g176489
+Nvec_vc1.1_XM_032367469.2	Nvec_v1g177063:HG.Unclassified	""	Nvec_v1g177063
+Nvec_vc1.1_XM_048724349.1	sig.Ldl_recept_b.HG1.0:like:Egf/Gm19410/Ldlr/Lrp1/Lrp1b/Lrp2/Lrp4/Lrp5/Lrp6/Lrp8/Nid1/Nid2/Sorl1/Vldlr		Nvec_v1g177505
+Nvec_vc1.1_XM_001641433.3	sig.Pkinase.HG3.15:Cdk5	Cdk5	Nvec_v1g177555
+Nvec_vc1.1_XM_001641096.3	sig.Activin_recp.HG1.1:Acvr1/Acvr2a/Acvr2b/Bmpr2;sig.Pkinase.HG21.15:Acvr1/Acvrl1	""	Nvec_v1g178197
+Nvec_vc1.1_XM_032365779.2	Nvec_v1g178677:HG.Unclassified	""	Nvec_v1g178677
+Nvec_vc1.1_XM_001640356.3	sig.GPCRrhod.HG24.8:NA		Nvec_v1g178844
+Nvec_vc1.1_XM_032365380.2	sig.Ldl_recept_b.HG1.16:like:Gm19410/Ldlr/Lrp8/Vldlr		Nvec_v1g178890
+Nvec_vc1.1_XM_032364941.2	sig.Pkinase.HG26.10:Tnk1/Tnk2	Tnk1/Tnk2	Nvec_v1g179216
+Nvec_vc1.1_XM_032364785.2	sig.Pkinase.HG9.21:Grk4/Grk5/Grk6;sig.RGS.HG2.1:Grk1/Grk4/Grk5/Grk6	""	Nvec_v1g179295
+Nvec_vc1.1_XM_032363793.2	sig.Pkinase.HG2.33:Pim1/Pim2/Pim3	Pim1/Pim2/Pim3	Nvec_v1g180174
+Nvec_vc1.1_XM_001638894.3	sig.Pkinase.HG16.6:Mapk11/Mapk12/Mapk13/Mapk14	Mapk11/Mapk12/Mapk13/Mapk14	Nvec_v1g180219
+Nvec_vc1.1_XM_032362976.2	Nvec_v1g180946:HG.Unclassified	""	Nvec_v1g180946
+Nvec_vc1.1_XM_048725842.1	sig.Pkinase.HG10.4:Taok1/Taok2/Taok3	Taok1/Taok2/Taok3	Nvec_v1g182331
+Nvec_vc1.1_XM_001634945.3	sig.Frizzled.HG1.18:Fzd1/Fzd2/Fzd3/Fzd4/Fzd5/Fzd6/Fzd7/Fzd8/Fzd9/Fzd10	Fzd5/Fzd8	Nvec_v1g183962
+Nvec_vc1.1_XM_048734678.1	sig.Pkinase.HG1.10:Tek/Tie1		Nvec_v1g1840
+Nvec_vc1.1_XM_048734679.1	sig.Pkinase.HG1.10:Tek/Tie1		Nvec_v1g1840
+Nvec_vc1.1_XM_001634289.3	sig.Pkinase.HG11.4:Camk4	Camk4	Nvec_v1g184645
+Nvec_vc1.1_XM_032383953.2	Nvec_v1g1848:HG.Unclassified	""	Nvec_v1g1848
+Nvec_vc1.1_XM_032383311.2	sig.Pkinase.HG2.6:Stk40	Stk40	Nvec_v1g184973
+Nvec_vc1.1_XM_032382663.2	sig.Pkinase.HG3.13:Cdk2/Cdk3	Cdk2/Cdk3	Nvec_v1g185545
+Nvec_vc1.1_XM_048733746.1	sig.Pkinase.HG3.2:Tbck	Tbck	Nvec_v1g186153
+Nvec_vc1.1_XM_032380045.2	sig.GPCRsecr.HG3.0:NA		Nvec_v1g187681
+Nvec_vc1.1_XM_048730897.1	sig.GPCRrhod.HG8.1:like:Fshr/Lgr4/Lgr5/Lhcgr/Tshr		Nvec_v1g18804
+Nvec_vc1.1_XM_001630340.3	sig.Pkinase.HG13.3:Mos		Nvec_v1g188457
+Nvec_vc1.1_XM_001629488.3	sig.Pkinase.HG28.5:NA		Nvec_v1g189257
+Nvec_vc1.1_XM_001629535.3	sig.GPCRrhod.HG4.41:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g189286
+Nvec_vc1.1_XM_032366927.2	Nvec_v1g1897:HG.Unclassified	""	Nvec_v1g1897
+Nvec_vc1.1_XM_001628384.3	sig.Pkinase.HG3.7:Gsk3a/Gsk3b	Gsk3a/Gsk3b	Nvec_v1g190252
+Nvec_vc1.1_XM_032372991.1	sig.GPCRglut.HG1.2:Grm1/Grm2/Grm3/Grm4/Grm5/Grm6/Grm7/Grm8		Nvec_v1g19149
+Nvec_vc1.1_XM_001627046.3	sig.GPCRrhod.HG12.21:NA		Nvec_v1g1919
+Nvec_vc1.1_XM_048729876.1	sig.DSL.HG1.7:Dll1/Dll4/Jag1/Jag2	Jag1/Jag2	Nvec_v1g192003
+Nvec_vc1.1_XM_001626339.3	sig.Pkinase.HG29.4:Csnk1g1/Csnk1g2/Csnk1g3	Csnk1g1/Csnk1g2/Csnk1g3	Nvec_v1g192152
+Nvec_vc1.1_XM_048730435.1	sig.Ldl_recept_b.HG1.2:Nid1/Nid2	Nid1/Nid2	Nvec_v1g193237
+Nvec_vc1.1_XM_048722145.1	sig.Patched.HG1.8:like:Npc1/Npc1l1/Ptch1/Ptch2		Nvec_v1g193880
+Nvec_vc1.1_XM_001623940.3	Nvec_v1g194295:HG.Unclassified	""	Nvec_v1g194295
+Nvec_vc1.1_XM_032376774.2	Nvec_v1g1944:HG.Unclassified	""	Nvec_v1g1944
+Nvec_vc1.1_XM_001623766.3	Nvec_v1g194423:HG.Unclassified	""	Nvec_v1g194423
+Nvec_vc1.1_XM_032370466.2	sig.Pkinase.HG26.11:Syk/Zap70	Syk/Zap70	Nvec_v1g194745
+Nvec_vc1.1_XM_001623107.3	sig.TGF_beta.HG1.28:Gdf5/Gdf6/Gdf7	Gdf5/Gdf6/Gdf7	Nvec_v1g194892
+Nvec_vc1.1_XM_001623050.3	sig.wnt.HG1.14:Wnt4	Wnt4	Nvec_v1g194914
+Nvec_vc1.1_XM_032369287.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g1951
+Nvec_vc1.1_XM_032368848.2	sig.wnt.HG1.2:Wnt8a/Wnt8b	Wnt8a/Wnt8b	Nvec_v1g195613
+Nvec_vc1.1_XM_032367591.2	sig.GPCRrhod.HG18.6:NA		Nvec_v1g196084
+Nvec_vc1.1_XM_001641842.3	sig.GPCRrhod.HG24.0:NA		Nvec_v1g196086
+Nvec_vc1.1_XM_001641852.3	sig.GPCRrhod.HG18.0:NA		Nvec_v1g196115
+Nvec_vc1.1_XM_001641986.3	sig.GPCRrhod.HG6.15:NA		Nvec_v1g196123
+Nvec_vc1.1_XM_001641989.3	sig.GPCRrhod.HG18.21:NA		Nvec_v1g196130
+Nvec_vc1.1_XM_001642036.3	sig.GPCRrhod.HG12.18:NA		Nvec_v1g196253
+Nvec_vc1.1_XM_001641917.3	sig.GPCRrhod.HG12.35:NA		Nvec_v1g196303
+Nvec_vc1.1_XM_032367679.2	sig.GPCRrhod.HG12.48:NA		Nvec_v1g196320
+Nvec_vc1.1_XM_001641928.3	sig.GPCRrhod.HG2.0:Brs3/Cckar/Cckbr/Ghsr/Gpr37/Gpr37l1/Gpr39/Grpr/Hcrtr1/Hcrtr2/Nmur1/Ntsr1/Ntsr2/Trhr2		Nvec_v1g196328
+Nvec_vc1.1_XM_032367336.2	sig.FGF.HG1.2:Fgf1/Fgf2	Fgf1/Fgf2	Nvec_v1g196402
+Nvec_vc1.1_XM_032367151.2	sig.GPCRrhod.HG19.8:NA		Nvec_v1g196457
+Nvec_vc1.1_XM_001641639.3	sig.GPCRrhod.HG4.17:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g196476
+Nvec_vc1.1_XM_001641768.3	sig.GPCRrhod.HG6.0:NA		Nvec_v1g196499
+Nvec_vc1.1_XM_048733724.1	sig.GPCRsecr.HG1.4:like:Adgrb1/Adgrb2/Adgrb3		Nvec_v1g196546
+Nvec_vc1.1_XM_001641794.3	sig.GPCRrhod.HG6.0:NA		Nvec_v1g196573
+Nvec_vc1.1_XM_001641817.3	sig.Pkinase.HG5.12:Bmx/Btk/Itk/Tec/Txk	Bmx/Btk/Itk/Tec/Txk	Nvec_v1g196615
+Nvec_vc1.1_XM_048723874.1	sig.GPCRrhod.HG19.0:NA		Nvec_v1g196686
+Nvec_vc1.1_XM_001641496.3	sig.TIR.HG1.4:Il1r1/Il1rap/Il1rapl1/Il1rapl2/Il1rl1/Il1rl2/Il18r1/Il18rap/Sigirr/Tlr1/Tlr2/Tlr3/Tlr4/Tlr6/Tlr7/Tlr8/Tlr9/Tlr11/Tlr12/Tlr13		Nvec_v1g196737
+Nvec_vc1.1_XM_001641131.3	sig.GPCRrhod.HG4.18:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g196956
+Nvec_vc1.1_XM_048721155.1	sig.RGS.HG1.8:Rgsl1	Rgsl1	Nvec_v1g197179
+Nvec_v1g197214	sig.GPCRrhod.HG12.45:NA		Nvec_v1g197214
+Nvec_vc1.1_XM_001640905.3	sig.GPCRrhod.HG6.12:NA		Nvec_v1g197284
+Nvec_vc1.1_XM_032366422.2	sig.GPCRrhod.HG6.12:NA		Nvec_v1g197310
+Nvec_vc1.1_XM_001641089.3	sig.GPCRrhod.HG23.1:Opn1mw/Opn1sw/Opn3/Opn5/Rgr/Rho/Rrh		Nvec_v1g197433
+Nvec_vc1.1_XM_048729451.1	sig.GPCRglut.HG1.2:Grm1/Grm2/Grm3/Grm4/Grm5/Grm6/Grm7/Grm8		Nvec_v1g197524
+Nvec_vc1.1_XM_048729451.1	sig.GPCRrhod.HG37.9:NA		Nvec_v1g197525
+Nvec_vc1.1_XM_048728953.1	sig.GPCRrhod.HG11.1:NA		Nvec_v1g197583
+Nvec_vc1.1_XM_048728946.1	sig.GPCRrhod.HG11.1:NA		Nvec_v1g197583
+Nvec_vc1.1_XM_001640722.3	Nvec_v1g197609:HG.Unclassified	""	Nvec_v1g197609
+Nvec_vc1.1_XM_001640732.3	sig.GPCRrhod.HG12.45:NA		Nvec_v1g197632
+Nvec_v1g197633	sig.GPCRrhod.HG12.45:NA		Nvec_v1g197633
+Nvec_vc1.1_XM_032366049.2	sig.Pkinase.HG2.25:like:Camkk1/Camkk2/Chek1/Pask/Pim1/Pim2/Pim3/Sbk1/Sbk2/Sbk3/Stk11		Nvec_v1g197647
+Nvec_vc1.1_XM_032365844.2	sig.GPCRrhod.HG19.12:NA		Nvec_v1g197819
+Nvec_v1g197843	sig.GPCRrhod.HG63.0:NA		Nvec_v1g197843
+Nvec_vc1.1_XM_048729712.1	sig.GPCRrhod.HG24.13:NA		Nvec_v1g197860
+Nvec_vc1.1_XM_032365727.2	sig.GPCRrhod.HG18.4:NA		Nvec_v1g197873
+Nvec_vc1.1_XM_032365830.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g197894
+Nvec_vc1.1_XM_001640538.3	sig.GPCRrhod.HG2.0:Brs3/Cckar/Cckbr/Ghsr/Gpr37/Gpr37l1/Gpr39/Grpr/Hcrtr1/Hcrtr2/Nmur1/Ntsr1/Ntsr2/Trhr2		Nvec_v1g197895
+Nvec_vc1.1_XM_032365912.2	Nvec_v1g197921:HG.Unclassified	""	Nvec_v1g197921
+Nvec_vc1.1_XM_001640550.3	Nvec_v1g197923:HG.Unclassified	""	Nvec_v1g197923
+Nvec_vc1.1_XM_032365919.2	Nvec_v1g197926:HG.Unclassified	""	Nvec_v1g197926
+Nvec_v1g197968	sig.GPCRrhod.HG4.17:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g197968
+Nvec_vc1.1_XM_001640257.3	sig.GPCRrhod.HG8.1:like:Fshr/Lgr4/Lgr5/Lhcgr/Tshr		Nvec_v1g197975
+Nvec_vc1.1_XM_032365561.2	sig.GPCRrhod.HG8.1:like:Fshr/Lgr4/Lgr5/Lhcgr/Tshr		Nvec_v1g197977
+Nvec_vc1.1_XM_001640264.3	sig.GPCRrhod.HG11.1:NA		Nvec_v1g197993
+Nvec_vc1.1_XM_032365659.2	sig.GPCRrhod.HG6.12:NA		Nvec_v1g197997
+Nvec_vc1.1_XM_032365607.2	sig.GPCRrhod.HG24.15:NA		Nvec_v1g198014
+Nvec_vc1.1_XM_001640400.3	sig.GPCRrhod.HG31.0:NA		Nvec_v1g198044
+Nvec_vc1.1_XM_001640117.3	sig.GPCRrhod.HG31.0:NA		Nvec_v1g198284
+Nvec_vc1.1_XM_001640117.3	sig.GPCRrhod.HG31.0:NA		Nvec_v1g198285
+Nvec_vc1.1_XM_048726292.1	sig.GPCRrhod.HG19.5:NA		Nvec_v1g198340
+Nvec_vc1.1_XM_001640242.3	sig.GPCRrhod.HG2.0:Brs3/Cckar/Cckbr/Ghsr/Gpr37/Gpr37l1/Gpr39/Grpr/Hcrtr1/Hcrtr2/Nmur1/Ntsr1/Ntsr2/Trhr2		Nvec_v1g198390
+Nvec_vc1.1_XM_001640170.3	sig.GPCRrhod.HG53.2:NA		Nvec_v1g198396
+Nvec_vc1.1_XM_001640247.3	sig.GPCRrhod.HG37.9:NA		Nvec_v1g198401
+Nvec_vc1.1_XM_048720236.1	sig.GPCRrhod.HG24.9:NA		Nvec_v1g198429
+Nvec_v1g198480	sig.GPCRrhod.HG6.0:NA		Nvec_v1g198480
+Nvec_vc1.1_XM_001639954.3	sig.GPCRrhod.HG4.0:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g198502
+Nvec_vc1.1_XM_001640051.3	sig.GPCRrhod.HG24.15:NA		Nvec_v1g198548
+Nvec_vc1.1_XM_032365143.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g198552
+Nvec_vc1.1_XM_001639845.3	sig.GPCRrhod.HG4.16:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g198600
+Nvec_vc1.1_XM_001639771.3	sig.GPCRrhod.HG37.9:NA		Nvec_v1g198607
+Nvec_vc1.1_XM_001639781.3	sig.GPCRrhod.HG6.8:NA		Nvec_v1g198624
+Nvec_vc1.1_XM_032363600.2	sig.GPCRsecr.HG2.0:like:Adgrg1/Adgrg2/Adgrg3/Adgrg4/Adgrg5/Adgrg6/Adgrg7		Nvec_v1g198777
+Nvec_vc1.1_XM_032364722.2	Nvec_v1g198868:HG.Unclassified	""	Nvec_v1g198868
+Nvec_vc1.1_XM_048728599.1	sig.GPCRrhod.HG19.6:NA		Nvec_v1g198883
+Nvec_vc1.1_XM_032364662.2	sig.GPCRglut.HG1.2:Grm1/Grm2/Grm3/Grm4/Grm5/Grm6/Grm7/Grm8		Nvec_v1g198894
+Nvec_vc1.1_XM_001639663.3	sig.GPCRrhod.HG12.13:NA		Nvec_v1g198963
+Nvec_vc1.1_XM_001628466.3	sig.GPCRrhod.HG11.1:NA		Nvec_v1g1990
+Nvec_vc1.1_XM_001639406.3	sig.GPCRrhod.HG30.29:NA		Nvec_v1g199000
+Nvec_vc1.1_XM_032364544.2	sig.GPCRrhod.HG30.29:NA		Nvec_v1g199002
+Nvec_vc1.1_XM_032364543.2	sig.GPCRrhod.HG30.29:NA		Nvec_v1g199002
+Nvec_vc1.1_XM_032364472.2	sig.GPCRrhod.HG19.3:NA		Nvec_v1g199087
+Nvec_vc1.1_XM_032364600.2	sig.GPCRrhod.HG19.3:NA		Nvec_v1g199093
+Nvec_v1g199164	sig.GPCRrhod.HG4.13:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g199164
+Nvec_vc1.1_XM_001639469.3	sig.GPCRrhod.HG18.6:NA		Nvec_v1g199170
+Nvec_v1g199202	Nvec_v1g199202:HG.Unclassified	""	Nvec_v1g199202
+Nvec_vc1.1_XM_048720473.1	Nvec_v1g199250:HG.Unclassified	""	Nvec_v1g199250
+Nvec_vc1.1_XM_032364294.2	sig.GPCRrhod.HG30.24:NA		Nvec_v1g199267
+Nvec_vc1.1_XM_001639364.3	Nvec_v1g199298:HG.Unclassified	""	Nvec_v1g199298
+Nvec_vc1.1_XM_032364377.2	sig.DSL.HG1.11:like:Dll1/Dll4/Jag1/Jag2		Nvec_v1g199329
+Nvec_vc1.1_XM_032364287.2	sig.GPCRrhod.HG6.0:NA		Nvec_v1g199377
+Nvec_vc1.1_XM_032364231.2	sig.GPCRrhod.HG63.0:NA		Nvec_v1g199416
+Nvec_vc1.1_XM_048731571.1	sig.Pkinase.HG24.4:Pink1	Pink1	Nvec_v1g199422
+Nvec_v1g199504	sig.GPCRrhod.HG19.7:NA		Nvec_v1g199504
+Nvec_vc1.1_XM_032375322.2	sig.Pkinase.HG8.4:Alk/Igf1r/Insr/Insrr/Ltk/Ros1		Nvec_v1g19953
+Nvec_vc1.1_XM_032364016.2	sig.GPCRrhod.HG12.45:NA		Nvec_v1g199560
+Nvec_vc1.1_XM_048733242.1	sig.Pkinase.HG5.0:like:Tex14;sig.TIR.HG2.4:like:Sarm1	""	Nvec_v1g199564
+Nvec_vc1.1_XM_048733564.1	sig.GPCRrhod.HG11.1:NA		Nvec_v1g199619
+Nvec_vc1.1_XM_032364039.2	sig.GPCRrhod.HG12.46:NA		Nvec_v1g199620
+Nvec_vc1.1_XM_048733417.1	sig.GPCRrhod.HG23.5:like:Opn1mw/Opn1sw/Opn3/Opn4/Opn5/Rgr/Rho/Rrh		Nvec_v1g199627
+Nvec_v1g199703	sig.GPCRrhod.HG18.1:NA		Nvec_v1g199703
+Nvec_v1g199705	sig.GPCRrhod.HG18.1:NA		Nvec_v1g199705
+Nvec_vc1.1_XM_032363814.2	sig.Patched.HG1.3:like:Npc1/Npc1l1/Ptch1/Ptch2/Ptchd1/Ptchd3/Ptchd4		Nvec_v1g199749
+Nvec_vc1.1_XM_048725834.1	sig.GPCRsecr.HG2.31:Adgrg7	Adgrg7	Nvec_v1g199785
+Nvec_vc1.1_XM_032363799.2	sig.GPCRrhod.HG31.0:NA		Nvec_v1g199844
+Nvec_vc1.1_XM_001638923.3	sig.GPCRrhod.HG31.0:NA		Nvec_v1g199846
+Nvec_vc1.1_XM_001638935.3	sig.GPCRrhod.HG12.9:NA		Nvec_v1g199875
+Nvec_vc1.1_XM_032363660.2	sig.Pkinase.HG7.0:like:Pdik1l/Pkmyt1/Stk31/Stk35/Stkld1/Wee1/Wee2		Nvec_v1g199941
+Nvec_vc1.1_XM_001638809.3	sig.GPCRrhod.HG19.5:NA		Nvec_v1g199985
+Nvec_vc1.1_XM_048730369.1	sig.Patched.HG1.4:like:Disp1/Disp3		Nvec_v1g199991
+Nvec_vc1.1_XM_032363678.2	sig.Patched.HG1.4:like:Disp1/Disp3		Nvec_v1g199992
+Nvec_vc1.1_XM_001638868.2	sig.GPCRrhod.HG18.6:NA		Nvec_v1g199997
+Nvec_vc1.1_XM_032363600.2	sig.GPCRsecr.HG2.0:like:Adgrg1/Adgrg2/Adgrg3/Adgrg4/Adgrg5/Adgrg6/Adgrg7		Nvec_v1g200012
+Nvec_v1g200208	sig.GPCRrhod.HG6.5:NA		Nvec_v1g200208
+Nvec_v1g200218	sig.GPCRrhod.HG6.4:NA		Nvec_v1g200218
+Nvec_vc1.1_XM_032363458.2	Nvec_v1g200221:HG.Unclassified	""	Nvec_v1g200221
+Nvec_vc1.1_XM_032363367.2	sig.Frizzled.HG1.17:Sfrp1/Sfrp2/Sfrp5	Sfrp1/Sfrp2/Sfrp5	Nvec_v1g200285
+Nvec_vc1.1_XM_032363224.2	Nvec_v1g200394:HG.Unclassified	""	Nvec_v1g200394
+Nvec_vc1.1_XM_048720808.1	sig.Pkinase.HG40.2:Eif2ak1	Eif2ak1	Nvec_v1g200396
+Nvec_vc1.1_XM_001638513.3	sig.GPCRrhod.HG24.0:NA		Nvec_v1g200448
+Nvec_vc1.1_XM_048734561.1	sig.GPCRrhod.HG24.0:NA		Nvec_v1g200455
+Nvec_vc1.1_XM_001638459.3	sig.GPCRrhod.HG19.3:NA		Nvec_v1g200473
+Nvec_vc1.1_XM_001638460.3	sig.GPCRrhod.HG60.0:NA		Nvec_v1g200474
+Nvec_vc1.1_XM_001638460.3	sig.GPCRrhod.HG60.0:NA		Nvec_v1g200475
+Nvec_vc1.1_XM_001638360.3	sig.GPCRrhod.HG24.0:NA		Nvec_v1g200556
+Nvec_vc1.1_XM_048734173.1	sig.GPCRrhod.HG24.0:NA		Nvec_v1g200576
+Nvec_vc1.1_XM_001638157.3	sig.Pkinase.HG18.11:Dyrk2/Dyrk3	Dyrk2/Dyrk3	Nvec_v1g200667
+Nvec_vc1.1_XM_001638224.3	sig.GPCRrhod.HG8.1:like:Fshr/Lgr4/Lgr5/Lhcgr/Tshr		Nvec_v1g200697
+Nvec_vc1.1_XM_001638232.3	sig.GPCRrhod.HG30.17:NA		Nvec_v1g200719
+Nvec_vc1.1_XM_001638174.3	sig.GPCRrhod.HG18.1:NA		Nvec_v1g200722
+Nvec_vc1.1_XM_001638192.3	sig.GPCRrhod.HG55.1:NA		Nvec_v1g200775
+Nvec_vc1.1_XM_001638097.3	sig.GPCRrhod.HG11.1:NA		Nvec_v1g200814
+Nvec_vc1.1_XM_032362704.2	sig.GPCRrhod.HG63.0:NA		Nvec_v1g200848
+Nvec_vc1.1_XM_048732478.1	sig.Pkinase.HG21.5:Amhr2/Bmpr2	Amhr2	Nvec_v1g200866
+Nvec_vc1.1_XM_048732478.1	sig.Activin_recp.HG1.1:Acvr1/Acvr2a/Acvr2b/Bmpr2	Bmpr2	Nvec_v1g200867
+Nvec_vc1.1_XM_032362643.2	sig.GPCRrhod.HG53.2:NA		Nvec_v1g200900
+Nvec_vc1.1_XM_032362667.1	sig.GPCRrhod.HG30.25:NA		Nvec_v1g200918
+Nvec_vc1.1_XM_032362733.2	sig.GPCRglut.HG1.2:Grm1/Grm2/Grm3/Grm4/Grm5/Grm6/Grm7/Grm8		Nvec_v1g200922
+Nvec_vc1.1_XM_001637992.2	Nvec_v1g200957:HG.Unclassified	""	Nvec_v1g200957
+Nvec_vc1.1_XM_001637962.3	sig.GPCRrhod.HG4.38:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g201033
+Nvec_vc1.1_XM_032362373.2	sig.GPCRglut.HG3.3:like:Casr/Gm14496/Gprc6a/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r8/Vmn2r9/Vmn2r10/Vmn2r11/Vmn2r12/Vmn2r13/Vmn2r14/Vmn2r15/Vmn2r16/Vmn2r17/Vmn2r18/Vmn2r19/Vmn2r20/Vmn2r21/Vmn2r22/Vmn2r23/Vmn2r24/Vmn2r25/Vmn2r26/Vmn2r27/Vmn2r28/Vmn2r29/Vmn2r30/Vmn2r31/Vmn2r32/Vmn2r33/Vmn2r34/Vmn2r35/Vmn2r36/Vmn2r37/Vmn2r38/Vmn2r39/Vmn2r40/Vmn2r41/Vmn2r42/Vmn2r43/Vmn2r44/Vmn2r45/Vmn2r47/Vmn2r48/Vmn2r49/Vmn2r50/Vmn2r51/Vmn2r52/Vmn2r53/Vmn2r54/Vmn2r55/Vmn2r56/Vmn2r57/Vmn2r58/Vmn2r59/Vmn2r60/Vmn2r61/Vmn2r62/Vmn2r63/Vmn2r65/Vmn2r66/Vmn2r67/Vmn2r68/Vmn2r69/Vmn2r70/Vmn2r71/Vmn2r72/Vmn2r73/Vmn2r74/Vmn2r75/Vmn2r76/Vmn2r77/Vmn2r78/Vmn2r79/Vmn2r80/Vmn2r81/Vmn2r82/Vmn2r83/Vmn2r84/Vmn2r85/Vmn2r86/Vmn2r87/Vmn2r90/Vmn2r91/Vmn2r92/Vmn2r93/Vmn2r94/Vmn2r95/Vmn2r96/Vmn2r97/Vmn2r98/Vmn2r99/Vmn2r100/Vmn2r101/Vmn2r102/Vmn2r103/Vmn2r104/Vmn2r105/Vmn2r106/Vmn2r107/Vmn2r108/Vmn2r109/Vmn2r110/Vmn2r111/Vmn2r112/Vmn2r113/Vmn2r114/Vmn2r115/Vmn2r116/Vmn2r117/Vmn2r118/Vmn2r120/Vmn2r121/Vmn2r124/Vmn2r128/Vmn2r129/Vmn2r130/Vmn2r-ps158		Nvec_v1g201150
+Nvec_vc1.1_XM_048724348.1	sig.GPCRrhod.HG18.4:NA		Nvec_v1g201161
+Nvec_vc1.1_XM_001637895.3	sig.GPCRrhod.HG11.1:NA		Nvec_v1g201170
+Nvec_vc1.1_XM_032362395.2	sig.GPCRrhod.HG63.0:NA		Nvec_v1g201201
+Nvec_vc1.1_XM_001637914.3	sig.GPCRrhod.HG6.12:NA		Nvec_v1g201216
+Nvec_vc1.1_XM_048723918.1	sig.GPCRrhod.HG18.6:NA		Nvec_v1g201223
+Nvec_vc1.1_XM_048733582.1	sig.GPCRrhod.HG6.0:NA		Nvec_v1g201266
+Nvec_v1g201314	sig.GPCRrhod.HG6.13:NA		Nvec_v1g201314
+Nvec_vc1.1_XM_001637778.2	sig.GPCRrhod.HG12.35:NA		Nvec_v1g201359
+Nvec_vc1.1_XM_032362262.2	sig.GPCRrhod.HG12.35:NA		Nvec_v1g201371
+Nvec_vc1.1_XM_048727815.1	sig.GPCRrhod.HG12.35:NA		Nvec_v1g201372
+Nvec_vc1.1_XM_001637786.3	sig.GPCRglut.HG1.2:Grm1/Grm2/Grm3/Grm4/Grm5/Grm6/Grm7/Grm8		Nvec_v1g201378
+Nvec_vc1.1_XM_048727846.1	sig.GPCRrhod.HG6.0:NA		Nvec_v1g201439
+Nvec_vc1.1_XM_032362171.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g201440
+Nvec_vc1.1_XM_001637643.3	sig.GPCRrhod.HG11.1:NA		Nvec_v1g201441
+Nvec_vc1.1_XM_001637572.3	sig.GPCRrhod.HG30.10:NA		Nvec_v1g201446
+Nvec_vc1.1_XM_001637467.3	sig.GPCRrhod.HG4.10:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g201540
+Nvec_v1g201567	sig.GPCRrhod.HG11.1:NA		Nvec_v1g201567
+Nvec_vc1.1_XM_032361962.2	sig.GPCRrhod.HG4.15:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g201583
+Nvec_vc1.1_XM_001637432.3	Nvec_v1g201795:HG.Unclassified	""	Nvec_v1g201795
+Nvec_vc1.1_XM_032361914.2	sig.GPCRrhod.HG31.0:NA		Nvec_v1g201828
+Nvec_vc1.1_XM_001637361.3	sig.GPCRrhod.HG31.0:NA		Nvec_v1g201829
+Nvec_vc1.1_XM_032387383.2	sig.GPCRsecr.HG1.16:like:Adgrd1/Adgre1/Adgre4/Adgre5/Adgrl1/Adgrl2/Adgrl3/Adgrl4		Nvec_v1g201898
+Nvec_vc1.1_XM_001637228.3	sig.GPCRrhod.HG2.4:Ffar4/Gpr19	Ffar4	Nvec_v1g201906
+Nvec_vc1.1_XM_001637284.3	sig.GPCRrhod.HG18.6:NA		Nvec_v1g201932
+Nvec_vc1.1_XM_001637287.3	sig.GPCRrhod.HG18.6:NA		Nvec_v1g201934
+Nvec_vc1.1_XM_001637284.3	sig.GPCRrhod.HG18.6:NA		Nvec_v1g201935
+Nvec_vc1.1_XM_001637287.3	sig.GPCRrhod.HG18.6:NA		Nvec_v1g201937
+Nvec_vc1.1_XM_001637246.3	sig.GPCRrhod.HG23.0:like:Opn1mw/Opn1sw/Opn3/Opn4/Opn5/Rgr/Rho/Rrh		Nvec_v1g201968
+Nvec_vc1.1_XM_032387169.2	sig.GPCRrhod.HG12.4:NA		Nvec_v1g202043
+Nvec_vc1.1_XM_032387219.2	sig.GPCRrhod.HG30.7:NA		Nvec_v1g202069
+Nvec_v1g202074	sig.GPCRrhod.HG6.1:NA		Nvec_v1g202074
+Nvec_v1g202152	sig.GPCRrhod.HG53.2:NA		Nvec_v1g202152
+Nvec_vc1.1_XM_048725725.1	sig.GPCRrhod.HG12.29:NA		Nvec_v1g202155
+Nvec_vc1.1_XM_032387090.2	sig.Pkinase.HG9.9:Prkci/Prkcz	Prkci/Prkcz	Nvec_v1g202173
+Nvec_vc1.1_XM_001637022.3	sig.GPCRrhod.HG24.0:NA		Nvec_v1g202179
+Nvec_vc1.1_XM_032387072.2	sig.GPCRrhod.HG18.3:NA		Nvec_v1g202235
+Nvec_vc1.1_XM_048724881.1	sig.GPCRrhod.HG4.42:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g202273
+Nvec_vc1.1_XM_001636911.3	sig.GPCRrhod.HG37.7:NA		Nvec_v1g202340
+Nvec_v1g202551	sig.GPCRrhod.HG18.1:NA		Nvec_v1g202551
+Nvec_v1g202552	sig.GPCRrhod.HG18.1:NA		Nvec_v1g202552
+Nvec_v1g202553	sig.GPCRrhod.HG18.1:NA		Nvec_v1g202553
+Nvec_v1g202554	sig.GPCRrhod.HG18.1:NA		Nvec_v1g202554
+Nvec_vc1.1_XM_001636687.3	sig.Frizzled.HG1.38:Gpr157;sig.GPCRsecr.HG4.0:Gpr157	""	Nvec_v1g202568
+Nvec_vc1.1_XM_032386608.2	sig.GPCRrhod.HG6.0:NA		Nvec_v1g202571
+Nvec_vc1.1_XM_032386442.2	sig.GPCRrhod.HG6.5:NA		Nvec_v1g202669
+Nvec_vc1.1_XM_032386376.2	sig.GPCRrhod.HG23.0:like:Opn1mw/Opn1sw/Opn3/Opn4/Opn5/Rgr/Rho/Rrh		Nvec_v1g202741
+Nvec_vc1.1_XM_001636591.3	Nvec_v1g202749:HG.Unclassified	""	Nvec_v1g202749
+Nvec_vc1.1_XM_048724378.1	sig.Ldl_recept_b.HG1.5:like:Egf/Gm19410/Ldlr/Lrp1/Lrp1b/Lrp2/Lrp4/Lrp5/Lrp6/Lrp8/Nid1/Nid2/Sorl1/Vldlr		Nvec_v1g2028
+Nvec_vc1.1_XM_048733881.1	sig.GPCRrhod.HG4.36:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g202811
+Nvec_vc1.1_XM_001636438.3	sig.GPCRrhod.HG12.45:NA		Nvec_v1g202834
+Nvec_vc1.1_XM_032386323.2	sig.GPCRrhod.HG12.32:NA		Nvec_v1g202862
+Nvec_vc1.1_XM_032386272.2	sig.GPCRrhod.HG18.0:NA		Nvec_v1g202891
+Nvec_vc1.1_XM_001636466.3	sig.GPCRrhod.HG11.1:NA		Nvec_v1g202896
+Nvec_vc1.1_XM_048733157.1	sig.Pkinase.HG43.1:like:Stk16		Nvec_v1g202901
+Nvec_v1g202954	Nvec_v1g202954:HG.Unclassified	""	Nvec_v1g202954
+Nvec_vc1.1_XM_032386113.2	sig.GPCRrhod.HG6.12:NA		Nvec_v1g202978
+Nvec_vc1.1_XM_032386114.2	sig.GPCRrhod.HG6.12:NA		Nvec_v1g202979
+Nvec_vc1.1_XM_001636347.3	Nvec_v1g202986:HG.Unclassified	""	Nvec_v1g202986
+Nvec_vc1.1_XM_032386178.2	Nvec_v1g202987:HG.Unclassified	""	Nvec_v1g202987
+Nvec_vc1.1_XM_048727253.1	sig.GPCRrhod.HG18.6:NA		Nvec_v1g203014
+Nvec_vc1.1_XM_032386100.2	sig.GPCRrhod.HG8.1:like:Fshr/Lgr4/Lgr5/Lhcgr/Tshr		Nvec_v1g203016
+Nvec_v1g203117	sig.GPCRrhod.HG18.6:NA		Nvec_v1g203117
+Nvec_vc1.1_XM_001625101.3	sig.GPCRrhod.HG18.1:NA		Nvec_v1g203149
+Nvec_vc1.1_XM_032385978.2	sig.GPCRrhod.HG37.9:NA		Nvec_v1g203180
+Nvec_vc1.1_XM_001636060.3	sig.GPCRrhod.HG11.1:NA		Nvec_v1g203367
+Nvec_vc1.1_XM_001635915.3	sig.GPCRrhod.HG37.9:NA		Nvec_v1g203459
+Nvec_vc1.1_XM_048731898.1	sig.GPCRrhod.HG6.17:NA		Nvec_v1g203460
+Nvec_vc1.1_XM_001635929.3	sig.GPCRrhod.HG30.12:NA		Nvec_v1g203495
+Nvec_vc1.1_XM_001635933.3	sig.GPCRrhod.HG6.3:NA		Nvec_v1g203500
+Nvec_v1g203549	sig.GPCRrhod.HG60.0:NA		Nvec_v1g203549
+Nvec_vc1.1_XM_032385491.2	sig.GPCRrhod.HG12.45:NA		Nvec_v1g203585
+Nvec_vc1.1_XM_001635853.3	sig.GPCRrhod.HG6.0:NA		Nvec_v1g203591
+Nvec_vc1.1_XM_001626408.3	sig.GPCRrhod.HG18.6:NA		Nvec_v1g203618
+Nvec_vc1.1_XM_001635829.2	sig.GPCRrhod.HG63.0:NA		Nvec_v1g203680
+Nvec_vc1.1_XM_048723036.1	sig.GPCRrhod.HG18.6:NA		Nvec_v1g203737
+Nvec_v1g203745	sig.GPCRrhod.HG6.12:NA		Nvec_v1g203745
+Nvec_vc1.1_XM_001635753.3	sig.GPCRrhod.HG6.1:NA		Nvec_v1g203786
+Nvec_vc1.1_XM_001635715.3	sig.GPCRrhod.HG30.27:NA		Nvec_v1g203791
+Nvec_v1g203795	sig.GPCRrhod.HG4.34:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g203795
+Nvec_vc1.1_XM_001635569.3	sig.GPCRrhod.HG18.2:NA		Nvec_v1g203822
+Nvec_v1g203910	sig.GPCRrhod.HG24.15:NA		Nvec_v1g203910
+Nvec_v1g203919	sig.Pkinase.HG20.12:like:Gucy2c/Npr1/Npr2		Nvec_v1g203919
+Nvec_vc1.1_XM_032385176.2	sig.TIR.HG1.4:Il1r1/Il1rap/Il1rapl1/Il1rapl2/Il1rl1/Il1rl2/Il18r1/Il18rap/Sigirr/Tlr1/Tlr2/Tlr3/Tlr4/Tlr6/Tlr7/Tlr8/Tlr9/Tlr11/Tlr12/Tlr13		Nvec_v1g204009
+Nvec_v1g204031	sig.GPCRrhod.HG53.2:NA		Nvec_v1g204031
+Nvec_vc1.1_XM_001635485.3	sig.GPCRrhod.HG11.1:NA		Nvec_v1g204037
+Nvec_vc1.1_XM_048732752.1	Nvec_v1g204048:HG.Unclassified	""	Nvec_v1g204048
+Nvec_vc1.1_XM_032385170.2	Nvec_v1g204049:HG.Unclassified	""	Nvec_v1g204049
+Nvec_vc1.1_XM_048733002.1	Nvec_v1g204050:HG.Unclassified	""	Nvec_v1g204050
+Nvec_v1g204107	sig.GPCRrhod.HG4.32:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g204107
+Nvec_vc1.1_XM_032384971.2	sig.GPCRrhod.HG8.1:like:Fshr/Lgr4/Lgr5/Lhcgr/Tshr		Nvec_v1g204108
+Nvec_vc1.1_XM_032384974.2	sig.GPCRrhod.HG8.1:like:Fshr/Lgr4/Lgr5/Lhcgr/Tshr		Nvec_v1g204109
+Nvec_vc1.1_XM_001635377.3	sig.GPCRrhod.HG30.26:NA		Nvec_v1g204115
+Nvec_vc1.1_XM_032385032.2	sig.GPCRrhod.HG24.0:NA		Nvec_v1g204117
+Nvec_vc1.1_XM_048727926.1	Nvec_v1g204194:HG.Unclassified	""	Nvec_v1g204194
+Nvec_vc1.1_XM_048727926.1	Nvec_v1g204195:HG.Unclassified	""	Nvec_v1g204195
+Nvec_v1g204223	sig.GPCRrhod.HG53.0:NA		Nvec_v1g204223
+Nvec_vc1.1_XM_032384861.2	sig.Pkinase.HG7.17:like:Stkld1		Nvec_v1g204287
+Nvec_vc1.1_XM_001635354.3	sig.GPCRrhod.HG53.2:NA		Nvec_v1g204292
+Nvec_vc1.1_XM_048731373.1	sig.GPCRrhod.HG53.2:NA		Nvec_v1g204296
+Nvec_vc1.1_XM_048729525.1	sig.Pkinase.HG2.25:like:Camkk1/Camkk2/Chek1/Pask/Pim1/Pim2/Pim3/Sbk1/Sbk2/Sbk3/Stk11		Nvec_v1g204344
+Nvec_vc1.1_XM_001635196.3	sig.GPCRrhod.HG18.3:NA		Nvec_v1g204351
+Nvec_vc1.1_XM_032384851.2	sig.GPCRrhod.HG19.5:NA		Nvec_v1g204373
+Nvec_vc1.1_XM_048729296.1	sig.GPCRrhod.HG8.3:Fshr/Lgr4/Lgr5/Lhcgr/Tshr	Lgr4/Lgr5	Nvec_v1g204412
+Nvec_vc1.1_XM_001635087.3	sig.GPCRrhod.HG2.0:Brs3/Cckar/Cckbr/Ghsr/Gpr37/Gpr37l1/Gpr39/Grpr/Hcrtr1/Hcrtr2/Nmur1/Ntsr1/Ntsr2/Trhr2		Nvec_v1g204419
+Nvec_vc1.1_XM_001635167.3	sig.GPCRglut.HG1.2:Grm1/Grm2/Grm3/Grm4/Grm5/Grm6/Grm7/Grm8		Nvec_v1g204466
+Nvec_vc1.1_XM_032384640.2	sig.GPCRrhod.HG6.5:NA		Nvec_v1g204469
+Nvec_vc1.1_XM_001635117.3	sig.GPCRrhod.HG37.9:NA		Nvec_v1g204471
+Nvec_vc1.1_XM_048728616.1	sig.GPCRrhod.HG12.14:NA		Nvec_v1g204506
+Nvec_vc1.1_XM_001635141.2	sig.GPCRrhod.HG12.33:NA		Nvec_v1g204519
+Nvec_vc1.1_XM_032384559.2	sig.GPCRrhod.HG12.37:NA		Nvec_v1g204582
+Nvec_vc1.1_XM_001635061.3	sig.GPCRrhod.HG11.1:NA		Nvec_v1g204597
+Nvec_vc1.1_XM_048724302.1	sig.GPCRrhod.HG55.0:NA		Nvec_v1g204782
+Nvec_vc1.1_XM_032384307.2	sig.GPCRsecr.HG1.11:like:Adgrd1		Nvec_v1g204814
+Nvec_vc1.1_XM_048734693.1	sig.GPCRrhod.HG53.2:NA		Nvec_v1g204889
+Nvec_vc1.1_XM_032384197.2	sig.GPCRrhod.HG53.2:NA		Nvec_v1g204904
+Nvec_vc1.1_XM_048728906.1	sig.GPCRglut.HG1.2:Grm1/Grm2/Grm3/Grm4/Grm5/Grm6/Grm7/Grm8		Nvec_v1g204939
+Nvec_vc1.1_XM_001634785.3	Nvec_v1g204979:HG.Unclassified	""	Nvec_v1g204979
+Nvec_vc1.1_XM_032384225.2	sig.GPCRrhod.HG6.5:NA		Nvec_v1g204980
+Nvec_vc1.1_XM_001634624.3	sig.GPCRrhod.HG6.12:NA		Nvec_v1g205072
+Nvec_vc1.1_XM_032384003.2	sig.Pkinase.HG25.3:like:Map3k8/Map3k14		Nvec_v1g205193
+Nvec_vc1.1_XM_001634549.3	sig.Pkinase.HG44.2:Wnk1/Wnk2/Wnk3/Wnk4	Wnk1/Wnk2/Wnk3/Wnk4	Nvec_v1g205199
+Nvec_vc1.1_XM_001634592.3	Nvec_v1g205205:HG.Unclassified	""	Nvec_v1g205205
+Nvec_vc1.1_XM_032384065.2	sig.GPCRrhod.HG4.7:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g205216
+Nvec_vc1.1_XM_001634565.3	sig.GPCRrhod.HG11.1:NA		Nvec_v1g205230
+Nvec_vc1.1_XM_048731890.1	sig.GPCRrhod.HG11.1:NA		Nvec_v1g205246
+Nvec_vc1.1_XM_001634438.3	sig.GPCRrhod.HG37.9:NA		Nvec_v1g205268
+Nvec_vc1.1_XM_032383911.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g205278
+Nvec_vc1.1_XM_048724224.1	sig.Pkinase.HG36.5:like:Kalrn/Trio		Nvec_v1g205307
+Nvec_v1g205366	sig.GPCRrhod.HG60.0:NA		Nvec_v1g205366
+Nvec_v1g205445	sig.GPCRrhod.HG53.0:NA		Nvec_v1g205445
+Nvec_vc1.1_XM_001634372.3	sig.GPCRrhod.HG18.6:NA		Nvec_v1g205446
+Nvec_vc1.1_XM_032383779.2	sig.GPCRrhod.HG60.0:NA		Nvec_v1g205452
+Nvec_vc1.1_XM_001634428.3	sig.GPCRrhod.HG12.38:NA		Nvec_v1g205458
+Nvec_vc1.1_XM_032383759.2	sig.GPCRrhod.HG6.5:NA		Nvec_v1g205500
+Nvec_v1g205501	sig.GPCRrhod.HG6.5:NA		Nvec_v1g205501
+Nvec_vc1.1_XM_032383589.2	sig.GPCRrhod.HG116.0:NA		Nvec_v1g205619
+Nvec_vc1.1_XM_001634021.3	Nvec_v1g205794:HG.Unclassified	""	Nvec_v1g205794
+Nvec_vc1.1_XM_001634043.3	sig.GPCRrhod.HG19.5:NA		Nvec_v1g205839
+Nvec_vc1.1_XM_048721949.1	Nvec_v1g205877:HG.Unclassified	""	Nvec_v1g205877
+Nvec_vc1.1_XM_048721977.1	sig.Pkinase.HG6.0:NA		Nvec_v1g205907
+Nvec_vc1.1_XM_001633961.2	sig.GPCRrhod.HG19.10:NA		Nvec_v1g205918
+Nvec_vc1.1_XM_032383357.2	Nvec_v1g205945:HG.Unclassified	""	Nvec_v1g205945
+Nvec_vc1.1_XM_032383198.2	sig.GPCRrhod.HG18.13:NA		Nvec_v1g206090
+Nvec_vc1.1_XM_001633854.3	sig.GPCRglut.HG2.13:Gabbr1/Gabbr2		Nvec_v1g206093
+Nvec_vc1.1_XM_032383130.2	sig.GPCRsecr.HG3.0:NA		Nvec_v1g206150
+Nvec_v1g206225	sig.GPCRrhod.HG6.0:NA		Nvec_v1g206225
+Nvec_vc1.1_XM_001633746.3	Nvec_v1g206236:HG.Unclassified	""	Nvec_v1g206236
+Nvec_vc1.1_XM_032382963.2	sig.Pkinase.HG46.3:NA		Nvec_v1g206293
+Nvec_vc1.1_XM_001633669.3	sig.GPCRrhod.HG11.1:NA		Nvec_v1g206354
+Nvec_vc1.1_XM_032382931.2	Nvec_v1g206397:HG.Unclassified	""	Nvec_v1g206397
+Nvec_vc1.1_XM_032382909.2	Nvec_v1g206433:HG.Unclassified	""	Nvec_v1g206433
+Nvec_vc1.1_XM_001633484.3	sig.LAG1-DNAbind.HG1.0:Rbpj/Rbpjl	Rbpj/Rbpjl	Nvec_v1g206550
+Nvec_vc1.1_XM_001633451.3	sig.GPCRrhod.HG24.0:NA		Nvec_v1g206573
+Nvec_v1g206575	sig.GPCRrhod.HG18.1:NA		Nvec_v1g206575
+Nvec_vc1.1_XM_048725233.1	sig.GPCRrhod.HG2.4:Ffar4/Gpr19		Nvec_v1g206578
+Nvec_v1g206594	sig.GPCRrhod.HG23.1:Opn1mw/Opn1sw/Opn3/Opn5/Rgr/Rho/Rrh		Nvec_v1g206594
+Nvec_vc1.1_XM_001633507.3	sig.GPCRrhod.HG11.1:NA		Nvec_v1g206604
+Nvec_vc1.1_XM_048727524.1	sig.GPCRrhod.HG6.0:NA		Nvec_v1g206698
+Nvec_vc1.1_XM_032382624.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g206732
+Nvec_vc1.1_XM_032382589.2	sig.Fringe.HG1.4:B3glct	B3glct	Nvec_v1g206765
+Nvec_v1g206787	sig.GPCRrhod.HG6.0:NA		Nvec_v1g206787
+Nvec_vc1.1_XM_001633285.3	Nvec_v1g206860:HG.Unclassified	""	Nvec_v1g206860
+Nvec_vc1.1_XM_001633142.2	sig.GPCRrhod.HG19.3:NA		Nvec_v1g206920
+Nvec_v1g206957	sig.GPCRrhod.HG12.36:NA		Nvec_v1g206957
+Nvec_v1g206959	sig.GPCRrhod.HG12.36:NA		Nvec_v1g206959
+Nvec_vc1.1_XM_048726307.1	sig.GPCRrhod.HG6.0:NA		Nvec_v1g206985
+Nvec_vc1.1_XM_032370615.2	sig.GPCRrhod.HG30.32:NA		Nvec_v1g206986
+Nvec_vc1.1_XM_001633174.3	sig.GPCRrhod.HG12.32:NA		Nvec_v1g207006
+Nvec_vc1.1_XM_001633097.3	Nvec_v1g207019:HG.Unclassified	""	Nvec_v1g207019
+Nvec_vc1.1_XM_032382215.2	Nvec_v1g207168:HG.Unclassified	""	Nvec_v1g207168
+Nvec_vc1.1_XM_048725489.1	sig.GPCRrhod.HG4.25:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g207190
+Nvec_vc1.1_XM_001632977.3	sig.GPCRrhod.HG11.1:NA		Nvec_v1g207254
+Nvec_vc1.1_XM_001632908.3	sig.GPCRrhod.HG11.1:NA		Nvec_v1g207324
+Nvec_vc1.1_XM_048733315.1	sig.GPCRrhod.HG60.0:NA		Nvec_v1g207414
+Nvec_vc1.1_XM_032381971.2	sig.GPCRrhod.HG53.2:NA		Nvec_v1g207468
+Nvec_vc1.1_XM_032381852.2	sig.GPCRrhod.HG19.5:NA		Nvec_v1g207495
+Nvec_vc1.1_XM_048722719.1	sig.GPCRrhod.HG30.28:NA		Nvec_v1g207526
+Nvec_vc1.1_XM_032381826.2	sig.GPCRrhod.HG30.40:NA		Nvec_v1g207545
+Nvec_vc1.1_XM_001632658.3	Nvec_v1g207630:HG.Unclassified	""	Nvec_v1g207630
+Nvec_vc1.1_XM_001632603.3	sig.GPCRrhod.HG30.19:NA		Nvec_v1g207741
+Nvec_vc1.1_XM_001632603.3	sig.GPCRrhod.HG30.19:NA		Nvec_v1g207742
+Nvec_vc1.1_XM_001632434.3	sig.Pkinase.HG17.6:Mapkapk2/Mapkapk3	Mapkapk2/Mapkapk3	Nvec_v1g207834
+Nvec_vc1.1_XM_001632476.3	sig.GPCRrhod.HG4.28:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g207843
+Nvec_vc1.1_XM_032381551.2	sig.GPCRrhod.HG6.14:NA		Nvec_v1g207844
+Nvec_vc1.1_XM_032381543.2	sig.GPCRrhod.HG30.2:NA		Nvec_v1g207873
+Nvec_vc1.1_XM_032381603.2	sig.GPCRrhod.HG53.2:NA		Nvec_v1g207906
+Nvec_vc1.1_XM_001632391.3	sig.GPCRrhod.HG6.5:NA		Nvec_v1g207938
+Nvec_vc1.1_XM_048725619.1	sig.GPCRrhod.HG53.2:NA		Nvec_v1g207940
+Nvec_vc1.1_XM_032381369.2	sig.GPCRrhod.HG4.2:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g207994
+Nvec_v1g208057	sig.GPCRrhod.HG18.6:NA		Nvec_v1g208057
+Nvec_vc1.1_XM_001621656.3	sig.FGF.HG1.4:like:Fgf8/Fgf17/Fgf18		Nvec_v1g208072
+Nvec_v1g208078	sig.GPCRrhod.HG18.1:NA		Nvec_v1g208078
+Nvec_vc1.1_XM_001632158.3	sig.GPCRrhod.HG2.4:Ffar4/Gpr19	Ffar4	Nvec_v1g208149
+Nvec_vc1.1_XM_001632168.3	sig.GPCRrhod.HG6.12:NA		Nvec_v1g208176
+Nvec_vc1.1_XM_048734489.1	sig.GPCRrhod.HG18.1:NA		Nvec_v1g208235
+Nvec_vc1.1_XM_048734489.1	sig.Frizzled.HG1.28:Smo	Smo	Nvec_v1g208236
+Nvec_vc1.1_XM_032381136.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g208268
+Nvec_vc1.1_XM_032381087.2	sig.GPCRrhod.HG6.12:NA		Nvec_v1g208358
+Nvec_vc1.1_XM_032381085.2	sig.GPCRrhod.HG6.12:NA		Nvec_v1g208358
+Nvec_v1g208444	sig.GPCRrhod.HG53.0:NA		Nvec_v1g208444
+Nvec_vc1.1_XM_001619925.3	sig.GPCRrhod.HG23.0:like:Opn1mw/Opn1sw/Opn3/Opn4/Opn5/Rgr/Rho/Rrh		Nvec_v1g208454
+Nvec_vc1.1_XM_001632026.3	sig.GPCRrhod.HG4.21:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g208482
+Nvec_vc1.1_XM_048732129.1	sig.GPCRrhod.HG4.21:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g208482
+Nvec_vc1.1_XM_032380866.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g208509
+Nvec_vc1.1_XM_001631928.3	sig.GPCRrhod.HG24.0:NA		Nvec_v1g208522
+Nvec_vc1.1_XM_032380940.2	sig.GPCRrhod.HG12.30:NA		Nvec_v1g208532
+Nvec_vc1.1_XM_048726419.1	sig.GPCRrhod.HG12.30:NA		Nvec_v1g208532
+Nvec_vc1.1_XM_032380707.2	sig.GPCRrhod.HG19.5:NA		Nvec_v1g208724
+Nvec_vc1.1_XM_048722320.1	Nvec_v1g208740:HG.Unclassified	""	Nvec_v1g208740
+Nvec_vc1.1_XM_048721035.1	sig.GPCRrhod.HG23.6:like:Opn1mw/Opn1sw/Opn3/Opn4/Opn5/Rgr/Rho/Rrh		Nvec_v1g208768
+Nvec_vc1.1_XM_048725606.1	sig.GPCRrhod.HG6.12:NA		Nvec_v1g208871
+Nvec_vc1.1_XM_032380524.2	sig.Pkinase.HG52.0:Pik3r4	Pik3r4	Nvec_v1g208907
+Nvec_vc1.1_XM_032387343.2	sig.Pkinase.HG18.7:Dyrk1a/Dyrk1b	Dyrk1a/Dyrk1b	Nvec_v1g20898
+Nvec_vc1.1_XM_001631511.3	sig.GPCRrhod.HG12.22:NA		Nvec_v1g209028
+Nvec_v1g209044	sig.GPCRrhod.HG6.0:NA		Nvec_v1g209044
+Nvec_vc1.1_XM_048729009.1	sig.GPCRrhod.HG60.0:NA		Nvec_v1g209052
+Nvec_vc1.1_XM_048729009.1	sig.GPCRrhod.HG60.0:NA		Nvec_v1g209053
+Nvec_vc1.1_XM_001631417.3	sig.GPCRrhod.HG2.4:Ffar4/Gpr19	Ffar4	Nvec_v1g209131
+Nvec_vc1.1_XM_032380198.2	sig.Pkinase.HG11.11:Cask	Cask	Nvec_v1g209174
+Nvec_vc1.1_XM_048732590.1	Nvec_v1g209217:HG.Unclassified	""	Nvec_v1g209217
+Nvec_v1g209220	sig.GPCRrhod.HG60.0:NA		Nvec_v1g209220
+Nvec_vc1.1_XM_048731995.1	sig.GPCRrhod.HG24.0:NA		Nvec_v1g209222
+Nvec_vc1.1_XM_001628985.3	sig.Patched.HG1.8:like:Npc1/Npc1l1/Ptch1/Ptch2		Nvec_v1g209409
+Nvec_v1g209416	sig.Patched.HG1.8:like:Npc1/Npc1l1/Ptch1/Ptch2		Nvec_v1g209416
+Nvec_vc1.1_XM_032379961.2	sig.GPCRrhod.HG4.31:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g209463
+Nvec_vc1.1_XM_001631174.3	sig.GPCRrhod.HG4.31:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g209464
+Nvec_vc1.1_XM_001631145.3	sig.GPCRrhod.HG4.31:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g209465
+Nvec_vc1.1_XM_032379913.2	sig.GPCRrhod.HG19.3:NA		Nvec_v1g209497
+Nvec_vc1.1_XM_032379875.2	sig.GPCRrhod.HG30.38:NA		Nvec_v1g209522
+Nvec_v1g209532	sig.GPCRrhod.HG18.6:NA		Nvec_v1g209532
+Nvec_vc1.1_XM_048730689.1	sig.GPCRrhod.HG4.21:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g209538
+Nvec_vc1.1_XM_001631052.3	sig.GPCRrhod.HG37.9:NA		Nvec_v1g209601
+Nvec_vc1.1_XM_048719434.1	sig.GPCRrhod.HG37.9:NA		Nvec_v1g209601
+Nvec_vc1.1_XM_048733773.1	sig.GPCRrhod.HG24.5:NA		Nvec_v1g209644
+Nvec_vc1.1_XM_048733775.1	sig.GPCRrhod.HG6.13:NA		Nvec_v1g209645
+Nvec_vc1.1_XM_032379755.2	sig.GPCRrhod.HG6.13:NA		Nvec_v1g209646
+Nvec_vc1.1_XM_032379729.2	sig.GPCRrhod.HG6.4:NA		Nvec_v1g209698
+Nvec_vc1.1_XM_048722710.1	sig.GPCRsecr.HG1.25:like:Adgrd1		Nvec_v1g20971
+Nvec_vc1.1_XM_032379711.2	sig.GPCRrhod.HG6.5:NA		Nvec_v1g209719
+Nvec_v1g209734	sig.GPCRrhod.HG6.0:NA		Nvec_v1g209734
+Nvec_vc1.1_XM_032379639.2	Nvec_v1g209780:HG.Unclassified	""	Nvec_v1g209780
+Nvec_v1g209782	sig.GPCRrhod.HG24.0:NA		Nvec_v1g209782
+Nvec_vc1.1_XM_001630811.3	sig.GPCRrhod.HG37.9:NA		Nvec_v1g209900
+Nvec_vc1.1_XM_001630797.3	sig.GPCRrhod.HG11.1:NA		Nvec_v1g209920
+Nvec_v1g209980	sig.GPCRrhod.HG18.1:NA		Nvec_v1g209980
+Nvec_vc1.1_XM_048722097.1	Nvec_v1g210002:HG.Unclassified	""	Nvec_v1g210002
+Nvec_vc1.1_XM_048721304.1	sig.GPCRrhod.HG63.0:NA		Nvec_v1g210024
+Nvec_vc1.1_XM_001630634.3	sig.GPCRrhod.HG12.43:NA		Nvec_v1g210058
+Nvec_vc1.1_XM_001630664.3	sig.GPCRrhod.HG30.3:NA		Nvec_v1g210067
+Nvec_vc1.1_XM_048733393.1	sig.wnt.HG1.11:Wnt7a/Wnt7b	Wnt7a/Wnt7b	Nvec_v1g210076
+Nvec_vc1.1_XM_048720214.1	sig.GPCRrhod.HG24.16:NA		Nvec_v1g210193
+Nvec_vc1.1_XM_048722807.1	sig.GPCRrhod.HG19.5:NA		Nvec_v1g210358
+Nvec_vc1.1_XM_048732359.1	sig.GPCRrhod.HG24.0:NA		Nvec_v1g210432
+Nvec_vc1.1_XM_032378982.2	sig.GPCRsecr.HG3.0:NA		Nvec_v1g210434
+Nvec_vc1.1_XM_001630403.3	Nvec_v1g210444:HG.Unclassified	""	Nvec_v1g210444
+Nvec_vc1.1_XM_032378963.1	sig.GPCRglut.HG2.13:Gabbr1/Gabbr2		Nvec_v1g210465
+Nvec_vc1.1_XM_001630355.3	Nvec_v1g210479:HG.Unclassified	""	Nvec_v1g210479
+Nvec_vc1.1_XM_048721600.1	sig.GPCRglut.HG2.1:like:Gabbr1/Gabbr2/Gpr156		Nvec_v1g210496
+Nvec_vc1.1_XM_048722613.1	sig.GPCRrhod.HG12.12:NA		Nvec_v1g210501
+Nvec_vc1.1_XM_048722785.1	sig.GPCRrhod.HG37.9:NA		Nvec_v1g210510
+Nvec_vc1.1_XM_001630319.3	sig.GPCRrhod.HG37.9:NA		Nvec_v1g210535
+Nvec_vc1.1_XM_001634759.3	sig.GPCRglut.HG1.2:Grm1/Grm2/Grm3/Grm4/Grm5/Grm6/Grm7/Grm8		Nvec_v1g21060
+Nvec_vc1.1_XM_001630223.2	sig.GPCRrhod.HG18.1:NA		Nvec_v1g210664
+Nvec_vc1.1_XM_032378704.2	sig.GPCRrhod.HG18.6:NA		Nvec_v1g210665
+Nvec_vc1.1_XM_001630180.3	sig.Pkinase.HG7.0:like:Pdik1l/Pkmyt1/Stk31/Stk35/Stkld1/Wee1/Wee2		Nvec_v1g210715
+Nvec_vc1.1_XM_001630148.3	sig.Pkinase.HG11.10:like:Camk2a/Camk2b/Camk2d/Camk2g/Cask		Nvec_v1g210728
+Nvec_vc1.1_XM_048733117.1	sig.Pkinase.HG1.14:like:Styk1		Nvec_v1g210816
+Nvec_vc1.1_XM_001629965.3	sig.Pkinase.HG2.18:Tssk1/Tssk2/Tssk3/Tssk4/Tssk6	Tssk4	Nvec_v1g210880
+Nvec_vc1.1_XM_032378457.2	sig.GPCRrhod.HG12.45:NA		Nvec_v1g210893
+Nvec_v1g210928	sig.GPCRrhod.HG18.6:NA		Nvec_v1g210928
+Nvec_vc1.1_XM_032377918.2	sig.Pkinase.HG13.14:Map3k12/Map3k13	Map3k12/Map3k13	Nvec_v1g211073
+Nvec_vc1.1_XM_032378234.2	sig.GPCRrhod.HG19.11:NA		Nvec_v1g211188
+Nvec_vc1.1_XM_048726159.1	sig.GPCRrhod.HG11.1:NA		Nvec_v1g211276
+Nvec_v1g211303	sig.GPCRrhod.HG60.0:NA		Nvec_v1g211303
+Nvec_vc1.1_XM_048726022.1	sig.GPCRrhod.HG6.11:NA		Nvec_v1g211310
+Nvec_vc1.1_XM_001629660.3	Nvec_v1g211315:HG.Unclassified	""	Nvec_v1g211315
+Nvec_vc1.1_XM_001629642.3	sig.GPCRrhod.HG6.5:NA		Nvec_v1g211327
+Nvec_vc1.1_XM_032378016.2	sig.GPCRrhod.HG19.4:NA		Nvec_v1g211420
+Nvec_vc1.1_XM_001629569.3	Nvec_v1g211467:HG.Unclassified	""	Nvec_v1g211467
+Nvec_vc1.1_XM_048725519.1	sig.GPCRrhod.HG37.9:NA		Nvec_v1g211484
+Nvec_vc1.1_XM_032377838.2	sig.GPCRsecr.HG3.0:NA		Nvec_v1g211490
+Nvec_vc1.1_XM_048725203.1	sig.GPCRrhod.HG24.0:NA		Nvec_v1g211528
+Nvec_vc1.1_XM_001629400.3	sig.wnt.HG1.0:Wnt10a/Wnt10b	Wnt10a/Wnt10b	Nvec_v1g211618
+Nvec_vc1.1_XM_032377764.2	sig.GPCRrhod.HG63.0:NA		Nvec_v1g211651
+Nvec_vc1.1_XM_032377662.2	sig.GPCRrhod.HG12.45:NA		Nvec_v1g211693
+Nvec_vc1.1_XM_032377720.2	sig.GPCRrhod.HG6.0:NA		Nvec_v1g211719
+Nvec_vc1.1_XM_048728566.1	sig.GPCRsecr.HG1.11:like:Adgrd1		Nvec_v1g211769
+Nvec_vc1.1_XM_048734232.1	sig.GPCRsecr.HG1.11:like:Adgrd1		Nvec_v1g211772
+Nvec_vc1.1_XM_048734232.1	sig.GPCRsecr.HG1.11:like:Adgrd1		Nvec_v1g211774
+Nvec_vc1.1_XM_048734232.1	sig.GPCRsecr.HG1.11:like:Adgrd1		Nvec_v1g211777
+Nvec_vc1.1_XM_048724156.1	sig.Pkinase.HG1.23:like:Styk1		Nvec_v1g211793
+Nvec_vc1.1_XM_001629273.3	sig.FGF.HG1.2:Fgf1/Fgf2	Fgf1/Fgf2	Nvec_v1g211797
+Nvec_vc1.1_XM_048728239.1	sig.GPCRrhod.HG11.1:NA		Nvec_v1g211853
+Nvec_vc1.1_XM_032377540.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g211856
+Nvec_vc1.1_XM_001629215.3	sig.TIR.HG1.1:like:Myd88		Nvec_v1g211916
+Nvec_vc1.1_XM_001629162.3	sig.GPCRrhod.HG4.10:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g211963
+Nvec_vc1.1_XM_048733957.1	sig.GPCRrhod.HG4.10:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g211963
+Nvec_vc1.1_XM_001629171.3	sig.GPCRrhod.HG19.3:NA		Nvec_v1g211994
+Nvec_vc1.1_XM_032363278.2	sig.GPCRrhod.HG19.3:NA		Nvec_v1g211995
+Nvec_vc1.1_XM_048728821.1	sig.Pkinase.HG15.5:Lrrk2	Lrrk2	Nvec_v1g212027
+Nvec_vc1.1_XM_001629156.3	sig.Pkinase.HG2.18:Tssk1/Tssk2/Tssk3/Tssk4/Tssk6	Tssk6	Nvec_v1g212052
+Nvec_vc1.1_XM_032377282.2	sig.GPCRrhod.HG12.45:NA		Nvec_v1g212102
+Nvec_v1g212111	Nvec_v1g212111:HG.Unclassified	""	Nvec_v1g212111
+Nvec_vc1.1_XM_032377312.2	Nvec_v1g212119:HG.Unclassified	""	Nvec_v1g212119
+Nvec_vc1.1_XM_032377275.2	sig.FGF.HG1.2:Fgf1/Fgf2	Fgf1/Fgf2	Nvec_v1g212165
+Nvec_vc1.1_XM_001628985.3	sig.Patched.HG1.8:like:Npc1/Npc1l1/Ptch1/Ptch2		Nvec_v1g212182
+Nvec_vc1.1_XM_032377195.2	sig.GPCRrhod.HG6.12:NA		Nvec_v1g212185
+Nvec_vc1.1_XM_001628987.3	sig.GPCRrhod.HG6.12:NA		Nvec_v1g212186
+Nvec_v1g212191	sig.GPCRrhod.HG18.6:NA		Nvec_v1g212191
+Nvec_v1g212192	sig.GPCRrhod.HG18.6:NA		Nvec_v1g212192
+Nvec_v1g212193	sig.GPCRrhod.HG18.6:NA		Nvec_v1g212193
+Nvec_vc1.1_XM_032377191.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g212204
+Nvec_vc1.1_XM_032377194.2	sig.GPCRrhod.HG6.12:NA		Nvec_v1g212205
+Nvec_vc1.1_XM_048731640.1	sig.Ldl_recept_b.HG1.0:like:Egf/Gm19410/Ldlr/Lrp1/Lrp1b/Lrp2/Lrp4/Lrp5/Lrp6/Lrp8/Nid1/Nid2/Sorl1/Vldlr		Nvec_v1g212268
+Nvec_vc1.1_XM_048729635.1	sig.GPCRrhod.HG6.13:NA		Nvec_v1g212306
+Nvec_vc1.1_XM_032377085.2	sig.GPCRrhod.HG6.12:NA		Nvec_v1g212348
+Nvec_vc1.1_XM_001628861.3	sig.GPCRrhod.HG53.2:NA		Nvec_v1g212367
+Nvec_vc1.1_XM_001628750.3	sig.GPCRrhod.HG4.30:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g212428
+Nvec_vc1.1_XM_001628750.3	sig.GPCRrhod.HG4.30:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g212429
+Nvec_v1g212437	Nvec_v1g212437:HG.Unclassified	""	Nvec_v1g212437
+Nvec_vc1.1_XM_001628794.3	sig.FGF.HG1.4:like:Fgf8/Fgf17/Fgf18		Nvec_v1g212464
+Nvec_v1g212466	sig.GPCRrhod.HG24.5:NA		Nvec_v1g212466
+Nvec_vc1.1_XM_001628798.3	sig.GPCRrhod.HG24.5:NA		Nvec_v1g212467
+Nvec_v1g212468	sig.GPCRrhod.HG24.5:NA		Nvec_v1g212468
+Nvec_vc1.1_XM_001628801.3	Nvec_v1g212478:HG.Unclassified	""	Nvec_v1g212478
+Nvec_vc1.1_XM_001628699.3	sig.GPCRrhod.HG112.0:NA		Nvec_v1g212496
+Nvec_vc1.1_XM_032376975.2	sig.GPCRrhod.HG37.1:NA		Nvec_v1g212517
+Nvec_vc1.1_XM_032376955.2	sig.GPCRrhod.HG37.9:NA		Nvec_v1g212533
+Nvec_vc1.1_XM_032376952.2	sig.DSL.HG1.5:like:Dll1/Dll4/Jag1/Jag2		Nvec_v1g212534
+Nvec_vc1.1_XM_032376953.2	sig.DSL.HG1.4:like:Dll1/Dll4/Jag1/Jag2		Nvec_v1g212543
+Nvec_vc1.1_XM_001628685.3	sig.GPCRrhod.HG19.0:NA		Nvec_v1g212589
+Nvec_v1g212594	sig.GPCRrhod.HG6.0:NA		Nvec_v1g212594
+Nvec_vc1.1_XM_032376888.2	sig.FGF.HG1.2:Fgf1/Fgf2	Fgf1/Fgf2	Nvec_v1g212596
+Nvec_vc1.1_XM_048720495.1	sig.GPCRrhod.HG18.1:NA		Nvec_v1g212660
+Nvec_vc1.1_XM_001628599.3	sig.GPCRrhod.HG12.3:NA		Nvec_v1g212671
+Nvec_vc1.1_XM_001628622.3	Nvec_v1g212680:HG.Unclassified	""	Nvec_v1g212680
+Nvec_vc1.1_XM_001628569.3	sig.GPCRrhod.HG11.1:NA		Nvec_v1g212697
+Nvec_vc1.1_XM_001628571.3	sig.GPCRrhod.HG11.1:NA		Nvec_v1g212702
+Nvec_vc1.1_XM_001628531.3	sig.Pkinase.HG18.0:Uhmk1	Uhmk1	Nvec_v1g212746
+Nvec_vc1.1_XM_001628522.3	sig.GPCRsecr.HG3.0:NA		Nvec_v1g212781
+Nvec_vc1.1_XM_001628498.3	sig.GPCRrhod.HG4.40:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g212817
+Nvec_vc1.1_XM_001628499.3	sig.GPCRrhod.HG4.22:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g212818
+Nvec_vc1.1_XM_032376515.2	sig.GPCRrhod.HG31.0:NA		Nvec_v1g213005
+Nvec_vc1.1_XM_048724652.1	sig.GPCRrhod.HG31.0:NA		Nvec_v1g213006
+Nvec_vc1.1_XM_032376515.2	sig.GPCRrhod.HG31.0:NA		Nvec_v1g213010
+Nvec_vc1.1_XM_001628302.3	sig.GPCRrhod.HG19.15:NA		Nvec_v1g213050
+Nvec_vc1.1_XM_032376411.2	sig.GPCRrhod.HG6.12:NA		Nvec_v1g213126
+Nvec_vc1.1_XM_048726142.1	sig.GPCRrhod.HG37.9:NA		Nvec_v1g213128
+Nvec_vc1.1_XM_048728320.1	sig.GPCRrhod.HG30.16:NA		Nvec_v1g213135
+Nvec_vc1.1_XM_032369105.2	sig.GPCRrhod.HG8.1:like:Fshr/Lgr4/Lgr5/Lhcgr/Tshr		Nvec_v1g213136
+Nvec_vc1.1_XM_032376317.2	sig.GPCRrhod.HG6.13:NA		Nvec_v1g213144
+Nvec_vc1.1_XM_048725636.1	sig.GPCRrhod.HG60.0:NA		Nvec_v1g213211
+Nvec_vc1.1_XM_001628151.3	sig.GPCRrhod.HG11.1:NA		Nvec_v1g213261
+Nvec_vc1.1_XM_032376147.2	sig.GPCRrhod.HG8.1:like:Fshr/Lgr4/Lgr5/Lhcgr/Tshr		Nvec_v1g213293
+Nvec_vc1.1_XM_048728504.1	Nvec_v1g213359:HG.Unclassified	""	Nvec_v1g213359
+Nvec_vc1.1_XM_001628067.3	Nvec_v1g213360:HG.Unclassified	""	Nvec_v1g213360
+Nvec_vc1.1_XM_032376121.2	Nvec_v1g213362:HG.Unclassified	""	Nvec_v1g213362
+Nvec_v1g213363	Nvec_v1g213363:HG.Unclassified	""	Nvec_v1g213363
+Nvec_v1g213365	Nvec_v1g213365:HG.Unclassified	""	Nvec_v1g213365
+Nvec_vc1.1_XM_048731366.1	sig.GPCRrhod.HG53.0:NA		Nvec_v1g213371
+Nvec_vc1.1_XM_048731527.1	sig.GPCRrhod.HG53.0:NA		Nvec_v1g213372
+Nvec_v1g213542	sig.GPCRrhod.HG60.0:NA		Nvec_v1g213542
+Nvec_v1g213617	sig.GPCRrhod.HG18.6:NA		Nvec_v1g213617
+Nvec_v1g213619	sig.GPCRrhod.HG53.2:NA		Nvec_v1g213619
+Nvec_vc1.1_XM_001627830.2	sig.GPCRrhod.HG53.2:NA		Nvec_v1g213627
+Nvec_v1g213628	sig.GPCRrhod.HG53.2:NA		Nvec_v1g213628
+Nvec_vc1.1_XM_001627842.3	sig.GPCRrhod.HG18.6:NA		Nvec_v1g213654
+Nvec_vc1.1_XM_048722549.1	sig.GPCRrhod.HG11.1:NA		Nvec_v1g21366
+Nvec_vc1.1_XM_001627773.3	sig.GPCRrhod.HG18.0:NA		Nvec_v1g213681
+Nvec_vc1.1_XM_048723376.1	sig.GPCRrhod.HG6.0:NA		Nvec_v1g213730
+Nvec_vc1.1_XM_032375696.2	Nvec_v1g213750:HG.Unclassified	""	Nvec_v1g213750
+Nvec_vc1.1_XM_001627738.3	sig.GPCRrhod.HG12.45:NA		Nvec_v1g213820
+Nvec_vc1.1_XM_001627692.3	sig.GPCRrhod.HG11.0:NA		Nvec_v1g213892
+Nvec_v1g213904	sig.Pkinase.HG46.1:NA		Nvec_v1g213904
+Nvec_vc1.1_XM_001627634.3	sig.GPCRrhod.HG18.9:NA		Nvec_v1g213947
+Nvec_vc1.1_XM_001627622.3	sig.GPCRrhod.HG6.5:NA		Nvec_v1g213954
+Nvec_vc1.1_XM_032375478.2	sig.GPCRrhod.HG6.5:NA		Nvec_v1g213954
+Nvec_vc1.1_XM_048722921.1	sig.GPCRrhod.HG12.27:NA		Nvec_v1g213992
+Nvec_vc1.1_XM_048722921.1	sig.GPCRrhod.HG12.27:NA		Nvec_v1g213996
+Nvec_vc1.1_XM_032375361.2	sig.GPCRrhod.HG24.7:NA		Nvec_v1g214079
+Nvec_vc1.1_XM_032375371.2	sig.GPCRrhod.HG53.2:NA		Nvec_v1g214085
+Nvec_vc1.1_XM_001627484.3	sig.GPCRrhod.HG12.45:NA		Nvec_v1g214108
+Nvec_vc1.1_XM_032375293.2	Nvec_v1g214156:HG.Unclassified	""	Nvec_v1g214156
+Nvec_vc1.1_XM_048733441.1	Nvec_v1g214156:HG.Unclassified	""	Nvec_v1g214156
+Nvec_vc1.1_XM_048733447.1	sig.Pkinase.HG31.0:NA		Nvec_v1g214159
+Nvec_v1g214208	sig.GPCRrhod.HG60.0:NA		Nvec_v1g214208
+Nvec_vc1.1_XM_048733315.1	sig.GPCRrhod.HG60.0:NA		Nvec_v1g214252
+Nvec_vc1.1_XM_001627342.3	Nvec_v1g214347:HG.Unclassified	""	Nvec_v1g214347
+Nvec_vc1.1_XM_001627295.3	Nvec_v1g214360:HG.Unclassified	""	Nvec_v1g214360
+Nvec_vc1.1_XM_048730641.1	sig.Patched.HG1.5:Disp1	Disp1	Nvec_v1g214420
+Nvec_vc1.1_XM_032374975.2	sig.GPCRrhod.HG23.3:like:Opn1mw/Opn1sw/Opn3/Opn4/Opn5/Rgr/Rho/Rrh		Nvec_v1g214428
+Nvec_vc1.1_XM_001627194.3	sig.GPCRrhod.HG18.6:NA		Nvec_v1g214487
+Nvec_vc1.1_XM_001627213.3	Nvec_v1g214489:HG.Unclassified	""	Nvec_v1g214489
+Nvec_vc1.1_XM_048725556.1	sig.GPCRrhod.HG6.5:NA		Nvec_v1g214493
+Nvec_vc1.1_XM_048725452.1	sig.GPCRrhod.HG6.5:NA		Nvec_v1g214495
+Nvec_vc1.1_XM_032385636.2	sig.Frizzled.HG1.27:Ror1/Ror2;sig.Pkinase.HG8.14:Ror1/Ror2	""	Nvec_v1g21450
+Nvec_v1g214502	sig.GPCRrhod.HG34.1:like:Ptgdr/Ptger1/Ptger2/Ptger3/Ptger4/Ptgfr/Ptgir/Tbxa2r		Nvec_v1g214502
+Nvec_vc1.1_XM_032374885.2	sig.GPCRrhod.HG6.9:NA		Nvec_v1g214531
+Nvec_vc1.1_XM_001627097.3	sig.GPCRrhod.HG19.4:NA		Nvec_v1g214601
+Nvec_vc1.1_XM_048720309.1	sig.GPCRrhod.HG24.13:NA		Nvec_v1g214631
+Nvec_vc1.1_XM_048721145.1	sig.GPCRrhod.HG23.6:like:Opn1mw/Opn1sw/Opn3/Opn4/Opn5/Rgr/Rho/Rrh		Nvec_v1g214772
+Nvec_vc1.1_XM_048721184.1	sig.GPCRrhod.HG23.6:like:Opn1mw/Opn1sw/Opn3/Opn4/Opn5/Rgr/Rho/Rrh		Nvec_v1g214773
+Nvec_vc1.1_XM_048721035.1	sig.GPCRrhod.HG23.6:like:Opn1mw/Opn1sw/Opn3/Opn4/Opn5/Rgr/Rho/Rrh		Nvec_v1g214774
+Nvec_vc1.1_XM_048721083.1	sig.GPCRrhod.HG23.6:like:Opn1mw/Opn1sw/Opn3/Opn4/Opn5/Rgr/Rho/Rrh		Nvec_v1g214775
+Nvec_vc1.1_XM_048724876.1	sig.GPCRrhod.HG4.11:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g214796
+Nvec_vc1.1_XM_001626947.3	sig.GPCRrhod.HG12.3:NA		Nvec_v1g214807
+Nvec_vc1.1_XM_048725014.1	sig.GPCRrhod.HG18.14:NA		Nvec_v1g214864
+Nvec_vc1.1_XM_032374445.2	sig.GPCRrhod.HG30.30:NA		Nvec_v1g214987
+Nvec_vc1.1_XM_001626665.3	sig.GPCRrhod.HG6.5:NA		Nvec_v1g215114
+Nvec_vc1.1_XM_048731533.1	sig.GPCRrhod.HG6.10:NA		Nvec_v1g215259
+Nvec_vc1.1_XM_001626500.3	sig.GPCRrhod.HG30.10:NA		Nvec_v1g215345
+Nvec_vc1.1_XM_001626470.3	sig.GPCRsecr.HG3.0:NA		Nvec_v1g215376
+Nvec_vc1.1_XM_048727561.1	Nvec_v1g215412:HG.Unclassified	""	Nvec_v1g215412
+Nvec_vc1.1_XM_001626408.3	sig.GPCRrhod.HG18.6:NA		Nvec_v1g215427
+Nvec_vc1.1_XM_032373973.2	sig.GPCRrhod.HG19.1:NA		Nvec_v1g215540
+Nvec_vc1.1_XM_001626338.3	sig.GPCRrhod.HG24.12:NA		Nvec_v1g215585
+Nvec_vc1.1_XM_048733973.1	sig.GPCRsecr.HG1.11:like:Adgrd1		Nvec_v1g215652
+Nvec_vc1.1_XM_032367746.2	sig.GPCRrhod.HG18.5:NA		Nvec_v1g2159
+Nvec_vc1.1_XM_048731492.1	sig.Pkinase.HG45.0:Cdc7	Cdc7	Nvec_v1g216115
+Nvec_v1g216186	sig.GPCRrhod.HG60.0:NA		Nvec_v1g216186
+Nvec_vc1.1_XM_048729848.1	sig.GPCRrhod.HG30.3:NA		Nvec_v1g216239
+Nvec_vc1.1_XM_032373264.2	sig.Pkinase.HG10.8:Pak1/Pak2/Pak3	Pak1/Pak2/Pak3	Nvec_v1g216329
+Nvec_v1g216359	sig.GPCRrhod.HG53.0:NA		Nvec_v1g216359
+Nvec_vc1.1_XM_001625675.3	sig.Pkinase.HG2.18:Tssk1/Tssk2/Tssk3/Tssk4/Tssk6	Tssk4	Nvec_v1g216383
+Nvec_vc1.1_XM_032373174.2	Nvec_v1g216426:HG.Unclassified	""	Nvec_v1g216426
+Nvec_vc1.1_XM_032373080.2	sig.FGF.HG1.2:Fgf1/Fgf2	Fgf1/Fgf2	Nvec_v1g216470
+Nvec_v1g216474	sig.GPCRrhod.HG12.45:NA		Nvec_v1g216474
+Nvec_vc1.1_XM_001625612.3	sig.GPCRglut.HG1.2:Grm1/Grm2/Grm3/Grm4/Grm5/Grm6/Grm7/Grm8		Nvec_v1g216511
+Nvec_vc1.1_XM_001625556.3	sig.GPCRrhod.HG18.6:NA		Nvec_v1g216552
+Nvec_vc1.1_XM_048720368.1	sig.Pkinase.HG20.14:like:Gucy2c/Npr1/Npr2		Nvec_v1g216603
+Nvec_vc1.1_XM_032372945.2	Nvec_v1g216684:HG.Unclassified	""	Nvec_v1g216684
+Nvec_vc1.1_XM_032372455.2	sig.GPCRrhod.HG4.34:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g2167
+Nvec_vc1.1_XM_001625348.3	Nvec_v1g216828:HG.Unclassified	""	Nvec_v1g216828
+Nvec_vc1.1_XM_048730232.1	sig.GPCRrhod.HG11.1:NA		Nvec_v1g216868
+Nvec_vc1.1_XM_001637992.2	Nvec_v1g216898:HG.Unclassified	""	Nvec_v1g216898
+Nvec_vc1.1_XM_032372738.2	Nvec_v1g216921:HG.Unclassified	""	Nvec_v1g216921
+Nvec_vc1.1_XM_001625224.3	sig.GPCRrhod.HG19.11:NA		Nvec_v1g216997
+Nvec_v1g217119	sig.Pkinase.HG13.5:Pbk		Nvec_v1g217119
+Nvec_vc1.1_XM_001619503.3	sig.GPCRrhod.HG11.1:NA		Nvec_v1g217140
+Nvec_vc1.1_XM_001625101.3	sig.GPCRrhod.HG18.1:NA		Nvec_v1g217166
+Nvec_vc1.1_XM_032372471.2	sig.Pkinase.HG11.10:like:Camk2a/Camk2b/Camk2d/Camk2g/Cask		Nvec_v1g217188
+Nvec_v1g217215	sig.GPCRrhod.HG18.1:NA		Nvec_v1g217215
+Nvec_vc1.1_XM_032372409.2	sig.GPCRrhod.HG18.0:NA		Nvec_v1g217291
+Nvec_vc1.1_XM_001633809.3	sig.Pkinase.HG26.4:like:Tnk1/Tnk2		Nvec_v1g217379
+Nvec_vc1.1_XM_032372203.2	sig.RGS.HG1.15:Rgs1/Rgs2/Rgs3/Rgs4/Rgs5/Rgs6/Rgs7/Rgs8/Rgs9/Rgs11/Rgs13/Rgs16/Rgs17/Rgs18/Rgs19/Rgs20/Rgs21	Rgs17/Rgs19/Rgs20	Nvec_v1g217514
+Nvec_vc1.1_XM_001624805.3	sig.FGF.HG1.2:Fgf1/Fgf2	Fgf1/Fgf2	Nvec_v1g217516
+Nvec_vc1.1_XM_032372156.2	sig.GPCRrhod.HG18.6:NA		Nvec_v1g217554
+Nvec_vc1.1_XM_032372106.2	sig.GPCRrhod.HG8.0:Rxfp1/Rxfp2		Nvec_v1g217594
+Nvec_vc1.1_XM_032372061.2	sig.Frizzled.HG1.31:like:Gpr157		Nvec_v1g217653
+Nvec_vc1.1_XM_032372007.2	Nvec_v1g217673:HG.Unclassified	""	Nvec_v1g217673
+Nvec_vc1.1_XM_001624592.3	sig.GPCRrhod.HG19.5:NA		Nvec_v1g217796
+Nvec_vc1.1_XM_001624564.3	Nvec_v1g217844:HG.Unclassified	""	Nvec_v1g217844
+Nvec_vc1.1_XM_032371841.2	sig.GPCRsecr.HG1.17:like:Adgrd1		Nvec_v1g217885
+Nvec_vc1.1_XM_048722610.1	sig.GPCRsecr.HG1.11:like:Adgrd1		Nvec_v1g217955
+Nvec_vc1.1_XM_032371743.2	sig.GPCRrhod.HG18.6:NA		Nvec_v1g217992
+Nvec_vc1.1_XM_001624427.2	sig.GPCRrhod.HG4.11:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g217998
+Nvec_vc1.1_XM_048731841.1	sig.GPCRrhod.HG18.6:NA		Nvec_v1g218059
+Nvec_vc1.1_XM_048727546.1	sig.Pkinase.HG13.10:like:Ksr1/Ksr2		Nvec_v1g218096
+Nvec_vc1.1_XM_048728947.1	sig.GPCRrhod.HG8.1:like:Fshr/Lgr4/Lgr5/Lhcgr/Tshr		Nvec_v1g218115
+Nvec_vc1.1_XM_048729961.1	sig.Pkinase.HG17.7:Rps6kc1/Rps6kl1	Rps6kc1/Rps6kl1	Nvec_v1g218142
+Nvec_v1g218148	sig.GPCRrhod.HG53.2:NA		Nvec_v1g218148
+Nvec_v1g218181	sig.GPCRrhod.HG6.5:NA		Nvec_v1g218181
+Nvec_vc1.1_XM_032371581.2	sig.GPCRrhod.HG6.5:NA		Nvec_v1g218182
+Nvec_vc1.1_XM_048734238.1	sig.GPCRsecr.HG1.11:like:Adgrd1		Nvec_v1g218198
+Nvec_vc1.1_XM_032371526.2	sig.GPCRrhod.HG30.31:NA		Nvec_v1g218222
+Nvec_v1g218310	sig.GPCRrhod.HG12.45:NA		Nvec_v1g218310
+Nvec_vc1.1_XM_032371345.2	sig.GPCRrhod.HG12.22:NA		Nvec_v1g218394
+Nvec_vc1.1_XM_032371272.2	sig.GPCRsecr.HG3.0:NA		Nvec_v1g218502
+Nvec_vc1.1_XM_032371141.2	sig.GPCRrhod.HG4.28:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g218637
+Nvec_vc1.1_XM_048733566.1	sig.GPCRrhod.HG8.1:like:Fshr/Lgr4/Lgr5/Lhcgr/Tshr		Nvec_v1g218641
+Nvec_vc1.1_XM_048733689.1	sig.GPCRrhod.HG8.1:like:Fshr/Lgr4/Lgr5/Lhcgr/Tshr		Nvec_v1g218643
+Nvec_vc1.1_XM_048733688.1	sig.GPCRrhod.HG8.1:like:Fshr/Lgr4/Lgr5/Lhcgr/Tshr		Nvec_v1g218646
+Nvec_vc1.1_XM_048731527.1	sig.GPCRrhod.HG53.0:NA		Nvec_v1g218659
+Nvec_vc1.1_XM_048731393.1	sig.GPCRrhod.HG53.0:NA		Nvec_v1g218664
+Nvec_vc1.1_XM_001623817.3	sig.GPCRglut.HG1.2:Grm1/Grm2/Grm3/Grm4/Grm5/Grm6/Grm7/Grm8	Grm1/Grm2/Grm3/Grm4/Grm5/Grm6/Grm7/Grm8	Nvec_v1g218792
+Nvec_vc1.1_XM_032370669.2	sig.GPCRrhod.HG6.12:NA		Nvec_v1g219172
+Nvec_vc1.1_XM_032370661.2	sig.GPCRrhod.HG6.12:NA		Nvec_v1g219173
+Nvec_vc1.1_XM_032370615.2	sig.GPCRrhod.HG30.32:NA		Nvec_v1g219247
+Nvec_v1g219259	sig.GPCRrhod.HG4.11:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g219259
+Nvec_v1g219290	sig.GPCRrhod.HG11.1:NA		Nvec_v1g219290
+Nvec_vc1.1_XM_001623376.3	sig.GPCRrhod.HG19.14:NA		Nvec_v1g219411
+Nvec_vc1.1_XM_032370459.2	sig.GPCRrhod.HG6.13:NA		Nvec_v1g219451
+Nvec_vc1.1_XM_001623332.3	sig.GPCRrhod.HG6.13:NA		Nvec_v1g219454
+Nvec_v1g219529	sig.GPCRrhod.HG4.34:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g219529
+Nvec_v1g219625	sig.GPCRrhod.HG4.34:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g219625
+Nvec_vc1.1_XM_048729496.1	sig.GPCRrhod.HG6.11:NA		Nvec_v1g219665
+Nvec_v1g219967	sig.GPCRrhod.HG53.2:NA		Nvec_v1g219967
+Nvec_vc1.1_XM_048731732.1	sig.GPCRrhod.HG23.1:Opn1mw/Opn1sw/Opn3/Opn5/Rgr/Rho/Rrh		Nvec_v1g219988
+Nvec_vc1.1_XM_032369992.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g220006
+Nvec_v1g220106	sig.GPCRrhod.HG6.1:NA		Nvec_v1g220106
+Nvec_v1g220113	sig.GPCRrhod.HG6.1:NA		Nvec_v1g220113
+Nvec_vc1.1_XM_001622815.3	sig.GPCRrhod.HG6.1:NA		Nvec_v1g220122
+Nvec_v1g220157	sig.Pkinase.HG42.0:like:Limk1/Limk2/Tesk1/Tesk2		Nvec_v1g220157
+Nvec_v1g220344	sig.Pkinase.HG13.3:Mos		Nvec_v1g220344
+Nvec_vc1.1_XM_048722510.1	sig.GPCRrhod.HG12.26:NA		Nvec_v1g220428
+Nvec_vc1.1_XM_032369679.2	sig.Pkinase.HG11.20:Camk2a/Camk2b/Camk2d/Camk2g	Camk2a/Camk2b/Camk2d/Camk2g	Nvec_v1g220432
+Nvec_vc1.1_XM_001622549.3	sig.GPCRrhod.HG18.6:NA		Nvec_v1g220479
+Nvec_vc1.1_XM_048720578.1	sig.Pkinase.HG6.0:NA		Nvec_v1g220607
+Nvec_v1g220759	sig.GPCRrhod.HG53.0:NA		Nvec_v1g220759
+Nvec_vc1.1_XM_001622350.3	sig.GPCRrhod.HG12.51:NA		Nvec_v1g220776
+Nvec_v1g220833	sig.GPCRrhod.HG12.10:NA		Nvec_v1g220833
+Nvec_vc1.1_XM_001622230.3	sig.GPCRrhod.HG24.0:NA		Nvec_v1g220946
+Nvec_v1g221026	sig.GPCRrhod.HG18.1:NA		Nvec_v1g221026
+Nvec_vc1.1_XM_048726307.1	sig.GPCRrhod.HG6.0:NA		Nvec_v1g221062
+Nvec_v1g221092	sig.GPCRrhod.HG4.34:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g221092
+Nvec_vc1.1_XM_001638628.3	sig.GPCRrhod.HG18.8:NA		Nvec_v1g2211
+Nvec_vc1.1_XM_032369130.2	sig.GPCRrhod.HG6.5:NA		Nvec_v1g221110
+Nvec_vc1.1_XM_048728320.1	sig.GPCRrhod.HG30.16:NA		Nvec_v1g221137
+Nvec_vc1.1_XM_032369105.2	sig.GPCRrhod.HG8.1:like:Fshr/Lgr4/Lgr5/Lhcgr/Tshr		Nvec_v1g221138
+Nvec_v1g221162	sig.GPCRrhod.HG11.1:NA		Nvec_v1g221162
+Nvec_vc1.1_XM_048734019.1	sig.GPCRsecr.HG1.11:like:Adgrd1		Nvec_v1g221163
+Nvec_vc1.1_XM_001622003.3	Nvec_v1g221220:HG.Unclassified	""	Nvec_v1g221220
+Nvec_vc1.1_XM_032386040.2	sig.Pkinase.HG5.3:Tex14	Tex14	Nvec_v1g221237
+Nvec_v1g221285	sig.GPCRrhod.HG60.0:NA		Nvec_v1g221285
+Nvec_v1g221316	sig.GPCRrhod.HG2.0:Brs3/Cckar/Cckbr/Ghsr/Gpr37/Gpr37l1/Gpr39/Grpr/Hcrtr1/Hcrtr2/Nmur1/Ntsr1/Ntsr2/Trhr2		Nvec_v1g221316
+Nvec_vc1.1_XM_032368935.2	sig.GPCRrhod.HG24.15:NA		Nvec_v1g221353
+Nvec_vc1.1_XM_032365766.2	sig.GPCRrhod.HG6.0:NA		Nvec_v1g221423
+Nvec_vc1.1_XM_048730689.1	sig.GPCRrhod.HG4.21:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g221429
+Nvec_vc1.1_XM_001621781.3	sig.Frizzled.HG1.7:like:Col18a1/Corin/Cpz/Frzb/Fzd1/Fzd2/Fzd3/Fzd4/Fzd5/Fzd6/Fzd7/Fzd8/Fzd9/Fzd10/Gpr157/Mfrp/Musk/Ror1/Ror2/Sfrp1/Sfrp2/Sfrp4/Sfrp5/Smo		Nvec_v1g221520
+Nvec_vc1.1_XM_001621781.3	sig.Frizzled.HG1.7:like:Col18a1/Corin/Cpz/Frzb/Fzd1/Fzd2/Fzd3/Fzd4/Fzd5/Fzd6/Fzd7/Fzd8/Fzd9/Fzd10/Gpr157/Mfrp/Musk/Ror1/Ror2/Sfrp1/Sfrp2/Sfrp4/Sfrp5/Smo		Nvec_v1g221521
+Nvec_v1g221557	sig.Pkinase.HG9.14:like:Grk1/Grk2/Grk3/Grk4/Grk5/Grk6/Stk32a/Stk32b/Stk32c		Nvec_v1g221557
+Nvec_vc1.1_XM_032377026.2	Nvec_v1g221626:HG.Unclassified	""	Nvec_v1g221626
+Nvec_vc1.1_XM_001621656.3	sig.FGF.HG1.4:like:Fgf8/Fgf17/Fgf18		Nvec_v1g221664
+Nvec_vc1.1_XM_001620632.3	sig.GPCRrhod.HG19.7:NA		Nvec_v1g221669
+Nvec_vc1.1_XM_032379116.2	sig.GPCRrhod.HG63.0:NA		Nvec_v1g221882
+Nvec_vc1.1_XM_048733315.1	sig.GPCRrhod.HG60.0:NA		Nvec_v1g221896
+Nvec_vc1.1_XM_032371204.2	sig.Pkinase.HG10.10:Stk24/Stk25/Stk26	Stk24/Stk25/Stk26	Nvec_v1g222183
+Nvec_vc1.1_XM_048734427.1	sig.GPCRrhod.HG24.0:NA		Nvec_v1g222268
+Nvec_vc1.1_XM_001632595.3	sig.GPCRrhod.HG12.24:NA		Nvec_v1g222314
+Nvec_vc1.1_XM_048729762.1	sig.Pkinase.HG4.6:Epha1/Epha2/Epha3/Epha4/Epha5/Epha6/Epha7/Epha8/Epha10/Ephb1/Ephb2/Ephb3/Ephb4/Ephb6	Epha1/Epha10/Epha2/Epha3/Epha4/Epha5/Epha6/Epha7/Epha8/Ephb1/Ephb2/Ephb3/Ephb4/Ephb6	Nvec_v1g222388
+Nvec_v1g222438	sig.GPCRrhod.HG18.6:NA		Nvec_v1g222438
+Nvec_vc1.1_XM_048733568.1	sig.GPCRrhod.HG60.0:NA		Nvec_v1g222485
+Nvec_vc1.1_XM_048724876.1	sig.GPCRrhod.HG4.11:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g222560
+Nvec_vc1.1_XM_048724932.1	sig.Pkinase.HG20.10:like:Gucy2c/Gucy2d/Gucy2e/Gucy2f/Gucy2g/Npr1/Npr2		Nvec_v1g222590
+Nvec_vc1.1_XM_048733951.1	sig.Pkinase.HG1.10:Tek/Tie1		Nvec_v1g222678
+Nvec_vc1.1_XM_032382215.2	Nvec_v1g222805:HG.Unclassified	""	Nvec_v1g222805
+Nvec_vc1.1_XM_032382215.2	Nvec_v1g222806:HG.Unclassified	""	Nvec_v1g222806
+Nvec_v1g222816	sig.GPCRrhod.HG36.0:Avpr1a/Avpr1b/Avpr2/Gnrhr/Gpr150/Npsr1/Oxtr	Avpr1a/Avpr1b/Avpr2/Gnrhr/Gpr150/Npsr1/Oxtr	Nvec_v1g222816
+Nvec_vc1.1_XM_001620632.3	sig.GPCRrhod.HG19.7:NA		Nvec_v1g222831
+Nvec_vc1.1_XM_048720214.1	sig.GPCRrhod.HG24.16:NA		Nvec_v1g223105
+Nvec_v1g223159	sig.GPCRrhod.HG18.1:NA		Nvec_v1g223159
+Nvec_vc1.1_XM_048724403.1	sig.GPCRglut.HG2.13:Gabbr1/Gabbr2		Nvec_v1g223171
+Nvec_vc1.1_XM_001620253.3	sig.TIR.HG2.4:like:Sarm1		Nvec_v1g223246
+Nvec_vc1.1_XM_032376288.2	sig.Pkinase.HG25.0:Map3k1	Map3k1	Nvec_v1g223498
+Nvec_vc1.1_XM_032386133.2	Nvec_v1g223523:HG.Unclassified	""	Nvec_v1g223523
+Nvec_v1g223660	sig.GPCRrhod.HG18.6:NA		Nvec_v1g223660
+Nvec_v1g223782	sig.GPCRrhod.HG2.12:Gpr176	Gpr176	Nvec_v1g223782
+Nvec_vc1.1_XM_048731605.1	sig.GPCRrhod.HG53.2:NA		Nvec_v1g223917
+Nvec_vc1.1_XM_032374991.2	sig.GPCRrhod.HG23.4:like:Opn1mw/Opn1sw/Opn3/Opn4/Opn5/Rgr/Rho/Rrh		Nvec_v1g223939
+Nvec_vc1.1_XM_001619503.3	sig.GPCRrhod.HG11.1:NA		Nvec_v1g224071
+Nvec_vc1.1_XM_048724875.1	sig.Pkinase.HG20.1:like:Gucy2c/Gucy2d/Gucy2e/Gucy2f/Gucy2g/Npr1/Npr2		Nvec_v1g224148
+Nvec_vc1.1_XM_048724975.1	Nvec_v1g224293:HG.Unclassified	""	Nvec_v1g224293
+Nvec_vc1.1_XM_001638382.3	sig.GPCRrhod.HG24.0:NA		Nvec_v1g224756
+Nvec_v1g224862	sig.GPCRrhod.HG60.0:NA		Nvec_v1g224862
+Nvec_vc1.1_XM_032364544.2	sig.GPCRrhod.HG30.29:NA		Nvec_v1g224894
+Nvec_vc1.1_XM_032364543.2	sig.GPCRrhod.HG30.29:NA		Nvec_v1g224894
+Nvec_vc1.1_XM_048719697.1	sig.Pkinase.HG25.7:Map3k2/Map3k3		Nvec_v1g224897
+Nvec_vc1.1_XM_032379913.2	sig.GPCRrhod.HG19.3:NA		Nvec_v1g225072
+Nvec_vc1.1_XM_001634372.3	sig.GPCRrhod.HG18.6:NA		Nvec_v1g225122
+Nvec_vc1.1_XM_048731605.1	sig.GPCRrhod.HG53.2:NA		Nvec_v1g225174
+Nvec_vc1.1_XM_032363600.2	sig.GPCRsecr.HG2.0:like:Adgrg1/Adgrg2/Adgrg3/Adgrg4/Adgrg5/Adgrg6/Adgrg7		Nvec_v1g225210
+Nvec_vc1.1_XM_001618277.3	sig.GPCRrhod.HG4.6:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g225269
+Nvec_vc1.1_XM_032369657.2	sig.Pkinase.HG16.9:Nlk	Nlk	Nvec_v1g225374
+Nvec_vc1.1_XM_032374719.2	sig.Pkinase.HG13.0:Arhgap33os	Arhgap33os	Nvec_v1g225412
+Nvec_vc1.1_XM_048731334.1	sig.GPCRrhod.HG4.34:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g225636
+Nvec_vc1.1_XM_001617885.3	sig.GPCRrhod.HG12.22:NA		Nvec_v1g225653
+Nvec_vc1.1_XM_048719879.1	sig.GPCRrhod.HG4.34:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g225716
+Nvec_vc1.1_XM_032367452.2	sig.GPCRrhod.HG24.0:NA		Nvec_v1g225772
+Nvec_vc1.1_XM_048733823.1	sig.Pkinase.HG32.7:like:Dstyk		Nvec_v1g226071
+Nvec_vc1.1_XM_001635898.3	sig.Pkinase.HG10.2:Strada/Stradb	Strada/Stradb	Nvec_v1g226620
+Nvec_vc1.1_XM_001628641.3	sig.GPCRrhod.HG12.10:NA		Nvec_v1g22729
+Nvec_vc1.1_XM_048721574.1	sig.Pkinase.HG54.0:Pxk	Pxk	Nvec_v1g228135
+Nvec_vc1.1_XM_032364001.2	sig.MH2.HG1.4:Smad1/Smad5/Smad9	Smad1/Smad5/Smad9	Nvec_v1g228395
+Nvec_vc1.1_XM_048722076.1	sig.GPCRrhod.HG18.6:NA		Nvec_v1g2285
+Nvec_vc1.1_XM_048724386.1	sig.Pkinase.HG3.22:Cdk12/Cdk13	Cdk12/Cdk13	Nvec_v1g228551
+Nvec_vc1.1_XM_001637526.3	sig.wnt.HG1.2:Wnt8a/Wnt8b	Wnt8a/Wnt8b	Nvec_v1g228651
+Nvec_vc1.1_XM_001636753.3	Nvec_v1g228796:HG.Unclassified	""	Nvec_v1g228796
+Nvec_vc1.1_XM_001635684.3	sig.Pkinase.HG3.14:Cdk1	Cdk1	Nvec_v1g228964
+Nvec_vc1.1_XM_032385023.2	sig.Pkinase.HG34.5:Gm49320/Map2k7	Gm49320/Map2k7	Nvec_v1g229025
+Nvec_vc1.1_XM_032382634.2	sig.GPCRglut.HG1.2:Grm1/Grm2/Grm3/Grm4/Grm5/Grm6/Grm7/Grm8	Grm1/Grm2/Grm3/Grm4/Grm5/Grm6/Grm7/Grm8	Nvec_v1g229374
+Nvec_vc1.1_XM_001633249.3	sig.Pkinase.HG8.0:Ptk7	Ptk7	Nvec_v1g229403
+Nvec_vc1.1_XM_048722961.1	sig.Pkinase.HG35.4:Prkg1/Prkg2	Prkg2	Nvec_v1g229919
+Nvec_vc1.1_XM_032378379.2	sig.wnt.HG1.13:Wnt11	Wnt11	Nvec_v1g230011
+Nvec_vc1.1_XM_001629840.3	sig.Pkinase.HG39.4:Plk1	Plk1	Nvec_v1g230033
+Nvec_vc1.1_XM_032375505.2	sig.Pkinase.HG11.5:Pskh1	Pskh1	Nvec_v1g230438
+Nvec_vc1.1_XM_032375338.2	sig.Pkinase.HG39.9:Aurka/Aurkb/Aurkc	Aurka/Aurkb/Aurkc	Nvec_v1g230469
+Nvec_vc1.1_XM_001627278.3	sig.Pkinase.HG35.2:Prkx	Prkx	Nvec_v1g230515
+Nvec_vc1.1_XM_032374007.2	sig.RGS.HG1.15:Rgs1/Rgs2/Rgs3/Rgs4/Rgs5/Rgs6/Rgs7/Rgs8/Rgs9/Rgs11/Rgs13/Rgs16/Rgs17/Rgs18/Rgs19/Rgs20/Rgs21	Rgs6/Rgs7	Nvec_v1g230662
+Nvec_vc1.1_XM_048726451.1	sig.Pkinase.HG17.9:Rps6kb1/Rps6kb2	Rps6kb1/Rps6kb2	Nvec_v1g232710
+Nvec_vc1.1_XM_032362679.2	sig.GPCRrhod.HG23.1:Opn1mw/Opn1sw/Opn3/Opn5/Rgr/Rho/Rrh		Nvec_v1g23333
+Nvec_v1g23357	Nvec_v1g23357:HG.Unclassified	""	Nvec_v1g23357
+Nvec_vc1.1_XM_032369657.2	sig.Pkinase.HG16.9:Nlk	Nlk	Nvec_v1g233772
+Nvec_vc1.1_XM_001633007.3	sig.Pkinase.HG4.6:Epha1/Epha2/Epha3/Epha4/Epha5/Epha6/Epha7/Epha8/Epha10/Ephb1/Ephb2/Ephb3/Ephb4/Ephb6	Epha1/Epha10/Epha2/Epha3/Epha4/Epha5/Epha6/Epha7/Epha8/Ephb1/Ephb2/Ephb3/Ephb4/Ephb6	Nvec_v1g234961
+Nvec_vc1.1_XM_032379382.2	sig.wnt.HG1.1:Wnt9a/Wnt9b	Wnt9a/Wnt9b	Nvec_v1g235248
+Nvec_vc1.1_XM_001625808.3	sig.Pkinase.HG18.5:Clk1/Clk2/Clk3/Clk4	Clk1/Clk2/Clk3/Clk4	Nvec_v1g235840
+Nvec_vc1.1_XM_001641878.3	sig.Pkinase.HG3.10:Cdk20	Cdk20	Nvec_v1g236269
+Nvec_vc1.1_XM_048729023.1	sig.Pkinase.HG9.18:Stk32a/Stk32b/Stk32c	Stk32a/Stk32b/Stk32c	Nvec_v1g236378
+Nvec_vc1.1_XM_001636633.3	sig.GPCRrhod.HG6.5:NA		Nvec_v1g236675
+Nvec_vc1.1_XM_048720324.1	sig.Pkinase.HG34.6:Map2k3/Map2k4/Map2k6	Map2k3/Map2k6	Nvec_v1g237148
+Nvec_vc1.1_XM_048727008.1	sig.Pkinase.HG44.0:Nrbp1/Nrbp2	Nrbp1/Nrbp2	Nvec_v1g237308
+Nvec_vc1.1_XM_001625076.3	sig.Pkinase.HG51.0:Trp53rka/Trp53rkb	Trp53rka/Trp53rkb	Nvec_v1g237501
+Nvec_vc1.1_XM_001622045.3	sig.Pkinase.HG3.21:Cdk10	Cdk10	Nvec_v1g237661
+Nvec_vc1.1_XM_032367419.2	sig.GPCRsecr.HG1.14:like:Adgra1/Adgra2/Adgra3/Adgrv1		Nvec_v1g237703
+Nvec_vc1.1_XM_032367572.2	sig.GPCRrhod.HG18.12:NA		Nvec_v1g237719
+Nvec_vc1.1_XM_032367543.2	sig.Pkinase.HG24.0:Peak1/Prag1	Peak1/Prag1	Nvec_v1g237729
+Nvec_vc1.1_XM_032367394.2	sig.GPCRrhod.HG12.43:NA		Nvec_v1g237937
+Nvec_vc1.1_XM_048723776.1	sig.Patched.HG1.1:Scap	Scap	Nvec_v1g238428
+Nvec_vc1.1_XM_032366112.2	sig.Pkinase.HG40.3:Eif2ak2/Eif2ak3	Eif2ak3	Nvec_v1g238489
+Nvec_vc1.1_XM_032365766.2	sig.GPCRrhod.HG6.0:NA		Nvec_v1g238695
+Nvec_vc1.1_XM_001640650.3	Nvec_v1g238699:HG.Unclassified	""	Nvec_v1g238699
+Nvec_vc1.1_XM_032365563.2	sig.GPCRrhod.HG8.1:like:Fshr/Lgr4/Lgr5/Lhcgr/Tshr		Nvec_v1g238729
+Nvec_vc1.1_XM_048728364.1	sig.GPCRsecr.HG2.31:Adgrg7	Adgrg7	Nvec_v1g238736
+Nvec_vc1.1_XM_032365328.2	sig.GPCRrhod.HG19.3:NA		Nvec_v1g238911
+Nvec_vc1.1_XM_001640000.3	sig.GPCRrhod.HG24.9:NA		Nvec_v1g238927
+Nvec_vc1.1_XM_032365119.2	sig.GPCRrhod.HG24.10:NA		Nvec_v1g238928
+Nvec_v1g238961	sig.GPCRrhod.HG18.1:NA		Nvec_v1g238961
+Nvec_vc1.1_XM_001639806.3	sig.Pkinase.HG5.9:Fer/Fes	Fer/Fes	Nvec_v1g239047
+Nvec_vc1.1_XM_001639372.3	Nvec_v1g239384:HG.Unclassified	""	Nvec_v1g239384
+Nvec_vc1.1_XM_032363988.2	sig.Pkinase.HG5.0:like:Tex14		Nvec_v1g239513
+Nvec_vc1.1_XM_001639015.3	sig.Pkinase.HG4.1:like:Epha1/Epha2/Epha3/Epha4/Epha5/Epha6/Epha7/Epha8/Epha10/Ephb1/Ephb2/Ephb3/Ephb4/Ephb6		Nvec_v1g239514
+Nvec_vc1.1_XM_032363790.2	sig.Pkinase.HG2.11:Nim1k	Nim1k	Nvec_v1g239601
+Nvec_vc1.1_XM_032363397.2	sig.GPCRglut.HG2.13:Gabbr1/Gabbr2		Nvec_v1g239821
+Nvec_vc1.1_XM_001638627.3	sig.GPCRrhod.HG18.10:NA		Nvec_v1g239832
+Nvec_v1g239944	sig.GPCRrhod.HG6.11:NA		Nvec_v1g239944
+Nvec_vc1.1_XM_001638150.3	sig.Pkinase.HG42.2:Tesk1/Tesk2	Tesk1/Tesk2	Nvec_v1g240002
+Nvec_vc1.1_XM_048731255.1	sig.GPCRrhod.HG30.17:NA		Nvec_v1g240023
+Nvec_vc1.1_XM_001637761.3	sig.GPCRrhod.HG2.7:Gpr135		Nvec_v1g240325
+Nvec_vc1.1_XM_048732495.1	sig.Ldl_recept_b.HG1.12:Sorl1	Sorl1	Nvec_v1g240569
+Nvec_vc1.1_XM_001637038.3	sig.GPCRrhod.HG2.4:Ffar4/Gpr19		Nvec_v1g240722
+Nvec_vc1.1_XM_001637043.3	sig.TIR.HG2.16:like:Sarm1		Nvec_v1g240728
+Nvec_vc1.1_XM_032386245.2	sig.Pkinase.HG32.8:Dstyk	Dstyk	Nvec_v1g241055
+Nvec_vc1.1_XM_032385972.2	sig.GPCRrhod.HG2.0:Brs3/Cckar/Cckbr/Ghsr/Gpr37/Gpr37l1/Gpr39/Grpr/Hcrtr1/Hcrtr2/Nmur1/Ntsr1/Ntsr2/Trhr2		Nvec_v1g241181
+Nvec_vc1.1_XM_001635978.3	sig.GPCRglut.HG3.1:Casr/Gm14496/Gprc6a/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r8/Vmn2r9/Vmn2r10/Vmn2r11/Vmn2r12/Vmn2r13/Vmn2r14/Vmn2r15/Vmn2r16/Vmn2r17/Vmn2r18/Vmn2r19/Vmn2r20/Vmn2r21/Vmn2r22/Vmn2r23/Vmn2r24/Vmn2r25/Vmn2r26/Vmn2r27/Vmn2r28/Vmn2r29/Vmn2r30/Vmn2r31/Vmn2r32/Vmn2r33/Vmn2r34/Vmn2r35/Vmn2r36/Vmn2r37/Vmn2r38/Vmn2r39/Vmn2r40/Vmn2r41/Vmn2r42/Vmn2r43/Vmn2r44/Vmn2r45/Vmn2r47/Vmn2r48/Vmn2r49/Vmn2r50/Vmn2r51/Vmn2r52/Vmn2r53/Vmn2r54/Vmn2r55/Vmn2r56/Vmn2r57/Vmn2r58/Vmn2r59/Vmn2r60/Vmn2r61/Vmn2r62/Vmn2r63/Vmn2r65/Vmn2r66/Vmn2r67/Vmn2r68/Vmn2r69/Vmn2r70/Vmn2r71/Vmn2r72/Vmn2r73/Vmn2r74/Vmn2r75/Vmn2r76/Vmn2r77/Vmn2r78/Vmn2r79/Vmn2r80/Vmn2r81/Vmn2r82/Vmn2r83/Vmn2r84/Vmn2r85/Vmn2r86/Vmn2r87/Vmn2r90/Vmn2r91/Vmn2r92/Vmn2r93/Vmn2r94/Vmn2r95/Vmn2r96/Vmn2r97/Vmn2r98/Vmn2r99/Vmn2r100/Vmn2r101/Vmn2r102/Vmn2r103/Vmn2r104/Vmn2r105/Vmn2r106/Vmn2r107/Vmn2r108/Vmn2r109/Vmn2r110/Vmn2r111/Vmn2r112/Vmn2r113/Vmn2r114/Vmn2r115/Vmn2r116/Vmn2r117/Vmn2r118/Vmn2r120/Vmn2r121/Vmn2r124/Vmn2r128/Vmn2r129/Vmn2r130/Vmn2r-ps158	Casr/Gm14496/Gprc6a/Tas1r1/Tas1r2/Tas1r3/Vmn2r-ps158/Vmn2r1/Vmn2r10/Vmn2r100/Vmn2r101/Vmn2r102/Vmn2r103/Vmn2r104/Vmn2r105/Vmn2r106/Vmn2r107/Vmn2r108/Vmn2r109/Vmn2r11/Vmn2r110/Vmn2r111/Vmn2r112/Vmn2r113/Vmn2r114/Vmn2r115/Vmn2r116/Vmn2r117/Vmn2r118/Vmn2r12/Vmn2r120/Vmn2r121/Vmn2r124/Vmn2r128/Vmn2r129/Vmn2r13/Vmn2r130/Vmn2r14/Vmn2r15/Vmn2r16/Vmn2r17/Vmn2r18/Vmn2r19/Vmn2r2/Vmn2r20/Vmn2r21/Vmn2r22/Vmn2r23/Vmn2r24/Vmn2r25/Vmn2r26/Vmn2r27/Vmn2r28/Vmn2r29/Vmn2r3/Vmn2r30/Vmn2r31/Vmn2r32/Vmn2r33/Vmn2r34/Vmn2r35/Vmn2r36/Vmn2r37/Vmn2r38/Vmn2r39/Vmn2r4/Vmn2r40/Vmn2r41/Vmn2r42/Vmn2r43/Vmn2r44/Vmn2r45/Vmn2r47/Vmn2r48/Vmn2r49/Vmn2r5/Vmn2r50/Vmn2r51/Vmn2r52/Vmn2r53/Vmn2r54/Vmn2r55/Vmn2r56/Vmn2r57/Vmn2r58/Vmn2r59/Vmn2r6/Vmn2r60/Vmn2r61/Vmn2r62/Vmn2r63/Vmn2r65/Vmn2r66/Vmn2r67/Vmn2r68/Vmn2r69/Vmn2r7/Vmn2r70/Vmn2r71/Vmn2r72/Vmn2r73/Vmn2r74/Vmn2r75/Vmn2r76/Vmn2r77/Vmn2r78/Vmn2r79/Vmn2r8/Vmn2r80/Vmn2r81/Vmn2r82/Vmn2r83/Vmn2r84/Vmn2r85/Vmn2r86/Vmn2r87/Vmn2r9/Vmn2r90/Vmn2r91/Vmn2r92/Vmn2r93/Vmn2r94/Vmn2r95/Vmn2r96/Vmn2r97/Vmn2r98/Vmn2r99	Nvec_v1g241281
+Nvec_vc1.1_XM_032385497.2	sig.wnt.HG1.8:Wnt3/Wnt3a	Wnt3/Wnt3a	Nvec_v1g241352
+Nvec_vc1.1_XM_032385559.2	sig.Pkinase.HG3.17:Cdk14/Cdk15	Cdk14/Cdk15	Nvec_v1g241402
+Nvec_vc1.1_XM_048724087.1	sig.HH_signal.HG1.3:Dhh/Ihh/Shh	Dhh/Ihh/Shh	Nvec_v1g241466
+Nvec_vc1.1_XM_001635481.3	sig.GPCRrhod.HG11.1:NA		Nvec_v1g241573
+Nvec_vc1.1_XM_001635346.3	sig.GPCRrhod.HG11.1:NA		Nvec_v1g241688
+Nvec_vc1.1_XM_001635352.3	sig.GPCRrhod.HG2.4:Ffar4/Gpr19	Ffar4	Nvec_v1g241692
+Nvec_vc1.1_XM_001635232.3	Nvec_v1g241741:HG.Unclassified	""	Nvec_v1g241741
+Nvec_vc1.1_XM_048728477.1	sig.RGS.HG1.14:Rgs10/Rgs12/Rgs14	Rgs12/Rgs14	Nvec_v1g241799
+Nvec_vc1.1_XM_032375984.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g24188
+Nvec_vc1.1_XM_048734255.1	sig.Pkinase.HG10.9:Stk3/Stk4	Stk3/Stk4	Nvec_v1g241948
+Nvec_vc1.1_XM_032384288.2	sig.GPCRsecr.HG1.22:Adgra1/Adgra2/Adgra3	Adgra1/Adgra2/Adgra3	Nvec_v1g242046
+Nvec_vc1.1_XM_048719657.1	sig.RGS.HG1.1:Snx14	Snx14	Nvec_v1g242063
+Nvec_vc1.1_XM_048728288.1	sig.GPCRsecr.HG1.23:Adgrv1	Adgrv1	Nvec_v1g242264
+Nvec_vc1.1_XM_001634109.3	sig.GPCRrhod.HG2.0:Brs3/Cckar/Cckbr/Ghsr/Gpr37/Gpr37l1/Gpr39/Grpr/Hcrtr1/Hcrtr2/Nmur1/Ntsr1/Ntsr2/Trhr2		Nvec_v1g242370
+Nvec_vc1.1_XM_032383075.2	sig.wnt.HG1.12:Wnt2/Wnt2b	Wnt2/Wnt2b	Nvec_v1g242584
+Nvec_vc1.1_XM_048733635.1	sig.Frizzled.HG1.37:like:Gpr157		Nvec_v1g242602
+Nvec_vc1.1_XM_032382911.2	sig.Frizzled.HG1.25:like:Musk/Ror1/Ror2		Nvec_v1g242665
+Nvec_vc1.1_XM_001640732.3	sig.GPCRrhod.HG12.45:NA		Nvec_v1g242725
+Nvec_vc1.1_XM_032382989.2	sig.GPCRrhod.HG12.32:NA		Nvec_v1g24303
+Nvec_vc1.1_XM_048725733.1	sig.TIR.HG2.16:like:Sarm1		Nvec_v1g243041
+Nvec_vc1.1_XM_001632810.3	sig.GPCRrhod.HG121.0:NA		Nvec_v1g243139
+Nvec_vc1.1_XM_032381755.2	sig.GPCRglut.HG2.10:like:Gabbr1/Gabbr2		Nvec_v1g243252
+Nvec_vc1.1_XM_032380887.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g243613
+Nvec_vc1.1_XM_048726561.1	sig.Pkinase.HG16.7:Mapk15	Mapk15	Nvec_v1g243879
+Nvec_vc1.1_XM_032380273.2	sig.GPCRrhod.HG19.3:NA		Nvec_v1g243885
+Nvec_vc1.1_XM_032380223.2	sig.Frizzled.HG1.7:like:Col18a1/Corin/Cpz/Frzb/Fzd1/Fzd2/Fzd3/Fzd4/Fzd5/Fzd6/Fzd7/Fzd8/Fzd9/Fzd10/Gpr157/Mfrp/Musk/Ror1/Ror2/Sfrp1/Sfrp2/Sfrp4/Sfrp5/Smo		Nvec_v1g243916
+Nvec_vc1.1_XM_032380216.2	Nvec_v1g243917:HG.Unclassified	""	Nvec_v1g243917
+Nvec_vc1.1_XM_001631329.3	sig.TIR.HG2.14:like:Sarm1		Nvec_v1g243976
+Nvec_vc1.1_XM_001631146.3	sig.GPCRrhod.HG4.31:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g244057
+Nvec_vc1.1_XM_048733202.1	sig.GPCRglut.HG2.13:Gabbr1/Gabbr2		Nvec_v1g244104
+Nvec_vc1.1_XM_032379116.2	sig.GPCRrhod.HG63.0:NA		Nvec_v1g244348
+Nvec_vc1.1_XM_032379072.2	sig.Pkinase.HG35.4:Prkg1/Prkg2	Prkg1	Nvec_v1g244400
+Nvec_vc1.1_XM_048722804.1	sig.GPCRrhod.HG19.5:NA		Nvec_v1g244403
+Nvec_vc1.1_XM_032379087.2	sig.GPCRrhod.HG18.19:NA		Nvec_v1g244405
+Nvec_vc1.1_XM_048723155.1	sig.GPCRrhod.HG2.9:Npffr1/Npffr2	Npffr1/Npffr2	Nvec_v1g244409
+Nvec_vc1.1_XM_048723155.1	sig.GPCRrhod.HG2.9:Npffr1/Npffr2	Npffr1/Npffr2	Nvec_v1g244410
+Nvec_vc1.1_XM_032378893.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g244478
+Nvec_vc1.1_XM_048722400.1	sig.GPCRrhod.HG6.12:NA		Nvec_v1g244491
+Nvec_vc1.1_XM_032378755.2	sig.GPCRglut.HG3.1:Casr/Gm14496/Gprc6a/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r8/Vmn2r9/Vmn2r10/Vmn2r11/Vmn2r12/Vmn2r13/Vmn2r14/Vmn2r15/Vmn2r16/Vmn2r17/Vmn2r18/Vmn2r19/Vmn2r20/Vmn2r21/Vmn2r22/Vmn2r23/Vmn2r24/Vmn2r25/Vmn2r26/Vmn2r27/Vmn2r28/Vmn2r29/Vmn2r30/Vmn2r31/Vmn2r32/Vmn2r33/Vmn2r34/Vmn2r35/Vmn2r36/Vmn2r37/Vmn2r38/Vmn2r39/Vmn2r40/Vmn2r41/Vmn2r42/Vmn2r43/Vmn2r44/Vmn2r45/Vmn2r47/Vmn2r48/Vmn2r49/Vmn2r50/Vmn2r51/Vmn2r52/Vmn2r53/Vmn2r54/Vmn2r55/Vmn2r56/Vmn2r57/Vmn2r58/Vmn2r59/Vmn2r60/Vmn2r61/Vmn2r62/Vmn2r63/Vmn2r65/Vmn2r66/Vmn2r67/Vmn2r68/Vmn2r69/Vmn2r70/Vmn2r71/Vmn2r72/Vmn2r73/Vmn2r74/Vmn2r75/Vmn2r76/Vmn2r77/Vmn2r78/Vmn2r79/Vmn2r80/Vmn2r81/Vmn2r82/Vmn2r83/Vmn2r84/Vmn2r85/Vmn2r86/Vmn2r87/Vmn2r90/Vmn2r91/Vmn2r92/Vmn2r93/Vmn2r94/Vmn2r95/Vmn2r96/Vmn2r97/Vmn2r98/Vmn2r99/Vmn2r100/Vmn2r101/Vmn2r102/Vmn2r103/Vmn2r104/Vmn2r105/Vmn2r106/Vmn2r107/Vmn2r108/Vmn2r109/Vmn2r110/Vmn2r111/Vmn2r112/Vmn2r113/Vmn2r114/Vmn2r115/Vmn2r116/Vmn2r117/Vmn2r118/Vmn2r120/Vmn2r121/Vmn2r124/Vmn2r128/Vmn2r129/Vmn2r130/Vmn2r-ps158	Casr/Gm14496/Gprc6a/Tas1r1/Tas1r2/Tas1r3/Vmn2r-ps158/Vmn2r1/Vmn2r10/Vmn2r100/Vmn2r101/Vmn2r102/Vmn2r103/Vmn2r104/Vmn2r105/Vmn2r106/Vmn2r107/Vmn2r108/Vmn2r109/Vmn2r11/Vmn2r110/Vmn2r111/Vmn2r112/Vmn2r113/Vmn2r114/Vmn2r115/Vmn2r116/Vmn2r117/Vmn2r118/Vmn2r12/Vmn2r120/Vmn2r121/Vmn2r124/Vmn2r128/Vmn2r129/Vmn2r13/Vmn2r130/Vmn2r14/Vmn2r15/Vmn2r16/Vmn2r17/Vmn2r18/Vmn2r19/Vmn2r2/Vmn2r20/Vmn2r21/Vmn2r22/Vmn2r23/Vmn2r24/Vmn2r25/Vmn2r26/Vmn2r27/Vmn2r28/Vmn2r29/Vmn2r3/Vmn2r30/Vmn2r31/Vmn2r32/Vmn2r33/Vmn2r34/Vmn2r35/Vmn2r36/Vmn2r37/Vmn2r38/Vmn2r39/Vmn2r4/Vmn2r40/Vmn2r41/Vmn2r42/Vmn2r43/Vmn2r44/Vmn2r45/Vmn2r47/Vmn2r48/Vmn2r49/Vmn2r5/Vmn2r50/Vmn2r51/Vmn2r52/Vmn2r53/Vmn2r54/Vmn2r55/Vmn2r56/Vmn2r57/Vmn2r58/Vmn2r59/Vmn2r6/Vmn2r60/Vmn2r61/Vmn2r62/Vmn2r63/Vmn2r65/Vmn2r66/Vmn2r67/Vmn2r68/Vmn2r69/Vmn2r7/Vmn2r70/Vmn2r71/Vmn2r72/Vmn2r73/Vmn2r74/Vmn2r75/Vmn2r76/Vmn2r77/Vmn2r78/Vmn2r79/Vmn2r8/Vmn2r80/Vmn2r81/Vmn2r82/Vmn2r83/Vmn2r84/Vmn2r85/Vmn2r86/Vmn2r87/Vmn2r9/Vmn2r90/Vmn2r91/Vmn2r92/Vmn2r93/Vmn2r94/Vmn2r95/Vmn2r96/Vmn2r97/Vmn2r98/Vmn2r99	Nvec_v1g244506
+Nvec_vc1.1_XM_001629754.3	Nvec_v1g244802:HG.Unclassified	""	Nvec_v1g244802
+Nvec_vc1.1_XM_032378043.2	sig.Pkinase.HG12.3:like:Axl/Mertk/Met/Mst1r/Tyro3		Nvec_v1g244850
+Nvec_vc1.1_XM_001629650.3	sig.GPCRrhod.HG30.15:NA		Nvec_v1g244851
+Nvec_vc1.1_XM_032377962.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g244873
+Nvec_vc1.1_XM_032377951.2	sig.Pkinase.HG3.5:Cdk4/Cdk6	Cdk4/Cdk6	Nvec_v1g244885
+Nvec_vc1.1_XM_032386160.2	sig.GPCRsecr.HG1.1:Adgre1/Adgre4/Adgre5/Adgrl1/Adgrl2/Adgrl3/Adgrl4	Adgre1/Adgre4/Adgre5	Nvec_v1g24490
+Nvec_vc1.1_XM_048724112.1	sig.FGF.HG1.2:Fgf1/Fgf2	Fgf1/Fgf2	Nvec_v1g244903
+Nvec_v1g244931	sig.GPCRrhod.HG11.0:NA		Nvec_v1g244931
+Nvec_vc1.1_XM_032377703.2	sig.RGS.HG1.15:Rgs1/Rgs2/Rgs3/Rgs4/Rgs5/Rgs6/Rgs7/Rgs8/Rgs9/Rgs11/Rgs13/Rgs16/Rgs17/Rgs18/Rgs19/Rgs20/Rgs21	Rgs17/Rgs19/Rgs20	Nvec_v1g245014
+Nvec_v1g245188	sig.Pkinase.HG6.0:NA		Nvec_v1g245188
+Nvec_vc1.1_XM_001628390.3	sig.GPCRrhod.HG12.2:NA		Nvec_v1g245559
+Nvec_vc1.1_XM_001628335.3	sig.GPCRrhod.HG6.5:NA		Nvec_v1g245565
+Nvec_vc1.1_XM_048723217.1	sig.Pkinase.HG18.1:like:Clk1/Clk2/Clk3/Clk4/Dyrk1a/Dyrk1b/Dyrk2/Dyrk3/Dyrk4/Hipk1/Hipk2/Hipk3/Hipk4/Prpf4b/Srpk1/Srpk2/Srpk3		Nvec_v1g245888
+Nvec_vc1.1_XM_001627635.3	sig.Pkinase.HG9.8:Prkce/Prkch	Prkce/Prkch	Nvec_v1g245970
+Nvec_v1g246081	sig.GPCRrhod.HG60.0:NA		Nvec_v1g246081
+Nvec_v1g246083	sig.GPCRrhod.HG60.0:NA		Nvec_v1g246083
+Nvec_vc1.1_XM_001627171.3	sig.GPCRrhod.HG63.0:NA		Nvec_v1g246188
+Nvec_vc1.1_XM_048726463.1	sig.Pkinase.HG9.20:Grk2/Grk3;sig.RGS.HG2.0:Grk2/Grk3	""	Nvec_v1g246204
+Nvec_vc1.1_XM_032374746.2	sig.GPCRrhod.HG19.5:NA		Nvec_v1g246236
+Nvec_vc1.1_XM_032382989.2	sig.GPCRrhod.HG12.32:NA		Nvec_v1g24624
+Nvec_vc1.1_XM_001626815.3	sig.Pkinase.HG3.23:Cdk9	Cdk9	Nvec_v1g246363
+Nvec_vc1.1_XM_001626757.3	sig.Pkinase.HG39.1:Plk4	Plk4	Nvec_v1g246408
+Nvec_vc1.1_XM_001626486.3	sig.GPCRrhod.HG37.5:NA		Nvec_v1g246558
+Nvec_vc1.1_XM_032373140.2	sig.Frizzled.HG1.31:like:Gpr157		Nvec_v1g246995
+Nvec_vc1.1_XM_032373112.2	sig.FGF.HG1.2:Fgf1/Fgf2	Fgf1/Fgf2	Nvec_v1g247007
+Nvec_vc1.1_XM_001625155.3	sig.TIR.HG2.13:like:Sarm1		Nvec_v1g247251
+Nvec_vc1.1_XM_032382111.2	sig.GPCRrhod.HG30.17:NA		Nvec_v1g24727
+Nvec_vc1.1_XM_048731968.1	sig.GPCRrhod.HG30.17:NA		Nvec_v1g24727
+Nvec_vc1.1_XM_001624955.3	Nvec_v1g247353:HG.Unclassified	""	Nvec_v1g247353
+Nvec_vc1.1_XM_032372038.2	sig.GPCRrhod.HG2.0:Brs3/Cckar/Cckbr/Ghsr/Gpr37/Gpr37l1/Gpr39/Grpr/Hcrtr1/Hcrtr2/Nmur1/Ntsr1/Ntsr2/Trhr2		Nvec_v1g247475
+Nvec_vc1.1_XM_032370541.2	sig.MH2.HG1.2:Smad4	Smad4	Nvec_v1g248037
+Nvec_v1g248131	sig.GPCRrhod.HG11.1:NA		Nvec_v1g248131
+Nvec_vc1.1_XM_048729133.1	sig.TIR.HG4.1:NA		Nvec_v1g248159
+Nvec_vc1.1_XM_032370157.2	sig.Fringe.HG1.0:B3gnt4/B3gnt7/B3gnt9		Nvec_v1g248175
+Nvec_vc1.1_XM_032378372.2	Nvec_v1g24822:HG.Unclassified	""	Nvec_v1g24822
+Nvec_vc1.1_XM_048731788.1	sig.Ldl_recept_b.HG1.0:like:Egf/Gm19410/Ldlr/Lrp1/Lrp1b/Lrp2/Lrp4/Lrp5/Lrp6/Lrp8/Nid1/Nid2/Sorl1/Vldlr		Nvec_v1g24848
+Nvec_vc1.1_XM_048725047.1	sig.GPCRrhod.HG6.5:NA		Nvec_v1g248555
+Nvec_vc1.1_XM_001622084.3	sig.GPCRrhod.HG6.12:NA		Nvec_v1g248556
+Nvec_vc1.1_XM_032385140.2	Nvec_v1g24865:HG.Unclassified	""	Nvec_v1g24865
+Nvec_vc1.1_XM_032380648.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g24914
+Nvec_v1g24947	sig.GPCRrhod.HG6.0:NA		Nvec_v1g24947
+Nvec_vc1.1_XM_032386057.2	sig.GPCRrhod.HG23.1:Opn1mw/Opn1sw/Opn3/Opn5/Rgr/Rho/Rrh		Nvec_v1g24997
+Nvec_vc1.1_XM_001629220.3	Nvec_v1g25017:HG.Unclassified	""	Nvec_v1g25017
+Nvec_vc1.1_XM_048731869.1	sig.GPCRrhod.HG23.1:Opn1mw/Opn1sw/Opn3/Opn5/Rgr/Rho/Rrh		Nvec_v1g25025
+Nvec_vc1.1_XM_032379183.2	sig.GPCRrhod.HG4.34:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g25137
+Nvec_vc1.1_XM_048725637.1	sig.GPCRrhod.HG4.21:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g25330
+Nvec_vc1.1_XM_032378243.2	sig.GPCRrhod.HG6.0:NA		Nvec_v1g25428
+Nvec_vc1.1_XM_032378320.2	Nvec_v1g25511:HG.Unclassified	""	Nvec_v1g25511
+Nvec_vc1.1_XM_032380675.2	sig.GPCRrhod.HG2.9:Npffr1/Npffr2	Npffr1/Npffr2	Nvec_v1g25516
+Nvec_vc1.1_XM_032379833.2	sig.Fringe.HG1.0:B3gnt4/B3gnt7/B3gnt9	B3gnt4/B3gnt7/B3gnt9	Nvec_v1g25535
+Nvec_vc1.1_XM_048728718.1	sig.GPCRsecr.HG1.1:Adgre1/Adgre4/Adgre5/Adgrl1/Adgrl2/Adgrl3/Adgrl4	Adgre1/Adgre4/Adgre5	Nvec_v1g25584
+Nvec_vc1.1_XM_032383031.2	Nvec_v1g25593:HG.Unclassified	""	Nvec_v1g25593
+Nvec_vc1.1_XM_001631895.3	sig.Ldl_recept_b.HG1.15:like:Gm19410/Ldlr/Lrp8/Vldlr		Nvec_v1g25796
+Nvec_v1g25900	sig.GPCRrhod.HG30.29:NA		Nvec_v1g25900
+Nvec_vc1.1_XM_001627529.3	sig.GPCRrhod.HG24.15:NA		Nvec_v1g26719
+Nvec_vc1.1_XM_032384121.2	sig.GPCRrhod.HG4.4:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g26815
+Nvec_vc1.1_XM_001633361.3	sig.Pkinase.HG2.14:Tssk5	Tssk5	Nvec_v1g27015
+Nvec_vc1.1_XM_032383144.2	sig.Pkinase.HG9.15:like:Grk1/Grk2/Grk3/Grk4/Grk5/Grk6/Stk32a/Stk32b/Stk32c		Nvec_v1g27751
+Nvec_vc1.1_XM_001631564.3	sig.GPCRrhod.HG37.6:NA		Nvec_v1g28065
+Nvec_vc1.1_XM_032383081.2	sig.GPCRrhod.HG37.8:NA		Nvec_v1g28106
+Nvec_vc1.1_XM_048720207.1	sig.GPCRrhod.HG37.4:NA		Nvec_v1g28225
+Nvec_vc1.1_XM_048722630.1	sig.GPCRrhod.HG12.28:NA		Nvec_v1g2877
+Nvec_vc1.1_XM_048727857.1	sig.Pkinase.HG5.17:Csk/Matk	Csk/Matk	Nvec_v1g29235
+Nvec_vc1.1_XM_032364424.2	sig.Pkinase.HG4.9:like:Epha1/Epha2/Epha3/Epha4/Epha5/Epha6/Epha7/Epha8/Epha10/Ephb1/Ephb2/Ephb3/Ephb4/Ephb6		Nvec_v1g29907
+Nvec_v1g30968	sig.GPCRrhod.HG30.1:NA		Nvec_v1g30968
+Nvec_vc1.1_XM_032384006.2	sig.Pkinase.HG22.9:Mast1/Mast3/Mast4	Mast1/Mast3/Mast4	Nvec_v1g31039
+Nvec_vc1.1_XM_032366633.2	sig.Pkinase.HG1.17:Fgfr1/Fgfr2/Fgfr3/Fgfr4	Fgfr1/Fgfr2/Fgfr3/Fgfr4	Nvec_v1g31143
+Nvec_vc1.1_XM_048724349.1	sig.Ldl_recept_b.HG1.17:like:Sorl1		Nvec_v1g31209
+Nvec_vc1.1_XM_001638140.3	sig.GPCRglut.HG1.2:Grm1/Grm2/Grm3/Grm4/Grm5/Grm6/Grm7/Grm8		Nvec_v1g31331
+Nvec_vc1.1_XM_048724349.1	sig.Ldl_recept_b.HG1.13:Lrp1/Lrp1b	Lrp1/Lrp1b	Nvec_v1g32389
+Nvec_vc1.1_XM_001637682.3	sig.GPCRrhod.HG4.10:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g33192
+Nvec_vc1.1_XM_001642034.3	sig.GPCRrhod.HG2.9:Npffr1/Npffr2	Npffr1/Npffr2	Nvec_v1g33569
+Nvec_vc1.1_XM_048734501.1	sig.GPCRrhod.HG4.19:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g33581
+Nvec_vc1.1_XM_032366785.2	sig.Pkinase.HG7.26:like:Nek1/Nek3/Nek5		Nvec_v1g33670
+Nvec_vc1.1_XM_032386181.2	Nvec_v1g33779:HG.Unclassified	""	Nvec_v1g33779
+Nvec_vc1.1_XM_032367681.2	sig.GPCRrhod.HG12.17:NA		Nvec_v1g33886
+Nvec_vc1.1_XM_032361988.2	sig.GPCRrhod.HG23.1:Opn1mw/Opn1sw/Opn3/Opn5/Rgr/Rho/Rrh		Nvec_v1g33918
+Nvec_vc1.1_XM_032364209.2	Nvec_v1g34108:HG.Unclassified	""	Nvec_v1g34108
+Nvec_vc1.1_XM_048724454.1	sig.Pkinase.HG22.8:Mastl	Mastl	Nvec_v1g34125
+Nvec_vc1.1_XM_032362986.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g34191
+Nvec_vc1.1_XM_032385685.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g34324
+Nvec_vc1.1_XM_032379871.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g34333
+Nvec_vc1.1_XM_048725506.1	sig.Pkinase.HG1.14:like:Styk1		Nvec_v1g34356
+Nvec_vc1.1_XM_032367720.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g34364
+Nvec_vc1.1_XM_001634990.3	sig.GPCRrhod.HG12.15:NA		Nvec_v1g34518
+Nvec_vc1.1_XM_048731609.1	Nvec_v1g34540:HG.Unclassified	""	Nvec_v1g34540
+Nvec_vc1.1_XM_032364209.2	Nvec_v1g34540:HG.Unclassified	""	Nvec_v1g34540
+Nvec_vc1.1_XM_032385047.2	Nvec_v1g34594:HG.Unclassified	""	Nvec_v1g34594
+Nvec_vc1.1_XM_048730108.1	sig.GPCRrhod.HG12.25:NA		Nvec_v1g34692
+Nvec_vc1.1_XM_001638273.3	sig.GPCRrhod.HG4.23:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g34809
+Nvec_vc1.1_XM_032386262.2	sig.GPCRrhod.HG2.1:like:Brs3/Cckar/Cckbr/Ffar4/Ghsr/Gpr19/Gpr22/Gpr37/Gpr37l1/Gpr39/Gpr135/Gpr176/Grpr/Hcrtr1/Hcrtr2/Nmur1/Ntsr1/Ntsr2/Trhr2		Nvec_v1g34835
+Nvec_vc1.1_XM_032364770.2	sig.GPCRrhod.HG30.26:NA		Nvec_v1g34948
+Nvec_vc1.1_XM_048731049.1	sig.GPCRrhod.HG2.4:Ffar4/Gpr19		Nvec_v1g35135
+Nvec_vc1.1_XM_032382352.2	sig.GPCRsecr.HG4.0:Gpr157	Gpr157	Nvec_v1g35189
+Nvec_vc1.1_XM_048719827.1	sig.GPCRrhod.HG30.33:NA		Nvec_v1g35490
+Nvec_vc1.1_XM_032365933.2	Nvec_v1g35687:HG.Unclassified	""	Nvec_v1g35687
+Nvec_vc1.1_XM_001633160.3	sig.Pkinase.HG3.4:Cilk1/Mak	Cilk1/Mak	Nvec_v1g3585
+Nvec_vc1.1_XM_001640046.3	sig.GPCRrhod.HG6.12:NA		Nvec_v1g35931
+Nvec_vc1.1_XM_048734019.1	sig.GPCRsecr.HG1.11:like:Adgrd1		Nvec_v1g36088
+Nvec_vc1.1_XM_048724537.1	sig.Pkinase.HG7.23:like:Nek1/Nek3/Nek5		Nvec_v1g36187
+Nvec_vc1.1_XM_032386184.2	sig.GPCRrhod.HG37.3:NA		Nvec_v1g36196
+Nvec_vc1.1_XM_001641795.3	sig.GPCRrhod.HG2.4:Ffar4/Gpr19		Nvec_v1g36686
+Nvec_vc1.1_XM_001640045.3	sig.GPCRrhod.HG6.12:NA		Nvec_v1g36879
+Nvec_vc1.1_XM_032384747.2	sig.Pkinase.HG2.25:like:Camkk1/Camkk2/Chek1/Pask/Pim1/Pim2/Pim3/Sbk1/Sbk2/Sbk3/Stk11		Nvec_v1g37225
+Nvec_vc1.1_XM_001625374.3	sig.GPCRrhod.HG4.10:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g3794
+Nvec_vc1.1_XM_032379840.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g38219
+Nvec_v1g38324	sig.GPCRrhod.HG6.12:NA		Nvec_v1g38324
+Nvec_v1g38327	sig.GPCRrhod.HG4.36:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g38327
+Nvec_vc1.1_XM_032367476.2	sig.GPCRrhod.HG2.0:Brs3/Cckar/Cckbr/Ghsr/Gpr37/Gpr37l1/Gpr39/Grpr/Hcrtr1/Hcrtr2/Nmur1/Ntsr1/Ntsr2/Trhr2		Nvec_v1g38577
+Nvec_vc1.1_XM_032367379.2	sig.GPCRsecr.HG1.19:like:Adgra1/Adgra2/Adgra3/Adgrv1		Nvec_v1g38812
+Nvec_vc1.1_XM_048732413.1	sig.GPCRrhod.HG6.12:NA		Nvec_v1g38826
+Nvec_vc1.1_XM_048732413.1	sig.GPCRrhod.HG6.12:NA		Nvec_v1g38827
+Nvec_vc1.1_XM_001637090.3	sig.Frizzled.HG1.27:Ror1/Ror2		Nvec_v1g39708
+Nvec_vc1.1_XM_001626325.3	sig.Pkinase.HG20.14:like:Gucy2c/Npr1/Npr2		Nvec_v1g40000
+Nvec_vc1.1_XM_032362808.2	sig.GPCRrhod.HG8.3:Fshr/Lgr4/Lgr5/Lhcgr/Tshr	Fshr/Lhcgr/Tshr	Nvec_v1g4007
+Nvec_vc1.1_XM_048724116.1	sig.Pkinase.HG7.5:Nek10	Nek10	Nvec_v1g40209
+Nvec_vc1.1_XM_001627303.3	sig.GPCRglut.HG1.2:Grm1/Grm2/Grm3/Grm4/Grm5/Grm6/Grm7/Grm8	Grm1/Grm2/Grm3/Grm4/Grm5/Grm6/Grm7/Grm8	Nvec_v1g40374
+Nvec_vc1.1_XM_048732948.1	sig.Pkinase.HG1.14:like:Styk1		Nvec_v1g41034
+Nvec_vc1.1_XM_048728075.1	sig.GPCRrhod.HG8.0:Rxfp1/Rxfp2	Rxfp1/Rxfp2	Nvec_v1g41295
+Nvec_vc1.1_XM_032381960.2	sig.GPCRrhod.HG12.43:NA		Nvec_v1g41512
+Nvec_vc1.1_XM_001633174.3	sig.GPCRrhod.HG12.32:NA		Nvec_v1g41719
+Nvec_vc1.1_XM_001638123.3	sig.GPCRrhod.HG12.2:NA		Nvec_v1g41807
+Nvec_vc1.1_XM_032370597.2	sig.GPCRrhod.HG4.19:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g41864
+Nvec_vc1.1_XM_032375140.2	Nvec_v1g41866:HG.Unclassified	""	Nvec_v1g41866
+Nvec_vc1.1_XM_032376170.2	sig.GPCRrhod.HG12.3:NA		Nvec_v1g42080
+Nvec_vc1.1_XM_032374552.2	sig.GPCRrhod.HG24.15:NA		Nvec_v1g42355
+Nvec_vc1.1_XM_032374552.2	sig.GPCRrhod.HG24.15:NA		Nvec_v1g42358
+Nvec_vc1.1_XM_032377513.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g42396
+Nvec_vc1.1_XM_001624760.3	sig.GPCRrhod.HG12.22:NA		Nvec_v1g42415
+Nvec_vc1.1_XM_048731133.1	sig.GPCRsecr.HG3.0:NA		Nvec_v1g42930
+Nvec_vc1.1_XM_032374437.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g43017
+Nvec_vc1.1_XM_032374432.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g43017
+Nvec_vc1.1_XM_032373896.2	sig.GPCRrhod.HG12.45:NA		Nvec_v1g43034
+Nvec_vc1.1_XM_048731968.1	sig.GPCRsecr.HG3.0:NA		Nvec_v1g43482
+Nvec_vc1.1_XM_032376538.2	sig.GPCRsecr.HG3.0:NA		Nvec_v1g43482
+Nvec_vc1.1_XM_048734006.1	sig.GPCRrhod.HG4.19:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g4350
+Nvec_v1g43778	sig.GPCRrhod.HG12.3:NA		Nvec_v1g43778
+Nvec_v1g44501	sig.GPCRrhod.HG12.3:NA		Nvec_v1g44501
+Nvec_vc1.1_XM_032375432.2	sig.GPCRrhod.HG12.5:NA		Nvec_v1g45169
+Nvec_vc1.1_XM_032387090.2	sig.Pkinase.HG9.9:Prkci/Prkcz	Prkci/Prkcz	Nvec_v1g46133
+Nvec_vc1.1_XM_032362976.2	Nvec_v1g46320:HG.Unclassified	""	Nvec_v1g46320
+Nvec_vc1.1_XM_048732891.1	sig.Pkinase.HG10.12:Map4k4/Mink1/Nrk/Tnik	Map4k4/Mink1/Nrk/Tnik	Nvec_v1g47772
+Nvec_vc1.1_XM_048720189.1	sig.GPCRrhod.HG24.6:NA		Nvec_v1g49119
+Nvec_vc1.1_XM_032371791.2	sig.GPCRrhod.HG2.0:Brs3/Cckar/Cckbr/Ghsr/Gpr37/Gpr37l1/Gpr39/Grpr/Hcrtr1/Hcrtr2/Nmur1/Ntsr1/Ntsr2/Trhr2		Nvec_v1g4953
+Nvec_vc1.1_XM_032380552.2	sig.Dishevelled.HG1.0:Dvl1/Dvl2/Dvl3	Dvl1/Dvl2/Dvl3	Nvec_v1g50431
+Nvec_vc1.1_XM_032378849.2	sig.GPCRsecr.HG1.11:like:Adgrd1		Nvec_v1g50582
+Nvec_vc1.1_XM_001631366.3	sig.GPCRrhod.HG23.1:Opn1mw/Opn1sw/Opn3/Opn5/Rgr/Rho/Rrh		Nvec_v1g50930
+Nvec_vc1.1_XM_001633255.3	sig.Pkinase.HG11.10:like:Camk2a/Camk2b/Camk2d/Camk2g/Cask		Nvec_v1g51603
+Nvec_vc1.1_XM_032381004.2	sig.GPCRrhod.HG12.1:NA		Nvec_v1g52016
+Nvec_vc1.1_XM_048727880.1	sig.GPCRrhod.HG8.0:Rxfp1/Rxfp2	Rxfp1/Rxfp2	Nvec_v1g52055
+Nvec_v1g52223	sig.GPCRrhod.HG44.0:NA		Nvec_v1g52223
+Nvec_vc1.1_XM_001632017.3	Nvec_v1g52329:HG.Unclassified	""	Nvec_v1g52329
+Nvec_vc1.1_XM_032376396.2	sig.GPCRrhod.HG30.13:NA		Nvec_v1g52556
+Nvec_vc1.1_XM_032376799.2	sig.GPCRrhod.HG4.38:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g52597
+Nvec_vc1.1_XM_032374208.2	Nvec_v1g52676:HG.Unclassified	""	Nvec_v1g52676
+Nvec_vc1.1_XM_048728991.1	sig.GPCRrhod.HG8.0:Rxfp1/Rxfp2	Rxfp1/Rxfp2	Nvec_v1g52738
+Nvec_vc1.1_XM_032381984.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g54070
+Nvec_vc1.1_XM_048720236.1	sig.GPCRrhod.HG24.9:NA		Nvec_v1g55099
+Nvec_vc1.1_XM_048722707.1	sig.GPCRrhod.HG2.0:Brs3/Cckar/Cckbr/Ghsr/Gpr37/Gpr37l1/Gpr39/Grpr/Hcrtr1/Hcrtr2/Nmur1/Ntsr1/Ntsr2/Trhr2	Hcrtr1/Hcrtr2	Nvec_v1g55551
+Nvec_vc1.1_XM_048731700.1	sig.Ldl_recept_b.HG1.19:Lrp2	Lrp2	Nvec_v1g5576
+Nvec_vc1.1_XM_001638685.3	sig.GPCRrhod.HG6.0:NA		Nvec_v1g56331
+Nvec_vc1.1_XM_032378458.2	sig.GPCRrhod.HG12.45:NA		Nvec_v1g56483
+Nvec_vc1.1_XM_032375055.2	sig.GPCRrhod.HG6.0:NA		Nvec_v1g56791
+Nvec_vc1.1_XM_048724389.1	sig.GPCRrhod.HG4.7:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g57064
+Nvec_vc1.1_XM_048723155.1	sig.GPCRrhod.HG2.9:Npffr1/Npffr2	Npffr1/Npffr2	Nvec_v1g57361
+Nvec_vc1.1_XM_032377730.2	sig.TIR.HG1.4:Il1r1/Il1rap/Il1rapl1/Il1rapl2/Il1rl1/Il1rl2/Il18r1/Il18rap/Sigirr/Tlr1/Tlr2/Tlr3/Tlr4/Tlr6/Tlr7/Tlr8/Tlr9/Tlr11/Tlr12/Tlr13		Nvec_v1g57985
+Nvec_vc1.1_XM_032377598.2	sig.Pkinase.HG48.1:Tlk1/Tlk2	Tlk1/Tlk2	Nvec_v1g5979
+Nvec_vc1.1_XM_048733305.1	sig.Pkinase.HG13.8:Araf/Braf/Raf1	Araf/Braf/Raf1	Nvec_v1g60102
+Nvec_vc1.1_XM_048722735.1	sig.Ldl_recept_b.HG1.16:like:Gm19410/Ldlr/Lrp8/Vldlr		Nvec_v1g60176
+Nvec_vc1.1_XM_048734633.1	sig.GPCRglut.HG3.0:like:Casr/Gm14496/Gprc6a/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r8/Vmn2r9/Vmn2r10/Vmn2r11/Vmn2r12/Vmn2r13/Vmn2r14/Vmn2r15/Vmn2r16/Vmn2r17/Vmn2r18/Vmn2r19/Vmn2r20/Vmn2r21/Vmn2r22/Vmn2r23/Vmn2r24/Vmn2r25/Vmn2r26/Vmn2r27/Vmn2r28/Vmn2r29/Vmn2r30/Vmn2r31/Vmn2r32/Vmn2r33/Vmn2r34/Vmn2r35/Vmn2r36/Vmn2r37/Vmn2r38/Vmn2r39/Vmn2r40/Vmn2r41/Vmn2r42/Vmn2r43/Vmn2r44/Vmn2r45/Vmn2r47/Vmn2r48/Vmn2r49/Vmn2r50/Vmn2r51/Vmn2r52/Vmn2r53/Vmn2r54/Vmn2r55/Vmn2r56/Vmn2r57/Vmn2r58/Vmn2r59/Vmn2r60/Vmn2r61/Vmn2r62/Vmn2r63/Vmn2r65/Vmn2r66/Vmn2r67/Vmn2r68/Vmn2r69/Vmn2r70/Vmn2r71/Vmn2r72/Vmn2r73/Vmn2r74/Vmn2r75/Vmn2r76/Vmn2r77/Vmn2r78/Vmn2r79/Vmn2r80/Vmn2r81/Vmn2r82/Vmn2r83/Vmn2r84/Vmn2r85/Vmn2r86/Vmn2r87/Vmn2r90/Vmn2r91/Vmn2r92/Vmn2r93/Vmn2r94/Vmn2r95/Vmn2r96/Vmn2r97/Vmn2r98/Vmn2r99/Vmn2r100/Vmn2r101/Vmn2r102/Vmn2r103/Vmn2r104/Vmn2r105/Vmn2r106/Vmn2r107/Vmn2r108/Vmn2r109/Vmn2r110/Vmn2r111/Vmn2r112/Vmn2r113/Vmn2r114/Vmn2r115/Vmn2r116/Vmn2r117/Vmn2r118/Vmn2r120/Vmn2r121/Vmn2r124/Vmn2r128/Vmn2r129/Vmn2r130/Vmn2r-ps158		Nvec_v1g60580
+Nvec_vc1.1_XM_048734637.1	sig.GPCRglut.HG3.0:like:Casr/Gm14496/Gprc6a/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r8/Vmn2r9/Vmn2r10/Vmn2r11/Vmn2r12/Vmn2r13/Vmn2r14/Vmn2r15/Vmn2r16/Vmn2r17/Vmn2r18/Vmn2r19/Vmn2r20/Vmn2r21/Vmn2r22/Vmn2r23/Vmn2r24/Vmn2r25/Vmn2r26/Vmn2r27/Vmn2r28/Vmn2r29/Vmn2r30/Vmn2r31/Vmn2r32/Vmn2r33/Vmn2r34/Vmn2r35/Vmn2r36/Vmn2r37/Vmn2r38/Vmn2r39/Vmn2r40/Vmn2r41/Vmn2r42/Vmn2r43/Vmn2r44/Vmn2r45/Vmn2r47/Vmn2r48/Vmn2r49/Vmn2r50/Vmn2r51/Vmn2r52/Vmn2r53/Vmn2r54/Vmn2r55/Vmn2r56/Vmn2r57/Vmn2r58/Vmn2r59/Vmn2r60/Vmn2r61/Vmn2r62/Vmn2r63/Vmn2r65/Vmn2r66/Vmn2r67/Vmn2r68/Vmn2r69/Vmn2r70/Vmn2r71/Vmn2r72/Vmn2r73/Vmn2r74/Vmn2r75/Vmn2r76/Vmn2r77/Vmn2r78/Vmn2r79/Vmn2r80/Vmn2r81/Vmn2r82/Vmn2r83/Vmn2r84/Vmn2r85/Vmn2r86/Vmn2r87/Vmn2r90/Vmn2r91/Vmn2r92/Vmn2r93/Vmn2r94/Vmn2r95/Vmn2r96/Vmn2r97/Vmn2r98/Vmn2r99/Vmn2r100/Vmn2r101/Vmn2r102/Vmn2r103/Vmn2r104/Vmn2r105/Vmn2r106/Vmn2r107/Vmn2r108/Vmn2r109/Vmn2r110/Vmn2r111/Vmn2r112/Vmn2r113/Vmn2r114/Vmn2r115/Vmn2r116/Vmn2r117/Vmn2r118/Vmn2r120/Vmn2r121/Vmn2r124/Vmn2r128/Vmn2r129/Vmn2r130/Vmn2r-ps158		Nvec_v1g60580
+Nvec_vc1.1_XM_032363282.2	sig.DSL.HG1.5:like:Dll1/Dll4/Jag1/Jag2		Nvec_v1g60816
+Nvec_vc1.1_XM_032385534.2	Nvec_v1g61476:HG.Unclassified	""	Nvec_v1g61476
+Nvec_vc1.1_XM_032375658.2	sig.Pkinase.HG25.8:like:Map3k8/Map3k14		Nvec_v1g61533
+Nvec_v1g61545	sig.Pkinase.HG36.11:Obscn/Speg	Obscn/Speg	Nvec_v1g61545
+Nvec_vc1.1_XM_032362149.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g61644
+Nvec_vc1.1_XM_032364058.2	Nvec_v1g61697:HG.Unclassified	""	Nvec_v1g61697
+Nvec_vc1.1_XM_048729308.1	sig.Ldl_recept_b.HG1.20:Gm19410	Gm19410	Nvec_v1g61732
+Nvec_vc1.1_XM_032364429.2	sig.GPCRsecr.HG3.0:NA		Nvec_v1g61965
+Nvec_vc1.1_XM_032364537.2	sig.GPCRrhod.HG12.23:NA		Nvec_v1g61967
+Nvec_vc1.1_XM_001639954.3	sig.GPCRrhod.HG4.0:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g6197
+Nvec_vc1.1_XM_032381976.2	sig.GPCRrhod.HG4.21:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g6224
+Nvec_vc1.1_XM_032363097.2	sig.GPCRrhod.HG24.0:NA		Nvec_v1g62323
+Nvec_vc1.1_XM_001638923.3	sig.GPCRrhod.HG31.0:NA		Nvec_v1g62354
+Nvec_v1g62515	sig.GPCRsecr.HG3.0:NA		Nvec_v1g62515
+Nvec_vc1.1_XM_032366275.2	sig.GPCRrhod.HG24.4:NA		Nvec_v1g62571
+Nvec_vc1.1_XM_048723578.1	sig.Pkinase.HG36.12:Mylk/Mylk2/Mylk3/Mylk4/Ttn	Mylk/Mylk2/Mylk3/Mylk4/Ttn	Nvec_v1g62863
+Nvec_vc1.1_XM_032371180.2	sig.GPCRrhod.HG4.11:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g63051
+Nvec_vc1.1_XM_032377056.2	sig.GPCRsecr.HG3.0:NA		Nvec_v1g6437
+Nvec_vc1.1_XM_032387246.2	sig.GPCRrhod.HG30.34:NA		Nvec_v1g64855
+Nvec_vc1.1_XM_032365055.2	Nvec_v1g64982:HG.Unclassified	""	Nvec_v1g64982
+Nvec_vc1.1_XM_048724035.1	sig.Pkinase.HG1.10:Tek/Tie1		Nvec_v1g65476
+Nvec_vc1.1_XM_032385703.2	sig.GPCRrhod.HG37.9:NA		Nvec_v1g65521
+Nvec_v1g66101	Nvec_v1g66101:HG.Unclassified	""	Nvec_v1g66101
+Nvec_vc1.1_XM_032385443.2	sig.GPCRrhod.HG12.45:NA		Nvec_v1g66315
+Nvec_vc1.1_XM_001640540.3	sig.GPCRrhod.HG63.0:NA		Nvec_v1g66332
+Nvec_v1g68237	sig.Pkinase.HG2.23:like:Sbk1/Sbk2/Sbk3		Nvec_v1g68237
+Nvec_vc1.1_XM_048727794.1	sig.Pkinase.HG3.9:Cdk7	Cdk7	Nvec_v1g6862
+Nvec_vc1.1_XM_032370760.2	sig.Pkinase.HG15.2:like:Lrrk1/Lrrk2		Nvec_v1g71335
+Nvec_vc1.1_XM_001630231.3	sig.Pkinase.HG19.0:NA		Nvec_v1g72008
+Nvec_vc1.1_XM_032367643.2	sig.GPCRsecr.HG1.24:like:Adgrd1		Nvec_v1g78835
+Nvec_vc1.1_XM_032367438.2	sig.GPCRrhod.HG18.6:NA		Nvec_v1g78890
+Nvec_vc1.1_XM_032367685.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g79076
+Nvec_vc1.1_XM_032367633.2	sig.GPCRrhod.HG12.32:NA		Nvec_v1g79242
+Nvec_vc1.1_XM_032367667.2	sig.GPCRrhod.HG2.0:Brs3/Cckar/Cckbr/Ghsr/Gpr37/Gpr37l1/Gpr39/Grpr/Hcrtr1/Hcrtr2/Nmur1/Ntsr1/Ntsr2/Trhr2		Nvec_v1g79441
+Nvec_vc1.1_XM_032367418.2	sig.GPCRrhod.HG2.0:Brs3/Cckar/Cckbr/Ghsr/Gpr37/Gpr37l1/Gpr39/Grpr/Hcrtr1/Hcrtr2/Nmur1/Ntsr1/Ntsr2/Trhr2		Nvec_v1g79502
+Nvec_vc1.1_XM_032367274.2	sig.Pkinase.HG5.5:like:Abl1/Abl2/Blk/Bmx/Btk/Csk/Fer/Fes/Fgr/Frk/Fyn/Hck/Itk/Lck/Lyn/Matk/Ptk6/Src/Srms/Tec/Txk/Yes1		Nvec_v1g79709
+Nvec_vc1.1_XM_048733724.1	sig.GPCRsecr.HG1.4:like:Adgrb1/Adgrb2/Adgrb3		Nvec_v1g79743
+Nvec_vc1.1_XM_048733823.1	sig.Pkinase.HG32.7:like:Dstyk		Nvec_v1g79816
+Nvec_vc1.1_XM_032367153.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g79851
+Nvec_vc1.1_XM_001641703.3	sig.Pkinase.HG7.22:Nek4		Nvec_v1g79897
+Nvec_vc1.1_XM_001641834.3	sig.Pkinase.HG7.28:Nek1	Nek1	Nvec_v1g79942
+Nvec_vc1.1_XM_032367120.2	Nvec_v1g79984:HG.Unclassified	""	Nvec_v1g79984
+Nvec_v1g80060	Nvec_v1g80060:HG.Unclassified	""	Nvec_v1g80060
+Nvec_vc1.1_XM_048733777.1	sig.FGF.HG1.2:Fgf1/Fgf2	Fgf1/Fgf2	Nvec_v1g80110
+Nvec_vc1.1_XM_001641530.3	sig.GPCRrhod.HG8.3:Fshr/Lgr4/Lgr5/Lhcgr/Tshr	Fshr/Lhcgr/Tshr	Nvec_v1g80429
+Nvec_vc1.1_XM_032367061.2	sig.Pkinase.HG3.16:Cdkl1/Cdkl4		Nvec_v1g80454
+Nvec_vc1.1_XM_032367095.2	sig.Activin_recp.HG1.1:Acvr1/Acvr2a/Acvr2b/Bmpr2;sig.Pkinase.HG21.1:Acvr2a/Acvr2b	""	Nvec_v1g80560
+Nvec_v1g80818	sig.Pkinase.HG36.5:like:Kalrn/Trio		Nvec_v1g80818
+Nvec_vc1.1_XM_001641583.3	sig.GPCRrhod.HG12.6:NA		Nvec_v1g81082
+Nvec_vc1.1_XM_032366574.2	sig.Pkinase.HG1.28:like:Styk1		Nvec_v1g81124
+Nvec_vc1.1_XM_001641251.3	sig.Pkinase.HG18.6:Hipk1/Hipk2/Hipk3	Hipk1/Hipk2/Hipk3	Nvec_v1g81131
+Nvec_vc1.1_XM_001641212.3	sig.GPCRsecr.HG1.17:like:Adgrd1		Nvec_v1g81203
+Nvec_vc1.1_XM_032366631.2	sig.Pkinase.HG1.17:Fgfr1/Fgfr2/Fgfr3/Fgfr4	Fgfr1/Fgfr2/Fgfr3/Fgfr4	Nvec_v1g81258
+Nvec_vc1.1_XM_032366617.2	Nvec_v1g81405:HG.Unclassified	""	Nvec_v1g81405
+Nvec_vc1.1_XM_048724211.1	sig.TIR.HG2.5:like:Sarm1		Nvec_v1g81923
+Nvec_vc1.1_XM_001641075.3	Nvec_v1g82035:HG.Unclassified	""	Nvec_v1g82035
+Nvec_vc1.1_XM_032366268.2	sig.TIR.HG1.0:Myd88	Myd88	Nvec_v1g82163
+Nvec_vc1.1_XM_001641038.3	sig.GPCRrhod.HG24.14:NA		Nvec_v1g82312
+Nvec_vc1.1_XM_001641048.3	sig.Pkinase.HG1.14:like:Styk1		Nvec_v1g82372
+Nvec_vc1.1_XM_032366232.2	Nvec_v1g82546:HG.Unclassified	""	Nvec_v1g82546
+Nvec_vc1.1_XM_032366082.2	sig.GPCRrhod.HG12.45:NA		Nvec_v1g82573
+Nvec_vc1.1_XM_032366123.2	Nvec_v1g82580:HG.Unclassified	""	Nvec_v1g82580
+Nvec_vc1.1_XM_032365978.2	sig.Pkinase.HG10.14:Slk/Stk10	Slk/Stk10	Nvec_v1g82599
+Nvec_vc1.1_XM_032366197.2	sig.GPCRrhod.HG12.33:NA		Nvec_v1g82721
+Nvec_vc1.1_XM_001640683.3	sig.GPCRrhod.HG4.8:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g82933
+Nvec_vc1.1_XM_032365933.2	Nvec_v1g83028:HG.Unclassified	""	Nvec_v1g83028
+Nvec_vc1.1_XM_032365898.2	Nvec_v1g83169:HG.Unclassified	""	Nvec_v1g83169
+Nvec_vc1.1_XM_001640469.3	sig.Pkinase.HG50.0:Bub1	Bub1	Nvec_v1g83438
+Nvec_vc1.1_XM_032365722.2	sig.GPCRsecr.HG3.0:NA		Nvec_v1g83594
+Nvec_vc1.1_XM_048719766.1	sig.Pkinase.HG34.6:Map2k3/Map2k4/Map2k6	Map2k4	Nvec_v1g83596
+Nvec_vc1.1_XM_032365721.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g83657
+Nvec_vc1.1_XM_032365556.2	sig.Ldl_recept_b.HG1.5:like:Egf/Gm19410/Ldlr/Lrp1/Lrp1b/Lrp2/Lrp4/Lrp5/Lrp6/Lrp8/Nid1/Nid2/Sorl1/Vldlr		Nvec_v1g83852
+Nvec_vc1.1_XM_048728453.1	sig.GPCRrhod.HG8.1:like:Fshr/Lgr4/Lgr5/Lhcgr/Tshr		Nvec_v1g83953
+Nvec_vc1.1_XM_032365472.2	sig.GPCRsecr.HG1.5:Celsr1/Celsr2/Celsr3	Celsr1/Celsr2/Celsr3	Nvec_v1g84228
+Nvec_vc1.1_XM_048729427.1	sig.Frizzled.HG1.27:Ror1/Ror2;sig.Pkinase.HG8.14:Ror1/Ror2	""	Nvec_v1g84420
+Nvec_vc1.1_XM_032365291.2	sig.Patched.HG1.9:Ptch1/Ptch2	Ptch1/Ptch2	Nvec_v1g84424
+Nvec_vc1.1_XM_032365365.2	sig.Pkinase.HG3.18:Cdk16/Cdk17/Cdk18	Cdk16/Cdk17/Cdk18	Nvec_v1g84454
+Nvec_vc1.1_XM_048720062.1	sig.Pkinase.HG35.1:Pdpk1	Pdpk1	Nvec_v1g84740
+Nvec_vc1.1_XM_001639997.3	sig.GPCRrhod.HG24.9:NA		Nvec_v1g84747
+Nvec_vc1.1_XM_001639974.3	sig.Pkinase.HG2.17:like:Tssk1/Tssk2/Tssk3/Tssk4/Tssk6		Nvec_v1g85087
+Nvec_vc1.1_XM_032365150.2	sig.GPCRrhod.HG6.13:NA		Nvec_v1g85129
+Nvec_vc1.1_XM_032365137.2	sig.GPCRrhod.HG6.13:NA		Nvec_v1g85129
+Nvec_vc1.1_XM_032365063.2	sig.GPCRrhod.HG23.1:Opn1mw/Opn1sw/Opn3/Opn5/Rgr/Rho/Rrh		Nvec_v1g85309
+Nvec_vc1.1_XM_032364986.2	sig.Pkinase.HG25.6:Map3k19	Map3k19	Nvec_v1g85505
+Nvec_vc1.1_XM_048725168.1	sig.Pkinase.HG13.0:Arhgap33os	Arhgap33os	Nvec_v1g85671
+Nvec_vc1.1_XM_048727799.1	sig.Pkinase.HG8.4:Alk/Igf1r/Insr/Insrr/Ltk/Ros1	Igf1r/Insr/Insrr	Nvec_v1g85808
+Nvec_vc1.1_XM_001639629.3	Nvec_v1g85851:HG.Unclassified	""	Nvec_v1g85851
+Nvec_vc1.1_XM_032364613.2	sig.GPCRrhod.HG37.9:NA		Nvec_v1g85861
+Nvec_vc1.1_XM_048728737.1	Nvec_v1g85943:HG.Unclassified	""	Nvec_v1g85943
+Nvec_vc1.1_XM_001639712.3	Nvec_v1g85995:HG.Unclassified	""	Nvec_v1g85995
+Nvec_vc1.1_XM_032371542.2	sig.GPCRsecr.HG3.0:NA		Nvec_v1g86208
+Nvec_vc1.1_XM_032364479.2	sig.RGS.HG1.11:Rgs22	Rgs22	Nvec_v1g86507
+Nvec_vc1.1_XM_048726737.1	sig.GPCRglut.HG2.13:Gabbr1/Gabbr2		Nvec_v1g86565
+Nvec_vc1.1_XM_048726890.1	sig.Pkinase.HG13.11:Ksr1/Ksr2	Ksr1/Ksr2	Nvec_v1g86629
+Nvec_vc1.1_XM_048720902.1	sig.Pkinase.HG18.2:Prpf4b	Prpf4b	Nvec_v1g86706
+Nvec_vc1.1_XM_048734006.1	sig.GPCRrhod.HG4.19:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g86951
+Nvec_vc1.1_XM_048720473.1	sig.GPCRrhod.HG11.1:NA		Nvec_v1g86966
+Nvec_vc1.1_XM_001639157.3	sig.Pkinase.HG13.9:Map3k7	Map3k7	Nvec_v1g87118
+Nvec_vc1.1_XM_048731760.1	sig.GPCRrhod.HG6.0:NA		Nvec_v1g87225
+Nvec_vc1.1_XM_048728235.1	sig.wnt.HG1.2:Wnt8a/Wnt8b	Wnt8a/Wnt8b	Nvec_v1g8735
+Nvec_vc1.1_XM_001639208.3	sig.Pkinase.HG5.13:Abl1/Abl2	Abl1/Abl2	Nvec_v1g87358
+Nvec_v1g87403	sig.GPCRrhod.HG12.42:NA		Nvec_v1g87403
+Nvec_vc1.1_XM_032363979.2	sig.Pkinase.HG1.13:Csf1r/Flt1/Flt3/Flt4/Kdr/Kit/Pdgfra/Pdgfrb	Csf1r/Flt1/Flt3/Flt4/Kdr/Kit/Pdgfra/Pdgfrb	Nvec_v1g87445
+Nvec_vc1.1_XM_032364097.2	sig.GPCRsecr.HG1.10:like:Adgrd1/Adgre1/Adgre4/Adgre5/Adgrl1/Adgrl2/Adgrl3/Adgrl4		Nvec_v1g87454
+Nvec_vc1.1_XM_048733539.1	sig.Pkinase.HG1.10:Tek/Tie1	Tek/Tie1	Nvec_v1g87477
+Nvec_vc1.1_XM_032363977.2	sig.Pkinase.HG1.13:Csf1r/Flt1/Flt3/Flt4/Kdr/Kit/Pdgfra/Pdgfrb	Csf1r/Flt1/Flt3/Flt4/Kdr/Kit/Pdgfra/Pdgfrb	Nvec_v1g87486
+Nvec_vc1.1_XM_048733511.1	sig.Pkinase.HG1.10:Tek/Tie1	Tek/Tie1	Nvec_v1g87552
+Nvec_vc1.1_XM_048733564.1	sig.GPCRrhod.HG11.1:NA		Nvec_v1g87606
+Nvec_vc1.1_XM_032364025.2	sig.TGF_beta.HG1.24:like:Bmp15/Gdf9		Nvec_v1g87636
+Nvec_vc1.1_XM_032364076.2	sig.GPCRrhod.HG12.42:NA		Nvec_v1g87682
+Nvec_vc1.1_XM_001639124.3	sig.GPCRglut.HG2.13:Gabbr1/Gabbr2		Nvec_v1g87697
+Nvec_vc1.1_XM_001639069.3	sig.GPCRrhod.HG12.22:NA		Nvec_v1g87719
+Nvec_vc1.1_XM_048733319.1	sig.Pkinase.HG5.6:like:Abl1/Abl2/Blk/Bmx/Btk/Csk/Fer/Fes/Fgr/Frk/Fyn/Hck/Itk/Lck/Lyn/Matk/Ptk6/Src/Srms/Tec/Txk/Yes1		Nvec_v1g87776
+Nvec_vc1.1_XM_032363877.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g87779
+Nvec_vc1.1_XM_032386181.2	Nvec_v1g8795:HG.Unclassified	""	Nvec_v1g8795
+Nvec_v1g87960	sig.GPCRrhod.HG6.16:NA		Nvec_v1g87960
+Nvec_vc1.1_XM_001638802.3	sig.Pkinase.HG29.1:Ttbk1/Ttbk2	Ttbk1/Ttbk2	Nvec_v1g88486
+Nvec_vc1.1_XM_032363581.2	Nvec_v1g88680:HG.Unclassified	""	Nvec_v1g88680
+Nvec_vc1.1_XM_032363552.2	sig.GPCRglut.HG1.2:Grm1/Grm2/Grm3/Grm4/Grm5/Grm6/Grm7/Grm8		Nvec_v1g88728
+Nvec_vc1.1_XM_001638660.3	sig.Pkinase.HG2.27:Hunk	Hunk	Nvec_v1g88759
+Nvec_vc1.1_XM_032363460.2	sig.Frizzled.HG1.16:Frzb/Sfrp4	Frzb/Sfrp4	Nvec_v1g88982
+Nvec_vc1.1_XM_001638629.3	sig.GPCRrhod.HG18.15:NA		Nvec_v1g89027
+Nvec_vc1.1_XM_048725596.1	sig.Pkinase.HG7.7:Pkmyt1	Pkmyt1	Nvec_v1g89125
+Nvec_vc1.1_XM_001638541.3	sig.Pkinase.HG7.25:like:Nek8		Nvec_v1g89190
+Nvec_vc1.1_XM_032363282.2	sig.DSL.HG1.5:like:Dll1/Dll4/Jag1/Jag2		Nvec_v1g89493
+Nvec_vc1.1_XM_001638419.3	sig.Fringe.HG1.1:C1galt1	C1galt1	Nvec_v1g89529
+Nvec_v1g89667	sig.GPCRrhod.HG6.11:NA		Nvec_v1g89667
+Nvec_vc1.1_XM_032363163.2	sig.TGF_beta.HG1.26:Bmp5/Bmp6/Bmp7/Bmp8a/Bmp8b	Bmp5/Bmp6/Bmp7/Bmp8a/Bmp8b	Nvec_v1g89693
+Nvec_vc1.1_XM_048734075.1	sig.GPCRglut.HG2.0:Gpr158/Gpr179		Nvec_v1g89773
+Nvec_vc1.1_XM_032363163.2	sig.TGF_beta.HG1.26:Bmp5/Bmp6/Bmp7/Bmp8a/Bmp8b	Bmp5/Bmp6/Bmp7/Bmp8a/Bmp8b	Nvec_v1g89805
+Nvec_vc1.1_XM_032362373.2	sig.GPCRglut.HG3.3:like:Casr/Gm14496/Gprc6a/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r8/Vmn2r9/Vmn2r10/Vmn2r11/Vmn2r12/Vmn2r13/Vmn2r14/Vmn2r15/Vmn2r16/Vmn2r17/Vmn2r18/Vmn2r19/Vmn2r20/Vmn2r21/Vmn2r22/Vmn2r23/Vmn2r24/Vmn2r25/Vmn2r26/Vmn2r27/Vmn2r28/Vmn2r29/Vmn2r30/Vmn2r31/Vmn2r32/Vmn2r33/Vmn2r34/Vmn2r35/Vmn2r36/Vmn2r37/Vmn2r38/Vmn2r39/Vmn2r40/Vmn2r41/Vmn2r42/Vmn2r43/Vmn2r44/Vmn2r45/Vmn2r47/Vmn2r48/Vmn2r49/Vmn2r50/Vmn2r51/Vmn2r52/Vmn2r53/Vmn2r54/Vmn2r55/Vmn2r56/Vmn2r57/Vmn2r58/Vmn2r59/Vmn2r60/Vmn2r61/Vmn2r62/Vmn2r63/Vmn2r65/Vmn2r66/Vmn2r67/Vmn2r68/Vmn2r69/Vmn2r70/Vmn2r71/Vmn2r72/Vmn2r73/Vmn2r74/Vmn2r75/Vmn2r76/Vmn2r77/Vmn2r78/Vmn2r79/Vmn2r80/Vmn2r81/Vmn2r82/Vmn2r83/Vmn2r84/Vmn2r85/Vmn2r86/Vmn2r87/Vmn2r90/Vmn2r91/Vmn2r92/Vmn2r93/Vmn2r94/Vmn2r95/Vmn2r96/Vmn2r97/Vmn2r98/Vmn2r99/Vmn2r100/Vmn2r101/Vmn2r102/Vmn2r103/Vmn2r104/Vmn2r105/Vmn2r106/Vmn2r107/Vmn2r108/Vmn2r109/Vmn2r110/Vmn2r111/Vmn2r112/Vmn2r113/Vmn2r114/Vmn2r115/Vmn2r116/Vmn2r117/Vmn2r118/Vmn2r120/Vmn2r121/Vmn2r124/Vmn2r128/Vmn2r129/Vmn2r130/Vmn2r-ps158		Nvec_v1g8981
+Nvec_vc1.1_XM_032363169.2	sig.GPCRrhod.HG30.21:NA		Nvec_v1g89857
+Nvec_vc1.1_XM_032362893.2	sig.GPCRsecr.HG1.1:Adgre1/Adgre4/Adgre5/Adgrl1/Adgrl2/Adgrl3/Adgrl4	Adgre1/Adgre4/Adgre5	Nvec_v1g90006
+Nvec_vc1.1_XM_032362974.2	Nvec_v1g90203:HG.Unclassified	""	Nvec_v1g90203
+Nvec_vc1.1_XM_048724116.1	sig.Pkinase.HG7.5:Nek10	Nek10	Nvec_v1g90306
+Nvec_vc1.1_XM_048724031.1	sig.Pkinase.HG7.20:Nek8	Nek8	Nvec_v1g90343
+Nvec_vc1.1_XM_001638104.3	sig.Pkinase.HG2.18:Tssk1/Tssk2/Tssk3/Tssk4/Tssk6	Tssk4	Nvec_v1g90415
+Nvec_vc1.1_XM_032362808.2	sig.GPCRrhod.HG8.3:Fshr/Lgr4/Lgr5/Lhcgr/Tshr	Fshr/Lhcgr/Tshr	Nvec_v1g90480
+Nvec_vc1.1_XM_001629401.3	sig.wnt.HG1.3:Wnt1/Wnt6	Wnt6	Nvec_v1g9057
+Nvec_vc1.1_XM_001638043.3	sig.GPCRrhod.HG11.1:NA		Nvec_v1g90581
+Nvec_v1g90615	sig.GPCRrhod.HG6.12:NA		Nvec_v1g90615
+Nvec_vc1.1_XM_001631362.3	sig.GPCRrhod.HG113.1:NA		Nvec_v1g90657
+Nvec_v1g90742	sig.GPCRrhod.HG18.6:NA		Nvec_v1g90742
+Nvec_vc1.1_XM_032362614.2	sig.GPCRrhod.HG4.26:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g90900
+Nvec_vc1.1_XM_032362342.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g91081
+Nvec_vc1.1_XM_032362450.2	sig.TIR.HG1.4:Il1r1/Il1rap/Il1rapl1/Il1rapl2/Il1rl1/Il1rl2/Il18r1/Il18rap/Sigirr/Tlr1/Tlr2/Tlr3/Tlr4/Tlr6/Tlr7/Tlr8/Tlr9/Tlr11/Tlr12/Tlr13		Nvec_v1g91199
+Nvec_vc1.1_XM_001637859.3	sig.Pkinase.HG10.7:Pak4/Pak5/Pak6	Pak4/Pak5/Pak6	Nvec_v1g91286
+Nvec_v1g91303	sig.GPCRrhod.HG2.7:Gpr135	Gpr135	Nvec_v1g91303
+Nvec_vc1.1_XM_032386181.2	Nvec_v1g9143:HG.Unclassified	""	Nvec_v1g9143
+Nvec_v1g91531	Nvec_v1g91531:HG.Unclassified	""	Nvec_v1g91531
+Nvec_vc1.1_XM_001637706.3	sig.Pkinase.HG16.10:Mapk4/Mapk6	Mapk4/Mapk6	Nvec_v1g91543
+Nvec_vc1.1_XM_032362183.2	sig.GPCRrhod.HG8.0:Rxfp1/Rxfp2	Rxfp1/Rxfp2	Nvec_v1g91817
+Nvec_vc1.1_XM_001637620.3	sig.wnt.HG1.5:like:Wnt2/Wnt2b/Wnt3/Wnt3a/Wnt4/Wnt5a/Wnt5b/Wnt7a/Wnt7b/Wnt11/Wnt16		Nvec_v1g91822
+Nvec_vc1.1_XM_048728011.1	Nvec_v1g91831:HG.Unclassified	""	Nvec_v1g91831
+Nvec_vc1.1_XM_048728292.1	sig.GPCRrhod.HG8.0:Rxfp1/Rxfp2	Rxfp1/Rxfp2	Nvec_v1g91883
+Nvec_vc1.1_XM_001637628.3	sig.GPCRrhod.HG11.1:NA		Nvec_v1g91936
+Nvec_vc1.1_XM_001637566.3	sig.Pkinase.HG34.4:Map2k1/Map2k2	Map2k1/Map2k2	Nvec_v1g91949
+Nvec_vc1.1_XM_001637480.3	sig.GPCRrhod.HG4.22:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g92032
+Nvec_vc1.1_XM_048734154.1	sig.Pkinase.HG16.4:Mapk8/Mapk9/Mapk10	Mapk10/Mapk8/Mapk9	Nvec_v1g92175
+Nvec_vc1.1_XM_048734489.1	sig.Frizzled.HG1.28:Smo	Smo	Nvec_v1g92220
+Nvec_vc1.1_XM_048734041.1	sig.Pkinase.HG8.11:like:Musk/Ntrk1/Ntrk2/Ntrk3/Ror1/Ror2		Nvec_v1g92237
+Nvec_vc1.1_XM_048734173.1	sig.GPCRrhod.HG24.0:NA		Nvec_v1g9290
+Nvec_vc1.1_XM_032382227.2	Nvec_v1g9297:HG.Unclassified	""	Nvec_v1g9297
+Nvec_vc1.1_XM_032387243.2	sig.Pkinase.HG17.2:Mknk1/Mknk2	Mknk1/Mknk2	Nvec_v1g93027
+Nvec_vc1.1_XM_048724932.1	sig.Pkinase.HG20.10:like:Gucy2c/Gucy2d/Gucy2e/Gucy2f/Gucy2g/Npr1/Npr2		Nvec_v1g93704
+Nvec_vc1.1_XM_048724875.1	sig.Pkinase.HG20.1:like:Gucy2c/Gucy2d/Gucy2e/Gucy2f/Gucy2g/Npr1/Npr2		Nvec_v1g93709
+Nvec_vc1.1_XM_001636940.3	sig.GPCRrhod.HG4.21:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g93785
+Nvec_vc1.1_XM_001636914.3	sig.GPCRrhod.HG24.15:NA		Nvec_v1g93808
+Nvec_vc1.1_XM_048719776.1	sig.Pkinase.HG9.6:Prkca/Prkcb/Prkcg	Prkca/Prkcb/Prkcg	Nvec_v1g93932
+Nvec_vc1.1_XM_032386836.2	sig.Pkinase.HG14.5:Ern1/Ern2	Ern1/Ern2	Nvec_v1g93936
+Nvec_v1g9397	sig.GPCRrhod.HG12.22:NA		Nvec_v1g9397
+Nvec_v1g9399	sig.GPCRrhod.HG4.34:like:Gpr50/Mtnr1a/Mtnr1b		Nvec_v1g9399
+Nvec_vc1.1_XM_032386725.2	sig.Fringe.HG1.8:like:Chsy1/Chsy3		Nvec_v1g94211
+Nvec_vc1.1_XM_032365063.2	sig.GPCRrhod.HG23.1:Opn1mw/Opn1sw/Opn3/Opn5/Rgr/Rho/Rrh		Nvec_v1g9432
+Nvec_vc1.1_XM_032386397.2	sig.Patched.HG1.5:Disp1	Disp1	Nvec_v1g94637
+Nvec_vc1.1_XM_001636588.3	sig.GPCRrhod.HG23.0:like:Opn1mw/Opn1sw/Opn3/Opn4/Opn5/Rgr/Rho/Rrh		Nvec_v1g94740
+Nvec_vc1.1_XM_032385140.2	Nvec_v1g9479:HG.Unclassified	""	Nvec_v1g9479
+Nvec_vc1.1_XM_032386379.2	sig.Pkinase.HG11.3:Phkg1/Phkg2	Phkg1/Phkg2	Nvec_v1g94804
+Nvec_vc1.1_XM_032386268.2	sig.Pkinase.HG1.13:Csf1r/Flt1/Flt3/Flt4/Kdr/Kit/Pdgfra/Pdgfrb	Csf1r/Flt1/Flt3/Flt4/Kdr/Kit/Pdgfra/Pdgfrb	Nvec_v1g94990
+Nvec_vc1.1_XM_032386265.2	sig.Pkinase.HG1.13:Csf1r/Flt1/Flt3/Flt4/Kdr/Kit/Pdgfra/Pdgfrb	Csf1r/Flt1/Flt3/Flt4/Kdr/Kit/Pdgfra/Pdgfrb	Nvec_v1g94997
+Nvec_vc1.1_XM_048733686.1	sig.Pkinase.HG2.2:Melk	Melk	Nvec_v1g95020
+Nvec_vc1.1_XM_032386302.2	sig.Pkinase.HG11.1:Dclk1/Dclk2/Dclk3	Dclk1/Dclk2	Nvec_v1g95129
+Nvec_vc1.1_XM_032386322.2	sig.GPCRrhod.HG12.45:NA		Nvec_v1g95133
+Nvec_vc1.1_XM_001636362.3	sig.HH_signal.HG1.2:like:Dhh/Ihh/Shh		Nvec_v1g95413
+Nvec_vc1.1_XM_032386021.2	sig.GPCRrhod.HG23.1:Opn1mw/Opn1sw/Opn3/Opn5/Rgr/Rho/Rrh		Nvec_v1g95791
+Nvec_vc1.1_XM_001632119.3	sig.GPCRrhod.HG11.1:NA		Nvec_v1g95925
+Nvec_vc1.1_XM_032385962.2	sig.Pkinase.HG42.1:Limk1/Limk2	Limk1/Limk2	Nvec_v1g95939
+Nvec_vc1.1_XM_048725870.1	sig.Pkinase.HG9.14:like:Grk1/Grk2/Grk3/Grk4/Grk5/Grk6/Stk32a/Stk32b/Stk32c		Nvec_v1g96056
+Nvec_vc1.1_XM_048730787.1	sig.Pkinase.HG26.3:like:Jak1/Jak2/Jak3/Syk/Tnk1/Tnk2/Tyk2/Zap70		Nvec_v1g96187
+Nvec_vc1.1_XM_032385855.2	sig.GPCRrhod.HG23.1:Opn1mw/Opn1sw/Opn3/Opn5/Rgr/Rho/Rrh		Nvec_v1g96290
+Nvec_vc1.1_XM_048731700.1	sig.Ldl_recept_b.HG1.19:Lrp2	Lrp2	Nvec_v1g96560
+Nvec_vc1.1_XM_032385677.2	sig.GPCRrhod.HG11.1:NA		Nvec_v1g96576
+Nvec_vc1.1_XM_001635943.3	sig.GPCRrhod.HG11.1:NA		Nvec_v1g96584
+Nvec_vc1.1_XM_032385634.2	sig.Pkinase.HG43.3:Gak	Gak	Nvec_v1g96644
+Nvec_vc1.1_XM_032385610.2	Nvec_v1g96957:HG.Unclassified	""	Nvec_v1g96957
+Nvec_vc1.1_XM_032385457.2	sig.Pkinase.HG36.8:Kalrn/Trio	Kalrn/Trio	Nvec_v1g96967
+Nvec_vc1.1_XM_001635738.3	sig.Pkinase.HG7.8:Wee1/Wee2	Wee1/Wee2	Nvec_v1g97030
+Nvec_vc1.1_XM_032385393.2	sig.GPCRrhod.HG30.27:NA		Nvec_v1g97288
+Nvec_vc1.1_XM_032385312.2	sig.GPCRrhod.HG12.45:NA		Nvec_v1g97413
+Nvec_v1g97421	sig.GPCRrhod.HG24.4:NA		Nvec_v1g97421
+Nvec_vc1.1_XM_001635648.3	Nvec_v1g97538:HG.Unclassified	""	Nvec_v1g97538
+Nvec_vc1.1_XM_048734487.1	sig.Pkinase.HG1.10:Tek/Tie1		Nvec_v1g9756
+Nvec_vc1.1_XM_048732752.1	Nvec_v1g97769:HG.Unclassified	""	Nvec_v1g97769
+Nvec_vc1.1_XM_001635552.3	Nvec_v1g97861:HG.Unclassified	""	Nvec_v1g97861
+Nvec_vc1.1_XM_001624193.2	Nvec_v1g9813:HG.Unclassified	""	Nvec_v1g9813
+Nvec_vc1.1_XM_001635420.3	sig.GPCRsecr.HG1.4:like:Adgrb1/Adgrb2/Adgrb3		Nvec_v1g98237
+Nvec_vc1.1_XM_032384867.2	sig.Pkinase.HG9.10:Pkn1/Pkn2/Pkn3	Pkn1/Pkn2/Pkn3	Nvec_v1g98367
+Nvec_v1g98570	sig.Pkinase.HG1.17:Fgfr1/Fgfr2/Fgfr3/Fgfr4	Fgfr1/Fgfr2/Fgfr3/Fgfr4	Nvec_v1g98570
+Nvec_vc1.1_XM_001635247.3	sig.Pkinase.HG1.17:Fgfr1/Fgfr2/Fgfr3/Fgfr4	Fgfr1/Fgfr2/Fgfr3/Fgfr4	Nvec_v1g98616
+Nvec_vc1.1_XM_048728616.1	sig.GPCRrhod.HG12.14:NA		Nvec_v1g98771
+Nvec_vc1.1_XM_032384646.2	sig.FGF.HG1.7:Fgf8/Fgf17/Fgf18	Fgf17/Fgf18/Fgf8	Nvec_v1g98908
+Nvec_vc1.1_XM_001635148.3	sig.FGF.HG1.7:Fgf8/Fgf17/Fgf18	Fgf17/Fgf18/Fgf8	Nvec_v1g98926
+Nvec_v1g99405	sig.GPCRrhod.HG23.1:Opn1mw/Opn1sw/Opn3/Opn5/Rgr/Rho/Rrh		Nvec_v1g99405
+Nvec_vc1.1_XM_032384383.2	sig.GPCRrhod.HG2.0:Brs3/Cckar/Cckbr/Ghsr/Gpr37/Gpr37l1/Gpr39/Grpr/Hcrtr1/Hcrtr2/Nmur1/Ntsr1/Ntsr2/Trhr2		Nvec_v1g99552
+Nvec_vc1.1_XM_001634828.3	sig.GPCRglut.HG1.2:Grm1/Grm2/Grm3/Grm4/Grm5/Grm6/Grm7/Grm8		Nvec_v1g99689
+Nvec_vc1.1_XM_048734634.1	sig.GPCRglut.HG3.2:like:Casr/Gm14496/Gprc6a/Tas1r1/Tas1r2/Tas1r3/Vmn2r1/Vmn2r2/Vmn2r3/Vmn2r4/Vmn2r5/Vmn2r6/Vmn2r7/Vmn2r8/Vmn2r9/Vmn2r10/Vmn2r11/Vmn2r12/Vmn2r13/Vmn2r14/Vmn2r15/Vmn2r16/Vmn2r17/Vmn2r18/Vmn2r19/Vmn2r20/Vmn2r21/Vmn2r22/Vmn2r23/Vmn2r24/Vmn2r25/Vmn2r26/Vmn2r27/Vmn2r28/Vmn2r29/Vmn2r30/Vmn2r31/Vmn2r32/Vmn2r33/Vmn2r34/Vmn2r35/Vmn2r36/Vmn2r37/Vmn2r38/Vmn2r39/Vmn2r40/Vmn2r41/Vmn2r42/Vmn2r43/Vmn2r44/Vmn2r45/Vmn2r47/Vmn2r48/Vmn2r49/Vmn2r50/Vmn2r51/Vmn2r52/Vmn2r53/Vmn2r54/Vmn2r55/Vmn2r56/Vmn2r57/Vmn2r58/Vmn2r59/Vmn2r60/Vmn2r61/Vmn2r62/Vmn2r63/Vmn2r65/Vmn2r66/Vmn2r67/Vmn2r68/Vmn2r69/Vmn2r70/Vmn2r71/Vmn2r72/Vmn2r73/Vmn2r74/Vmn2r75/Vmn2r76/Vmn2r77/Vmn2r78/Vmn2r79/Vmn2r80/Vmn2r81/Vmn2r82/Vmn2r83/Vmn2r84/Vmn2r85/Vmn2r86/Vmn2r87/Vmn2r90/Vmn2r91/Vmn2r92/Vmn2r93/Vmn2r94/Vmn2r95/Vmn2r96/Vmn2r97/Vmn2r98/Vmn2r99/Vmn2r100/Vmn2r101/Vmn2r102/Vmn2r103/Vmn2r104/Vmn2r105/Vmn2r106/Vmn2r107/Vmn2r108/Vmn2r109/Vmn2r110/Vmn2r111/Vmn2r112/Vmn2r113/Vmn2r114/Vmn2r115/Vmn2r116/Vmn2r117/Vmn2r118/Vmn2r120/Vmn2r121/Vmn2r124/Vmn2r128/Vmn2r129/Vmn2r130/Vmn2r-ps158		Nvec_v1g99708
+Nvec_vc1.1_XM_032384308.2	sig.GPCRrhod.HG24.0:NA		Nvec_v1g99718
+Nvec_vc1.1_XM_032384309.2	sig.Pkinase.HG39.0:Ttk	Ttk	Nvec_v1g99786
+Nvec_vc1.1_XM_048734688.1	sig.Patched.HG1.10:Npc1/Npc1l1	Npc1/Npc1l1	Nvec_v1g99833
+Nvec_vc1.1_XM_048734496.1	sig.Pkinase.HG36.12:Mylk/Mylk2/Mylk3/Mylk4/Ttn	Mylk/Mylk2/Mylk3/Mylk4/Ttn	Nvec_v1g99878
