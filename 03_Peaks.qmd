@@ -81,13 +81,19 @@ Define directories to save the results to.
 ```{r}
 #| label: dirs
 
-# define directories
+# input directories
 adult_dir <- "ArchRProj_Nvec_TSS4_frag200"
 gastr_dir <- "ArchRProj_Nvec_gastrula"
+
+# gene annotations
 ann_dir <- "annotation"
-pks_dir <- "Results/Peaks"
+gen_ann <- fread(file.path(ann_dir, "Nematostella_DToL_FINAL.tsv"))
+tfs_ann <- fread(file.path(ann_dir, "Nematostella_DToL_TFs_FINAL.tsv"))
+
+# output directories
+pks_dir <- "results/Peaks"
 dir.create(pks_dir, showWarnings = FALSE)
-fig_dir <- "Plots/Peaks"
+fig_dir <- "plots/Peaks"
 dir.create(fig_dir, showWarnings = FALSE)
 ```
 
@@ -954,7 +960,7 @@ tau_dt[, n_cell_types := NULL]
 pks_dt <- merge.data.table(pks_dt, tau_dt, by = c("gene", "cell_type"), all.x = TRUE)
 
 # save
-fwrite(pks_dt, file.path(pks_dir, "Peaks_cell_type_promoter_annotation.tsv"), sep = "\t")
+fwrite(pks_dt, file.path(pks_dir, "Peaks_cell_type_promoter_annotation.tsv.gz"), sep = "\t")
 
 ```
 
@@ -962,11 +968,8 @@ fwrite(pks_dt, file.path(pks_dir, "Peaks_cell_type_promoter_annotation.tsv"), se
 
 ```{r}
 # load peaks data
-pks_dt <- fread(file.path(pks_dir, "Peaks_cell_type_promoter_annotation.tsv"))
+pks_dt <- fread(file.path(pks_dir, "Peaks_cell_type_promoter_annotation.tsv.gz"))
 pks_dt <- unique(pks_dt[, .(peak, id, cell_type, stage, gene, gene_expression_fc, gene_tau_index, promoter)])
-
-# load gene expression data
-# gen_dt <- fread(file.path())
 
 # get data for promoters peaks only
 pro_cols <- c(
@@ -981,6 +984,54 @@ pro_dt[, promoter := factor(promoter, levels = names(pro_cols))]
 setorder(pro_dt, gene, promoter)
 pro_dt <- pro_dt[, .SD[1], .(gene, stage)]
 setnames(pro_dt, "promoter", "gene_promoter")
+
+# gene lists for functional enrichment
+gl_fns <- list.files(
+  ann_dir, pattern = ".*Nvec_genes.curated_DToL_names.tsv", full.names = TRUE
+)
+names(gl_fns) <- str_remove(basename(gl_fns), "\\.Nvec_genes.curated_DToL_names.tsv")
+gl_dt <- rbindlist(sapply(names(gl_fns), function(x) {
+  fread(gl_fns[x], header = TRUE)[, 1]
+}, simplify = FALSE, USE.NAMES = TRUE), idcol = "genelist")
+gl_dt <- unique(gl_dt[, .(genelist, gene)])
+gl_dt <- gl_dt[!genelist %in% c("neu")]
+
+# supplement with go
+go_annotations <- readRDS(file.path(ann_dir, "Nvec_ensembl.GO.rds"))
+go_map_dt <- data.table(
+    gene = rep(names(go_annotations), sapply(go_annotations, length)),
+    category = unlist(go_annotations)
+)
+selected_gos <- list(
+  ion = c(
+    "intracellular calcium ion homeostasis" = "GO:0055074",
+    "monoatomic ion transport" = "GO:0006811",
+    "bicarbonate transport" = "GO:0015701"
+  ),
+  cal = c(
+    "metabolic process" = "GO:0008152",
+    "catalytic activity" = "GO:0003824",
+    "lyase activity" = "GO:0016829"
+  )
+)
+gl_add <- rbindlist(sapply(names(selected_gos), function(x) {
+  unique(go_map_dt[category %in% selected_gos[[x]]])
+}, simplify = FALSE, USE.NAMES = TRUE), idcol = "genelist")
+gl_dt <- rbindlist(list(gl_dt, gl_add), fill = TRUE)
+
+# add full names
+gl_full_names <- c(
+  "cal" = "metabolism",
+  "ion" = "ion transport",
+  "adh" = "adhesion",
+  "sig" = "signaling",
+  "tfs" = "TFs",
+  "chr" = "chromatin",
+  "rbp" = "RNA BPs"
+)
+gl_dt[, genelist_full := gl_full_names[genelist]]
+gl_dt[, genelist_full := factor(genelist_full, levels = gl_full_names)]
+
 ```
 
 ### Number of peaks
@@ -1055,53 +1106,6 @@ ggsave(
 Number of peaks per gene for different functional gene classes.
 
 ```{r}
-# gene lists
-gl_fns <- list.files(
-  ann_dir, pattern = ".*Nvec_genes.curated_DToL_names.tsv", full.names = TRUE
-)
-names(gl_fns) <- str_remove(basename(gl_fns), "\\.Nvec_genes.curated_DToL_names.tsv")
-gl_dt <- rbindlist(sapply(names(gl_fns), function(x) {
-  fread(gl_fns[x], header = TRUE)[, 1]
-}, simplify = FALSE, USE.NAMES = TRUE), idcol = "genelist")
-gl_dt <- unique(gl_dt[, .(genelist, gene)])
-gl_dt <- gl_dt[!genelist %in% c("neu")]
-
-# supplement with go
-go_annotations <- readRDS(file.path(ann_dir, "Nvec_ensembl.GO.rds"))
-go_map_dt <- data.table(
-    gene = rep(names(go_annotations), sapply(go_annotations, length)),
-    category = unlist(go_annotations)
-)
-selected_gos <- list(
-  ion = c(
-    "intracellular calcium ion homeostasis" = "GO:0055074",
-    "monoatomic ion transport" = "GO:0006811",
-    "bicarbonate transport" = "GO:0015701"
-  ),
-  cal = c(
-    "metabolic process" = "GO:0008152",
-    "catalytic activity" = "GO:0003824",
-    "lyase activity" = "GO:0016829"
-  )
-)
-gl_add <- rbindlist(sapply(names(selected_gos), function(x) {
-  unique(go_map_dt[category %in% selected_gos[[x]]])
-}, simplify = FALSE, USE.NAMES = TRUE), idcol = "genelist")
-gl_dt <- rbindlist(list(gl_dt, gl_add), fill = TRUE)
-
-# add full names
-gl_full_names <- c(
-  "cal" = "metabolism",
-  "ion" = "ion transport",
-  "adh" = "adhesion",
-  "sig" = "signaling",
-  "tfs" = "TFs",
-  "chr" = "chromatin",
-  "rbp" = "RNA BPs"
-)
-gl_dt[, genelist_full := gl_full_names[genelist]]
-gl_dt[, genelist_full := factor(genelist_full, levels = gl_full_names)]
-
 # fraction of genes in a genelist with each promoter class (CP vs SP)
 gn_pt <- unique(pro_dt[, .(gene, gene_promoter, stage)])
 gl_dt_1 <- merge.data.table(gl_dt, gn_pt, by = "gene", sort = FALSE)
@@ -1179,9 +1183,9 @@ ggsave(
 
 ```
 
-### Number of cell types (pleiotropy)
+### Number of cell types
 
-N cell types with expression FC > X (or Tau score) vs N CREs (boxplots).
+Summarize number of cell types nad number of peaks. 
 
 ```{r}
 # number of cell types where gene is expressed
@@ -1203,6 +1207,11 @@ cre_dt <- cre_dt[gene_promoter != "AP"]
 cre_dt[, n_cell_types := factor(n_cell_types, levels = sort(unique(cre_dt$n_cell_types)))]
 cre_dt[, gene_promoter := factor(gene_promoter, levels = names(pro_cols))]
 
+```
+
+Number of peaks per gene, and number of genes, stratified per different promoter types (SP vs CP).
+
+```{r}
 # plot number of peaks per gene
 gp_1 <- ggplot(cre_dt, aes(
     x = n_cell_types, y = n_peaks_per_gene_all_cell_type,
@@ -1313,7 +1322,7 @@ ggsave(
 tau_dt <- unique(cre_dt[, .(gene, gene_promoter, gene_tau_index, n_peaks_per_gene_all_cell_type, n_peaks_per_gene_not_promoters)])
 tau_dt[, tau_bin := cut(
     gene_tau_index, 
-    breaks = c(0, 0.6, 0.8, 1), 
+    breaks = c(0, 0.6, 0.7, 0.8, 0.9, 1), 
     include.lowest = TRUE
 )]
 
@@ -1337,19 +1346,26 @@ gp_tau_1 <- ggplot(
   ) +
   labs(x = "", y = "# peaks\nper gene")
 
+require(ggpubr)
 gp_tau_2 <- ggplot(
     tau_dt[!is.na(gene_tau_index)],
     aes(x = tau_bin, y = n_peaks_per_gene_not_promoters, fill = gene_promoter, color = gene_promoter)
   ) +
   geom_boxplot() +
+  stat_compare_means(
+    label = "p.signif", hide.ns = TRUE,
+    method = "t.test", 
+    method.args = list(formula = n_peaks_per_gene_not_promoters ~ gene_promoter)
+  ) +
   scale_fill_manual(values = pro_cols, drop = FALSE) +
   scale_color_manual(values = structure(
     colorspace::darken(pro_cols, 0.5),
     names = names(pro_cols)
   )) +
   scale_y_continuous(
-    limits = c(0, quantile(cre_dt$n_peaks_per_gene_not_promoters, 0.99)),
-    oob = scales::squish
+    limits = c(0, quantile(cre_dt$n_peaks_per_gene_not_promoters, 0.995)),
+    oob = scales::squish,
+    expand = expansion(mult = c(0.1, 0.1))
   ) +
   theme(
     axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
@@ -1371,14 +1387,14 @@ gp_tau_3 <- ggplot(
     axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
     legend.position = "none"
   ) +
-  labs(x = "Tau", y = "# genes")
+  labs(x = "Tau index", y = "# genes")
 
 
 gp_tau <- gp_tau_1 / gp_tau_2 / gp_tau_3
 
 ggsave(
     file.path(fig_dir, "num_pks_gene_expression_tau.pdf"),
-    gp_tau, width = 3, height = 8
+    gp_tau, width = 4, height = 9
 )
 
 # figure
@@ -1457,270 +1473,452 @@ ggsave(
 ```
 
 
-### Genes variability
+### Broad H3K4me3
 
-sz_cor for SP vs CP genes
+
+To identify genes with broad K4me3 in gene body, we trim TSS signal.
 
 ```{r}
-gstat <- switch(
-  stage,
-  "adult" = gstat_adult,
-  "gastrula" = gstat_gastr
+trim_tss <- 600
+bed <- fread("genome/Nvec_v4_merged_annotation_sort.bed")
+bed[V6=="+", V2 := V2 + trim_tss]
+bed[V6=="-", V3 := V3 - trim_tss]
+bed[, len := V3 - V2]
+fwrite(
+  bed[len > 0, 1:6],
+  sprintf("genome/Nvec_v4_merged_annotation_sort_TSS+%s.bed", trim_tss),
+  sep = "\t",
+  col.names = FALSE
 )
-if (stage == "joint") {
-  gstat <- rbindlist(list(
-    adult = gstat_adult, gastrua = gstat_gastr
-  ))
-}
-
-gstat_pro <- merge.data.table(pro_dt, gstat, by = c("gene", "stage"), all.x = TRUE)
-gstat_pro <- merge.data.table(
-  gstat_pro,
-  unique(class_peaks[, .(gene, cell_type, stage, umifrac, mcfp)]),
-  by = c("gene", "stage")
-)
-gstat_pro[, gene_promoter_2 := paste0(gene_promoter, "2")]
-gstat_pro[, gene_promoter := factor(gene_promoter, levels = c("CP", "SP", "AP"))]
-# gstat_pro <- gstat_pro[gene_promoter != "AP"]
-
-# szcor globally
-gp_szcor <- ggplot(gstat_pro, aes(umifrac, sz_cor)) +
-  ggrastr::geom_point_rast(aes(color = gene_promoter_2, shape = stage), size = 0.25, alpha = 0.7) +
-  geom_density_2d(aes(color = gene_promoter)) +
-  scale_x_continuous(
-    trans = "log10",
-    oob = scales::squish
-  ) +
-  scale_shape_manual(values = c("adult" = 16, "gastrula" = 17)) +
-  facet_grid(gene_promoter ~ stage) +
-  scale_color_manual(values = c(
-    class_cols,
-    structure(
-      colorspace::lighten(class_cols, 0.6),
-      names = paste0(names(class_cols), "2")
-    )
-  )) +
-  theme(legend.position = "none")
-
-ggsave(
-    file.path(plot_dir, sprintf("peaks_class_gene_szcor_%s.pdf", stage)),
-    gp_szcor, width = 6, height = 6.5
-)
-
-gp_szcor_box_1 <- ggplot(gstat_pro, aes(stage, sz_cor_norm)) +
-  geom_boxplot(aes(color = gene_promoter_2, fill = gene_promoter), outlier.shape = NA) +
-  scale_fill_manual(values = class_cols) +
-  scale_y_continuous(
-    limits = c(-0.1, 0.1),
-    oob = scales::squish,
-    expand = c(0.01, 0.01)
-  ) +
-  scale_color_manual(values = structure(
-    colorspace::darken(class_cols, 0.5),
-    names = paste0(names(class_cols), "2")
-  )) +
-  theme(legend.position = "none")
-gp_szcor_box_2 <- ggplot(gstat_pro, aes(gene_promoter, sz_cor_norm)) +
-  geom_boxplot(aes(color = gene_promoter_2, fill = gene_promoter), outlier.shape = NA) +
-  scale_fill_manual(values = class_cols) +
-  scale_y_continuous(
-    limits = c(-0.07, 0.07),
-    oob = scales::squish,
-    expand = c(0.01, 0.01)
-  ) +
-  scale_color_manual(values = structure(
-    colorspace::darken(class_cols, 0.5),
-    names = paste0(names(class_cols), "2")
-  )) +
-  theme(legend.position = "none")
-gp_szcor_box <- gp_szcor_box_1 + gp_szcor_box_2 + plot_layout(widths = c(2, 1))
-
-ggsave(
-    file.path(plot_dir, sprintf("peaks_class_gene_szcor_nom_box_%s.pdf", stage)),
-    gp_szcor_box, width = 4.5, height = 2.5
-)
-
-
-# szcor per cell type
-gp_szcor_ct <- ggplot(gstat_pro, aes(umifrac, sz_cor)) +
-  ggrastr::geom_point_rast(aes(color = gene_promoter_2, shape = stage), size = 0.25, alpha = 0.7) +
-  geom_density_2d(aes(color = gene_promoter)) +
-  scale_shape_manual(values = c("adult" = 16, "gastrula" = 17)) +
-  scale_x_continuous(
-    trans = "log10",
-    oob = scales::squish
-  ) +
-  facet_grid(cell_type ~ gene_promoter) +
-  scale_color_manual(values = c(
-    class_cols,
-    structure(
-      colorspace::lighten(class_cols, 0.6),
-      names = paste0(names(class_cols), "2")
-    )
-  )) +
-  theme(legend.position = "none")
-
-ggsave(
-    file.path(plot_dir, sprintf("peaks_class_gene_szcor_per_cell_type_%s.pdf", stage)),
-    gp_szcor_ct, width = 12, height = 24
-)
-
-
-gp_szcor_ct_box <- ggplot(gstat_pro, aes(cell_type, sz_cor)) +
-  geom_boxplot(aes(color = gene_promoter_2, fill = gene_promoter), outlier.shape = NA) +
-  scale_fill_manual(values = class_cols) +
-  scale_y_continuous(
-    limits = c(NA, NA), oob = scales::squish, expand = c(0.01, 0.01)
-  ) +
-  scale_color_manual(values = structure(
-    colorspace::darken(class_cols, 0.5),
-    names = paste0(names(class_cols), "2")
-  )) +
-  theme(
-    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
-    legend.position = "none"
-  )
-
-ggsave(
-    file.path(plot_dir, sprintf("peaks_class_gene_szcor_per_cell_type_box_%s.pdf", stage)),
-    gp_szcor_ct_box, width = 12, height = 6
-)
-
-# metacell level variability
-var_dt <- rbindlist(list(
-  adult = data.table(var_mc = apply(mc_adult@mc_fp, 1, var), gene = rownames(mc_adult@mc_fp)),
-  gastrula = data.table(var_mc = apply(mc_gastr@mc_fp, 1, var), gene = rownames(mc_gastr@mc_fp))
-), idcol = "stage")
-gstat_vardt <- merge.data.table(
-  gstat_pro, var_dt, by = c("gene", "stage"), all = FALSE, sort = FALSE
-)
-
-gp_mcvar_box <- ggplot(gstat_vardt, aes(gene_promoter, var_mc)) +
-  geom_boxplot(aes(color = gene_promoter_2, fill = gene_promoter), outlier.shape = NA) +
-  scale_fill_manual(values = class_cols) +
-  scale_y_continuous(
-    limits = c(NA, quantile(gstat_vardt$var_mc, 0.9, na.rm=TRUE)),
-    oob = scales::squish,
-    expand = c(0.01, 0.01)
-  ) +
-  scale_color_manual(values = structure(
-    colorspace::darken(class_cols, 0.5),
-    names = paste0(names(class_cols), "2")
-  )) +
-  theme(legend.position = "none")
-
-ggsave(
-    file.path(plot_dir, sprintf("peaks_class_gene_var_mc_box_%s.pdf", stage)),
-    gp_mcvar_box, width = 2, height = 2.5
-)
-
 ```
 
-### Peaks variability
+deeptools matrix and plot heatmap
+
+```{bash}
+# directories
+scatac_dir=$(pwd)
+chip_dir="/home/anamaria/cluster/aelek/proj/ChIPseq_nvec_v2"
+plot_dir=${scatac_dir}"/plots/Peaks"
+resu_dir=${scatac_dir}"/results/Peaks"
+
+# inputs
+tss_trim=600
+genes=${scatac_dir}"/genome/Nvec_v4_merged_annotation_sort.bed"
+genes=${scatac_dir}"/genome/Nvec_v4_merged_annotation_sort_TSS+"${tss_trim}".bed"
+bw_h3k4me3=${chip_dir}"/H3K4me3/alignments/H3K4me3.bw"
+bw_h3k4me3_gastrula=${chip_dir}"/H3K4me3_gastrula/H3K4me3_gastrula_bwa.bw"
+
+# H3K4me3 heatmap outputs
+k=8
+matrix=${resu_dir}"/deeptools.matrix.H3K4me3.TSS+"${tss_trim}"bp.gz"
+heatmap=${plot_dir}"/deeptools.heatmap.H3K4me3.TSS+"${tss_trim}"bp.k"${k}".pdf"
+
+# adult
+computeMatrix scale-regions \
+  -R ${genes} \
+  -S ${bw_h3k4me3} \
+  -b 0 -a 1000 \
+  --regionBodyLength 5000 \
+  --skipZeros \
+  -o ${matrix%%.gz}.adult.gz \
+  --outFileNameMatrix ${matrix%%.gz}.adult.tab \
+  --outFileSortedRegions ${matrix%%.gz}.adult.bed \
+  -p 32
+
+plotHeatmap -m ${matrix%%.gz}.adult.gz \
+  -out ${heatmap%%.pdf}.adult.pdf \
+  --outFileSortedRegions ${heatmap%%.pdf}.adult.bed \
+  --colorMap Blues \
+  --zMin 0 --zMax 30 \
+  --kmeans ${k} \
+  --legendLocation lower-center \
+  --dpi 100 &
+
+# gastrula
+computeMatrix scale-regions \
+  -R ${genes} \
+  -S ${bw_h3k4me3_gastrula} \
+  -b 0 -a 1000 \
+  --regionBodyLength 5000 \
+  --skipZeros \
+  -o ${matrix%%.gz}.gastrula.gz \
+  --outFileNameMatrix ${matrix%%.gz}.gastrula.tab \
+  --outFileSortedRegions ${matrix%%.gz}.gastrula.bed \
+  -p 32
+
+plotHeatmap -m ${matrix%%.gz}.gastrula.gz \
+  -out ${heatmap%%.pdf}.gastrula.pdf \
+  --outFileSortedRegions ${heatmap%%.pdf}.gastrula.bed \
+  --colorMap Blues \
+  --zMin 0 --zMax 30 \
+  --kmeans ${k} \
+  --legendLocation lower-center \
+  --dpi 100 &
+```
+
+Parse deeptools output files and save inputs for figure heatmap
 
 ```{r}
-if (!is.null(ap_dir)) {
+k <- 8
+stage <- "adult"
+stage <- "gastrula"
+k4me3_cols <- c(adult = "#853636ff", gastrula = "#d35f5fe5")
 
-  stats_peaks <- fread(file.path(ap_dir, "scATAC_reduced_peaks_gene_scores_table.tsv.gz"))[, stage := stage]
+# load data
+dtools_dt <- fread(file.path(fig_dir, sprintf(
+  "deeptools.heatmap.H3K4me3.TSS+600bp.k%s.%s.bed", k, stage
+)))
+setnames(dtools_dt, c("#chrom", "name"), c("seqnames", "gene"))
+dtools_dt <- unique(dtools_dt[, .(gene, deepTools_group)])
+dtools_dt[, deepTools_group := factor(deepTools_group, levels = paste0("cluster_", seq_len(k)))]
+dtools_dt[, rank := .I]
 
-} else {
+# add gene annotations
+gene_bed <- fread("genome/Nvec_v4_merged_annotation_sort.bed")
+gene_len <- gene_bed[, abs(V2 - V3)]
+names(gene_len) <- gene_bed$V4
+dtools_dt[, gene_length := gene_len[gene]]
+dtools_gn <- merge.data.table(
+  dtools_dt, gen_ann, by = "gene", all.x = TRUE, sort = FALSE
+)
+fwrite(
+  dtools_gn,
+  file.path(pks_dir, sprintf("deeptools_groups_TSS+600bp_k%s.%s.tsv", k, stage)),
+  sep = "\t"
+)
 
-  stats_peaks_adult <- fread(file.path(adult_pks_dir, "scATAC_reduced_peaks_gene_scores_table.tsv.gz"))
-  setnames(stats_peaks_adult, "peak", "peak_adult")
-  stats_peaks_adult <- merge.data.table(
-    stats_peaks_adult,
-    unique(pks_map[, .(peak, peak_adult)][peak_adult != ""]),
-    by = "peak_adult", all.x = TRUE
+# save bed files for figure heatmap
+# check which clusterr is broad in the heatmap
+cl_fg <- c( "adult" = "cluster_1", "gastrula" = "cluster_1")
+cl_bg <- c("adult" = "cluster_6", "gastrula" = "cluster_5")
+cl <- c("broad" = unname(cl_fg[stage]), "control" = unname(cl_bg[stage]))
+for (x in c("broad", "control")) {
+  fwrite(
+    gene_bed[V4 %in% dtools_gn[deepTools_group == cl[x]]$gene],
+    file.path(fig_dir, sprintf("Nvec_v4_merged_annotation_sort_%s_%s.bed", x, stage)),
+    sep = "\t", col.names = FALSE
   )
-  stats_peaks_adult[, peak_adult := NULL]
-  stats_peaks_gastr <- fread(file.path(gastr_pks_dir, "scATAC_reduced_peaks_gene_scores_table.tsv.gz"))
-  setnames(stats_peaks_gastr, "peak", "peak_gastrula")
-  stats_peaks_gastr <- merge.data.table(
-    stats_peaks_gastr,
-    unique(pks_map[, .(peak, peak_gastrula)][peak_gastrula != ""]),
-    by = "peak_gastrula", all.x = TRUE
-  )
-  stats_peaks_gastr[, peak_gastrula := NULL]
-  stats_peaks <- rbindlist(list(
-    gastrula = stats_peaks_gastr, adult = stats_peaks_adult
-  ), use.names = TRUE, idcol = "stage")
-
 }
+```
 
-stats_peaks <- unique(stats_peaks[, .(gene, peak, stage, dist_to_tss, peak_gini, peak_gini_scaled, mean_corr)])
-setnames(stats_peaks, "mean_corr", "expression_correlation")
+How many broad domain genes are in adult/gastrula/intersect?
 
-# combine
-var_dt <- merge.data.table(class_peaks, stats_peaks, by = c("gene", "peak", "stage"))
-var_dt <- merge.data.table(var_dt, pro_dt, by = c("gene", "stage"), sort = FALSE)
-var_dt[, cre := ifelse(promoter == "NO", "enhancer", "promoter")]
-var_dt[, cre_class := promoter][cre_class == "NO", cre_class := "enhancer"]
-var_dt[, cre_class := factor(cre_class, levels = c("CP", "SP", "AP", "enhancer"))]
+```{r}
+# how many overlapping broad domain genes?
+broad_dt <- rbindlist(sapply(c("adult", "gastrula"), function(stage)
+  fread(file.path(fig_dir, sprintf("Nvec_v4_merged_annotation_sort_broad_%s.bed", stage))),
+  simplify = FALSE, USE.NAMES = TRUE
+), idcol = "stage")
+broad_dt[, gene_length := abs(V3 - V2)]
+setnames(broad_dt, "V4", "gene")
+broad_dt <- broad_dt[, .(stage, gene, gene_length)]
 
-# plot
-cre_cols <- c(class_cols, "promoter" = "#4393c3", "enhancer" = "#4ba068")
-gp_list <- lapply(c("CP", "SP", "AP", "enhancer"), function(x) {
-  ggplot(var_dt[cre_class == x], aes(score, peak_gini)) + 
-    stat_density_2d(aes(fill = ..density..), geom = "raster", contour = FALSE) +
-    scale_x_continuous(trans = "log10", limits = c(0.1, 2), oob = squish, expand = c(0, 0)) +
-    scale_y_continuous(limits = c(0.4, 1), oob = squish, expand = c(0, 0)) +
-    scale_fill_gradientn(colours = c(colorspace::lighten(cre_cols[x], 0.995), cre_cols[x])) +
-    labs(x = "peak accessibility", y = "peak variability", title = x)
-})
-gp_pvar <- wrap_plots(gp_list) +
+broad_dc <- dcast.data.table(broad_dt, gene ~ stage, value.var = "gene_length")
+broad_mt <- as.matrix(broad_dc[, -1])
+broad_mt[!is.na(broad_mt)] <- 1
+broad_mt[is.na(broad_mt)] <- 0
+
+require(eulerr)
+fit <- euler(broad_mt)
+p1 <- plot(
+  fit,
+  quantities = TRUE,
+  fill = k4me3_cols,
+  labels = list(font = 4)
+)
+pdf(
+  file.path(fig_dir, "broad_H3K4me3_genes_ovl.pdf"),
+  width = 4, height = 2
+)
+print(p1)
+dev.off()
+```
+
+Expression for genes in different deeptools clusters of H3K4me3
+
+```{r}
+# deep tools clusters
+dtools_dt <- rbindlist(sapply(c("adult", "gastrula"), function(stage)
+  fread(file.path(pks_dir, sprintf("deeptools_groups_TSS+600bp_k%s.%s.tsv", k, stage))),
+  simplify = FALSE, USE.NAMES = TRUE
+), idcol = "stage")
+
+# expression data
+pks_dt <- fread(file.path(pks_dir, "Peaks_cell_type_promoter_annotation.tsv.gz"))
+exp_dt <- unique(pks_dt[, .(gene, cell_type, stage, gene_expression_fc, gene_expression_umifrac, gene_tau_index)])
+exp_dt[, n_stages := length(unique(.SD$stage)), gene]
+exp_dt[, n_cell_types := length(unique(.SD[gene_expression_fc > fcthr]$cell_type)), gene]
+
+# add deeptools cluster info
+dtools_exptop <- merge.data.table(
+  dtools_dt[, .(gene, stage, deepTools_group)],
+  exp_dt, by = c("gene", "stage")
+)
+
+# top expression fc per gene
+dtools_exptop <- dtools_exptop[!is.na(gene_expression_umifrac)][order(stage, -gene_expression_fc)][, .SD[1], .(gene, stage)]
+dtools_exptop[, gene_expression_fc := pmin(gene_expression_fc, 6)]
+
+# category for plot
+dtools_exptop <- dtools_exptop[
+  (stage == "adult" & deepTools_group %in% c(cl_fg["adult"], cl_bg["adult"])) |
+  (stage == "gastrula" & deepTools_group %in% c(cl_fg["gastrula"], cl_bg["gastrula"]))
+]
+dtools_exptop[, category := stage]
+dtools_exptop[
+  (stage == "adult" & deepTools_group %in% cl_bg["adult"]) |
+  (stage == "gastrula" & deepTools_group %in% cl_bg["gastrula"])
+, category := "other"]
+dtools_exptop[, category_short := substr(category, 1, 1)]
+dtools_exptop[, category_short := factor(category_short, levels = c("a", "g", "o"))]
+
+# plot joint
+gp_umi <- ggplot(dtools_exptop, aes(category_short, gene_expression_umifrac, fill = category, color = category)) +
+  geom_boxplot(outlier.shape = 21) +
+  ggpubr::stat_compare_means(
+    label = "p.signif", hide.ns = TRUE, method = "wilcox", 
+    comparisons = list(c("g", "o"), c("a", "o"))
+  ) +
+  scale_y_continuous(
+    limits = c(NA, quantile(dtools_exptop$gene_expression_umifrac, 0.98, na.rm = TRUE)), oob = squish,
+    expand = expansion(mult = c(0.1, 0.12)),
+    breaks = scales::pretty_breaks(n = 4)
+  ) +
+  scale_fill_manual(values = c(k4me3_cols, "other" = "#757575ff")) +
+  scale_color_manual(values = colorspace::darken(c(k4me3_cols, "other" = "#757575ff"), 0.5)) +
+  labs(x = "", y = "gene\n expression UMI frac")
+gp_fc <- ggplot(dtools_exptop, aes(category_short, gene_expression_fc, fill = category, color = category)) +
+  geom_boxplot(outlier.shape = 21) +
+  ggpubr::stat_compare_means(
+    label = "p.signif", hide.ns = TRUE, method = "wilcox", 
+    comparisons = list(c("g", "o"), c("a", "o"))
+  ) +
+  scale_y_continuous(
+    expand = expansion(mult = c(0.1, 0.12)),
+    breaks = scales::pretty_breaks(n = 4)
+  ) +
+  scale_fill_manual(values = c(k4me3_cols, "other" = "#757575ff")) +
+  scale_color_manual(values = colorspace::darken(c(k4me3_cols, "other" = "#757575ff"), 0.5)) +
+  labs(x = "", y = "gene\nexpression FC")
+gp_tau <- ggplot(dtools_exptop, aes(category_short, gene_tau_index, fill = category, color = category)) +
+  geom_boxplot(outlier.shape = 21) +
+  ggpubr::stat_compare_means(
+    label = "p.signif", hide.ns = TRUE, method = "wilcox", 
+    comparisons = list(c("g", "o"), c("a", "o"))
+  ) +
+  scale_y_continuous(
+    limits = c(NA, quantile(dtools_exptop$gene_tau_index, 0.98, na.rm = TRUE)), oob = squish, 
+    expand = expansion(mult = c(0.1, 0.2)),
+    breaks = scales::pretty_breaks(n = 4)
+  ) +
+  scale_fill_manual(values = c(k4me3_cols, "other" = "#757575ff")) +
+  scale_color_manual(values = colorspace::darken(c(k4me3_cols, "other" = "#757575ff"), 0.5)) +
+  labs(x = "", y = "Tau index")
+gp_ncts <- ggplot(dtools_exptop, aes(category_short, n_cell_types, fill = category, color = category)) +
+  geom_boxplot(outlier.shape = 21) +
+  ggpubr::stat_compare_means(
+    label = "p.signif", hide.ns = TRUE, method = "wilcox", 
+    comparisons = list(c("g", "o"), c("a", "o"))
+  ) +
+  scale_y_continuous(
+    expand = expansion(mult = c(0.1, 0.1)),
+    breaks = scales::pretty_breaks(n = 4)
+  ) +
+  scale_fill_manual(values = c(k4me3_cols, "other" = "#757575ff")) +
+  scale_color_manual(values = colorspace::darken(c(k4me3_cols, "other" = "#757575ff"), 0.5)) +
+  labs(x = "", y = "# expression\ndomains")
+gp_exp <- gp_umi + gp_fc + gp_tau + gp_ncts + 
   plot_layout(nrow = 1, guides = "collect") & theme(legend.position = "bottom")
 ggsave(
-    file.path(plot_dir, sprintf("peaks_var_%s.pdf", stage)),
-    gp_pvar, width = 9.5, height = 3.5
+  file.path(fig_dir, "broad_H3K4me3_genes_exp_joint.pdf"),
+  gp_exp, width = 7, height = 3
 )
 ```
 
-### GC content
+Functional enrichment for different deeptools clusters of H3K4me3
 
 ```{r}
-# sequence
-dna_fn <- file.path("..", "..", "genome", "Nvec_vc1.1_gDNA_mtDNA.fasta")
-dna <- Biostrings::readDNAStringSet(dna_fn)
-
-# get peaks ranges
-peaks_gr <- makeGRangesFromDataFrame(
-  unique(class_peaks[, .(seqnames, start, end, peak, promoter)]),
-  keep.extra.columns = TRUE
+# add gene list info
+dtools_gl <- merge.data.table(
+  dtools_dt, gl_dt[, .(gene, genelist, genelist_full)],
+  by = "gene", all.x = TRUE, sort = FALSE
 )
-
-# get peaks sequence
-peaks_seq <- dna[peaks_gr]
-
-# GC content
-gc <- letterFrequency(peaks_seq, letters="GC", as.prob=TRUE)
-peaks_gr$GC <- unlist(gc)
-peaks_dt <- setDT(as.data.frame(peaks_gr))
-setnames(peaks_dt, "G.C", "GC")
-peaks_dt[, promoter := factor(promoter, levels = c(names(class_cols), "NO"))]
+dtools_gl[is.na(genelist), genelist:= ""]
+dtools_gl <- unique(dtools_gl)
 
 # plot
-gp_gc <- ggplot(peaks_dt, aes(
-    x = promoter, y = GC,
-    fill = promoter, color = promoter
-  )) +
-  geom_boxplot(outlier.shape = 21) +
-  scale_fill_manual(values = c(class_cols, "NO" = "#319854"), drop = FALSE) +
-  scale_color_manual(values = structure(
-    colorspace::darken(c(class_cols, "#319854"), 0.5),
-    names = c(names(class_cols), "NO")
-  )) +
-  scale_y_continuous(
-    #limits = c(0, quantile(dt_gp_nop$N, 0.99)),
-    #trans = "log10",
-    oob = scales::squish
+dtools_gl_gp <- ggplot(
+    dtools_gl,
+    aes(deepTools_group, fill = genelist)
   ) +
-  theme(legend.position = "none") +
-  labs(
-    y = "non-promoter peaks",
-    x = ""
+  geom_bar(position = "stack", color = "black") +
+  scale_fill_manual(values = RColorBrewer::brewer.pal(n=9, "Blues")) +
+  scale_y_continuous(trans = "log10") +
+  theme(
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+  )
+
+ggsave(
+    file.path(fig_dir, sprintf("deeptools_groups_gene_list_annot.pdf")),
+    dtools_gl_gp, width = 6, height = 4.5
+)
+
+# add gene promoter info
+dtools_pr <- merge.data.table(
+  dtools_dt, unique(pro_dt[, .(gene, gene_promoter)]),
+  by = "gene", all.x = TRUE, sort = FALSE
+)
+dtools_pr <- dtools_pr[!is.na(gene_promoter)]
+dtools_pr <- unique(dtools_pr)
+
+# plot
+dtools_pr_gp <- ggplot(
+    dtools_pr,
+    aes(deepTools_group, fill = gene_promoter)
+  ) +
+  scale_fill_manual(values = class_cols) +
+  scale_y_continuous(trans = "log10") +
+  geom_bar(position = "stack") +
+  theme(
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
   )
 ggsave(
-    file.path(plot_dir, sprintf("peaks_gc_%s.pdf", stage)),
-    gp_gc, width = 2.5, height = 2.5
+    file.path(plot_dir, sprintf("deeptools_groups_gene_promoter_annot.pdf")),
+    dtools_pr_gp, width = 6, height = 4.5
 )
+```
+
+Are they CP or SP?
+
+```{r}
+dtools_pro <- merge.data.table(dtools_dt, pro_dt[, .(gene, gene_promoter, stage)], by = c("gene", "stage"))
+dtools_pro <- dtools_pro[deepTools_group %in% c(cl_fg, cl_bg)]
+dtools_pro[, category := paste0(stage, "_fg")]
+dtools_pro[stage == "adult" & deepTools_group %in% cl_bg["adult"], category := "adult_bg"]
+dtools_pro[stage == "gastrula" & deepTools_group %in% cl_bg["gastrula"], category := "gastrula_bg"]
+dtools_pro <- dtools_pro[gene_promoter != "AP"]
+dtools_sum <- dtools_pro[, .N, .(gene_promoter, category)]
+dtools_sum[, stage := str_extract(category, "adult|gastrula")]
+dtools_sum[, fgbg := str_extract(category, "fg|bg")]
+dtools_sum[, category := str_remove(category, "_fg")]
+dtools_sum[, category := factor(category, levels = rev(c("adult", "adult_bg", "gastrula", "gastrula_bg")))]
+setorder(dtools_sum,stage,category,fgbg,gene_promoter)
+setnames(dtools_sum, "N", "genes")
+
+dtools_dcs <- dcast.data.table(dtools_sum, gene_promoter + stage ~ fgbg, value.var = "N")
+dtools_dcs[, tot_fg := sum(fg), stage]
+dtools_dcs[, tot_bg := sum(bg), stage]
+dtools_dcs[, fg_frac := fg / sum(fg), stage]
+dtools_dcs[, bg_frac := bg / sum(bg), stage]
+dtools_dcs[, fc := fg_frac / bg_frac]
+dtools_dcs[, pval := binom.test(
+  fg, tot_fg, p = bg_frac, alternative = "greater"
+)$p.value, by = c("gene_promoter", "stage")]
+dtools_dcs[, logpval := -1 * log10(pval)]
+dtools_dcs[, qval := p.adjust(pval)]
+
+# Common limits
+xmax <- max(dtools_sum$genes) + 0.05 * max(dtools_sum$genes) 
+
+# Create CP plot (facing left)
+gp_cp <- ggplot(dtools_sum[dtools_sum$gene_promoter == "CP", ], aes(x = genes, y = category, fill = category)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values = cat_cols) +
+  scale_x_reverse(limits = c(xmax, NA), expand = expansion(mult = c(0, 0)), breaks = scales::pretty_breaks(4)) + 
+  theme(legend.position = "none", axis.text.y = element_blank(), axis.ticks.y = element_blank(), axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  labs(title = "CP", x = "Genes", y = "")
+
+# Create SP plot (facing right)
+gp_sp <- ggplot(dtools_sum[dtools_sum$gene_promoter == "SP", ], aes(x = genes, y = category, fill = category)) +
+  geom_bar(stat = "identity") +
+  scale_x_continuous(limits = c(NA, xmax), expand = expansion(mult = c(0, 0)), breaks = scales::pretty_breaks(4)) + 
+  scale_fill_manual(values = cat_cols) +
+  theme(legend.position = "none",  axis.ticks.y = element_blank(), axis.text.x = element_text(angle = -90, vjust = 0.5, hjust = 0)) +
+  labs(title = "SP", x = "Genes", y = "")
+
+# Combine the two plots with patchwork
+gp_dtools_prom <- gp_cp + gp_sp
+
+ggsave(
+  file.path(fig_dir, "broad_H3K4me3_genes_promoters_joint.pdf"),
+  gp_dtools_prom, width = 5.5, height = 2.5
+)
+```
+
+For figure, we plot heatmap and profile for full gene models
+
+```{bash}
+# directories
+scatac_dir=$(pwd)
+chip_dir="/home/anamaria/cluster/aelek/proj/ChIPseq_nvec_v2"
+plot_dir=${scatac_dir}"/plots/Peaks"
+resu_dir=${scatac_dir}"/results/Peaks"
+
+# inputs
+genes_broad=${plot_dir}"/Nvec_v4_merged_annotation_sort_broad.bed"
+genes_control=${plot_dir}"/Nvec_v4_merged_annotation_sort_control.bed"
+bw_h3k4me3=${chip_dir}"/H3K4me3/alignments/H3K4me3.bw"
+bw_h3k4me3_gastrula=${chip_dir}"/H3K4me3_gastrula/H3K4me3_gastrula_bwa.bw"
+
+# H3K4me3 heatmap outputs
+matrix=${resu_dir}"/deeptools.matrix.H3K4me3.broad.gz"
+heatmap=${plot_dir}"/deeptools.heatmap.H3K4me3.broad.pdf"
+
+# adult
+computeMatrix scale-regions \
+  -R ${genes_broad%%.bed}_adult.bed ${genes_control%%.bed}_adult.bed \
+  -S ${bw_h3k4me3} \
+  -b 3000 -a 3000 \
+  --regionBodyLength 5000 \
+  --skipZeros \
+  -o ${matrix%%.gz}.adult.gz \
+  --outFileNameMatrix ${matrix%%.gz}.adult.tab \
+  -p 32
+
+plotHeatmap -m ${matrix%%.gz}.adult.gz \
+  -out ${heatmap%%.pdf}.adult.pdf \
+  --colorMap Blues \
+  --zMin 0 --zMax 30 \
+  --legendLocation lower-center \
+  --dpi 100 &
+
+# gastrula
+computeMatrix scale-regions \
+  -R ${genes_broad%%.bed}_gastrula.bed ${genes_control%%.bed}_gastrula.bed \
+  -S ${bw_h3k4me3_gastrula} \
+  -b 3000 -a 3000 \
+  --regionBodyLength 5000 \
+  --skipZeros \
+  -o ${matrix%%.gz}.gastrula.gz \
+  --outFileNameMatrix ${matrix%%.gz}.gastrula.tab \
+  -p 32
+
+plotHeatmap -m ${matrix%%.gz}.gastrula.gz \
+  -out ${heatmap%%.pdf}.gastrula.pdf \
+  --colorMap Blues \
+  --zMin 0 --zMax 30 \
+  --legendLocation lower-center \
+  --dpi 100 &
+
+# joint
+computeMatrix scale-regions \
+  -R ${genes_broad%%.bed}_adult.bed \
+     ${genes_broad%%.bed}_gastrula.bed \
+     ${genes_control%%.bed}_adult.bed  \
+     ${genes_control%%.bed}_gastrula.bed \
+  -S ${bw_h3k4me3} ${bw_h3k4me3_gastrula} \
+  -b 3000 -a 3000 \
+  --regionBodyLength 5000 \
+  --skipZeros \
+  -o ${matrix} \
+  --outFileNameMatrix ${matrix%%.gz}.tab \
+  -p 32
+
+plotHeatmap -m ${matrix} \
+  -out ${heatmap} \
+  --colorMap Blues \
+  --zMin 0 --zMax 30 \
+  --legendLocation lower-center \
+  --dpi 100 &
+
 ```

@@ -3329,8 +3329,22 @@ saveRDS(
 Next we can update motif-to-gene assignment.
 
 ```{r}
-# load motif-to-gene assignment
+# load archetypes
 arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
+arch_fn <- file.path(arc_dir, sprintf("motif-archetypes-%s-pwms.meme", arc_id))
+arch_list <- universalmotif::read_meme(arch_fn)
+arch_nms <- sapply(arch_list, function(m) str_extract(m@name, "ARCH\\d+"))
+names(arch_list) <- arch_nms
+
+# save all motifs
+all_list <- c(arch_list, mots_mta_lst)
+write_meme(all_list, file.path(mta_dir, "motif-archetypes-all.meme"))
+
+# load archetype dictionary
+# dict <- fread(file.path(arc_dir, sprintf("motif-archetypes-%s.dict", arc_id)))
+# dict[, archetype_num := paste0("ARCH", archetype_num)]
+
+# load motif-to-gene assignment
 mta_gen_fn <- file.path(
   "Results", "Archetypes",
   sprintf("motif-assignment-archetypes-%s.tsv", arc_id)
