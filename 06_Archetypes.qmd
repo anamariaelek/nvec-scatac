@@ -96,14 +96,15 @@ Define directories to read the data from and save the results to.
 
 adult_dir <- "ArchRProj_Nvec_TSS4_frag200"
 gastr_dir <- "ArchRProj_Nvec_gastrula"
-pks_dir <- "Results/Peaks"
-arc_dir <- "Results/Archetypes"
-mta_dir <- "Results/Motifs"
+pks_dir <- "results/Peaks"
+arc_dir <- "results/Archetypes"
+mta_dir <- "results/Motifs"
 dir.create(arc_dir, showWarnings = FALSE)
-fig_dir <- "Plots/Archetypes"
+fig_dir <- "plots/Archetypes"
 dir.create(fig_dir, showWarnings = FALSE)
 ann_dir <- "annotation"
 cisbp_dir <- "CisBP"
+dap_dir <- "DAPseq"
 ```
 
 Load gene annotations.
@@ -3040,35 +3041,87 @@ ggsave(
 Besides archetypes, we will include motifs for TFs that we determined
 experimentally:
 
-1.  FoxQ2d
+- directly determined motifs from CiSBP
 
-First we will recalculate motif stats.
+```{r}
+#| label: cisbp_direct_motifs
+ 
+ # TF and motif info
+cisbp_dt <- fread(file.path(cisbp_dir, "cisbp_nvec_motifs.tsv"))
+cisbp_dt <- cisbp_dt[TF_Status == "D" & Motif_Species == "Nematostella_vectensis" & TF_Name != ""]
+
+# add tf annotations
+cisbp_dt[, c("PFAM", "name") := NULL]
+cisbp_dt <- merge.data.table(
+  cisbp_dt, tfan, by.x = "TF_Name", by.y = "gene",
+  all.x = TRUE, sort = FALSE
+)
+cisbp_dt[, TF_Common_Name := TF_Name]
+cisbp_dt[gene_name != "", TF_Common_Name := gene_name]
+cisbp_dt[common_name != "", TF_Common_Name := common_name]
+
+# genes vector
+genes_cisbp <- structure(
+  cisbp_dt$TF_Name,
+  names = cisbp_dt$TF_Common_Name
+)
+
+# TF family vector - we replace CIsBP family names with the ones we use in TF annotations
+fam_replace <- c(
+  "Homeodomain,POU" = "Pou/Homeodomain",
+  "Homeodomain" = "Homeodomains"
+)
+for (i in names(fam_replace)) {
+  cisbp_dt[Family_Name == i, Family_Name := fam_replace[i]]
+}
+tffam_cisbp <- cisbp_dt[, setNames(Family_Name, TF_Common_Name)]
+
+# motif PWMs
+cisbp_mt <- readRDS(file.path(cisbp_dir, "cisbp_nvec_motifs.rds"))
+names(cisbp_mt) <- sapply(cisbp_mt, function(m) m@name)
+cisbp_mt <- cisbp_mt[cisbp_dt$Motif_ID]
+
+# motifs vector
+motifs_cisbp <- cisbp_mt
+names(motifs_cisbp) <- cisbp_dt$TF_Common_Name
+```
+
+- motifs we retrieved from DAPseq: FoxQ2d
 
 ```{r}
 #| label: exp_motifs
 
-# genes
-genes <- c(
+# genes vector
+genes_dapseq <- c(
   "FoxQ2d" = "Nvec_vc1.1_XM_032385706.2"
 )
 
-# motifs
-motifs <- c(
-  "FoxQ2d" = file.path(mta_dir, "FoxQ2d.motif1.motif")
+# tf family vector
+tffam_dapseq <- c(
+  "FoxQ2d" = "Forkhead"
 )
+
+# motifs vector
+motifs_dapseq <- c(
+  "FoxQ2d" = mta_read_homer_mod(file.path(dap_dir, "FoxQ2d.motif1.motif"))
+)
+```
+
+First we will recalculate motif stats.
+
+```{r}
+motifs <- c(motifs_cisbp, motifs_dapseq)
 
 # load motifs
 mots_mta_lst <- sapply(names(motifs), function(x) {
-  mfn <- motifs[x]
-  mta <- mta_read_homer_mod(mfn)
+  mta <- motifs[[x]]
   mta@name <- x
   mta
 }, simplify = FALSE, USE.NAMES = TRUE)
-saveRDS(mots_mta_lst, file.path("Results", "Motifs", "motifs.rds"))
+saveRDS(mots_mta_lst, file.path("results", "Motifs", "motifs.rds"))
 
 # convert to monaLisa format
 mona_mta_lst <- mta_convert_umot_to_monalisa(mots_mta_lst)
-
 ```
 
 -   motif scores in peaks
@@ -3092,7 +3145,7 @@ seqlvl <- seqdt[[1]]
 peaks_gr <- mta_trim_granges(peaks_gr, seqdt)
 
 # scanning motifs
-q <- 0.98
+q <- 0.95
 mta_scores_mona <- mta_gw_motif_score_monalisa(
   motifs = mona_mta_lst,
   genome_object = genome,
@@ -3221,7 +3274,7 @@ bgd_peaks <- readRDS(file.path(
 
 # create binary matrix of motif hits in peaks
 arc_hits <- unique(fread(
-  file.path(mta_dir, "motif-scores-mona.tsv.gz")
+  file.path(mta_dir, sprintf("motif-scores-mona-q%s.tsv.gz", q))
 )[, .(motif, peak, motif_score)])
 setorder(arc_hits, -motif_score)
 arc_hits <- arc_hits[, .SD[1], .(motif, peak)]
@@ -3286,7 +3339,7 @@ saveRDS(chromvar_deviations, file.path(mat_dir, "chromvar_deviations.rds"))
 ```{r}
 # gene scores matrix aggregated per seacells
 gene_score_mat <- readRDS(file.path(
-    "Results", "GeneScoreMatrix",
+    "results", "GeneScoreMatrix",
     "Matrix-Gene-Scores-SEACell-FC.rds"
 ))
 
@@ -3308,8 +3361,8 @@ saveRDS(
 # gene expression matrix aggregated per SEACell
 ctfp_mat <- readRDS(
   file.path(
-    "Results", "Metacells", "metacell", 
-    "gene_expression_seacells_fc_genes_exp_FC2_acc_FC4_spearman.rds"
+    "results", "Metacells", "metacell", 
+    "gene_expression_fc_genes_exp_FC2_acc_FC4_spearman.rds"
   )
 )
 ctfp_mat <- ctfp_mat[, colnames(chromvar_mat)]
@@ -3338,7 +3391,7 @@ names(arch_list) <- arch_nms
 
 # save all motifs
 all_list <- c(arch_list, mots_mta_lst)
-write_meme(all_list, file.path(mta_dir, "motif-archetypes-all.meme"))
+write_meme(all_list, file.path(mta_dir, "motif-archetypes-all.meme"), overwrite = TRUE)
 
 # load archetype dictionary
 # dict <- fread(file.path(arc_dir, sprintf("motif-archetypes-%s.dict", arc_id)))
@@ -3346,7 +3399,7 @@ write_meme(all_list, file.path(mta_dir, "motif-archetypes-all.meme"))
 
 # load motif-to-gene assignment
 mta_gen_fn <- file.path(
-  "Results", "Archetypes",
+  "results", "Archetypes",
   sprintf("motif-assignment-archetypes-%s.tsv", arc_id)
 )
 mta_gen_dt <- fread(mta_gen_fn)
@@ -3362,9 +3415,10 @@ mot_gen_cor <- readRDS(file.path(
 ))
 
 # update existing motif assignments 
+genes <- c(genes_cisbp, genes_dapseq)
 genes_assigned <- intersect(genes, mta_gen_dt$gene)
 if (length(genes_assigned) > 0) {
-  names(genes_assigned) <- names(genes)[genes == genes_assigned]
+  names(genes_assigned) <- names(genes)[match(genes_assigned, genes)]
   genes_names <- structure(names(genes_assigned), names = genes_assigned)
   # update info
   mta_gen_dt[match(genes_assigned, gene), ':='(
@@ -3372,17 +3426,31 @@ if (length(genes_assigned) > 0) {
     archetype_family = .SD$tf_family,
     source = "experiment",
     rank = 0,
-    gene_score_correlation = mot_exp_cor[.SD$gene, genes_names[.SD$gene]],
-    gene_expression_correlation = mot_exp_cor[.SD$gene, genes_names[.SD$gene]],
+    #gene_score_correlation = mot_gen_cor[.SD$gene, genes_names[.SD$gene]],
+    #gene_expression_correlation = mot_exp_cor[.SD$gene, genes_names[.SD$gene]],
     class = "NA"
   ), by = .I]
+  mta_gen_dt[gene %in% genes_assigned & gene %in% genes_cisbp, CisBP_assignment := "assigned"]
+  mta_gen_dt[gene %in% genes_assigned & gene %in% genes_cisbp, source := "CisBP_D"]
+  for (g in genes_assigned) {
+    gsc <- tryCatch(
+      mot_gen_cor[g, genes_names[g]],
+      error = function(e) NA
+    )
+    mta_gen_dt[gene == g, gene_score_correlation := gsc]
+    gec <- tryCatch(
+      mot_exp_cor[g, genes_names[g]],
+      error = function(e) NA
+    )
+    mta_gen_dt[gene == g, gene_expression_correlation := gec]
+  }
 } 
 
 genes_unassigned <- setdiff(genes, mta_gen_dt$gene)
 
 # add motif assignments for genes with no previously assigned motifs
 if (length(genes_unassigned) > 0) {
-  names(genes_unassigned) <- names(genes)[genes == genes_unassigned]
+  names(genes_unassigned) <- names(genes)[match(genes_unassigned, genes)]
   genes_names <- structure(names(genes_unassigned), names = genes_unassigned)
   genes_data <- data.table(
     gene = genes_unassigned, source = "experiment", rank = 0, class = "NA"
@@ -3396,14 +3464,28 @@ if (length(genes_unassigned) > 0) {
   # motif info
   genes_data[, archetype_name := genes_names[.SD$gene]]
   genes_data[, archetype_family := tf_family]
-  genes_data[, assigned := FALSE]
+  genes_data[, assigned := TRUE]
   genes_data[, any_assigned := .SD$gene %in% cisbp_dta$TF_Name]
   genes_data[, CisBP_assignment := ifelse(any_assigned, "other", "none")]
+  genes_data[gene %in% genes_cisbp, CisBP_assignment := "assigned"]
+  genes_data[gene %in% genes_cisbp, source := "CisBP_D"]
   # correlation info
-  genes_data[, ':='(
-    gene_score_correlation = mot_exp_cor[.SD$gene, genes_names[.SD$gene]],
-    gene_expression_correlation = mot_exp_cor[.SD$gene, genes_names[.SD$gene]]
-  )]
+  #genes_data[, ':='(
+  #  gene_score_correlation = mot_exp_cor[.SD$gene, genes_names[.SD$gene]],
+  #  gene_expression_correlation = mot_exp_cor[.SD$gene, genes_names[.SD$gene]]
+  #)]
+  for (g in genes_data$gene) {
+    gsc <- tryCatch(
+      mot_gen_cor[g, genes_names[g]],
+      error = function(e) NA
+    )
+    genes_data[gene == g, gene_score_correlation := gsc]
+    gec <- tryCatch(
+      mot_exp_cor[g, genes_names[g]],
+      error = function(e) NA
+    )
+    genes_data[gene == g, gene_expression_correlation := gec]
+  }
   # match columns
   setcolorder(genes_data, colnames(mta_gen_dt))
   # merge with existing assignments
@@ -3434,13 +3516,13 @@ arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
 
 # archetypes assignment
 assign_dt <- fread(file.path(
-  "Results", "Motifs",
+  "results", "Motifs",
   sprintf("motif-assignment-archetypes-%s.tsv", arc_id)
 ))
 
 # gene-archetype correlations
 cor_dt <- fread(file.path(
-  "Results", 
+  "results", 
   sprintf("ChromVAR-%s", arc_id),
   "correlation-seacells-archetype-motif-score-gene.tsv.gz"
 ))
@@ -3448,13 +3530,13 @@ cor_dt <- fread(file.path(
 # archetype similarities
 sim_mat <- readRDS(
   file.path(
-    "Results", "Archetypes",
+    "results", "Archetypes",
     sprintf("motif-similarity-archetypes-%s.rds", arc_id)
   )
 )
 
 # motif enrichments
-q <- 0.98
+q <- 0.95
 enr_dt <- rbindlist(lapply(c(
   # archetypes
   file.path(arc_dir, sprintf("motif-enrichment-cell-type-archetypes-%s-mona-q%s.tsv", arc_id, q)),
@@ -3464,13 +3546,13 @@ enr_dt <- rbindlist(lapply(c(
 
 # motif deviation scores
 chromvar_mat_arc <- readRDS(file.path(
-  "Results", 
+  "results", 
   sprintf("ChromVAR-%s", arc_id), 
   "ArchetypesSEACellsMatrix",
   "Matrix-Archetypes-SEACells.rds"
 ))
 chromvar_mat_mta <- readRDS(file.path(
-  "Results", "Motifs", "ChromVAR", "MotifsSEACellsMatrix",
+  "results", "Motifs", "ChromVAR", "MotifsSEACellsMatrix",
   "Matrix-Motifs-SEACells.rds"
 ))
 # sanity scheck
@@ -3479,13 +3561,13 @@ chromvar_mat <- rbind(chromvar_mat_arc, chromvar_mat_mta)
 
 # gene expression
 exp_mt <- readRDS(file.path(
-  "Results", "Metacells", "metacell", 
+  "results", "Metacells", "metacell", 
   "gene_expression_fc_genes_exp_FC2_acc_FC4_spearman.rds"
 ))
 
 # gene scores
 acc_mt <- readRDS(file.path(
-    "Results", "GeneScoreMatrix",
+    "results", "GeneScoreMatrix",
     "Matrix-Gene-Scores-SEACell-FC.rds"
 ))
 ```
@@ -3504,8 +3586,11 @@ arc_ann_dt <- merge.data.table(
   all.x = TRUE, sort = FALSE, allow.cartesian = TRUE
 )
 
-# add archetype info
-arc_fam_dt <- unique(cor_dt[, .(archetype_name, archetype_family)])
+# add archetype family
+arc_fam_dt_1 <- unique(assign_dt[, .(archetype_name, archetype_family)])
+arc_fam_dt_2 <- unique(cor_dt[, .(archetype_name, archetype_family)])
+arc_fam_dt_2 <- arc_fam_dt_2[!archetype_name %in% arc_fam_dt_1$archetype_name]
+arc_fam_dt <- rbindlist(list(arc_fam_dt_1, arc_fam_dt_2))
 arc_ann_dt <- merge.data.table(
   arc_ann_dt, arc_fam_dt,
   by = "archetype_name", 
@@ -3534,13 +3619,16 @@ ctr <- cutree(hc, k = k)
 
 # add cluster info to datatable and select representative archetype for each cluster
 arc_ann_dt[, cluster := ctr[archetype_name]]
+# experimental motifs "clusters"
+arc_ann_dt[!archetype_name %in% rownames(sim_mat), cluster := k + as.integer(as.factor(archetype_name))]
+
+# select representative archetypes for each cluster
 # first take those archetypes that are assigned to marker genes
 arc_rep_1 <- unique(arc_ann_dt[common_name != "", .(archetype_name, cluster)])[order(cluster)]
 # for the rest of clusters, take the archetype with highest FC and cluster family assigned
 arc_rep_2 <- unique(arc_ann_dt[!cluster %in% arc_rep_1$cluster][archetype_family != ""][order(-fc), .SD[1], cluster][, .(archetype_name, cluster)][order(cluster)])
 arc_rep <- rbindlist(list(arc_rep_1, arc_rep_2))
-arc_ann_dt[!archetype_name %in% rownames(sim_mat), cluster := k + as.integer(as.factor(archetype_name))]
-arc_ann_dt[archetype_name == "FoxQ2d", archetype_family := "Forkhead"]
+
 # combine
 arc_clu_dt <- arc_ann_dt[archetype_name %in% arc_rep$archetype_name]
 
@@ -3573,10 +3661,11 @@ arc_plt_dt <- arc_clu_dt[archetype_name %in% c(arc_sig, arc_mks)]
 arc_plt_dt[, fc_scaled := pmin(fc, 6)]
 arc_plt_dt[, minuslog10padj_scaled := pmin(minuslog10padj, 30)]
 arc_plt_dt[, gene_label := ""]
-arc_plt_dt[gene != "", gene_label := str_remove(gene, "Nvec_(vc1.1_)*")]
-arc_plt_dt[gene != "" & common_name != "", gene_label := common_name]
-arc_plt_dt[gene != "" & common_name == "" & og != "", gene_label := ifelse(nchar(og)>25, paste0(substr(og, 1, 22), "..."), og)]
-arc_plt_dt[gene != "" & common_name == "" & og == "" & pfam != "", gene_label := ifelse(nchar(pfam)>25, paste0(substr(pfam, 1, 22), "..."), pfam)]
+arc_plt_dt[gene_label == "" & gene != "" & common_name != "", gene_label := common_name]
+arc_plt_dt[gene_label == "" & gene != "" & common_name == "" & gene_name != "", gene_label := gene_name]
+arc_plt_dt[gene_label == "" & gene != "" & common_name == "" & og != "", gene_label := ifelse(nchar(og)>25, paste0(substr(og, 1, 22), "..."), og)]
+arc_plt_dt[gene_label == "" & gene != "" & common_name == "" & og == "" & pfam != "", gene_label := ifelse(nchar(pfam)>25, paste0(substr(pfam, 1, 22), "..."), pfam)]
+arc_plt_dt[gene_label == "" & gene != "", gene_label := str_remove(gene, "Nvec_(vc1.1_)*")]
 arc_plt_dt[, gene_label := ifelse(
   any(.SD$common_name != ""), 
   paste(sort(unique(.SD[gene_label != "" & common_name != ""]$common_name)), collapse = ", "),
@@ -3657,11 +3746,9 @@ rownames(dev_tfs) <- assign_id$id
 
 # how many of TFs with assigned motifs are expressed genes
 mean(tfan[gene %in% rownames(exp_mt)]$gene %in% unique(assign_dt$gene))
-# 0.9850993
 
 # how many of TFs with assigned motifs are accessible genes
 mean(tfan[gene %in% rownames(acc_mt)]$gene %in% unique(assign_dt$gene))
-# 0.9889241
 
 # subset only expressed and accessible TFs
 tfs <- unique(assign_dt$gene)
@@ -3723,10 +3810,13 @@ Next we will add cell type annotations and save combined data.
 ```{r}
 # load cell type annotations for SEACells
 annot_dt <- fread(file.path(
-  "Results", "Clustering", "Annotation_Adult_Gastrula_SEACell.tsv"
+  "results", "Clustering", "Annotation_Adult_Gastrula_SEACell.tsv"
 ))
 annot_dt <- unique(annot_dt[, .(SEACell, cell_type)])
 setnames(annot_dt, "SEACell", "metacell")
+
+# keep gastrula differentiated cell types separately
+annot_dt[grepl("SEACell", metacell) & cell_type=="cnidocyte", cell_type := "cnidocyte_gastrula"]
 
 # add cell type annotations to combined table
 acc_exp_dt[, metacell := as.character(metacell)]
@@ -3747,7 +3837,7 @@ acc_exp_mc <- dcast.data.table(
 
 # save
 fwrite(acc_exp_mc, file.path(
-  "Results", sprintf("ChromVAR-%s", arc_id),
+  "results", sprintf("ChromVAR-%s", arc_id),
   "gene-expression-accessibility-archetype-motif-deviation-metacell.tsv.gz"
 ), sep = "\t")
 
@@ -3776,7 +3866,7 @@ acc_exp_ct[, motif_deviation_gene_accessibility_correalton := cor(.SD$motif_devi
 
 # save
 fwrite(acc_exp_ct, file.path(
-  "Results", sprintf("ChromVAR-%s", arc_id),
+  "results", sprintf("ChromVAR-%s", arc_id),
   "gene-expression-accessibility-archetype-motif-deviation-cell-type.tsv.gz"
 ), sep = "\t")
 
@@ -3787,14 +3877,14 @@ Plot per-TF scatterplots of expression vs activity (deviation Z score).
 ```{r}
 # combined data
 acc_exp_ct <- fread(file.path(
-  "Results", sprintf("ChromVAR-%s", arc_id),
+  "results", sprintf("ChromVAR-%s", arc_id),
   "gene-expression-accessibility-archetype-motif-deviation-cell-type.tsv.gz"
 ))
 
 # archetypes pwms
 mots_arc_lst <- unlist(lapply(c(
-  file.path("Results", "Archetypes", sprintf("motif-archetypes-%s-pwms.rds", arc_id)),
-  file.path("Results", "Motifs", "motifs.rds")
+  file.path("results", "Archetypes", sprintf("motif-archetypes-%s-pwms.rds", arc_id)),
+  file.path("results", "Motifs", "motifs.rds")
 ), readRDS))
 names(mots_arc_lst) <- sapply(mots_arc_lst, function(m) m@name)
 
@@ -3820,7 +3910,7 @@ for (y_value in c("motif_enrichment_fc", "motif_deviation")) {
   # where to save the plot
   pdf(
     file.path(fig_dir, sprintf("tf-expression-%s-scatter-plots-%s.pdf", f_label, arc_id)), 
-    height = 10, width = 7
+    height = 10, width = 6
   )
   
   for (i in seq_along(iters)) {
