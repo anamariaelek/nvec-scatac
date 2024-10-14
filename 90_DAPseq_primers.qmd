@@ -23,6 +23,9 @@ knitr::opts_chunk$set(echo = TRUE, fig.width=7, fig.height=5)
 ```
 
 ```{r}
+#| label: load_libraries
+#| warning: FALSE
+#| message: FALSE
 library(data.table)
 library(stringr)
 library(Biostrings)
@@ -34,7 +37,7 @@ Primers matching to the genome
 
 ```{r}
 # load primers
-ps <- readDNAStringSet("annotation/DAPseq-primers.fasta")
+ps <- readDNAStringSet("annotation/DAPseq-primers-3.fasta")
 gs <- unique(str_remove(names(ps), ":(rev|fwd)\\d+"))
   
 # load genome
@@ -63,17 +66,32 @@ gr <- lapply(gs, function(g) {
   
   # match fwd primer
   mrf <- vmatchPattern(prf, Nvectensis)
+  if (length(mrf) == 0) {
+    mrf <- vmatchPattern(reverseComplement(prf), Nvectensis)
+  }
   mrf <- mrf[seqnames(mrf) == chr]
-  mrf$primer <- "fwd"
+  if (length(mrf) > 0) {
+    mrf$primer <- "fwd"
+    mrf$gene <- g
+  } else {
+    message(sprintf("No match for %s fwd primer", g))
+  }
   
   # match rev primer
   mrr <- vmatchPattern(prr, Nvectensis)
+  if (length(mrr) == 0) {
+    mrr <- vmatchPattern(reverseComplement(prr), Nvectensis)
+  }
   mrr <- mrr[seqnames(mrr) == chr]
-  mrr$primer <- "rev"
+  if (length(mrr) > 0) {
+    mrr$primer <- "rev"
+    mrr$gene <- g
+  } else {
+    message(sprintf("No match for %s rev primer", g))
+  }
   
   # return
   pgr <- c(mrf, mrr)
-  pgr$gene <- g
   pgr
   
 })
@@ -91,11 +109,109 @@ stopifnot(nrow(dt[,.N,gene][N>1]) == 0)
 # save bed
 fwrite(
   dt[, .(seqnames, start, end, gene, score, strand)],
-  "annotation/DAPseq-primers.bed",
+  "annotation/DAPseq-primers-match-genome.bed",
   sep = "\t",
   col.names = FALSE
 )
+```
 
+Primers matching to the transcriptome
+
+```{r}
+# load primers
+ps <- readDNAStringSet("annotation/DAPseq-primers-4.fasta")
+gs <- unique(str_remove(names(ps), ":(rev|fwd)\\d+"))
+  
+# load genome
+require(BSgenome.jaNemVect1.1.DToL.Assembly)
+
+# load gene annotations
+gn <- rtracklayer::import("genome/Nvec_v4_merged_annotation_sort.gtf.gz")
+ga <- gn[gn$type == "exon", ]
+gb <- gn[gn$type == "CDS", ]
+
+# match sequences to the reference genome
+dt <- rbindlist(lapply(gs, function(g) {
+  
+  message(sprintf("%s (%d / %d)", g, which(gs == g), length(gs)))
+  
+  # get chromosome on which the gene is
+  chr <- as.character(seqnames(ga[ga$transcript_id == g, ]))[1]
+  
+  # get transcript of the gene
+  ggr <- ga[ga$transcript_id == g, ]
+  ggs <- gb[gb$transcript_id == g, ]
+  
+  # get sequence of the transcript
+  gseq <- unlist(getSeq(Nvectensis, ggr))
+  
+  # get coordinates of the exons
+  gcoord_dt <- rbindlist(lapply(seq_along(ggr), function(i) {
+    data.table(genomic_coord = seq(from = start(ggr)[i], to = end(ggr)[i]))
+  }))
+  gcoord_dt[, view_coord := .I]
+
+  # get primers of the gene
+  prs <- ps[grep(g, names(ps))]
+  
+  # get fwd primer
+  prf <- unlist(prs[grepl("fwd", names(prs))])
+  
+  # get rev primer
+  prr <- unlist(prs[grepl("rev", names(prs))])
+  
+  # match fwd primer
+  mrf <- matchPattern(prf, gseq)
+  if (length(mrf) == 0) {
+    mrf <- matchPattern(reverseComplement(prf), gseq)
+  }
+  if (length(mrf) > 0) {
+    # match back to original coordinates
+    gcoord_fw <- gcoord_dt[which(gcoord_dt$view_coord == start(mrf)) : which(gcoord_dt$view_coord == end(mrf))]
+    # get primer "exons"
+    exo_fw <- gcoord_fw[, .(start = min(genomic_coord), end = max(genomic_coord)), by = rleid(genomic_coord - view_coord)]
+    exo_fw[, seqnames := chr][, type := "exon"][, rleid := NULL]
+    # get primer "transcript"
+    tra_fw <- data.table(seqnames = chr, start = gcoord_fw[1]$genomic_coord, end = gcoord_fw[.N]$genomic_coord, type = "transcript")
+    gtf_fw <- rbindlist(list(tra_fw, exo_fw), use.names = TRUE)
+    gtf_fw$gene <- paste(g, "fwd", sep = "__")
+  } else {
+    message(sprintf("No match for %s fwd primer", g))
+  }
+  
+  # match rev primer
+  mrr <- matchPattern(prr, gseq)
+  if (length(mrr) == 0) {
+    mrr <- matchPattern(reverseComplement(prr), gseq)
+  }
+  if (length(mrr) > 0) {
+    # match back to original coordinates
+    gcoord_rv <- gcoord_dt[which(gcoord_dt$view_coord == start(mrr)) : which(gcoord_dt$view_coord == end(mrr))]
+    # get primer "exons"
+    exo_rv <- gcoord_rv[, .(start = min(genomic_coord), end = max(genomic_coord)), by = rleid(genomic_coord - view_coord)]
+    exo_rv[, seqnames := chr][, type := "exon"][, rleid := NULL]
+    # get primer "transcript"
+    tra_rv <- data.table(seqnames = chr, start = gcoord_rv[1]$genomic_coord, end = gcoord_rv[.N]$genomic_coord, type = "transcript")
+    gtf_rv <- rbindlist(list(tra_fw, exo_fw), use.names = TRUE)
+    gtf_rv$gene <- paste(g, "rev", sep = "__")
+  } else {
+    message(sprintf("No match for %s rev primer", g))
+  }
+  
+  # return
+  rbindlist(list(gtf_fw, gtf_rv))
+  
+}))
+
+# transform to single GRanges object
+gr <- makeGRangesFromDataFrame(dt, keep.extra.columns = TRUE)
+
+# save gtf
+rtracklayer::export.gff3(gr, "annotation/DAPseq-primers-match-transciptome.gtf")
+```
+
+
+```{r}
 hamming <- function(x, y) {
   sum(as.character(x) != as.character(y))
 }

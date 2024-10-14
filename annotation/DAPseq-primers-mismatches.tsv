@@ -1,3 +1,4 @@
 seqnames	start	end	gene	hamming_distance	strand	dist_to_tss	dist_to_tes
-NC_064034.1	2201554	2201571	Nvec_vc1.1_XM_032384889.2_fwd	1	+	956	956
 NC_064035.1	3200287	3200303	Nvec_vc1.1_XM_032385185.2_rev	1	+	556	556
+NC_064043.1	4759793	4759811	Nvec_vc1.1_XM_032379400.2_rev	1	-	2514	2514
+NC_064042.1	8978944	8978964	Nvec_vc1.1_XM_048732532.1_rev	1	-	2442	2442

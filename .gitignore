@@ -1,4 +1,5 @@
 *.nb.html
+annotation/DAPseq-*
 ArchRLogs
 ArchRProj_Nvec_TSS4_frag200/ArchRProj/GeneScoreMatrix/Matrix-Gene-Scores-Dist-Var-Coacces-SEACell-FC.rds
 CisBP/TF_Information_all_motifs.txt
