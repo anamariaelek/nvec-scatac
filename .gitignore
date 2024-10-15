@@ -48,6 +48,7 @@ results/Syntax/old
 results/Syntax/q0.8-hits-enrich-assign-motifs-ovl-0.5
 results/Syntax/q0.9-hits-enrich-assign-motifs-ovl-0.5
 results/Syntax/q0.95-hits-enrich-assign-motifs-ovl-0.5
+results/Syntax/motif-combinations-per-cell-type.tsv.gz
 results/Syntax/motif-hits-all.tsv.gz
 results/Syntax/motif-hits-reduced.tsv.gz
 results/Syntax/motif-hits-selected.tsv.gz

@@ -33,13 +33,13 @@ theme_set(theme_py)
 adult_dir <- "ArchRProj_Nvec_TSS4_frag200"
 gastr_dir <- "ArchRProj_Nvec_gastrula"
 ann_dir <- "annotation"
-pks_dir <- "Results/Peaks"
-mta_dir <- "Results/Motifs"
-arc_dir <- "Results/Archetypes"
-grn_dir <- "Results/GRN"
-syn_dir <- "Results/Syntax"
+pks_dir <- "results/Peaks"
+mta_dir <- "results/Motifs"
+arc_dir <- "results/Archetypes"
+grn_dir <- "results/GRN"
+syn_dir <- "results/Syntax"
 dir.create(syn_dir, showWarnings = FALSE)
-fig_dir <- "Plots/Syntax"
+fig_dir <- "plots/Syntax"
 dir.create(fig_dir, showWarnings = FALSE)
 
 # cell types
@@ -120,7 +120,7 @@ q <- as.numeric(commandArgs(trailingOnly = TRUE)[3])
 subset_motifs <- as.character(commandArgs(trailingOnly = TRUE)[4])
 
 # subdirectory where to save the results
-res_dir <- sprintf("q%s-hits-%s-motifs-ovl-%s", q, subset_motifs, reciprocal_overlap)
+res_dir <- sprintf("q%s-hits-%s-motifs-ovl-%s-all-pks", q, subset_motifs, reciprocal_overlap)
 dir.create(file.path(syn_dir, res_dir), showWarnings = FALSE)
 
 # starting analysis
@@ -203,9 +203,13 @@ peaks_gr <- makeGRangesFromDataFrame(peaks, keep.extra.columns = TRUE)
 # cell type peaks
 message(sprintf("%s | Reducingp peaks for %s", Sys.time(), ct))
 stg_dir <- ifelse(ct %in% adult_cell_types, adult_dir, gastr_dir)
+#pks_fn <- file.path(
+#  stg_dir, "ArchRProj", "PeakDifferential", "cell_type_filtered",
+#  sprintf("Peaks-%s-vs-others.tsv", ct)
+#)
 pks_fn <- file.path(
-  stg_dir, "ArchRProj", "PeakDifferential", "cell_type_filtered",
-  sprintf("Peaks-%s-vs-others.tsv", ct)
+  stg_dir, "ArchRProj", "Peaks", "cell_type_filtered",
+  sprintf("Peaks-%s.tsv", ct)
 )
 pks_dt <- fread(pks_fn, select = 1:3)
 setnames(pks_dt, c("seqnames", "start", "end"))

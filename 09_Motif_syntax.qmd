@@ -98,15 +98,15 @@ Define directories to read the data from and save the results to.
 
 adult_dir <- "ArchRProj_Nvec_TSS4_frag200"
 gastr_dir <- "ArchRProj_Nvec_gastrula"
-pks_dir <- "Results/Peaks"
-mta_dir <- "Results/Motifs"
-arc_dir <- "Results/Archetypes"
-map_dir <- "Results/Metacells"
-grn_dir <- "Results/GRN"
-mod_dir <- "Results/Modules"
-syn_dir <- "Results/Syntax"
+pks_dir <- "results/Peaks"
+mta_dir <- "results/Motifs"
+arc_dir <- "results/Archetypes"
+map_dir <- "results/Metacells"
+grn_dir <- "results/GRN"
+mod_dir <- "results/Modules"
+syn_dir <- "results/Syntax"
 dir.create(syn_dir, showWarnings = FALSE)
-fig_dir <- "Plots/Syntax"
+fig_dir <- "plots/Syntax"
 dir.create(fig_dir, showWarnings = FALSE)
 ann_dir <- "annotation"
 ```
@@ -217,7 +217,7 @@ bct_maps <- setDT(cbind.data.frame(
 ))
 ```
 
-## Reduce overlapping motifs (top-down approach)
+## Reduce overlapping motifs (top-down approach, not used)
 
 We will derive motif lexicons by starting from motif hits in all peaks.  
 First, get locations of all hits (motif scores above the 95th quantile of 
@@ -1711,16 +1711,20 @@ dev.off()
 Load results
 
 ```{r}
-syn_sub_dir <- "fcactovl0.5"
+syn_sub_dir <- "q0.8-hits-active-motifs-ovl-0.5"
 mts_ct <- fread(file.path(syn_dir, syn_sub_dir, "motif-hits-selected.tsv.gz"))
-amt_ct <- fread(file.path(syn_dir, syn_sub_dir, "motif-hits-all.tsv.gz"))
+# amt_ct <- fread(file.path(syn_dir, syn_sub_dir, "motif-hits-all.tsv.gz"))
 ```
 
 Compare number of motif hits per peak before and after reducing motif hits.
 
 ```{r}
+all_hits <- rbindlist(list(
+  #"all" = amt_ct, 
+  "reduced" = mts_ct
+), idcol = "set")
+
 # how many (different or same) motifs hits per peak?
-all_hits <- rbindlist(list("all" = amt_ct, "reduced" = mts_ct), idcol = "set")
 mta_pks_mts_diff <- unique(all_hits[,.(motif, peak, set)])[, .N, .(peak, set)]
 mta_pks_mts_same <- unique(all_hits[, .N, .(motif, peak, set)])
 
@@ -1745,18 +1749,50 @@ ggsave(
 )
 ```
 
-Count number of motifs per cell types.
+Number of motif hits per peak per cell type.
 
 ```{r}
-# order peaks and cell types
-peaks <- paste0(
-  "peak",
-  unique(sort(as.integer(str_extract(mts_ct$peak, "\\d+"))))
-)
-mts_ct[, cell_type := factor(cell_type, levels = cell_types)]
+# count motifs per peaks in cell types
+mta_pks_mts_cts <- unique(mts_ct[,.(motif, peak, cell_type, set)])[, .N, .(peak, cell_type, set)]
 
+# order cell types
+mta_pks_mts_cts[, cell_type := factor(cell_type, levels = cell_types)]
+
+# plot
+ggp_pks_mts <- ggplot(mta_pks_mts_cts, aes(cell_type, N, color = cell_type, fill = cell_type)) + 
+  geom_boxplot(outlier.shape = 21) +
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 5)) +
+  scale_fill_manual(values = ct_cols) +
+  scale_color_manual(values = structure(
+    colorspace::darken(ct_cols, 0.5),
+    names = names(ct_cols)
+  )) +
+  annotate(
+    "text",
+    label = sprintf("median = %i", median(mta_pks_mts_cts$N)),
+    y = median(mta_pks_mts_cts$N) + 10,
+    x = cell_types[3],
+    size = 6
+  ) +
+  labs(
+    y = "# motifs per peak", x = ""
+  ) +
+  theme(
+    panel.grid.major.y = element_line(colour = "grey", size = 0.25),
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+    legend.position = "none"
+  )
+
+```
+
+Number of motifs per cell types.
+
+```{r}
 # unique motif hits per cell type
 mts_ct_uniq <- unique(mts_ct[, .(cell_type, motif)])
+
+# prder cell types
+mts_ct_uniq[, cell_type := factor(cell_type, levels = cell_types)]
 
 # counts
 mts_ct_uniq_n <- mts_ct_uniq[, .(n_motifs = .N), .(cell_type)]
@@ -1775,6 +1811,13 @@ gp_mts <- ggplot(
     aes(label = n_motifs), 
     vjust = -0.5, hjust = 0.5, size = 4, color = "black"
   ) +
+  annotate(
+    "text",
+    label = sprintf("median = %i", round(median(mts_ct_uniq_n$n_motifs))),
+    y = median(mts_ct_uniq_n$n_motifs) + 30,
+    x = cell_types[3],
+    size = 6
+  ) +
   scale_fill_manual(
     values = ct_cols, 
     guide = "none"
@@ -1786,76 +1829,23 @@ gp_mts <- ggplot(
   scale_y_continuous(
     expand = expansion(mult = c(0, 0.15))
   ) +
-  labs(x = "cell type", y = "motifs") +
+  labs(x = "", y = "motifs") +
   theme(
     legend.position = "none",
-    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
     panel.grid.major.y = element_line(colour = "grey", size = 0.25)
   )
 
-ggsave(
-  file.path(fig_dir, "motif-hits-per-cell-type.pdf"), 
-  gp_mts, width = 10, height = 5
-)
 ```
 
-Count number of motif hits per peak for all cell types.
+Save plots
 
 ```{r}
-# order peaks and cell types
-peaks <- paste0(
-  "peak",
-  unique(sort(as.integer(str_extract(mts_ct$peak, "\\d+"))))
-)
-mts_ct[, cell_type := factor(cell_type, levels = cell_types)]
-mts_ct[, peak := factor(peak, levels = peaks)]
-setorder(mts_ct, cell_type, peak)
-
-# unique motif hits in peaks per cell type
-mts_ct_uniq <- unique(mts_ct[, .(cell_type, peak, motif)])
-
-# counts
-mts_ct_uniq_n <- mts_ct_uniq[, .(n_motifs = .N), .(cell_type, peak)][, .(n_peaks = .N), .(cell_type, n_motifs)]
-
-# plot
-gp_pks_mts <- ggplot(
-  mts_ct_uniq_n,
-  aes(
-    cell_type, n_motifs, 
-    size = n_peaks, 
-    label = n_peaks,
-    fill = cell_type,
-    color = cell_type
-  )
-) + 
-  geom_point(shape = 22) +
-  geom_text(vjust = 0.5, hjust = 0.5, size = 2, color = "black") +
-  scale_fill_manual(
-    values = ct_cols, 
-    guide = "none"
-  ) +
-  scale_color_manual(values = structure(
-    colorspace::darken(ct_cols, 0.5),
-    names = names(ct_cols)
-  ), guide = "none") +  
-  scale_size_continuous(
-    range = c(2, 8),
-    name = "number of peaks"
-  ) +
-  scale_y_continuous(
-    breaks = seq(1, max(mts_ct_uniq_n$n_motifs), by = 1),
-    expand = expansion(mult = c(0.05, 0.05))
-  ) +
-  labs(x = "cell type", y = "motifs per peak") +
-  theme(
-    legend.position = "right",
-    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
-    panel.grid.major.y = element_line(colour = "grey", size = 0.25)
-  )
-
+gp_pms <- gp_mts / ggp_pks_mts
 ggsave(
-  file.path(fig_dir, "motif-hits-per-peak-per-cell-type.pdf"), 
-  gp_pks_mts, width = 10, height = 8
+  file.path(fig_dir, "motif-hits-per-peak-cell-type.pdf"), 
+  gp_pms, width = 9, height = 8.5
 )
 ```
 
@@ -1874,12 +1864,12 @@ mts_ct[, archetype_name := motif]
 # # # # # # # # # # # # # #
 
 # load peaks classification
-pks_dt <- fread(file.path(pks_dir, "Peaks_cell_type_promoter_annotation.tsv"))
+pks_dt <- fread(file.path(pks_dir, "Peaks_cell_type_promoter_annotation.tsv.gz"))
 
 # cell type entries into separate rows
-pks_dt <- separate_rows(pks_dt, "cell_types", sep = ",")
-setDT(pks_dt)
-setnames(pks_dt, "cell_types", "cell_type")
+#pks_dt <- separate_rows(pks_dt, "cell_types", sep = ",")
+#setDT(pks_dt)
+#setnames(pks_dt, "cell_types", "cell_type")
 
 # annotations for each peak: CP > SP > AP > NO
 pks_dt <- unique(pks_dt[, .(peak, promoter, cell_type)])
@@ -1908,8 +1898,9 @@ mts_ct[is.na(promoter), promoter := "NO"]
 # # # # # # # # # # # #
 
 # load archetype family info
+arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
 cor_dt <- fread(file.path(
-  "Results", 
+  "results", 
   sprintf("ChromVAR-%s", arc_id), 
   "correlation-seacells-archetype-motif-score-gene.tsv.gz"
 ))
@@ -2235,6 +2226,74 @@ for (ct in cell_types) {
 # combine results across cell types
 cmb_dt <- rbindlist(cmb_ls)
 
+# save 
+fwrite(cmb_dt, file.path(syn_dir, "motif-combinations-per-cell-type.tsv.gz"))
+```
+
+Inspect top motif combinations per cell type
+
+```{r}
+# load the combinations calculated above
+cmb_dt <- fread(file.path(syn_dir, "motif-combinations-per-cell-type.tsv.gz"))
+
+# select cell type
+cmb_ct <- cmb_dt[cell_type == "cnidocyte"]
+cmb_sm <- cmb_ct[, .(num_peaks = .N), .(motif, N, n_pks)][order(-num_peaks)]
+
+# pairs of motifs
+cmb_2 <- cmb_sm[N == 2]
+
+# split motif in two columns: motif1 and motif2
+cmb_2[, c("motif1", "motif2") := tstrsplit(motif, " \\+ ")]
+setnames(cmb_2, "motif", "motif_pair")
+
+# split motif1 by | into rows
+cmb_2 <- tidyr::separate_rows(cmb_2, motif1, sep = " \\| ")
+cmb_2 <- tidyr::separate_rows(cmb_2, motif2, sep = " \\| ")
+setDT(cmb_2)
+
+# add TF info 
+
+# select top active TFs for each possible pair
+grn_ct <- grn_tfs[cell_type == "cnidocyte"]
+# ...
+cmb_2 <- cmb_2[, .SD[1], motif_pair]
+
+# order
+cmb_2[, motif_label := paste(motif1, motif2, sep = " + ")]
+cmb_2[, motif_label := factor(motif_label, levels = rev(unique(cmb_2$motif_label)))]
+
+# for plotting
+cmb_2[, cell_type := "cnidocyte"]
+
+# plot barplot
+int_breaks <- function(x, n = 5) {
+  l <- pretty(x, n)
+  l[abs(l %% 1) < .Machine$double.eps ^ 0.5] 
+}
+ggplot(cmb_2[1:30], aes(num_peaks, motif_label, color = cell_type, fill = cell_type)) +
+  geom_bar(stat = "identity") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  scale_fill_manual(values = ct_cols) +
+  scale_color_manual(values = structure(
+    colorspace::darken(ct_cols, 0.5),
+    names = names(ct_cols)
+  )) +
+  scale_x_continuous(
+    expand = expansion(mult = c(0, 0.1)), 
+    breaks = int_breaks,
+    sec.axis = sec_axis(~ . / cmb_2$n_pks[1] * 100, name = "% of peaks")
+  ) +
+  theme(legend.position = "none") +
+  facet_grid(~ cell_type, scales = "free_y") +
+  labs(x = "# peaks", y = "motif pair")
+
+ggsave(file.path(fig_dir, "motif-pairs-cnidocyte.pdf"), width = 10, height = 8)
+```
+
+Plot motif combinations...
+
+```{r}
 # helper function for plotting integer breaks
 int_breaks <- function(x, n = 5) {
   l <- pretty(x, n)
