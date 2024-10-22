@@ -974,7 +974,7 @@ peaks <- peaks[seqnames!="ENA|OW052000|OW052000.1"]
 peaks_gr <- makeGRangesFromDataFrame(peaks, keep.extra.columns = TRUE)
 
 # all genes
-genes_gr <- read_gtf("genome/Nvec_v4_merged_annotation_sort.gtf")
+genes_gr <- read_gtf("genome/Nvec_v4_merged_annotation_sort.gtf.gz")
 genes_gr <- genes_gr[genes_gr$feature=="transcript"]
 genes_gr$name <- str_extract(genes_gr$attribute, '(?<=transcript_id ").+(?="; gene_id)')
 genes_gr$type <- "transcript" 
@@ -1090,7 +1090,7 @@ Assign ChiP peaks to genes
 ```{r}
 # genes
 genes <- read_gtf(
-  "genome/Nvec_v4_merged_annotation_sort.gtf",
+  "genome/Nvec_v4_merged_annotation_sort.gtf.gz",
   as_GRanges = TRUE
 )
 genes <- genes[genes$feature == "transcript"]
@@ -1219,7 +1219,7 @@ Load genes.
 ```{r}
 source("scripts/scatac_helper_functions.R")
 genes <- read_gtf(
-  "genome/Nvec_v4_merged_annotation_sort.gtf",
+  "genome/Nvec_v4_merged_annotation_sort.gtf.gz",
   as_GRanges = TRUE
 )
 genes <- genes[genes$feature == "transcript"]
@@ -1924,7 +1924,7 @@ Genomic regions overlap
 
 ```{r}
 # gene annotation
-genes_gr <- read_gtf("genome/Nvec_v4_merged_annotation_sort.gtf")
+genes_gr <- read_gtf("genome/Nvec_v4_merged_annotation_sort.gtf.gz")
 genes_gr$name <- str_extract(genes_gr$attribute, '(?<=transcript_id ").+(?="; gene_id)')
 
 # define regions
