@@ -9,6 +9,7 @@ logs
 plots/Archetypes/norm/
 plots/Modules/modularization-ordered-*.pdf
 plots/Modules/modularization-global-FC*-ordered-*-subsampled.pdf
+plots/Peaks/deeptools/
 results/Archetypes/motif-scores-archetypes*
 results/Archetypes/motif-scores-archetypes-PPM-PCC-0.8-IC0.5-5bp-mona.rds
 results/Archetypes/motif-scores-input-motifs*
@@ -41,7 +42,9 @@ results/Modules/gmod.wgcna.softPower*.gene_correlations.rds
 results/Modules/gmod.wgcna.softPower*.wgcna.rds
 results/Modules/GO/ics-hclust/results
 results/Modules/PFAM/ics-hclust/results
-results/Peaks/deeptools.*tab
+results/Peaks/annotaton_promoters_adult.rds
+results/Peaks/annotaton_promoters_gastrula.rds
+results/Peaks/deeptools/
 results/Peaks/Matrix-Adult-Gastrula-Peaks-mapped-qnormalized.rds
 results/Peaks/Sum_Adult_Gastrula_Peaks_SEACell_qnorm.rds
 results/Syntax/old

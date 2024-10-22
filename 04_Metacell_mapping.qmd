@@ -143,7 +143,7 @@ ct_cols <- c(
   "neuron_Pou4_FoxL2_1"        = "#101cde",
   "neuron_Pou4_FoxL2_2"        = "#0b16bf",
   "neuron_Pou4_FoxL2_3"        = "#2e39dd",
-  "neuronal_gastrula"          = "#063cb9",
+  "neuronal"                   = "#063cb9",
   "gland"                      = "#ff6f08",
   "gland_mucin"                = "#ff8f12"
 )
