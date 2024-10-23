@@ -1,0 +1,15 @@
+# 5' scRNA-seq
+5prime_peaks.rds
+
+# ChIP from Schwaiger 2014
+H3K4me3_macs_narrow_peaks.narrowPeak
+H3K4me3_macs_narrow_summits.bed
+
+# iChIP adult
+Nvec_H3K4me3_250124_peaks.narrowPeak
+Nvec_H3K4me3_250124_summits.bed
+
+# mouse
+mmus_adult_annotation_peaks_genomic_overlap.tsv.gz
+mmus_adult_annotation_peaks.tsv.gz
+

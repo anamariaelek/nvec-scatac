@@ -4,6 +4,9 @@ ArchRLogs
 ArchRProj_Nvec_TSS4_frag200/ArchRProj/GeneScoreMatrix/Matrix-Gene-Scores-Dist-Var-Coacces-SEACell-FC.rds
 CisBP/TF_Information_all_motifs.txt
 CisBP/pwms
+data/2023-nematostella_whole_genome_conservation/*bw
+data/2023-nematostella_whole_genome_conservation/phastcons.Nvec.phylop_tfbs.bed
+data/2023-nematostella_whole_genome_conservation/phastcons.Nvec.phylop_windows.bed
 genome/Nvec_vc1.1_gDNA.fasta*
 logs
 plots/Archetypes/norm/

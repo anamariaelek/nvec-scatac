@@ -1077,7 +1077,7 @@ chip_peaks <- read_bed(
   as_GRanges = TRUE
 )
 
-# summits 
+# ChIP summits 
 chip_summits <- read_bed(
   "data/Nvec_H3K4me3_250124_summits.bed",
   format = "bed",
@@ -1237,7 +1237,7 @@ pks_dt <- fread(file.path(
 
 # peaks assignment to genes
 pks_gen_dt <- fread(file.path(
-  pks_dir, "Peaks_cell_type_mapped_gene_assignment_coaccess.tsv"
+  pks_dir, "Peaks_cell_type_mapped_gene_assignment_coaccess.tsv.gz"
 ))
 pks_gen_dt[, score := NULL] # this will come from cell type peaks assignmente
 ```
@@ -1304,73 +1304,6 @@ fwrite(
   sep = "\t"
 )
 ```
-```{r}
-#| label: scatac_peaks_debug
-#| ehco: FALSE
-#| eval: FALSE
-#| include: FALSE
-
-# DO NOT RUN
-# re-use ArchR files above instead
-
-# peaks assignment to cell types for adult and gastrula
-pks_flt <- rbindlist(lapply(cell_types, function(ct) {
-  
-  print(ct)
-
-  # gastrula or adult cell type
-  stage <- if (ct %in% adult_cell_types) {
-     "adult"
-  } else {
-     "gastrula"
-  }
-  stage_dir <- switch(stage, "adult" = adult_dir, "gastrula" = gastr_dir)
-
-  # load peaks
-  pks_ct_fn <- file.path(
-    stage_dir, 
-    "ArchRProj", "Peaks", "cell_type_filtered", 
-    sprintf("Peaks-%s.bed", ct)
-  )
-  pks_ct_dt <- fread(pks_ct_fn)[, 1:3]
-  setnames(pks_ct_dt, c("seqnames", "start", "end"))
-  pks_ct_dt[, cell_type := ct][, stage := stage]
-    
-}), fill = TRUE, use.names = TRUE)
-
-setcolorder(pks_flt, c("seqnames", "start", "end", "cell_type"))
-
-# map peaks
-query_gr <- makeGRangesFromDataFrame(
-    pks_flt, keep.extra.columns = TRUE
-)
-subject_gr <- makeGRangesFromDataFrame(
-    pks_dt, keep.extra.columns = TRUE
-)
-ovl <- findOverlaps(
-    query = query_gr, subject = subject_gr,
-    minoverlap = 50
-)
-pks_cts <- pks_flt[queryHits(ovl)]$cell_type
-pks_cts_dt <- pks_dt[subjectHits(ovl)]
-pks_cts_dt$cell_type <- pks_cts
-pks_cts_dt <- unique(pks_cts_dt)
-
-# order
-pks_cts_dt[, stage := ifelse(cell_type %in% adult_cell_types, "adult", "gastrula")]
-pks_cts_dt[, stage := paste(sort(unique(.SD$stage)), collapse = ","), by = "peak"]
-pks_cts_dt[, cell_type := factor(cell_type, levels = cell_types)]
-setorder(pks_cts_dt, "seqnames", "start", "end", "cell_type")
-setcolorder(pks_cts_dt, c("seqnames", "start", "end", "peak", "cell_type"))
-pks_cts_dt <- unique(pks_cts_dt)
-
-# save
-fwrite(
-  pks_cts_dt, 
-  file.path(pks_dir, "Peaks_cell_type_mapped_cell_type_assignment.tsv.gz"), 
-  sep = "\t"
-)
-```
 
 Load mapped filtered cell type peaks.
 
@@ -1425,149 +1358,8 @@ chip_peaks <- fread(
 )
 ```
 
-```{r}
-#| label: chip_peaks_debug
-#| ehco: FALSE
-#| eval: FALSE
-#| include: FALSE
-
-# to save time while debugging, pass overlap pairs between chip and atac peaks directly to classifier
-max_dist_to_tss = 20000
-max_dist_to_tss = 3000
-extend_scrna = 250
-extend_chip = 250
-
-require(ggraph)
-require(tidygraph)
-require(ArchR)
-
-# convert to GRanges
-if ("data.frame" %in% class(scatac_peaks)) {
-  scatac_gr <- makeGRangesFromDataFrame(scatac_peaks, keep.extra.columns = TRUE)
-} else if ("GRanges" %in% class(scatac_peaks)) {
-  scatac_gr <- scatac_peaks
-}
-if ("data.frame" %in% class(scrna_peaks)) {
-  scrna_gr <- makeGRangesFromDataFrame(scrna_peaks, keep.extra.columns = TRUE)
-} else if ("GRanges" %in% class(scrna_peaks)) {
-  scrna_gr <- scrna_peaks
-} else if (is.null(scrna_peaks)) {
-  scrna_gr <- GenomicRanges::GRanges()
-}
-if ("data.frame" %in% class(chip_peaks)) {
-  chip_gr <- makeGRangesFromDataFrame(chip_peaks, keep.extra.columns = TRUE)
-} else if ("GRanges" %in% class(chip_peaks)) {
-  chip_gr <- chip_peaks
-} else if (is.null(chip_peaks)) {
-  chip_gr <- GenomicRanges::GRanges()
-}
-if ("data.frame" %in% class(genes)) {
-  genes_gr <- makeGRangesFromDataFrame(genes, keep.extra.column = TRUE)
-} else if ("GRanges" %in% class(genes)) {
-  genes_gr <- genes
-}
-
-# add gene strand to scATAC peaks
-genes_str <- as.data.frame(genes_gr)[, c("gene","strand")]
-peaks_str <- genes_str[match(scatac_gr$gene,genes_str$gene),]
-peaks_str[is.na(peaks_str$strand),"strand"] <- "*"
-strand(scatac_gr) <- peaks_str$strand
-
-# overlap scATAC with scRNA peaks
-scrna_gr <- ArchR::extendGR(scrna_gr, upstream = extend_scrna, downstream = 0)
-ovl <- findOverlaps(query=scatac_gr, subject=scrna_gr, minoverlap=10, ignore.strand=FALSE)
-
-# scATAC peaks overlapping scRNA peaks
-ovl_gr <- scatac_gr[queryHits(ovl)]
-meta_df <- mcols(scrna_gr[subjectHits(ovl)])
-mcols(ovl_gr)[,"scRNA_peak"] <- meta_df$peak
-mcols(ovl_gr)[,"scRNA_strand"] <- strand(scrna_gr[subjectHits(ovl)])
-mcols(ovl_gr)[,"scRNA_cell_type"] <- meta_df$cell_type
-
-# scATAC peaks not overlapping scRNA peaks
-nonovl <- setdiff(seq_along(scatac_gr), queryHits(ovl))
-nonovl_gr <- scatac_gr[nonovl]
-
-# all scATAC peaks with scRNA info
-all_gr <- sort(c(nonovl_gr,ovl_gr))
-seqlevels(all_gr) <- seqlevels(BSgenome.jaNemVect1.1.DToL.Assembly)
-all_gr <- sort(all_gr)
-
-# keep only entries where scRNA peak matches scATAC cell type
-if (!is.null(scrna_peaks)) {
-  if (any(is.na(all_gr$cell_type))) all_gr[is.na(all_gr$cell_type)]$cell_type <- ""
-  if (any(is.na(all_gr$scRNA_cell_type)))  all_gr[is.na(all_gr$scRNA_cell_type)]$scRNA_cell_type <- ""
-  all_gr$id <- paste(all_gr$gene, all_gr$peak, all_gr$cell_type)
-  ovl_gr <- all_gr[all_gr$cell_type == all_gr$scRNA_cell_type | is.na(all_gr$scRNA_peak)]
-  novl_gr <- all_gr[all_gr$cell_type != all_gr$scRNA_cell_type]
-  novl_gr <- novl_gr[!novl_gr$id %in% ovl_gr$id]
-  novl_gr$scRNA_peak <- ""
-  novl_gr$scRNA_cell_type <- ""
-  peaks_gr <- c(ovl_gr, novl_gr)
-} else {
-  peaks_gr <- all_gr
-  peaks_gr$scRNA_peak <- ""
-}
-
-# add ChIP peaks overlap
-gs <- unique(peaks_gr$gene)
-gs <- gs[gs %in% peaks_gr$gene]
-gs <- gs[gs!=""]
-message(Sys.time()," | ","Overlap scATAC and ChIP peaks per gene")
-verbose <- TRUE
-chip_gr <- extendGR(chip_gr, upstream = extend_chip, downstream = extend_chip)
-pairs_dt <- rbindlist(lapply(1:length(gs), function(i) {
-  if (verbose & i%%1000==0) message(Sys.time()," | ",i,"/",length(gs))
-  g <- gs[i]
-  g_gr <- peaks_gr[peaks_gr$gene==g]
-  c_gr <- chip_gr[chip_gr$gene==g]
-  ovl <- findOverlaps(query=g_gr, subject=c_gr, minoverlap=1, ignore.strand=TRUE)
-  if (length(ovl)>0) {
-    ovl_peaks <- unique(g_gr[queryHits(ovl)]$peak)
-    data.table(peak=ovl_peaks)[,H3K4me3_peak:=c_gr$peak][,gene:=g][]
-  }
-}))
-
-```
-
 Classify promoters
 
-```{r}
-#| label: classify_promoters
-#| ehco: FALSE
-#| eval: FALSE
-#| include: FALSE
-
-# DO NOT RUN
-# we will classify promoters separately for adult and gastrula stages below
-
-class_cols <- c(
-  "scATAC peaks" = "#9142eb",
-  "5' scRNA" = "#e66101",
-  "H3K4me3" = "#e6ab02",
-  "SP" = "#2166ac",
-  "CP" = "#053061",
-  "AP" = "#4393c3"
-)
-
-# classify peaks
-res_list <- mta_class_promoters(
-  scatac_peaks = scatac_peaks,
-  scrna_peaks = scrna_peaks,
-  chip_peaks = chip_peaks,
-  pairs_dt = NULL,
-  genes = genes,
-  max_dist_to_tss = 20000,
-  class_cols = class_cols,
-  verbose = TRUE
-)
-
-# save
-saveRDS(
-  res_list,
-  file.path(pks_dir, "annotaton_promoters.rds")
-)
-```
 ```{r}
 class_cols <- c(
   "scATAC peaks" = "#9142eb",
@@ -1601,7 +1393,7 @@ saveRDS(
 res_list_gastrula <- mta_class_promoters(
   scatac_peaks = scatac_peaks[stage == "gastrula"],
   scrna_peaks = NULL,
-  chip_peaks = chip_peaks,
+  chip_peaks = NULL,
   pairs_dt = pairs_dt,
   genes = genes,
   max_dist_to_tss = 20000,
@@ -1671,9 +1463,55 @@ peaks_res <- rbindlist(sapply(c("adult", "gastrula"), function(stage) {
 # sanity check that one gene only gets one type of promoter
 stopifnot(
   nrow(
-    unique(peaks_res[, .(gene, stage, promoter)][promoter!="NO"])[, .N, .(gene, stage)][N>1]
+    unique(peaks_res[, .(gene, stage, promoter)][promoter != "NO"])[, .N, .(gene, stage)][N>1]
   ) == 0
 )
+
+# sanity check that all promoters open in all cell types are called CP
+peaks_res_gastr <- unique(
+  peaks_res[stage=="gastrula" & promoter != "NO"][, .(gene, peak, promoter, cell_type)]
+)[, n_cell_types := .N, .(gene, peak, promoter)]
+n_cts_gastr <- max(peaks_res_gastr$n_cell_types)
+peaks_res_gastr[n_cell_types == 6][, .N, promoter]
+
+peaks_res_adult <- unique(
+  peaks_res[stage=="adult" & promoter != "NO"][, .(gene, peak, promoter, cell_type)]
+)[, n_cell_types := .N, .(gene, peak, promoter)]
+n_cts_adult <- max(peaks_res_adult$n_cell_types)
+peaks_res_adult[n_cell_types == n_cts_adult][, .N, promoter]
+
+# ad-hoc fix:
+# if a gene is SP in gastrula in 5 out of 6 cell types, and is a CP in adult
+# then it is likely also CP in gastrula
+cp_adult <- unique(peaks_res_adult[promoter == "CP", .(gene, peak, promoter)])
+setnames(cp_adult, "promoter", "promoter_adult")
+sp_gastr <- unique(peaks_res_gastr[n_cell_types == n_cts_gastr-1, .(gene, peak, promoter)])
+setnames(sp_gastr, "promoter", "promoter_gastrula")
+reassign <- merge.data.table(sp_gastr, cp_adult, by = c("gene", "peak"))
+reassign <- reassign[promoter_gastrula != promoter_adult]
+for (i in seq_along(unique(reassign$gene))) {
+  # if (i %% 100 == 0) print(sprintf("%i/%i", i, length(unique(reassign$gene))))
+  g <- unique(reassign$gene)[i]
+  p <- reassign[gene == g]$peak
+  peaks_res[gene == g, promoter := "NO"]
+  peaks_res[gene == g & peak == p, promoter := "CP"]
+}
+
+# ad-hoc fix:
+# if a gene is SP in gastrula in 5 out of 6 cell types, regardless of promoter in adult
+# it is more likely to be a CP
+pt_gastr <- unique(peaks_res_gastr[n_cell_types == n_cts_gastr-1 & promoter != "CP", .(gene, peak, promoter, cell_type)])
+# check in which cell type is it not open
+pt_gastr <- unique(pt_gastr[, missing_cell_type := setdiff(gastrula_broad_cell_types, .SD$cell_type),.( gene, peak)][, .(gene, peak, missing_cell_type)])
+pt_gastr[, .N, missing_cell_type][order(N)]
+# update assignment
+for (i in seq_along(unique(pt_gastr$gene))) {
+  # if (i %% 100 == 0) print(sprintf("%i/%i", i, length(unique(pt_gastr$gene))))
+  g <- unique(pt_gastr$gene)[i]
+  p <- pt_gastr[gene == g]$peak
+  peaks_res[stage == "gastrula" & gene == g, promoter := "NO"]
+  peaks_res[stage == "gastrula" & gene == g & peak == p, promoter := "CP"]
+}
 
 # check that all cell types are valid
 stopifnot(all(peaks_res$cell_type %in% broad_cell_types))
@@ -1689,7 +1527,7 @@ setorder(peaks_res, gene, peak, cell_type)
 setcolorder(peaks_res, c("gene", "peak", "promoter", "cell_type"))
 
 # save
-fwrite(peaks_res, file.path(pks_dir, "annotaton_promoters_decison_tree.tsv"))
+fwrite(peaks_res, file.path(pks_dir, "annotaton_promoters_decison_tree.tsv.gz"))
 
 # all cell types per gene in one row
 peaks_annotation <- copy(peaks_res)
@@ -1700,7 +1538,7 @@ peaks_annotation <- unique(peaks_annotation)
 # save
 fwrite(
   peaks_annotation,
-  file.path(pks_dir, "annotaton_peaks.tsv"),
+  file.path(pks_dir, "annotaton_peaks.tsv.gz"),
   sep="\t", col.names = TRUE
 )
 
@@ -1712,7 +1550,7 @@ genes_promoters <- genes_promoters[promoter != "NO"]
 # save
 fwrite(
   genes_promoters,
-  file.path(pks_dir, "annotaton_promoters.tsv"),
+  file.path(pks_dir, "annotaton_promoters.tsv.gz"),
   sep="\t", col.names = TRUE
 )
 
@@ -1721,8 +1559,8 @@ fwrite(
 Add expression info to peak/promoters table.
 
 ```{r}
-# load peas classification
-pks_dt <- fread(file.path(pks_dir, "annotaton_promoters_decison_tree.tsv"))
+# load peaks classification
+peaks_res <- fread(file.path(pks_dir, "annotaton_promoters_decison_tree.tsv.gz"))
 
 # load gene expression info
 gen_fc <- readRDS(file.path("results", "Metacells", "cell_type", "gene_expression_fc_genes_exp_FC2_acc_FC4_spearman.rds"))
@@ -1742,11 +1580,11 @@ gen_umi <- melt.data.table(
 gen_fc <- merge.data.table(gen_fc, gen_umi, by = c("gene", "cell_type"))
 gen_fc[cell_type == "neuronal_gastrula", cell_type := "neuronal"]
 gen_fc <- merge.data.table(gen_fc, bct_maps, by = "cell_type", all.x = TRUE)
-gen_fc[!cell_type %in% pks_dt$cell_type, cell_type := broad_cell_type]
+gen_fc[!cell_type %in% peaks_res$cell_type, cell_type := broad_cell_type]
 gen_fc[, broad_cell_type := NULL]
 gen_fc[, gene_expression_fc := max(gene_expression_fc), .(gene, cell_type)]
 gen_fc <- unique(gen_fc)
-stopifnot(length(pks_dt[,.N,cell_type][!cell_type %in% gen_fc$cell_type]$cell_type) == 0)
+stopifnot(length(peaks_res[,.N,cell_type][!cell_type %in% gen_fc$cell_type]$cell_type) == 0)
 
 # tau index
 tau_dt <- unique(gen_fc[, .(gene, cell_type, gene_expression_fc, gene_expression_umifrac)])
@@ -1755,21 +1593,29 @@ tau_dt[, gene_tau_index := (sum(1 - gene_expression_umifrac/max(gene_expression_
 tau_dt[, n_cell_types := NULL]
 
 # add gene expression info to peaks table
-pks_dt <- merge.data.table(pks_dt, tau_dt, by = c("gene", "cell_type"), all.x = TRUE)
+peaks_res <- merge.data.table(peaks_res, tau_dt, by = c("gene", "cell_type"), all.x = TRUE)
+
+# add coordinates
+peaks_res <- merge.data.table(
+  unique(pks_dt[, .(seqnames, start, end, peak, id)]), 
+  peaks_res,
+  by = "peak",
+  all.y = TRUE, sort = FALSE
+)
 
 # save
-fwrite(pks_dt, file.path(pks_dir, "Peaks_cell_type_promoter_annotation.tsv.gz"), sep = "\t")
+fwrite(peaks_res, file.path(pks_dir, "Peaks_cell_type_promoter_annotation.tsv.gz"), sep = "\t")
 ```
 
 ## Peak types summary
 
 ```{r}
 # load promoters classification
-pks_dt <- fread(file.path(pks_dir, "Peaks_cell_type_promoter_annotation.tsv.gz"))
-pks_dt <- unique(pks_dt[, .(peak, cell_type, stage, gene, gene_expression_fc, gene_tau_index, promoter)])
+peaks_res <- fread(file.path(pks_dir, "Peaks_cell_type_promoter_annotation.tsv.gz"))
+pks_dt <- unique(peaks_res[, .(peak, cell_type, stage, gene, gene_expression_fc, gene_tau_index, promoter)])
 
 # load promoters per gene
-peaks_annotation <- fread(file.path(pks_dir, "annotaton_peaks.tsv"))
+peaks_annotation <- fread(file.path(pks_dir, "annotaton_peaks.tsv.gz"))
 
 # get data for promoters peaks only
 pro_cols <- c(
@@ -1778,7 +1624,7 @@ pro_cols <- c(
   "AP" = "#4393c3",
   "NO" = "#319854"
 )
-pro_dt <- pks_dt[promoter != "NO"]
+pro_dt <- peaks_res[promoter != "NO"]
 pro_dt[, promoter := str_extract(promoter, "CP|SP|AP|NO")]
 pro_dt[, promoter := factor(promoter, levels = names(pro_cols))]
 setorder(pro_dt, gene, promoter)
@@ -1920,7 +1766,7 @@ for (st in c("adult", "gastrula", "all")) {
 
 ```
 
-Genomic regions overlap
+### Genomic regions overlap
 
 ```{r}
 # gene annotation
@@ -2089,6 +1935,158 @@ for (st in c("adult", "gastrula", "all")) {
 }
 ```
 
+### Conservation in genomic regions overlaps
+
+```{r}
+con_dir <-file.path("data", "2023-nematostella_whole_genome_conservation")
+
+ph_cols <- c(
+  class_cols[c("CP", "SP", "AP")],
+  "enh_intergenic" = colorspace::lighten(ovl_cols["intergenic"], 0.5),
+  ovl_cols["intergenic"],
+  "enh_intron" = colorspace::lighten(ovl_cols["intron"], 0.5),
+  ovl_cols["intron"], 
+  ovl_cols["CDS"],
+  "transposons" = "#f03b20",
+  "tfbs" = "#c51b8a",
+  "loops" = "#756bb1",
+  "CRE" = "#326bb1"
+)
+
+```
+
+Load scores
+
+```{r}
+# all classified peaks
+pks <- fread(file.path(pks_dir, "Peaks_cell_type_mapped.tsv"))
+pks_gr <- makeGRangesFromDataFrame(pks, keep.extra.columns = TRUE)
+
+# phylop scores for peaks and other features
+phylop_fn <- c(
+  CRE = "phastcons.Nvec.phylop_per_peak.bed",
+  CDS = "phastcons.Nvec.phylop_CDS.bed",
+  UTR = "phastcons.Nvec.phylop_UTR.bed",
+  intron = "phastcons.Nvec.phylop_introns.bed",
+  intergenic = "phastcons.Nvec.phylop_intergenic.bed",
+  transposons = "phastcons.Nvec.phylop_transposons.bed",
+  tfbs = "phastcons.Nvec.phylop_tfbs.bed",
+  loops = "phastcons.Nvec.phylop_loops.bed"
+)
+phastc_list <- lapply(
+  names(phylop_fn), function(x) {
+
+    # load file
+    phastc_dt <- fread(file.path(con_dir, phylop_fn[x]), fill = TRUE)
+    setnames(phastc_dt, c("seqnames", "start", "end", "peak", "phylop_score", "strand"))
+    phastc_dt[, c("strand", "peak") := NULL]
+
+    # map peaks
+    if (x == "CRE") {
+
+      phastc_gr <- makeGRangesFromDataFrame(phastc_dt, keep.extra.columns = TRUE)
+      ovl <- findOverlaps(query = phastc_gr, subject = pks_gr, ignore.strand = TRUE, type = "any")
+      phastc_dt <- phastc_gr[queryHits(ovl)]
+      phastc_dt$peak <- pks_dt[subjectHits(ovl)]$peak
+      phastc_dt <- as.data.table(phastc_dt)[, width := NULL]
+
+      # map to peak classification
+      peak_class_dt <- unique(peaks_res[, .(peak, promoter)])
+      phastc_dt <- merge.data.table(
+        phastc_dt, peak_class_dt, 
+        by = "peak", sort = FALSE, allow.cartesian = TRUE
+      )
+
+      # add genomic overlaps
+      phastc_dt <- merge.data.table(
+        phastc_dt, unique(all_peaks_ovl[, .(peak, overlap)]), 
+        by = "peak", sort = FALSE, allow.cartesian = TRUE
+      )
+
+    } else {
+
+      phastc_dt[, peak := paste(x, .I, sep = "_")]
+
+    }
+
+    # add metadata
+    phastc_dt[, type := x]
+    phastc_dt
+  }
+)
+phastc_dt <- rbindlist(phastc_list, use.names = TRUE, fill = TRUE)
+setcolorder(phastc_dt, c("seqnames", "start", "end", "phylop_score", "type", "peak", "promoter", "overlap"))
+phastc_dt[, strand := NULL]
+```
+
+Plot phastCon scores
+
+```{r}
+# data to plot
+
+# for peaks (CRE), show CP, SP, AP, and intergenic and intronic enhancers
+cons_plot_dt <- rbindlist(list(
+  # genomic features
+  phastc_dt[type != "CRE"][, feature := type][phylop_score!=0][],
+  # promoters
+  phastc_dt[type == "CRE" & promoter != "NO"][phylop_score!=0][, feature := promoter][],
+  # enhancers
+  phastc_dt[type == "CRE" & promoter == "NO" & overlap %in% c("intergenic", "first_intron", "other_introns")][phylop_score!=0][, feature := paste0("enh_", str_extract(overlap, "intergenic|intron"))]
+))
+
+# top score per feature
+cons_plot_dt <- cons_plot_dt[, .(score = mean(phylop_score)), .(type, peak, feature)]
+cons_plot_dt[, feature := factor(feature, levels = names(ph_cols))]
+setorder(cons_plot_dt, type, -score)
+
+# plot phastCon scores
+gp_phastc_ovl <- ggplot(
+    cons_plot_dt[feature %in% c(
+      "CP", "SP", "AP", 
+      "enh_intron", "enh_intergenic", 
+      "intergenic", "intron", 
+      "CDS"
+    )],
+    aes(feature, score, color = feature, fill = feature)
+  ) +
+  geom_boxplot(outlier.shape = NA, outlier.size = 1) +
+  ggpubr::stat_compare_means(
+    method = "t.test", method.args = list(alternative = "greater"),
+    label = "p.signif", hide.ns = TRUE,
+    comparisons = list(
+      c("CP", "SP"),
+      c("CP", "AP"), 
+      c("enh_intergenic", "intergenic"),
+      c("enh_intron", "intron")
+    )
+  ) +
+  scale_y_continuous(
+    #trans = "log10",
+    breaks = scales::pretty_breaks(n = 3),
+    limits = c(-4, 10), oob = scales::squish,
+    expand = expansion(mult = c(0.05, 0.2))
+  ) +
+  scale_fill_manual(values = ph_cols) +
+  scale_color_manual(values = structure(
+    colorspace::darken(ph_cols, 0.5),
+    names = names(ph_cols)
+  )) +
+  theme(
+    legend.position = "none",
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+    panel.grid.major.x = element_blank(), panel.grid.minor.x = element_blank(),
+    panel.grid.major.y = element_line(linewidth = 0.5), panel.grid.minor.y = element_blank(),
+  ) +
+  labs(x = "", y = "phastCon\nscore")
+
+# save
+ggsave(
+  file.path(fig_dir, "phastcon_scores.pdf"),
+  gp_phastc_ovl,
+  width = 4, height = 4
+)
+```
+
 ### Number of peaks
 
 Number of peaks per gene, where genes are groupped by the promoter type (CP vs SP).
@@ -2214,7 +2212,8 @@ gl_gp_2 <- ggplot(gl_dt_2[genelist_full != "none"], aes(genelist_full, num_non_p
     outlier.shape = 21
   ) +
   scale_y_continuous(
-    limits = c(0, quantile(gl_dt_2$num_non_prom, 0.9995)),
+    trans = "log10",
+    #limits = c(0, quantile(gl_dt_2$num_non_prom, 0.9995)),
     oob = scales::squish,
     expand = expansion(c(0.05, 0.11))
   ) +
@@ -2290,7 +2289,8 @@ gp_1_ct <- ggplot(cre_dt, aes(
     names = names(pro_cols)
   )) +
   scale_y_continuous(
-    limits = c(0, quantile(cre_dt$n_peaks_per_gene_all_cell_type, 0.99)),
+    trans = "log10",
+    #limits = c(0, quantile(cre_dt$n_peaks_per_gene_all_cell_type, 0.99)),
     oob = scales::squish
   ) +
   theme(
@@ -2305,7 +2305,8 @@ gp_2 <- ggplot(cre_dt, aes(
   )) +
   geom_boxplot(fill = "#4d8cc4", color = colorspace::darken("#4d8cc4", 0.5), outlier.shape = 20, outlier.size = 1) +
   scale_y_continuous(
-    limits = c(0, quantile(cre_dt$n_peaks_per_gene_not_promoters, 0.99)),
+    trans = "log10",
+    #limits = c(0, quantile(cre_dt$n_peaks_per_gene_not_promoters, 0.99)),
     oob = scales::squish
   ) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
@@ -2325,7 +2326,8 @@ gp_2_ct <- ggplot(cre_dt, aes(
     names = names(pro_cols)
   )) +
   scale_y_continuous(
-    limits = c(0, quantile(cre_dt$n_peaks_per_gene_not_promoters, 0.99)),
+    trans = "log10",
+    #limits = c(0, quantile(cre_dt$n_peaks_per_gene_not_promoters, 0.99)),
     oob = scales::squish
   ) +
   theme(
@@ -2392,7 +2394,8 @@ gp_tau_1 <- ggplot(
     names = names(pro_cols)
   )) +
   scale_y_continuous(
-    limits = c(0, quantile(cre_dt$n_peaks_per_gene_per_cell_type, 0.999)),
+    trans = "log10",
+    #limits = c(0, quantile(cre_dt$n_peaks_per_gene_per_cell_type, 0.99)),
     oob = scales::squish
   ) +
   theme(
@@ -2417,7 +2420,8 @@ gp_tau_2 <- ggplot(
     names = names(pro_cols)
   )) +
   scale_y_continuous(
-    limits = c(0, quantile(cre_dt$n_peaks_per_gene_not_promoters, 0.9)),
+    trans = "log10",
+    #limits = c(0, quantile(cre_dt$n_peaks_per_gene_not_promoters, 0.9)),
     oob = scales::squish,
     expand = expansion(mult = c(0.1, 0.1))
   ) +
