@@ -1981,9 +1981,9 @@ phastc_list <- lapply(
     setnames(phastc_dt, c("seqnames", "start", "end", "peak", "phylop_score", "strand"))
     phastc_dt[, c("strand", "peak") := NULL]
 
-    # map peaks
     if (x == "CRE") {
 
+      # map peaks
       phastc_gr <- makeGRangesFromDataFrame(phastc_dt, keep.extra.columns = TRUE)
       ovl <- findOverlaps(query = phastc_gr, subject = pks_gr, ignore.strand = TRUE, type = "any")
       phastc_dt <- phastc_gr[queryHits(ovl)]
@@ -2004,7 +2004,12 @@ phastc_list <- lapply(
       )
 
     } else {
-
+      
+      # substract peaks
+      phastc_gr <- makeGRangesFromDataFrame(phastc_dt, keep.extra.columns = TRUE)
+      ovl <- findOverlaps(query = phastc_gr, subject = pks_gr, ignore.strand = TRUE, type = "any")
+      phastc_dt <- phastc_gr[setdiff(seq_along(phastc_gr), queryHits(ovl))]
+      phastc_dt <- as.data.table(phastc_dt)[, width := NULL]
       phastc_dt[, peak := paste(x, .I, sep = "_")]
 
     }
@@ -2035,7 +2040,7 @@ cons_plot_dt <- rbindlist(list(
 ))
 
 # top score per feature
-cons_plot_dt <- cons_plot_dt[, .(score = mean(phylop_score)), .(type, peak, feature)]
+cons_plot_dt <- cons_plot_dt[, .(score = max(phylop_score)), .(type, peak, feature)]
 cons_plot_dt[, feature := factor(feature, levels = names(ph_cols))]
 setorder(cons_plot_dt, type, -score)
 
@@ -2212,10 +2217,10 @@ gl_gp_2 <- ggplot(gl_dt_2[genelist_full != "none"], aes(genelist_full, num_non_p
     outlier.shape = 21
   ) +
   scale_y_continuous(
-    trans = "log10",
-    #limits = c(0, quantile(gl_dt_2$num_non_prom, 0.9995)),
+    #trans = "log10",
+    limits = c(0, quantile(gl_dt_2$num_non_prom, 0.99)),
     oob = scales::squish,
-    expand = expansion(c(0.05, 0.11))
+    expand = expansion(c(0.05, 0.1))
   ) +
   stat_compare_means(
     label = "p.signif", hide.ns = TRUE,
@@ -2394,8 +2399,8 @@ gp_tau_1 <- ggplot(
     names = names(pro_cols)
   )) +
   scale_y_continuous(
-    trans = "log10",
-    #limits = c(0, quantile(cre_dt$n_peaks_per_gene_per_cell_type, 0.99)),
+    #trans = "log10",
+    limits = c(0, quantile(cre_dt$n_peaks_per_gene_per_cell_type, 0.99)),
     oob = scales::squish
   ) +
   theme(
@@ -2420,8 +2425,8 @@ gp_tau_2 <- ggplot(
     names = names(pro_cols)
   )) +
   scale_y_continuous(
-    trans = "log10",
-    #limits = c(0, quantile(cre_dt$n_peaks_per_gene_not_promoters, 0.9)),
+    #trans = "log10",
+    limits = c(0, quantile(cre_dt$n_peaks_per_gene_not_promoters, 0.9)),
     oob = scales::squish,
     expand = expansion(mult = c(0.1, 0.1))
   ) +
