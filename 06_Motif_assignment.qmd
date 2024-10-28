@@ -830,7 +830,7 @@ fwrite(
 )
 ```
 
-Plot
+We now load the correlation data to plot the correlations of ranked motifs, used for motif assignment.
 
 ```{r}
 # load all ranked motifs per TF
@@ -848,17 +848,32 @@ class_top_asg <- fread(
   )
 )
 
-g <- "Nvec_vc1.1_XM_001632929.3"
+# motif logos
+mta_pwm <- unlist(lapply(c(
+  file.path("results", "Archetypes", sprintf("motif-archetypes-%s-pwms.rds", arc_id)),
+  file.path("results", "Motifs", "motifs.rds")
+), readRDS))
+names(mta_pwm) <- sapply(mta_pwm, function(m) m@name)
+```
+
+For the selected gene, plot a detailed plot for inspection.
+
+```{r}
+g <- "Nvec_vc1.1_XM_001632929.3" # shox2
+g <- "Nvec_vc1.1_XM_001641129.3" # znf845, no assigned motifs
+g <- "Nvec_vc1.1_XM_032363992.2" # pou4, agrees with direct motif assignment
+
 gene_cor_dt <- cor_dt[gene == g]
 gene_top_dt <- class_top_asg[gene == g]
-nm <- gnan[gene == g]$gene_name
-if (is.na(nm)) nm <- gnan[gene == g]$common_name
+nm <- gnan[gene == g]$common_name
+if (is.na(nm)) nm <- gnan[gene == g]$gene_name
 if (is.na(nm)) nm <- ""
+nm <- str_replace_all(nm, "/", "_")
 
 # indicate selected motif
-gene_cor_dt[selected := FALSE][archetype_name == gene_top_dt$archetype_name, selected := TRUE]
+gene_cor_dt[,selected := FALSE][archetype_name == gene_top_dt$archetype_name, selected := TRUE]
 
-# subset all ranked motifs for the ones of the same family
+# subset all ranked motifs
 best_rank <- gene_cor_dt[archetype_name == gene_top_dt$archetype_name]$rank
 show_ranks <- seq(pmax(1, best_rank - 10), best_rank + 150)
 plot_cor_dt <- gene_cor_dt[rank %in% show_ranks]
@@ -867,6 +882,7 @@ plot_cor_dt <- gene_cor_dt[rank %in% show_ranks]
 plot_cor_dt <- melt.data.table(plot_cor_dt, measure.vars = c("gene_score_correlation", "gene_expression_correlation"))
 plot_cor_dt[, same_family := archetype_family == tf_family]
 
+# detailed plot
 gp_cor <- ggplot(plot_cor_dt, aes(rank, value)) +
   geom_line(aes(color = variable)) +
   geom_point(
@@ -917,7 +933,115 @@ ggsave(
   file.path(fig_dir, sprintf("tfs_motifs_assignment_%s_%s.pdf", g, nm)),
   gp_cor, width = 8, height = 18
 )
-  ```
+```
+
+Minimal plot for figures.
+
+```{r}
+gs <- c(
+  "Nvec_vc1.1_XM_032363992.2", # pou4, agrees with direct motif assignment
+  "Nvec_vc1.1_XM_001641129.3", # znf845, no assigned motifs
+  "Nvec_vc1.1_XM_001632929.3", # shox2, does not agree with direct motif assignment
+  "Nvec_vc1.1_XM_032378021.2" # brachyury, agrees with ChIP motif
+)
+gls <- list()
+gns <- c()
+for (g in gs) {
+
+  # select all ranked motifs
+  gene_cor_dt <- cor_dt[gene == g]
+  gene_top_dt <- class_top_asg[gene == g]
+  nm <- gnan[gene == g]$common_name
+  if (nm=="") nm <- gnan[gene == g]$gene_name
+  if (nm=="") nm <- gnan[gene == g]$og
+  nm <- str_replace_all(nm, "/", "_")
+  gns[g] <- nm
+
+  # subset all ranked motifs
+  best_rank <- gene_cor_dt[archetype_name == gene_top_dt$archetype_name]$rank
+  show_ranks <- unique(c(c(1, 2), seq(pmax(1, best_rank - 3), best_rank + 10)[1:8]))
+  g_dt <- gene_cor_dt[rank %in% show_ranks]
+  g_dt[, selected := FALSE][rank == best_rank, selected := TRUE]
+  g_dt[, rank := as.factor(rank)]
+  g_dt[, gene_name := nm]
+  gls[[g]] <- g_dt
+
+}
+plot_cor_dt <- rbindlist(gls)
+
+# transform for plotting
+plot_cor_dt <- melt.data.table(
+  plot_cor_dt, 
+  measure.vars = c("gene_score_correlation", "gene_expression_correlation")
+)
+plot_cor_dt[, same_family := archetype_family == tf_family]
+plot_cor_dt[, gene := factor(gene, levels = gs)]
+
+# small plot
+gp_cor_minimal <- ggplot(plot_cor_dt, aes(rank, value)) +
+  geom_line(aes(group = variable, linetype = variable)) +
+  geom_point(
+    aes(fill = same_family, color = selected), 
+    size = 2, shape = 21
+  ) +
+  scale_y_continuous() +
+  scale_x_discrete(
+    expand = expansion(mult = c(0.05, 0.05)),
+    breaks = plot_cor_dt$rank
+  ) +
+  scale_color_manual(values = c(
+    "TRUE" = "red", 
+    "FALSE" = "grey60"
+  )) +
+  scale_fill_manual(values = c(
+    "TRUE" = "black", 
+    "FALSE" = "grey"
+  )) +
+  scale_linetype_manual(values = c(
+    "gene_score_correlation" = 2, 
+    "gene_expression_correlation" = 3
+  )) +
+  facet_grid(
+    . ~ gene, 
+    scales = "free_x", space = "free_x",
+    labeller = labeller(gene = structure(gns, names = gs))
+  ) +
+  theme(
+    legend.position = "bottom",
+    legend.box = "vertical",
+    legend.box.just = "center",
+    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
+    axis.text.x.top = element_text(angle = 90, hjust = 0, vjust = 0.5),
+    panel.grid.major = element_line(size = 0.1)
+  ) +
+  guides(
+    color = guide_legend(nrow = 2),
+    fill = guide_legend(nrow = 2)
+  ) +
+  labs(
+    x = "rank", y = "correlation"
+  )
+
+# plot motif logos
+archs <- unique(plot_cor_dt[, .(gene, archetype_name)])
+archs_logo <- lapply(archs$archetype_name, function(x) {
+  mot <- mta_pwm[[x]]@motif
+  ggseqlogo::ggseqlogo(mot) + theme_void() + coord_flip()
+})
+gp_mot <- patchwork::wrap_plots(archs_logo, ncol = length(archs_logo))
+
+gp_fig <- gp_cor_minimal / gp_mot + plot_layout(
+    guides = "collect",
+    heights = c(1, 0.2)
+  )
+
+# save figure
+ggsave(
+  file.path(fig_dir, "tfs_motifs_assignment_figure.pdf"),
+  gp_fig, width = 16, height = 4
+)
+
+```
 
 For experimental validations, we want to keep also CisBP motifs that
 didn't make it to correlation based assignments.
@@ -1037,23 +1161,40 @@ cols <- c(
   "gene_score_correlation","gene_expression_correlation"
 )
 
-dt1 <- fread(file.path("results", "Archetypes", "motif-assignment-archetypes-PPM-PCC-0.8-IC0.5-5bp.tsv.gz"))
+arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
+
+dt1 <- fread(file.path(
+  "results", "Archetypes", 
+  sprintf("motif-assignment-archetypes-%s.tsv.gz", arc_id)
+))
+
+# TFs with assigned motifs
 dt1a <- dt1[!(gene_score_correlation<0.4 & gene_expression_correlation<0.4), ..cols]
+
+# TFs with CisBP motifs
 dt1b <- dt1[  gene_score_correlation<0.4 & gene_expression_correlation<0.4 & CisBP_assignment=="assigned", ..cols]
 
-dt2 <- fread(file.path("results", "Archetypes", "motif-assignment-plus-cisbp-archetypes-PPM-PCC-0.8-IC0.5-5bp.tsv.gz"))
+# other TFs
+dt2 <- fread(file.path(
+  "results", "Archetypes", 
+  sprintf("motif-assignment-plus-cisbp-archetypes-%s.tsv.gz", arc_id)
+))
 dt2a <- dt2[!gene %in% c(dt1a$gene, dt1b$gene)][, ..cols]
 
+# combine
 dt <- rbindlist(list(
   dt1a[, assignment := "assigned_correlation"],
   dt1b[, assignment := "assigned_CisBP"],
   dt2a[, assignment := "not_assigned"]
 ))
 
+# add similarity to other archetypes
 dt2b <- unique(
   dt2[, .(archetype_name, archetype_source, most_similar_archetype, most_similar_archetype_source, archetype_archetype_similarity)]
 )
 dt <- merge.data.table(dt, dt2b, by = "archetype_name", all.x = TRUE, sort = FALSE)
+
+# save
 fwrite(dt, file.path("results", "Archetypes", "motif-assignment.tsv.gz"), sep = "\t")
 ```
 
@@ -2156,6 +2297,7 @@ fwrite(
 )
 ```
 
+
 ## Combine motif metrics with other gene metrics
 
 Here we will combine and compare motif scores with motif enrichment,
@@ -2226,6 +2368,53 @@ acc_mt <- readRDS(file.path(
     "results", "GeneScoreMatrix",
     "Matrix-Gene-Scores-SEACell-FC.rds"
 ))
+
+# motif-to-gene assignment supplementary table
+dt <- fread(file.path("results", "Archetypes", "motif-assignment.tsv.gz"))
+length(unique(dt$gene)) # 569
+
+```
+
+First, we look at Venn diagram of the number of assigned TFs ussing different approaches
+
+```{r}
+# all annotated TFs
+length(tfan$gene) # 654
+
+# accessibile TFs
+tfan_acc <- tfan[gene %in% rownames(acc_mt)]
+length(unique(tfan_acc$gene)) # 632
+
+# accessible and expressed TFs
+tfan_exp <- tfan_acc[gene %in% rownames(exp_mt)]
+length(unique(tfan_exp$gene)) # 599
+
+# TFs with CisBP infered motifs
+cisbp_dt_all <- fread(file.path(cisbp_dir, "cisbp_nvec_motifs.tsv"))
+cisbp_dt <- unique(cisbp_dt_all[, .(TF_Name, TF_Status)])
+
+# TFs with motif assigned
+length(unique(assign_dt$gene)) # 548
+
+# data for venn diagram
+venn_dt <- copy(tfan_exp)
+venn_dt[, expressed := gene %in% rownames(exp_mt)]
+venn_dt[, direct := gene %in% cisbp_dt[TF_Status == "D"]$TF_Name]
+venn_dt[, CisBP_inferred := gene %in% cisbp_dt[TF_Status %in% c("I", "N")]$TF_Name]
+venn_dt[, assigned := gene %in% assign_dt$gene]
+
+require(eulerr)
+venn_df <- venn_dt[, .(expressed, direct, CisBP_inferred, assigned)]
+class(venn_df) <- "data.frame"
+rownames(venn_df) <- venn_dt$gene
+fit <- euler(venn_df)
+pdf(file.path(fig_dir, "TF-assignment-venn-diagram.pdf"), height = 6, width = 6)
+plot(
+  fit, 
+  quantities = TRUE,
+  fills = list(fill = c("grey", "red", "steelblue4"), alpha = 0.5)
+)
+dev.off()
 ```
 
 Plot motif enrichment, indicating assigned TFs
