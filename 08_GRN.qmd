@@ -1,0 +1,1447 @@
+---
+title: "GRN"
+author: "Anamaria Elek"
+date: today
+format: 
+  html:
+    code-fold: false
+    code-tools: false
+    embed-resources: true
+    highlight-style: github
+    toc: true 
+    code-line-numbers: false 
+execute:
+  eval: false
+  message: false
+  warning: false
+---
+
+```{r}
+#| label: initialize
+#| echo: FALSE
+knitr::opts_chunk$set(echo = TRUE, fig.width=7, fig.height=5) 
+```
+
+In this notebook, we will construct Gene Regulatory Networks (GRN) for 
+*Nematostella* cell types.
+
+## Setup
+
+Load packages and functions.
+
+```{r}
+#| label: setup
+
+# load in-house functions
+source("metacell_downstream_functions/Downstream_functions.R")
+source("metacell_downstream_functions/utils.R")
+source("motif-analysis/mta_downstream_functions.R")
+source("scripts/scatac_helper_functions.R")
+
+# global settings
+options(stringsAsFactors = FALSE)
+
+# load packages
+library(RColorBrewer)
+library(BSgenome.jaNemVect1.1.DToL.Assembly)
+library(GenomicRanges)
+library(data.table)
+library(tidyr)
+library(stringr)
+library(ggplot2)
+library(patchwork)
+library(ggrepel)
+library(ggside)
+library(ggseqlogo)
+library(universalmotif)
+library(grid)
+library(ArchR)
+library(Seurat)
+library(metacell)
+library(openxlsx)
+
+# set ggplot2 theme
+theme_blank <- theme_minimal() + theme(
+  axis.title.x = element_blank(),
+  axis.title.y = element_blank(),
+  panel.border = element_blank(),
+  panel.grid=element_blank(),
+  axis.ticks = element_blank(),
+  text = element_text(size=20)
+)
+theme_py <- theme_light() + theme(
+  panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank(),
+  panel.border = element_rect(colour = "black", fill = NA),
+  text = element_text(size=20),
+  strip.placement = "outside", 
+  strip.text = element_text(size=20, color="black"),
+  strip.background = element_rect(fill="white")
+)
+theme_set(theme_py)
+```
+
+Define directories to read the data from and save the results to.
+
+```{r}
+#| label: dirs
+
+adult_dir <- "ArchRProj_Nvec_TSS4_frag200"
+gastr_dir <- "ArchRProj_Nvec_gastrula"
+pks_dir <- "results/Peaks"
+mta_dir <- "results/Motifs"
+arc_dir <- "results/Archetypes"
+map_dir <- "results/Metacells"
+grn_dir <- "results/GRN"
+dir.create(grn_dir, showWarnings = FALSE)
+dir.create(file.path(grn_dir, "networks"), showWarnings = FALSE)
+fig_dir <- "plots/GRN"
+dir.create(fig_dir, showWarnings = FALSE)
+ann_dir <- "annotation"
+```
+
+Load gene annotations.
+
+```{r}
+# gene annotation
+gnan <- fread(file.path(
+  ann_dir, "Nematostella_DToL_FINAL.tsv"
+))
+
+# TF annotation
+tfan <- fread(file.path(
+  ann_dir, "Nematostella_DToL_TFs_FINAL.tsv"
+))
+
+# golden markers
+gold <- fread(file.path(
+  ann_dir, "golden-marks-231124.tsv"
+), header = FALSE)
+setnames(gold, c("common_name", "gene", "remark"))
+```
+
+Project-specific variables:
+
+```{r}
+ct_cols <- c(
+  "cnidocyte"                  = "#ff42ff",
+  "cnidocyte_gastrula"         = "#f7abf7",
+  "ecto_pharynx"               = "#5bc0e8",
+  "ectoderm"                   = "#51a0be",
+  "ecto_aboral"                = "#045170",
+  "EMS"                        = "#bdf5bd",
+  "EMS_ecto_boundary"          = "#93dbce",
+  "gastro_circular_muscle_1"   = "#85c90e",
+  "gastro_circular_muscle_2"   = "#73b009",
+  "gastro_parietal_muscle"     = "#8ceb10",
+  "gastro_IRF1_2"              = "#c1eb05",
+  "gastro_somatic_gonad"       = "#bde314",
+  "muscle_tentacle_retractor"  = "#ffd700",
+  "muscle_mesentery_retractor" = "#f0e229",
+  "digestive_filaments_1"      = "#e33d3d",
+  "digestive_filaments_2"      = "#d10606",
+  "digestive_filaments_3"      = "#ad0303",
+  "epidermis_1"                = "#04ccd4",
+  "epidermis_2"                = "#16bacc",
+  "precursors_PGC"             = "#bebebe",
+  "precursors_endoNPC"         = "#8a8686",
+  "precursors_NPC"             = "#636363",
+  "NPC_1"                      = "#808d91",
+  "NPC_2"                      = "#758d92",
+  "neuron_GATA_Islet_1"        = "#0c82f7",
+  "neuron_GATA_Islet_2"        = "#1175f0",
+  "neuron_Pou4_FoxL2_1"        = "#101cde",
+  "neuron_Pou4_FoxL2_2"        = "#0b16bf",
+  "neuron_Pou4_FoxL2_3"        = "#2e39dd",
+  "neuronal_gastrula"          = "#063cb9",
+  "gland"                      = "#ff6f08",
+  "gland_mucin"                = "#ff8f12"
+)
+cell_types <- names(ct_cols)
+adult_cell_types <- c(
+  "cnidocyte",
+  "gastro_circular_muscle_1", 
+  "gastro_circular_muscle_2",
+  "gastro_parietal_muscle",
+  "gastro_IRF1_2",
+  "gastro_somatic_gonad",
+  "muscle_mesentery_retractor",
+  "muscle_tentacle_retractor",
+  "digestive_filaments_1",
+  "digestive_filaments_2",
+  "digestive_filaments_3",
+  "epidermis_1",
+  "epidermis_2",
+  "precursors_PGC",
+  "precursors_endoNPC",
+  "precursors_NPC",
+  "neuron_GATA_Islet_1",
+  "neuron_GATA_Islet_2",
+  "neuron_Pou4_FoxL2_1",
+  "neuron_Pou4_FoxL2_2",
+  "neuron_Pou4_FoxL2_3",
+  "gland"
+)
+gastr_cell_types <- c(setdiff(cell_types, adult_cell_types))
+bct_cols <- toupper(c(
+  "cnidocyte"                 = "#FF42FF",
+  "ecto"                      = "#51a0be",
+  "EMS"                       = "#bdf5bd",
+  "gastro_circular_muscle"    = "#73b009",
+  "gastro_parietal_muscle"    = "#8ceb10",
+  "gastro"                    = "#85c90e",  
+  "muscle"                    = "#FFD700",
+  "digestive_filaments"       = "#e33d3d",
+  "precursors"                = "#BEBEBE",
+  "NPC"                       = "#808d91",
+  "epidermis"                 = "#04ccd4",
+  "neuron_GATA_Islet"         = "#1175f0",
+  "neuron_Pou4_FoxL2"         = "#101cde",
+  "neuronal"                  = "#063cb9",
+  "gland"                     = "#ff6f08"
+))
+bct_maps <- setDT(cbind.data.frame(
+  cell_type = cell_types,
+  broad_cell_type = str_extract(cell_types, paste(names(bct_cols), collapse = "|"))
+))
+```
+
+## Global GRN
+
+To identify putative GRN, we need to 
+  - identify peaks that are bound by TFs - we do this by selecing peaks with
+*in silico* ChIP binding score above 0.1  
+  - identify genes that these peaks are regulators of - we do this by referring 
+to previously determined peaks to genes assignments.  
+
+In this way, we link TFs with target genes they regulate.
+
+```{r}
+# peak to gene assignment
+peaks_dt <- fread(file.path(
+    pks_dir, "Peaks_cell_type_mapped_gene_assignment_coaccess.tsv"
+))[, .(seqnames, start, end, peak, gene)][gene != ""]
+setnames(peaks_dt, "gene", "target_gene")
+
+# in silico ChIP binding score
+res_dt <- fread(file.path(
+    grn_dir, lvl,
+    sprintf("insilico-chip-binding-score-%s.tsv.gz", id)
+))
+
+# GRN
+grn_dt <- merge.data.table(
+    res_dt, peaks_dt,
+    by = c("seqnames", "start", "end", "peak"),
+    all.x = TRUE, allow.cartesian = TRUE
+)
+
+# add target gene annotation
+target_gnan <- copy(gnan)
+target_gnan[, gene_list := NULL]
+setnames(target_gnan, colnames(target_gnan), paste0("target_", colnames(target_gnan)))
+grn_dt <- merge.data.table(
+    grn_dt, gnan, by = "target_gene",
+    all.x = TRUE, sort = FALSE
+)
+grn_dt[is.na(target_gene_name), target_gene_name := ""]
+grn_dt[is.na(target_common_name), target_common_name := ""]
+grn_dt[is.na(target_og), target_og := ""]
+grn_dt[is.na(target_pfam), target_pfam := ""]
+
+# save
+saveRDS(
+    grn_dt,
+    file.path(
+        grn_dir, lvl,
+        sprintf("insilico-chip-grn-%s.rds", id)
+    )
+)
+```
+
+Inspect global network:  
+
+```{r}
+# load global network
+grn_dt <- readRDS(file.path(
+    grn_dir, lvl, sprintf("insilico-chip-grn-%s.rds", id)
+))
+thrs <- 0.1
+grn_dt <- grn_dt[in_silico_chip_score > thrs]
+
+```
+
+  - distribution of TF inputs per target gene  
+  - distribution of target genes per TF  
+
+```{r}
+# number of target genes per TF
+dt_tf_gen <- unique(
+  grn_dt[, .(gene, target_gene)][!is.na(target_gene)]
+)
+tfs_target_self <- unique(dt_tf_gen[gene == target_gene]$gene)
+dt_tf_gen[, target_self := gene %in% tfs_target_self]
+dt_tf_gen <- dt_tf_gen[order(gene)]
+dt_tf_gen <- dt_tf_gen[, .N, .(gene, target_self)]
+dt_tf_gen[, median(N), target_self]
+# FALSE    89
+#  TRUE   224
+
+# plot
+gp_tf_gen <- ggplot(
+        dt_tf_gen, aes(
+          target_self, N
+        )
+    ) +
+    ggbeeswarm::geom_quasirandom(
+      size = 1, alpha = 1, fill = "#8a8a8a", color = "#3d3d3d"
+    ) +
+    geom_boxplot(outlier.shape = NA, alpha = 0.5) +
+    geom_text(
+      data = dt_tf_gen[, .(md = median(N)), target_self],
+      aes(x = target_self, y = max(dt_tf_gen$N), label = sprintf("median: %s", md)),
+      size = 5
+    ) +
+    scale_x_discrete(
+      breaks = c("TRUE", "FALSE"), 
+      labels = c("auto\nregulating\nTFs", "not auto\nregulating\nTFs"), 
+      drop = TRUE
+    ) +
+    scale_y_continuous(
+      expand = expansion(mult = c(0.1, 0.1)),
+      trans = "log10"
+    ) +
+    guides(
+      shape = guide_legend(override.aes = list(size = 5))
+    ) +
+    theme(
+      axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+      axis.ticks.x = element_blank(),
+      axis.title.x = element_blank()
+    ) +
+    labs(y = "target genes\nper TF")
+
+
+# number of TFs per target gene
+dt_tg_tfs <- unique(
+  grn_dt[, .(gene, target_gene)]
+)
+tfs_target_gene <- unique(dt_tg_tfs[gene == target_gene]$gene)
+dt_tg_tfs[, target_TF := gene %in% tfs_target_gene]
+dt_tg_tfs <- dt_tg_tfs[, .N, .(target_gene, target_TF)]
+dt_tg_tfs[, median(N), target_TF]
+#  TRUE     2
+# FALSE     3
+
+# plot
+gp_tg_tfs <- ggplot(
+        dt_tg_tfs, aes(
+          target_TF, N
+        )
+    ) +
+    ggbeeswarm::geom_quasirandom(
+      size = 1, alpha = 1, fill = "#8a8a8a", color = "#3d3d3d"
+    ) +
+    geom_boxplot(outlier.shape = NA, alpha = 0.5) +
+    geom_text(
+      data = dt_tg_tfs[, .(md = median(N)), target_TF],
+      aes(x = target_TF, y = max(dt_tg_tfs$N), label = sprintf("median: %s", md)),
+      size = 5
+    ) +
+    scale_x_discrete(
+      breaks = c("TRUE", "FALSE"), 
+      labels = c("target\ngene\nTF", "target\ngene\nnot TF"), 
+      drop = TRUE
+    ) +
+    scale_y_continuous(
+      limits = c(-0.5, NA),
+      expand = expansion(mult = c(0.1, 0.1)),
+      trans = "log10"
+    ) +
+    guides(shape = guide_legend(override.aes = list(size = 5))) +
+    theme(
+      axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+      axis.ticks.x = element_blank(),
+      axis.title.x = element_blank()
+    ) +
+    labs(y = "TFs per\ntarget gene")
+
+# all target genes together
+dt_tg_tfs[, Nchr := as.character(pmin(N, 11))]
+dt_tg_tfs[Nchr=="11", Nchr := ">10"]
+dt_tg_tfs[, Nchr := factor(Nchr, levels = c(as.character(0:10), ">10"))]
+gp_tg_tfs <- ggplot(dt_tg_tfs, aes(Nchr)) +
+    geom_bar(color = "#8a8a8a", fill = "#3d3d3d") +
+    geom_text(
+      data = dt_tg_tfs[,.(md=median(N))],
+      aes(x = "6", y = 5e3, label = sprintf("median: %s", md)),
+      size = 5
+    ) +
+    scale_y_continuous(
+      expand = expansion(mult = c(0, 0.05))
+    ) +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+    labs(x = "TFs per target gene", y = "target genes")
+
+# save plot
+gp_grn <- gp_tf_gen + gp_tg_tfs + 
+  plot_layout(guides = "collect", width = c(2, 3))
+ggsave(
+  file.path(fig_dir, "GRN-global-num-tfs-targets.pdf"),
+  gp_grn, height = 4, width = 9
+)
+```
+
+## Gene developmental expression dynamics
+
+Parse developmental data info for GRNs.
+
+```{r}
+# add temporal development iformation from scRNA-seq data
+dev_dir <- "/home/anamaria/cluster/aelek/proj/scRNAseq_nvec_technau/"
+rpm_dt <- readRDS(file.path(dev_dir, "pseudobulk_tfs_rpm.rds"))
+rpm_dt <- rpm_dt[gene %in% grn_all$gene]
+stages <- c(
+    "gastrula18hpf" =   "D|18h gastrula",
+    "gastrula24hpf" =   "D|24h gastrula",
+    # "gastrula25hpf" =   "D|25hr gastrula",
+    "planula2dpf" =     "D|2d planula",
+    "planula3dpf" =     "D|3d planula",
+    # "planula4dpflive" = "D|4d planula",
+    "planula4dpfcryo" = "D|4d.c planula",
+    "polyp5dpf" =       "D|5d p.polyp",
+    "polyp8dpf" =       "D|8d p.polyp",
+    "polyp16dpf" =      "D|16d p.polyp",
+    "phbw" =            "T|pharynx/bw",
+    "bodywall" =        "T|bodywall",
+    "mesentery" =       "T|mesentery",
+    "pharynx" =         "T|pharynx",
+    "tentacle" =        "T|tentacle",
+    "mesf" =            "T|fem.mesentery"
+)
+rpm_dt[, stage := stages[mat]]
+
+# combine tissues of a 2 months old polyp
+rpm_dt[grepl("T\\|", stage), stage := "D|adult"]
+stages_levels <- c(grep("D\\|", stages, value = TRUE), "D|adult")
+rpm_dt[, stage := factor(stage, levels = stages_levels)]
+
+# select tissue with max rpm for every gene
+rpm_dt <- rpm_dt[order(stage, rpm)][, .SD[1], .(gene, stage, cell_type)]
+
+# scale rpm
+rpm_dt[, rpm_scaled := rpm / max(rpm), .(gene)]
+
+# find max rpm delta
+rpm_dt <- rpm_dt[order(gene, stage)]
+rpm_dt[, rpm_delta := .SD$rpm_scaled - c(0, lag(.SD$rpm_scaled)[-1]), .(cell_type)]
+rpm_dt[, group := as.character(.SD[order(-rpm_delta)][1]$stage), .(gene, cell_type)]
+rpm_dt[, group := factor(group, levels = stages_levels)]
+
+# plot
+gp_rpm <- ggplot(rpm_dt, aes(stage, rpm_delta, group = gene)) +
+    geom_line() +
+    geom_point() +
+    facet_grid(cell_type ~ group) +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+ggsave(file.path(fig_dir, itr, "developmental-tfs-rpm.pdf"), width = 24, height = 24)
+
+# get matching of developmental scRNA data to Nematostella atlas data
+cor_mat <- readRDS(file.path(dev_dir, "scdb", "comparison_atlas_dev_clust.rds"))
+devel_dt <- data.table(
+    devel_metacell = colnames(cor_mat),
+    atlas_metacell = rownames(cor_mat)[apply(cor_mat, 2, which.max)]
+)
+atlas_dt <- data.table(
+    devel_metacell = colnames(cor_mat)[apply(cor_mat, 1, which.max)],
+    atlas_metacell = rownames(cor_mat)
+)
+map_dt <- rbindlist(lapply(c("adult", "gastrula"), function(x)
+    fread(file.path(
+        maps_dir, "cell_type", itr, sprintf(
+            "mapping_cell_type_%s_%s.tsv", id, x
+        )
+    ))
+))
+map_dt[, development_cell_type := ""]
+map_dt[SEACell_cell_type %in% devel_dt$devel_metacell, development_cell_type := devel_dt[match(SEACell_cell_type, devel_metacell)]$devel_metacell]
+map_dt[SEACell_cell_type %in% devel_dt$atlas_metacell, development_cell_type := devel_dt[match(SEACell_cell_type, atlas_metacell)]$devel_metacell]
+map_dt[metacell_cell_type %in% devel_dt$devel_metacell, development_cell_type := devel_dt[match(metacell_cell_type, devel_metacell)]$devel_metacell]
+map_dt[metacell_cell_type %in% devel_dt$atlas_metacell, development_cell_type := devel_dt[match(metacell_cell_type, atlas_metacell)]$devel_metacell]
+map_dt[metacell_cell_type %in% atlas_dt$atlas_metacell, development_cell_type := atlas_dt[match(metacell_cell_type, atlas_metacell)]$devel_metacell]
+map_dt[metacell_cell_type %in% c("ectoderm.embryonic.oral", "ectoderm.embryonic.aboral"), development_cell_type := "ectoderm.embryonic"]
+map <- map_dt[, .(SEACell_cell_type, development_cell_type)]
+setnames(map, "SEACell_cell_type", "cell_type")
+map <- unique(map[, .SD[1], cell_type])
+fwrite(map, file.path(
+    grn_dir, "development_cell_type_mapping.tsv"
+), sep = "\t")
+
+# get stage with max rpm
+rpm_max <- rpm_dt[, .(gene, cell_type, stage, rpm, rpm_scaled, rpm_delta)]
+rpm_max <- rpm_max[order(-rpm_delta)][, rpm_delta_diff := .SD[1]$rpm_delta - .SD[2]$rpm_delta, .(gene, cell_type)]
+rpm_all <- rbindlist(list(
+    # select stage where there's the biggest change in expression
+    rpm_max[rpm_delta_diff >= 0.05][order(-rpm_delta), .SD[1], .(gene, cell_type)],
+    # if the change is small, take the earliest of the two stages
+    rpm_max[rpm_delta_diff < 0.05][order(-rpm_delta)][, .SD[1:2], .(gene, cell_type)][order(stage), .SD[1], .(gene, cell_type)]
+    
+))
+rpm_all[, time := stage]
+rpm_all[, lvl := as.integer(as.factor(time))]
+rpm_all <- rpm_all[, .(gene, cell_type, stage, time, lvl, rpm_delta, rpm_delta_diff)]
+
+# save
+fwrite(rpm_all, file.path(
+    grn_dir, "development_gene_info.tsv"
+), sep = "\t")
+
+```
+
+Map cell types
+
+```{r}
+# mapping
+devel_cell_type <- fread(file.path(
+    grn_dir, "development_cell_type_mapping.tsv"
+))
+devel_cell_type[, cell_type := str_replace_all(cell_type, cell_type_rename)]
+stopifnot(all(devel_cell_type$cell_type %in% cell_types))
+devel_cell_type[, cell_type := factor(cell_type, levels = cell_types)]
+
+# genes info
+devel_genes <- fread(file.path(
+    grn_dir, "development_gene_info.tsv"
+))
+setnames(devel_genes, c("cell_type", "stage"), c("development_cell_type", "development_stage"))
+devel_genes[, c("rpm_delta", "rpm_delta_diff") := NULL]
+devel_dt <- merge.data.table(
+    devel_cell_type, devel_genes, by = "development_cell_type",
+    all = TRUE, allow.cartesian = TRUE
+)
+devel_dt[, c("time") := NULL]
+devel_dt <- unique(devel_dt[!is.na(cell_type)])
+
+# save
+fwrite(devel_dt, file.path(
+    grn_dir, "development_data_for_grn.tsv"
+), sep = "\t")
+```
+
+## GRNs per cell type
+
+Next we construct GRNs at cell type level by filtering global GRN (constructed 
+above) based on:
+  - expression and activity (motif deviation Z  score) of TFs  
+  - expression and accessibility of target genes.  
+
+We could either define the quantile threshold for expression (`thr_q_exp`) and 
+accessibility (`thr_q_acc`), or use the same threshold value (`thr_fc_exp`) in 
+all cell types.
+
+### Expression and accessibility per cell type
+
+Combine peak accessibility, gene accessibility and expression.
+
+```{r}
+id <- "genes_exp_FC2_acc_FC4_spearman"
+
+# peak accessibility data with mapped metacells
+acc_mt <- readRDS(file.path(
+        map_dir, "cell_type", sprintf("peak_accessibility_%s.rds", id)
+))
+acc_mt <- sweep(acc_mt, 2, colSums(acc_mt), "/")
+acc_mt <- acc_mt * 1e4
+acc_dt <- melt.data.table(
+    as.data.table(acc_mt, keep.rownames = "peak"),
+    id.var = "peak",
+    variable.name = "cell_type",
+    value.name = "accessibility"
+)
+acc_dt <- acc_dt[, .(accessibility = mean(accessibility)), .(peak, cell_type)]
+acc_dt[[2]] <- as.character(acc_dt[[2]])
+
+# add peak to gene assignment
+peaks_dt <- fread(file.path(
+    pks_dir, "Peaks_cell_type_mapped_gene_assignment_coaccess.tsv"
+))[, .(peak, gene)][gene != ""]
+acc_dt <- merge.data.table(
+    acc_dt, peaks_dt, by = "peak",
+    all.x = TRUE, sort = FALSE, allow.cartesian = TRUE
+)
+stopifnot(all(acc_dt$cell_type %in% cell_types))
+acc_dt[, stage := ifelse(cell_type %in% adult_cell_types, "adult", "gastrula")]
+
+# gene expression umifrac with mapped metacells
+exp_umi_mt <- readRDS(file.path(
+        map_dir, "cell_type",
+        sprintf("gene_expression_umifrac_%s.rds", id)
+))
+exp_umi <- melt.data.table(
+    as.data.table(exp_umi_mt, keep.rownames = "gene"),
+    id.var = "gene",
+    variable.name = "cell_type",
+    value.name = "expression_umifrac"
+)
+
+# gene expression fold change with mapped metacells
+exp_fc_mt <- readRDS(file.path(
+        map_dir, "cell_type", 
+        sprintf("gene_expression_fc_%s.rds", id)
+))
+exp_fc <- melt.data.table(
+    as.data.table(exp_fc_mt, keep.rownames = "gene"),
+    id.var = "gene",
+    variable.name = "cell_type",
+    value.name = "expression_fc"
+)
+
+# combine expression fc and umifrac
+stopifnot(all(exp_fc$gene %in% exp_umi$gene))
+stopifnot(all(exp_fc$cell_type %in% exp_umi$cell_type))
+exp_dt <- merge.data.table(
+    exp_umi, exp_fc,
+    by = c("gene", "cell_type"),
+    sort = FALSE, all = TRUE
+)
+exp_dt <- exp_dt[!grepl("orphan", gene)]
+exp_dt[, stage := ifelse(cell_type %in% adult_cell_types, "adult", "gastrula")]
+
+# gene scores with mapped metacells
+gsc_mt <- readRDS(
+    file.path(
+        map_dir, "cell_type", 
+        sprintf("gene_scores_%s.rds", id)
+    )
+)
+gsc_dt <- melt.data.table(
+    as.data.table(as.matrix(gsc_mt), keep.rownames = "gene"),
+    id.var = "gene",
+    variable.name = "cell_type",
+    value.name = "gene_score"
+)
+gsc_dt[, stage := ifelse(cell_type %in% adult_cell_types, "adult", "gastrula")]
+
+# combine gene scores with expression
+dist_dt <- merge.data.table(
+    exp_dt, gsc_dt, by = c("gene", "cell_type", "stage"), 
+    sort = FALSE
+)
+
+# combine peak accessibility with expression and gene scores
+dist_dt <- merge.data.table(
+    dist_dt, acc_dt, by = c("gene", "cell_type", "stage"),
+    all.x = TRUE, sort = FALSE
+)
+
+# save
+fwrite(dist_dt, file.path(
+    map_dir, "cell_type", sprintf(
+        "data_expression_accessibility_%s.tsv.gz", id
+    )
+), sep = "\t")
+```
+
+Determine quantile thresholds per cell type.
+
+```{r}
+dist_dt <- fread(file.path(
+    map_dir, "cell_type", sprintf(
+        "data_expression_accessibility_%s.tsv.gz", id
+    )
+))
+
+thr_q_exp <- 0.6
+thr_q_acc <- 0.6
+
+# expression vs gene score
+dist_genes <- unique(dist_dt[, .(
+    gene,
+    expression_umifrac, expression_fc,
+    gene_score,
+    cell_type
+)])
+dist_genes[, thr_exp_umifrac := quantile(
+    unique(
+        .SD[expression_umifrac > 0][, .(
+            gene, expression_umifrac
+        )]
+    )$expression_umifrac,
+    thr_q_exp, na.rm = TRUE
+), .(cell_type)]
+dist_genes[, thr_exp_fc := quantile(
+    unique(
+        .SD[expression_fc > 0][, .(
+            gene, expression_fc
+        )]
+    )$expression_fc,
+    thr_q_exp, na.rm = TRUE
+), .(cell_type)]
+dist_genes[, thr_gene_score := quantile(
+    unique(
+        .SD[gene_score > 0][, .(
+            gene, gene_score
+        )]
+    )$gene_score,
+    thr_q_acc, na.rm = TRUE
+), .(cell_type)]
+
+data_thrs_1 <- unique(
+    dist_genes[, .(cell_type, thr_exp_umifrac, thr_exp_fc, thr_gene_score)]
+)[order(cell_type)]
+
+
+# expression vs peak accessibility
+dist_genes <- unique(dist_dt[, .(
+    gene,
+    expression_umifrac, expression_fc,
+    accessibility,
+    cell_type
+)])
+dist_genes[, thr_exp_umifrac := quantile(
+    unique(
+        .SD[expression_umifrac > 0][, .(
+            gene, expression_umifrac
+        )]
+    )$expression_umifrac,
+    thr_q_exp, na.rm = TRUE
+), .(cell_type)]
+dist_genes[, thr_exp_fc := quantile(
+    unique(
+        .SD[expression_fc > 0][, .(
+            gene, expression_fc
+        )]
+    )$expression_fc,
+    thr_q_exp, na.rm = TRUE
+), .(cell_type)]
+dist_genes[, thr_accessibility := quantile(
+    unique(
+        .SD[accessibility > 0][, .(
+            gene, accessibility
+        )]
+    )$accessibility,
+    thr_q_acc, na.rm = TRUE
+), .(cell_type)]
+
+data_thrs_2 <- unique(
+    dist_genes[, .(cell_type, thr_exp_umifrac, thr_exp_fc, thr_accessibility)]
+)[order(cell_type)]
+
+# combine
+data_thrs <- merge.data.table(
+    data_thrs_1, data_thrs_2,
+    by = intersect(colnames(data_thrs_1), colnames(data_thrs_2))
+)
+
+# save
+fwrite(data_thrs, file.path(
+    grn_dir, "cell_type", sprintf(
+        "qthreshold_%s_expression_%s_accessibility_%s.tsv",
+        id, thr_q_exp, thr_q_acc
+    )
+), sep = "\t")
+
+```
+
+Parse expression and accessibility for TF-target gene pairs.
+
+```{r}
+# in silico chip threshold
+thrs <- 0.1
+
+# global network
+grn_dt <- readRDS(file.path(
+    grn_dir, lvl, sprintf("insilico-chip-grn-%s.rds", id)
+))
+grn_dt <- unique(grn_dt[in_silico_chip_score > thrs])
+
+# expression and accessibility data for all genes
+dist_dt <- fread(file.path(
+    map_dir, "cell_type", sprintf(
+        "data_expression_accessibility_%s.tsv.gz", id
+    )
+))
+
+# combine expression and accessibility for TFs and target genes
+genes <- unique(grn_dt$gene)
+gns_exp_acc_list <- sapply(unname(genes), function(g) {
+
+    # selected gene
+    message(g, "(", which(genes == g), "/", length(genes), ")")
+    gns_dt <- grn_dt[gene == g]
+
+    # TF expression and gene score
+    gns_exp <- merge.data.table(
+        gns_dt,
+        unique(dist_dt[gene == g, .(
+            gene, cell_type, stage, expression_umifrac, expression_fc, gene_score
+        )]),
+        by = c("gene"),
+        allow.cartesian = TRUE, sort = FALSE
+    )
+
+    # target gene expression and gene score
+    tgs_dt <- unique(copy(dist_dt)[
+        gene %in% gns_exp$target_gene,
+        .(gene, cell_type, stage, expression_umifrac, expression_fc, gene_score, 
+          peak, accessibility)
+    ])
+    setnames(
+        tgs_dt,
+        c("gene", "expression_umifrac", "expression_fc", 
+          "gene_score"),
+        c("target_gene", "target_expression_umifrac", "target_expression_fc", 
+          "target_gene_score")
+    )
+    gns_ext <- merge.data.table(
+        gns_exp, tgs_dt,
+        by = c("target_gene", "peak", "cell_type", "stage"),
+        sort = FALSE, all = FALSE, allow.cartesian = TRUE
+    )
+    setnames(
+      gns_ext, 
+      c("peak", "accessibility"), 
+      c("target_peak", "target_accessibility")
+    )
+    
+    # order
+    setcolorder(
+        gns_ext, c(
+            "cell_type", "stage", 
+            "gene", "gene_name", "common_name", "og", "pfam",
+            "expression_fc", "expression_umifrac", "gene_score",
+            "target_gene", "target_gene_name", "target_common_name", 
+            "target_og", "target_pfam",
+            "target_peak", "seqnames", "start", "end",
+            "target_expression_fc", "target_expression_umifrac",
+            "target_gene_score", "target_accessibility", 
+            "motif", "id", 
+            "motif_score", "peak_tf_correlation_score", "in_silico_chip_score"
+        )
+    )
+    gns_ext
+
+}, simplify = FALSE, USE.NAMES = TRUE)
+
+# save
+saveRDS(
+    gns_exp_acc_list,
+    file.path(
+        grn_dir, "cell_type", "grn_tf_targets_expression_accessibility.rds"
+    )
+)
+```
+
+### Filter GRN per cell type
+
+```{r}
+# how peak-TF correlations were calculated
+lvl <- "metacell"
+
+# mapping between metacells
+id <- "genes_exp_FC2_acc_FC4_spearman"
+
+# in silico ChIP threshold
+thrs <- 0.1
+
+# expression quantification: fc or umifrac
+exp <- "fc"
+
+# accessibility quantification: access or score
+acc <- "access"
+
+# quantile thresholds for expression and accessibility
+thr_q_exp <- 0.4
+thr_q_acc <- 0.4
+
+# chromvar threshold for TF motif activity
+chr_thrs <- 4
+
+# this is a global expression threshold for all cell types;
+# if not NULL, it overrides expression quantification and quantile threshold!
+thr_fc_exp <- NULL
+if (!is.null(thr_fc_exp)) exp <- "fc"
+
+# file name
+if (is.null(thr_fc_exp)) {
+  fn <- sprintf(
+    "expression_%s_%s_accessibility_%s_%s_chromvar_%s", 
+    exp, thr_q_exp, acc, thr_q_acc, chr_thrs
+  )
+} else {
+  fn <- sprintf(
+    "expression_%s_%s_accessibility_%s_%s_chromvar_%s", 
+    exp, thr_fc_exp, acc, thr_q_acc, chr_thrs
+  )
+}
+
+```
+
+Load global GRN data.
+
+```{r}
+# global GRN data
+grn_dt <- readRDS(file.path(
+    grn_dir, lvl, sprintf("insilico-chip-grn-%s.rds", id)
+))
+grn_dt <- unique(grn_dt[in_silico_chip_score > thrs])
+
+# global network targets
+grn_glob <- unique(grn_dt[, .(gene, target_gene)])
+setnames(grn_glob, "gene", "tf_gene")
+```
+
+Load gene developmental stage data
+
+```{r}
+# gene developmental stage data
+devel_dt <- fread(file.path(
+    grn_dir, "development_data_for_grn.tsv"
+))
+stopifnot(all(devel_dt$cell_type %in% cell_types))
+devel_dt[, cell_type := factor(cell_type, levels = cell_types)]
+```
+
+Load chromVAR gene scores per metacell and aggregate them per cell type.
+
+```{r}
+# chromvar data 
+exp_chromvar_dt <- fread(
+    file.path(
+        grn_dir, lvl,
+        sprintf("gene_expression_%s_chromVAR_%s.tsv.gz", exp, id)
+    )
+)
+exp_chromvar_dt <- exp_chromvar_dt[insilico_ChIP_threshold == thrs]
+stopifnot(all(exp_chromvar_dt$cell_type %in% cell_types))
+exp_chromvar_dt[, cell_type := factor(cell_type, levels = cell_types)]
+
+# aggregate zscores per cell type
+exp_chromvar_dt[, zscore := mean(zscore), .(gene, motif, cell_type)]
+exp_chromvar_dt[, expression := mean(expression), .(gene, motif, cell_type)]
+exp_chromvar_dt[, c("metacell", "expression", "insilico_ChIP_threshold") := NULL]
+exp_chromvar_dt <- unique(exp_chromvar_dt)
+```
+
+Load expression and accessibility data for base network, and combine with 
+chromVAR scores (i.e TF activity).
+
+```{r}
+# expression and accessibility data for base network
+gns_exp_acc_list <- readRDS(
+    file.path(
+        grn_dir, "cell_type", "grn_tf_targets_expression_accessibility.rds"
+    )
+)
+gns_exp_acc_dt <- rbindlist(gns_exp_acc_list)
+
+# combine withh cromVAR scores
+gns_exp_acc_act_dt <- merge.data.table(
+    gns_exp_acc_dt, exp_chromvar_dt,
+    by = intersect(colnames(exp_chromvar_dt), colnames(gns_exp_acc_dt)),
+    all.x = TRUE, sort = FALSE
+)
+setcolorder(gns_exp_acc_act_dt, c(
+  colnames(gns_exp_acc_dt)[1 : grep("target", colnames(gns_exp_acc_dt))[1]-1],
+  "zscore"
+))
+```
+
+Load per cell type thresholds of expression and accessibility, and combine with 
+base GRN gene data.
+
+```{r}
+# per cell type thresholds of expression and accessibility
+data_thrs <- fread(file.path(
+    grn_dir, "cell_type", sprintf(
+        "qthreshold_%s_expression_%s_accessibility_%s.tsv",
+        id, thr_q_exp, thr_q_acc
+    )
+))
+data_thrs[cell_type %in% adult_cell_types, stage := "adult"]
+data_thrs[cell_type %in% gastr_cell_types, stage := "gastrula"]
+stopifnot(all(data_thrs$cell_type %in% cell_types))
+data_thrs[, cell_type := factor(cell_type, levels = cell_types)]
+if (exp == "umifrac") {
+    data_thrs[, exp_thrs := thr_exp_umifrac]
+} else if (exp == "fc") {
+    data_thrs[, exp_thrs := thr_exp_fc]
+}
+if (!is.null(thr_fc_exp)) (
+  data_thrs[, exp_thrs := thr_fc_exp]
+)
+if (acc == "score") {
+    data_thrs[, acc_thrs := thr_gene_score]
+} else if (acc == "access") {
+    data_thrs[, acc_thrs := thr_accessibility]
+}
+
+# combine
+grn_base_dt <- merge.data.table(
+  gns_exp_acc_act_dt, data_thrs[, .(cell_type, stage, exp_thrs, acc_thrs)], 
+  by = c("cell_type", "stage")
+)
+```
+
+Filter TFs per cell type.
+
+```{r}
+# determine which TFs are active in which cell type
+# based on mean expression and z score
+if (exp == "fc") {
+  grn_filt_dt <- grn_base_dt[expression_fc > exp_thrs & zscore > chr_thrs]
+} else if (exp == "umifrac") {
+  grn_filt_dt <- grn_base_dt[expression_umifrac > exp_thrs & zscore > chr_thrs]
+}
+```
+
+Filter target genes
+
+```{r}
+# filter target genes per cell type
+# based on mean expression and accessibility/gene score
+if (exp == "fc") {
+  grn_filt_dt <- grn_filt_dt[target_expression_fc > exp_thrs]
+} else if (exp == "umifrac") {
+  grn_filt_dt <- grn_filt_dt[target_expression_umifrac > exp_thrs]
+}
+if (acc == "access") {
+  grn_filt_dt <- grn_filt_dt[target_accessibility > acc_thrs]
+} else if (exp == "score") {
+  grn_filt_dt <- grn_filt_dt[target_gene_score > acc_thrs]
+}
+```
+
+Identify auto-regulating TFs per cell type.
+
+```{r}
+# auto regulating TFs per cell type
+grn_auto_dt <- unique(grn_filt_dt[, .(gene, target_gene, cell_type)])
+grn_auto_dt <- rbindlist(lapply(cell_types, function(ct) {
+  auto_reg_gns <- unique(grn_auto_dt[cell_type == ct][gene == target_gene]$gene)
+  data.table(gene = auto_reg_gns)[, cell_type := ct][, target_self := TRUE]
+}))
+grn_filt_dt <- merge.data.table(
+  grn_filt_dt, grn_auto_dt, by = c("gene", "cell_type"), 
+  all.x = TRUE, sort = FALSE
+)
+grn_filt_dt[is.na(target_self), target_self := FALSE]
+```
+
+Save TF info tables per cell type.
+
+```{r}
+# TF info table
+tfs_info_dt <- unique(grn_filt_dt[, .(
+  cell_type, stage, gene, gene_name, common_name, og, pfam, 
+  expression_fc, expression_umifrac, gene_score, zscore, motif, id, target_self
+)])
+stopifnot(nrow(tfs_info_dt[,.N,.(cell_type,gene)][N>1])==0)
+
+# save
+fwrite(
+  tfs_info_dt,
+  file.path(
+    grn_dir, "networks", sprintf("grn_tfs_info_%s.tsv", fn)
+  ),
+  sep = "\t"
+)
+require(openxlsx)
+wb <- createWorkbook()
+for (ct in cell_types) {
+  sheetName <- substr(ct, 1, 30)
+  grn_ct <- tfs_info_dt[cell_type == ct]
+  addWorksheet(wb, sheetName = sheetName)
+  writeData(wb, sheet = sheetName, grn_ct)
+}
+saveWorkbook(
+  wb,
+  file.path(grn_dir, "networks", sprintf("grn_tfs_info_%s.xlsx", fn)),
+  overwrite = TRUE
+)
+```
+
+Complete GRN tables by including TFs that pass TF filtering, but get removed 
+because no targets pass the filtering.
+
+```{r}
+# any TFs that have no target genes
+tfs_info_dt[, stage_cell_type_gene := paste(stage, cell_type, gene)]
+grn_filt_dt[, stage_cell_type_gene := paste(stage, cell_type, gene)]
+grn_fill_dt <- rbindlist(list(
+  grn_filt_dt,
+  tfs_info_dt[! stage_cell_type_gene %in% grn_filt_dt$stage_cell_type_gene]
+), use.names = TRUE, fill = TRUE)
+grn_fill_dt[, exp_thrs := .SD[!is.na(exp_thrs)]$exp_thrs[1], .(cell_type, stage)]
+grn_fill_dt[, acc_thrs := .SD[!is.na(acc_thrs)]$acc_thrs[1], .(cell_type, stage)]
+grn_fill_dt[, cell_type := factor(cell_type, levels = cell_types)]
+grn_fill_dt[, stage_cell_type_gene := NULL]
+tfs_info_dt[, stage_cell_type_gene := NULL]
+setorder(grn_fill_dt, cell_type, stage)
+
+# target TF annotations
+grn_fill_dt[, target_TF := target_gene %in% tfan$gene]
+grn_fill_dt[, target_active_TF := target_gene %in% .SD$gene, .(cell_type, stage)]
+
+# save
+fwrite(
+  grn_fill_dt,
+  file.path(
+    grn_dir, "networks", sprintf("grn_peaks_%s.tsv", fn)
+  ),
+  sep = "\t"
+)
+require(openxlsx)
+wb <- createWorkbook()
+for (ct in cell_types) {
+  sheetName <- substr(ct, 1, 30)
+  grn_ct <- grn_fill_dt[cell_type == ct]
+  addWorksheet(wb, sheetName = sheetName)
+  writeData(wb, sheet = sheetName, grn_ct)
+}
+saveWorkbook(
+  wb,
+  file.path(grn_dir, "networks", sprintf("grn_peaks_%s.xlsx", fn)),
+  overwrite = TRUE
+)
+```
+
+Save TF-gene network.
+
+```{r}
+# aggregate peaks per gene
+grn_gene_dt <- copy(grn_fill_dt)
+grn_gene_dt[, c("target_peak", "seqnames", "start", "end") := NULL]
+grn_gene_dt[, target_accessibility := max(target_accessibility), .(gene, target_gene, cell_type, stage)]
+grn_gene_dt[, peak_tf_correlation_score := max(peak_tf_correlation_score), .(gene, target_gene, cell_type, stage)]
+grn_gene_dt[, in_silico_chip_score := max(in_silico_chip_score), .(gene, target_gene, cell_type, stage)]
+grn_gene_dt <- unique(grn_gene_dt)
+
+# save
+fwrite(
+  grn_gene_dt,
+  file.path(
+    grn_dir, "networks", sprintf("grn_genes_%s.tsv", fn)
+  ),
+  sep = "\t"
+)
+require(openxlsx)
+wb <- createWorkbook()
+for (ct in cell_types) {
+  sheetName <- substr(ct, 1, 30)
+  grn_ct <- grn_gene_dt[cell_type == ct]
+  addWorksheet(wb, sheetName = sheetName)
+  writeData(wb, sheet = sheetName, grn_ct)
+}
+saveWorkbook(
+  wb,
+  file.path(grn_dir, "networks", sprintf("grn_genes_%s.xlsx", fn)),
+  overwrite = TRUE
+)
+```
+
+Save TF-TF network.
+
+```{r}
+grn_tfs_dt <- copy(grn_gene_dt)
+grn_tfs_dt <- grn_tfs_dt[target_TF == TRUE]
+
+# any TFs that have no target genes
+tfs_info_dt[, stage_cell_type_gene := paste(stage, cell_type, gene)]
+grn_tfs_dt[, stage_cell_type_gene := paste(stage, cell_type, gene)]
+grn_tfs_dt <- rbindlist(list(
+  grn_tfs_dt,
+  tfs_info_dt[! stage_cell_type_gene %in% grn_tfs_dt$stage_cell_type_gene]
+), use.names = TRUE, fill = TRUE)
+grn_tfs_dt[, exp_thrs := .SD[!is.na(exp_thrs)]$exp_thrs[1], .(cell_type, stage)]
+grn_tfs_dt[, acc_thrs := .SD[!is.na(acc_thrs)]$acc_thrs[1], .(cell_type, stage)]
+grn_tfs_dt[, cell_type := factor(cell_type, levels = cell_types)]
+grn_tfs_dt[, stage_cell_type_gene := NULL]
+tfs_info_dt[, stage_cell_type_gene := NULL]
+setorder(grn_tfs_dt, cell_type, stage)
+
+# save
+fwrite(
+  grn_tfs_dt,
+  file.path(
+    grn_dir, "networks", sprintf("grn_tfs_%s.tsv", fn)
+  ),
+  sep = "\t"
+)
+require(openxlsx)
+wb <- createWorkbook()
+for (ct in cell_types) {
+  sheetName <- substr(ct, 1, 30)
+  grn_ct <- grn_tfs_dt[cell_type == ct]
+  addWorksheet(wb, sheetName = sheetName)
+  writeData(wb, sheet = sheetName, grn_ct)
+}
+saveWorkbook(
+  wb,
+  file.path(grn_dir, "networks", sprintf("grn_tfs_%s.xlsx", fn)),
+  overwrite = TRUE
+)
+```
+
+### Inspect cell type GRNs
+
+Inspect networks, plot stats and diagnostic plots.
+
+```{r}
+# how peak-TF correlations were calculated
+lvl <- "metacell"
+
+# mapping between metacells
+id <- "genes_exp_FC2_acc_FC4_spearman"
+
+# in silico ChIP threshold
+thrs <- 0.1
+
+# expression quantification: fc or umifrac
+exp <- "fc"
+
+# accessibility quantification: access or score
+acc <- "access"
+
+# quantile thresholds for expression and accessibility
+thr_q_exp <- 0.4
+thr_q_acc <- 0.4
+
+# chromvar threshold for TF motif activity
+chr_thrs <- 4
+
+# this is a global expression threshold for all cell types;
+# if not NULL, it overrides expression quantification and quantile threshold!
+thr_fc_exp <- NULL
+if (!is.null(thr_fc_exp)) exp <- "fc"
+
+# file name
+if (is.null(thr_fc_exp)) {
+  fn <- sprintf(
+    "expression_%s_%s_accessibility_%s_%s_chromvar_%s", 
+    exp, thr_q_exp, acc, thr_q_acc, chr_thrs
+  )
+} else {
+  fn <- sprintf(
+    "expression_%s_%s_accessibility_%s_%s_chromvar_%s", 
+    exp, thr_fc_exp, acc, thr_q_acc, chr_thrs
+  )
+}
+
+# load network
+grn_ct_dt <- fread(file.path(
+  grn_dir, "networks", sprintf("grn_genes_%s.tsv", fn)
+))
+grn_ct_dt[, cell_type := factor(cell_type, levels = cell_types)]
+```
+
+Per cell type
+
+-   number of TFs per cell type
+-   distribution of TF inputs per target gene
+-   distribution of target genes per TF
+
+```{r}
+# GRN data
+lvl_cols <- structure(
+  c("#66FF66", "#FFCC00", "#CC9900", "#FF0000", "#CC0099","#6600CC", "#0011CC", "#030B61", "#08153b", "#040a1c"),
+  names = 1:10
+)
+
+# number of TFs per cell type
+cp_tf_num <- ggplot(
+        unique(grn_ct_dt[, .(gene, cell_type)]),
+        aes(cell_type, fill = cell_type, color = cell_type)
+    ) +
+    geom_bar() +
+    scale_x_discrete(drop = TRUE) +
+    scale_fill_manual(values = ct_cols, drop = TRUE) +
+    scale_color_manual(values = structure(
+      colorspace::darken(ct_cols, 0.5),
+      names = names(ct_cols)
+    )) +
+    scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
+    theme(
+        legend.position = "none",
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.x = element_blank()
+    ) +
+    labs(y = "TFs")
+
+
+# number of target genes per TF per cell type
+ct_tf_gen <- unique(
+  grn_ct_dt[, .(gene, lvl, target_self, target_gene, cell_type)]
+)[, .N, .(cell_type, lvl, gene, target_self)]
+ct_tf_gen[, lvl := factor(lvl, levels = 1:10)]
+ct_tf_gen[, cell_type_box := paste0(cell_type, "_box")]
+cp_tf_gen <- ggplot(
+        ct_tf_gen, aes(
+          cell_type, N,
+          color = cell_type
+        )
+    ) +
+    ggrastr::rasterise(ggbeeswarm::geom_quasirandom(
+      aes(fill = cell_type, shape = target_self),
+      size = 1, alpha = 1
+    )) +
+    geom_boxplot(aes(fill = cell_type_box), outlier.shape = NA, alpha = 0.5) +
+    scale_x_discrete(drop = TRUE) +
+    scale_fill_manual(values = c(
+      ct_cols, 
+      structure(
+        colorspace::lighten(ct_cols, 0.8),
+        names = paste0(names(ct_cols), "_box")
+      )
+    ), guide = "none") +
+    scale_color_manual(values = structure(
+      colorspace::darken(ct_cols, 0.5),
+      names = names(ct_cols)
+    ), guide = "none") +
+    scale_shape_manual(values = c("TRUE" = 25, "FALSE" = 21)) +
+    scale_y_continuous(
+      expand = expansion(mult = c(0.1, 0.1)),
+      trans = "log10"
+    ) +
+    guides(
+      shape = guide_legend(override.aes = list(size = 5))
+    ) +
+    theme(
+      axis.text.x = element_blank(),
+      axis.ticks.x = element_blank(),
+      axis.title.x = element_blank()
+    ) +
+    labs(y = "target genes\nper TF")
+
+
+# number of TFs per target gene per cell type
+ct_tg_tfs <- unique(
+  grn_ct_dt[, .(gene, target_gene, target_TF, cell_type)]
+)[, .N, .(cell_type, target_TF, target_gene)]
+ct_tg_tfs[, cell_type_box := paste0(cell_type, "_box")]
+cp_tg_tfs <- ggplot(
+        ct_tg_tfs, aes(
+          cell_type, N,
+          color = cell_type
+        )
+    ) +
+    ggrastr::rasterise(ggbeeswarm::geom_quasirandom(
+      aes(fill = cell_type, shape = target_TF),
+      size = 1, alpha = 1
+    )) +
+    geom_boxplot(aes(fill = cell_type_box), outlier.shape = NA, alpha = 0.5) +
+    scale_x_discrete(drop = TRUE) +
+    scale_fill_manual(values = c(
+      ct_cols, structure(
+      colorspace::lighten(ct_cols, 0.8),
+      names = paste0(names(ct_cols), "_box")
+    )), guide = "none") +
+    scale_color_manual(values = structure(
+      colorspace::darken(ct_cols, 0.5),
+      names = names(ct_cols)
+    ), guide = "none") +
+    scale_shape_manual(values = c("TRUE" = 24, "FALSE" = 22)) +
+    scale_y_continuous(
+      expand = expansion(mult = c(0.1, 0.1)),
+      trans = "log2"
+    ) +
+    guides(shape = guide_legend(override.aes = list(size = 5))) +
+    theme(
+      axis.text.x = element_blank(),
+      axis.ticks.x = element_blank(),
+      axis.title.x = element_blank()
+    ) +
+    labs(y = "TFs per\ntarget gene")
+
+
+
+# overlap of targets per TF per cell type
+ct_tg_tfs <- unique(
+ grn_ct_dt[, .(gene, target_gene, target_TF, cell_type)]
+)
+ct_tf_ovl <- rbindlist(sapply(
+  as.character(unique(grn_ct_dt$cell_type)), 
+  function(ct) {
+    ct_dt <- ct_tg_tfs[cell_type == ct]
+    ct_tf <- unique(ct_dt$gene)
+    rbindlist(lapply(seq_along(ct_tf), function(i) {
+      rbindlist(lapply(seq_along(ct_tf), function(j) {
+        tf1 <- ct_tf[i]
+        tf2 <- ct_tf[j]
+        if (i > j) {
+          message(sprintf("%s: %s vs %s", ct, tf1, tf2))
+          target1 <- unique(ct_dt[gene == tf1]$target_gene)
+          target2 <- unique(ct_dt[gene == tf2]$target_gene)
+          ovl <- length(intersect(target1, target2)) / length(union(target1, target2))
+          data.table(tf_gene_1 = tf1, tf_gene_2 = tf2, target_overlap = ovl)
+        }
+      }))
+    }))                                                                                                               
+  }, simplify = FALSE, USE.NAMES = TRUE
+), idcol = "cell_type")
+ct_tf_ovl[, cell_type := factor(cell_type, levels = cell_types)]
+ct_tf_ovl[, cell_type_box := paste0(cell_type, "_box")]
+ct_tf_ovl[, mean(target_overlap), cell_type]
+cp_tg_ovl <- ggplot(
+        ct_tf_ovl, aes(
+          cell_type, target_overlap,
+          color = cell_type
+        )
+    ) +
+    # ggrastr::rasterise(ggbeeswarm::geom_quasirandom(
+    #   aes(fill = cell_type),
+    #   size = 1, alpha = 1, shape = 21
+    # )) +
+    geom_boxplot(
+      aes(fill = cell_type_box),
+      outlier.shape = 21, alpha = 1
+    ) +
+    scale_x_discrete(drop = TRUE) +
+    scale_fill_manual(values = c(
+      ct_cols, structure(
+      ct_cols,
+      names = paste0(names(ct_cols), "_box")
+    )), guide = "none") +
+    scale_color_manual(values = structure(
+      colorspace::darken(ct_cols, 0.5),
+      names = names(ct_cols)
+    ), guide = "none") +
+    scale_y_continuous(
+      expand = expansion(mult = c(0.1, 0.1))
+      #trans = "log2"
+    ) +
+    guides(shape = guide_legend(override.aes = list(size = 5))) +
+    theme(
+      axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)
+      #axis.ticks.x = element_blank(),
+      #axis.title.x = element_blank()
+    ) +
+    labs(y = "target gene overlap\nper pair of TFs")
+
+
+
+# plot
+gp_grn_ct <- cp_tf_num / cp_tg_ovl
+gp_grn_ct <- gp_grn_ct +
+  plot_annotation(title = sprintf(
+      "Expression %s %s & chromVAR Z %s",
+      exp, 
+      ifelse(
+        is.null(thr_fc_exp), 
+        sprintf("quantile %s", thr_q_exp), 
+        thr_fc_exp
+      ),
+      chr_thrs
+  ))
+
+# save
+ggsave(
+  file.path(fig_dir, sprintf("GRN-cell-type-num-tfs-targets-%s.pdf", fn)), 
+  gp_grn_ct, 
+  height = 8, width = 8
+)
+```
+
+
+

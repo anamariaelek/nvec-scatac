@@ -1047,7 +1047,7 @@ arc_scores_mona <- mta_gw_motif_score_monalisa(
   index_object = seqdt,
   bin_width = 250,
   subsample_fraction = 0.10,
-  score_quantiles = c(0, 0.05, 0.1, 0.25, 0.5, 0.75, 0.95, 0.98, 0.99, 0.995, 0.999, 1.0),
+  score_quantiles = c(0, 0.25, 0.5, 0.75, 0.95, 0.98, 0.99, 0.995, 0.999, 1.0),
   score_quantile_thr = q,
   do_gw_scan = TRUE,
   given_gr = peaks_gr,
@@ -1605,22 +1605,25 @@ peaks_mat_seacells <- readRDS(file.path(
 ))
 peaks_mat_seacells <- as(peaks_mat_seacells, "dgCMatrix")
 
+# use only peaks that have some accessibility
+peaks_mat_seacells <- peaks_mat_seacells[rowSums(peaks_mat_seacells) > 0, ]
+
 # create binary matrix of motif hits in peaks
 arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
 arc_hits <- unique(fread(
-  file.path(arc_dir, sprintf("motif-scores-archetypes-%s-mona.tsv.gz", arc_id))
+  file.path(arc_dir, sprintf("motif-scores-archetypes-%s-mona-q0.98.tsv.gz", arc_id))
 )[, .(motif, peak, motif_score)])
 setorder(arc_hits, -motif_score)
 arc_hits <- arc_hits[, .SD[1], .(motif, peak)]
 arc_data <- dcast.data.table(arc_hits, peak ~ motif, value.var = "motif_score")
 
-# include in binary matrix peaks that have no hits
-pks_miss <- setdiff(rownames(peaks_mat_seacells), arc_data[[1]])
-pks_miss <- data.table("peak" = cbind(pks_miss))
-setnames(pks_miss, "peak")
-arc_data <- rbindlist(list(
-  arc_data, pks_miss
-), fill = TRUE, use.names = TRUE)
+# include in binary matrix peaks that have no motif hits
+# pks_miss <- setdiff(rownames(peaks_mat_seacells), arc_data[[1]])
+# pks_miss <- data.table("peak" = cbind(pks_miss))
+# setnames(pks_miss, "peak")
+# arc_data <- rbindlist(list(
+#   arc_data, pks_miss
+# ), fill = TRUE, use.names = TRUE)
 
 # convert to matrix
 arc_matx <- data.matrix(arc_data[, -1])
@@ -1628,7 +1631,11 @@ arc_matx[!is.na(arc_matx)] <- 1
 arc_matx[is.na(arc_matx)] <- 0
 rownames(arc_matx) <- arc_data[[1]]
 arc_matx <- as(arc_matx, "dgCMatrix")
-arc_matx <- arc_matx[match(rownames(peaks_mat_seacells), rownames(arc_matx)), ]
+
+# include only peaks present in both matrices
+pks <- intersect(rownames(peaks_mat_seacells), rownames(arc_matx))
+peaks_mat_seacells <- peaks_mat_seacells[pks, ]
+arc_matx <- arc_matx[pks, ]
 
 # sanity check
 all.equal(rownames(arc_matx), as.character(rownames(peaks_mat_seacells)))
@@ -1683,6 +1690,9 @@ saveRDS(
 ChromVAR calculation
 
 ```{r}
+# load background peaks
+bgd_peaks <- readRDS(file.path(pks_dir, "Adult_Gastrula_Background_Peaks_SEACell.rds"))
+
 # calculate chromVAR deviations (this takes a while)
 chromvar_deviations <- .customDeviations(
   countsMatrix = peaks_mat_seacells,
@@ -1697,7 +1707,7 @@ chromvar_deviations <- .customDeviations(
 
 # save matrix
 mat_dir <- file.path(
-  "Results", 
+  "results", "Archetypes",
   sprintf("ChromVAR-%s", arc_id),
   "ArchetypesSEACellsMatrix"
 )
@@ -1716,33 +1726,6 @@ saveRDS(chromvar_mat, file.path(mat_dir, "Matrix-Archetypes-SEACells.rds"))
 saveRDS(chromvar_deviations, file.path(mat_dir, "chromvar_deviations.rds"))
 ```
 
-```{r}
-#| label: chromvar_rename
-#| include: FALSE
-#| echo: FALSE
-
-mat_dir <- file.path(
-  "Results", 
-  sprintf("ChromVAR-%s", arc_id),
-  "ArchetypesSEACellsMatrix"
-)
-chromvar_mat <- readRDS(file.path(mat_dir, "Matrix-Archetypes-SEACells.rds"))
-chromvar_deviations <- readRDS(file.path(mat_dir, "chromvar_deviations.rds"))
-
-arc_num <- str_extract(rownames(chromvar_mat), "ARCH\\d+")
-arc_nam <- dict[match(arc_num, archetype_num)]$archetype_name
-all(!is.na(arc_num))
-rownames(chromvar_mat) <- arc_nam
-
-arc_num <- str_extract(rownames(chromvar_deviations), "ARCH\\d+")
-arc_nam <- dict[match(arc_num, archetype_num)]$archetype_name
-all(!is.na(arc_num))
-rownames(chromvar_deviations) <- arc_nam
-
-saveRDS(chromvar_mat, file.path(mat_dir, "Matrix-Archetypes-SEACells.rds"))
-saveRDS(chromvar_deviations, file.path(mat_dir, "chromvar_deviations.rds"))
-```
-
 Now we can inspect motif scores in comparison to gene scores.
 We will load gene scores aggregated per SEACells and chromVAR deviation
 scores per SEACell. We also need initial assignemt of motifs to genes
@@ -1750,8 +1733,9 @@ scores per SEACell. We also need initial assignemt of motifs to genes
 
 ```{r}
 # archetypes
+arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
 pwm_fn <-   file.path(
-  arc_dir, "motif-archetypes-PPM-PCCnorm-0.8-IC0.5-8bp-pwms.rds"
+  arc_dir, sprintf("motif-archetypes-%s-pwms.rds", arc_id)
 )
 mots_arc_lst <- readRDS(pwm_fn)
 
@@ -1763,18 +1747,18 @@ setnames(motifs_to_genes, c("motif", "gene"))
 
 # cell type gene scores 
 gene_score_mat <- readRDS(file.path(
-    "Results", "GeneScoreMatrix",
+    "results", "GeneScoreMatrix",
     "Matrix-Gene-Scores-SEACell-FC.rds"
 ))
 
 # motif chromVAR deviation scores
 chromvar_mat <- readRDS(file.path(
-  "Results", "ChromVAR", "Matrix-Archetypes-SEACells.rds"
+  "results", sprintf("ChromVAR-%s", arc_id), "ArchetypesSEACellsMatrix", "Matrix-Archetypes-SEACells.rds"
 ))
 
 # 2D projection coordinates
 coord <- fread(file.path(
-    "Results", "Clustering", 
+    "results", "Clustering", 
     "SEACells_adult_gastrula_UMAP_FC3_gastrula_FC5_adult_qnorm.tsv"
 ))
 coord_df <- coord[, 2:3]
@@ -1888,6 +1872,31 @@ p_scores <- for (sg in select_genes) {
   )
   dev.off()
 }
+```
+
+```{r}
+# I don't understand why this is now different
+
+# motif chromVAR deviation scores
+chromvar_mat <- readRDS(file.path(
+  "results", sprintf("ChromVAR-%s", arc_id), "ArchetypesSEACellsMatrix_", 
+  "Matrix-Archetypes-SEACells.rds"
+))
+
+# seacell to cell type annotation
+annot_dt <- fread(file.path(
+  "results", "Clustering", "Annotation_Adult_Gastrula_SEACell.tsv"
+))
+annot_dt <- unique(annot_dt[, .(SEACell, cell_type)])
+
+# add annotations to seacells matrix
+chromvar_dt <- as.data.table(chromvar_mat, keep.rownames = "archetype_name")
+chromvar_dt <- melt.data.table(chromvar_dt, id.vars = "archetype_name", variable.name = "SEACell", value.name = "score")
+chromvar_dt <- merge.data.table(chromvar_dt, annot_dt, by = "SEACell", all.x = TRUE, sort = FALSE)
+chromvar_dt[, stage := "adult"]
+chromvar_dt[grep("seacell",SEACell,ignore.case=TRUE), stage := "gastrula"]
+chromvar_dt[archetype_name=="ARCH530_Snai2"][,.(value=mean(score)),.(archetype_name,cell_type,stage)][order(-value)][1:8]
+ 
 ```
 
 ## Session info

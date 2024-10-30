@@ -2334,7 +2334,7 @@ sim_mat <- readRDS(
 )
 
 # motif enrichments
-q <- 0.95
+q <- 0.98
 enr_dt <- rbindlist(lapply(c(
   # archetypes
   file.path(arc_dir, sprintf("motif-enrichment-cell-type-archetypes-%s-mona-q%s.tsv", arc_id, q)),
@@ -2851,6 +2851,120 @@ for (y_value in c("motif_enrichment_fc", "motif_deviation")) {
 }
 ```
 
+Plot per TF scatterplots of expression vs activity (deviation Z score) for selected genes (to show in the figure).
+
+```{r}
+# combined data
+acc_exp_ct <- fread(file.path(
+  "results", sprintf("ChromVAR-%s", arc_id),
+  "gene-expression-accessibility-archetype-motif-deviation-cell-type.tsv.gz"
+))
+
+# archetypes pwms
+mots_arc_lst <- unlist(lapply(c(
+  file.path("results", "Archetypes", sprintf("motif-archetypes-%s-pwms.rds", arc_id)),
+  file.path("results", "Motifs", "motifs.rds")
+), readRDS))
+names(mots_arc_lst) <- sapply(mots_arc_lst, function(m) m@name)
+
+#selected genes
+gs <- c(
+  "Pou4" = "Nvec_vc1.1_XM_032363992.2",
+  "PaxA" = "Nvec_vc1.1_XM_001631763.3",
+  "Brachyury" = "Nvec_vc1.1_XM_032378021.2",
+  "Hes2" = "Nvec_vc1.1_XM_032384889.2",
+  "SnailA" = "Nvec_vc1.1_XM_032387186.2",
+  "Six4/5" = "Nvec_vc1.1_XM_001623084.3",
+  "FoxA" = "Nvec_vc1.1_XM_001634505.3",
+  "FoxQ2d" = "Nvec_vc1.1_XM_032385706.2",
+  "Islet" = "Nvec_vc1.1_XM_032362713.2",
+  "GATA" = "Nvec_vc1.1_XM_032367288.2",
+  "FoxL2" = "Nvec_vc1.1_XM_032364887.2",
+  "Insm1" = "Nvec_vc1.1_XM_032375602.2"
+)
+
+patch_list <- lapply(seq_along(gs), function(x) {
+  
+  # gene annotation
+  gn <- gs[x]
+  cn <- names(gs)[x]
+  pf <- tfan[gene==gn]$pfam
+  og <- tfan[gene==gn]$og
+  tf <- ifelse(cn!="", sprintf("%s\n%s", cn, str_remove(gn, "Nvec_vc1.1_")), gn)
+  mm <- unique(assign_dt[gene==gn]$archetype_name)
+  print(tf)
+
+  # motif annotation
+  mm_dt <- assign_dt[gene==gn & archetype_name==mm]
+  tfam <- unique(mm_dt$tf_family)
+  afam <- unique(mm_dt$archetype_family)
+  rasg <- unique(mm_dt$assigned)
+  ranm <- unique(mm_dt$rank)
+  
+  # data for gene
+  tf_dt <- acc_exp_ct[gene==gn & archetype_name==mm]
+  ecor <- unique(tf_dt$motif_deviation_gene_expression_correalton)
+  acor  <- unique(tf_dt$motif_deviation_gene_accessibility_correalton)
+
+  # motif logo
+  mt_gp <- ggseqlogo::ggseqlogo(mots_arc_lst[[mm]]@motif) +
+    theme_void() +
+    labs(title = tf)
+  
+  # assemble scatter plot
+  tf_gp <- ggplot(tf_dt, aes(
+          expression, motif_deviation, 
+          label = cell_type,
+          fill = cell_type, 
+          color = cell_type,
+          shape = stage
+      )
+    ) +
+    geom_point(size = 4) +
+    ggrepel::geom_text_repel(size = 4, alpha = 0.6) +
+    scale_fill_manual(values = ct_cols) +
+    scale_color_manual(
+      values = c(
+        structure(
+          colorspace::darken(ct_cols, 0.5),
+          names = names(ct_cols)
+        ),
+        structure(
+          colorspace::lighten(ct_cols, 0.5),
+          names = paste0(names(ct_cols), "_sc")
+        )
+      )
+    ) +
+    scale_x_continuous(limits = c(0, NA)) +
+    scale_shape_manual(
+        values = c("adult" = 21, "gastrula" = 24)
+    ) +
+    labs(x = "", y = "") +
+    theme(
+      # strip.text = element_text(size = 8),
+      # axis.text = element_text(size = 8),
+      # axis.title = element_text(size = 8),
+      # title = element_text(size = 8),
+      legend.position = "none"
+    )
+  
+  # patchwork
+  patch <- mt_gp + tf_gp + 
+    plot_layout(ncol = 1, heights = c(1, 5))
+  
+  patch
+
+})
+
+patch <- wrap_plots(patch_list, ncol = 3)
+
+ggsave(
+  file.path(fig_dir, sprintf("tf-expression-activity-scatter-plots-%s-figure.pdf", arc_id)), 
+  patch, height = 16, width = 10
+)
+
+```
+
 Plot dotmap of TF expression vs activity (deviation Z score).
 
 ```{r}
@@ -2873,7 +2987,7 @@ zscore_mt <- as.matrix(zscore_dt[, -1])
 rownames(zscore_mt) <- zscore_dt[[1]]
 gen_ord <- order(apply(zscore_mt, 1, which.max))
 gen_lvl <- rownames(zscore_mt)[gen_ord]
-acc_exp_ct[, gene := factor(gene, levels = gen_lvl)]
+acc_exp_ct[, gene := factor(gene, levels = rev(gen_lvl))]
 setorder(acc_exp_ct, gene)
 
 # significant archetypes
@@ -2899,7 +3013,7 @@ gen_plt_dt[common_name == "" & og != "", gene_label := ifelse(nchar(og)>40, past
 gen_plt_dt[gene != "" & common_name == "" & og == "" & pfam != "", gene_label := ifelse(nchar(pfam)>40, paste0(substr(pfam, 1, 37), "..."), pfam)]
 
 # motif enrichment dotmap
-gen_plt_gp <- ggplot(
+gp_dotmap <- ggplot(
   gen_plt_dt, 
   aes(cell_type, gene)
   ) +
@@ -2924,19 +3038,77 @@ gen_plt_gp <- ggplot(
     name = "TF motif activity",
     range = c(0, 4)
   ) +
+  labs(y = sprintf("%s marker TFs", length(unique(gen_plt_dt$gene)))) +
   theme(
-    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 8),
-    axis.text.y = element_text(size = 6),
+    #axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 8),
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks.x = element_blank(),
+    #axis.text.y = element_text(size = 6),
     panel.grid.major = element_line(linewidth = 0.25),
-    axis.title = element_blank(),
+    axis.title.x = element_blank(),
     plot.margin = margin(5.5, 40, 5.5, 40)
   )
+
+# plot annotation rectangle below the plot
+gen_plt_ct <- gen_plt_dt[
+  order(gene, -motif_deviation)
+][, .SD[1, .(cell_type, gene_label)], gene]
+
+gp_ctbar_v <- ggplot(
+        gen_plt_ct,
+        aes(gene, fill = cell_type)
+    ) +
+    geom_bar(position = "stack", width = 1) +
+    coord_flip() +
+    scale_x_discrete(
+      breaks = gen_plt_ct$gene,
+      labels = gen_plt_ct$gene_label,
+      expand = expansion(mult = c(0.005, 0.005))
+    ) +
+    scale_y_continuous(expand = c(0, 0)) +
+    scale_fill_manual(values = ct_cols) +
+    theme_void() +
+    theme(
+        legend.position = "none",
+        axis.text.x = element_blank(),
+        axis.text.y = element_text(size = 6, vjust = 0.5, hjust = 1),
+        plot.margin = unit(c(0, 0, 0, 0), "cm")
+    )
+
+gp_ctbar_h <- ggplot(
+        gen_plt_dt[, .N, .(cell_type)],
+        aes(cell_type, 1, fill = cell_type)
+    ) +
+    geom_bar(stat = "identity", width = 1) +
+    scale_y_continuous(expand = c(0, 0)) +
+    scale_fill_manual(values = ct_cols) +
+    theme_void() +
+    theme(
+        legend.position = "none",
+        axis.text.x = element_text(size = 8, angle = 90, vjust = 0.5, hjust = 1),
+        plot.margin = unit(c(0, 0, 0, 0), "cm")
+    )
+
+
+design <- "AABBBBBBB
+           AABBBBBBB
+           AABBBBBBB
+           AABBBBBBB
+           AABBBBBBB
+           AABBBBBBB
+           AABBBBBBB
+           AABBBBBBB
+           ##CCCCCCC"
+
+gp_acc_exp_ann <- gp_ctbar_v + gp_dotmap + gp_ctbar_h +
+  plot_layout(design = design, widths = c(1, 200), heights = c(200, 1))
 
 # save
 ggsave(
   file.path(fig_dir, sprintf("motif-activity-gene-expression-FC-%s-zscore-%s.pdf", fc_thr, zs_thr)),
-  gen_plt_gp,
-  height = 14, width = 9, limitsize = FALSE
+  gp_acc_exp_ann,
+  height = 10, width = 9, limitsize = FALSE
 )
 ```
 

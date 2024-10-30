@@ -297,7 +297,7 @@ fwrite(
 dev_dir <- "/home/anamaria/cluster/aelek/proj/scRNAseq_nvec_technau/"
 rpm_dt <- readRDS(file.path(dev_dir, "pseudobulk_rpm.rds"))
 
-# append adult to adukt tissues
+# append adult to adult tissues
 tiss <- c("phbw", "bodywall", "mesentery", "pharynx", "tentacle", "mesf")
 rpm_dt[mat %in% tiss, mat := paste0("adult_", mat)]
 
