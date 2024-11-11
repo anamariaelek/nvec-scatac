@@ -1162,10 +1162,11 @@ dev.off()
 ```{r}
 # plot markers on one page
 fg_vc <- c(
-  #"Nvec_vc1.1_XM_032363992.2" = "Pou4",
-  "Nvec_vc1.1_XM_001631763.3" = "PaxA",
-  "Nvec_vc1.1_XM_032378021.2" = "Brachyury",
+  "Nvec_vc1.1_XM_032363992.2" = "Pou4",
+  #"Nvec_vc1.1_XM_001631763.3" = "PaxA",
+  #"Nvec_vc1.1_XM_032378021.2" = "Brachyury",
   "Nvec_vc1.1_XM_001623084.3" = "Six4/5",
+  "Nvec_vc1.1_XM_032365096.2" = "Rfx4/6/8",
   "Nvec_vc1.1_XM_032367288.2" = "GATA",
   "Nvec_vc1.1_XM_032377897.2" = "Pea3/Ets",
   "Nvec_vc1.1_XM_032375602.2" = "Insm1"  

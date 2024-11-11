@@ -217,6 +217,248 @@ bct_maps <- setDT(cbind.data.frame(
 ))
 ```
 
+## Motif co-occurence
+
+We will derive motif lexicons by starting from motif hits in cell type specific 
+peaks. First, get locations of all hits (motif scores above the nth quantile of 
+genomic binding energy).
+
+```{r}
+# load motif scores
+arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
+q <- 0.95
+mta_dt <- rbindlist(lapply(c(
+  # archetypes
+  file.path(arc_dir, sprintf("motif-scores-archetypes-%s-mona-q%s.tsv.gz", arc_id, q)),
+  # experimental motifs
+  file.path(mta_dir, sprintf("motif-scores-mona-q%s.tsv.gz", q))
+), fread))
+
+# calculate relative motif scores (independent of the motif length)
+mta_dt[, relative_motif_score := motif_score / max(motif_score)]
+mta_dt <- unique(mta_dt)
+```
+
+Get non-overlapping motif hits per peak for each individual motif.
+
+```{r}
+# testing dataset
+#mta_hits_dt <- mta_dt[motif %in% c("ARCH1635_NEUROG2", "Pou4", "Shox2")]
+#mta_hits_dt <- mta_hits_dt[peak %in% mta_hits_dt[order(peak)][, .N, peak][order(-N)][, .SD[1], N]$peak[1:10]]
+
+#' Reduce motif hits to non-overlapping hits for each motif
+#' 
+#' @param dt dataframe with have individual motif hits in peaks in separate rows, it should have (at least) these columns: seqnames, start, end, motif, motif_score, peak
+#' @return dataframe with non-overlapping motif hits
+#' 
+reduce_ovl_ocurrences <- function(dt) {
+
+  # convert to data.table
+  setDT(dt)
+
+  # order data by motif and coordinate
+  message(sprintf("%s Ordering %d instances of %d motifs", Sys.time(), nrow(dt), length(unique(dt$motif))))
+  dt <- unique(dt[, .(seqnames, start, end, motif, motif_score, peak)])
+  setorder(dt, motif, start)
+
+  # identify groups of overlapping motif instances
+  .mta_occurr_ovl <- function(dt) {
+    message(sprintf("%s Identifying overlapping motif instances, this might take several minutes", Sys.time()))
+    dt[, dist := start - lag(end), by = .(motif, peak)]
+    dt[is.na(dist), dist := 1000]
+    message(sprintf("%s Numbering motif occurrences per peak", Sys.time()))
+    dt[, motif_occurrence := cumsum(dist > 0), by = .(motif, peak)]
+    # count number of non-overlapping motif hits for individual motifs
+    message(sprintf("%s Counting number of motif instances per peak", Sys.time()))
+    dt[, motif_count := sum(dist > 0), .(motif, peak)]
+  }
+  .mta_occurr_ovl(dt)
+  message(sprintf("%s Reduced mumber of motif instances to %d", Sys.time(), nrow(dt)))
+
+  # for overlapping motif instances, take the ones with max score
+  message(sprintf("%s Selecting motif instances with maximum score", Sys.time()))
+  dt[, max_motif_score := max(motif_score), .(motif, peak, motif_occurrence)]
+  dt <- dt[motif_score == max_motif_score]
+  .mta_occurr_ovl(dt)
+  message(sprintf("%s Reduced mumber of motif instances to %d", Sys.time(), nrow(dt)))
+
+  # for motif instances that are still overlapping, 
+  # take the coordiantes of maximum possible span
+  message(sprintf("%s Selecting maximum span for overlapping instances with max score", Sys.time()))
+  dt[, start := min(start), .(motif, peak, motif_occurrence)]
+  dt[, end := max(end), .(motif, peak, motif_occurrence)]
+  dt[, dist := NULL]
+  dt[, max_motif_score := NULL]
+  dt <- unique(dt)
+  message(sprintf("%s Final number of non-overlapping motif instances: %d", Sys.time(), nrow(dt)))
+
+  return(dt)
+}
+
+system.time({
+  mta_novl_dt <- reduce_ovl_ocurrences(mta_dt)
+})
+fwrite(
+  mta_novl_dt, 
+  file.path(syn_dir, sprintf("motif-hits-novl-%s-mona-q-%s.tsv.gz", arc_id, q)),
+  sep = "\t"
+)
+```
+
+Co-occurence of pairs of motifs
+
+```{r}
+count_co_occurrences <- function(dt) {
+  
+  # Convert to data.table
+  setDT(dt)
+  
+  # Count the number of motif hits in each peak
+  mta_hits_dc <- dcast.data.table(dt, peak ~ motif, fun.aggregate = length)
+  mta_hits <- as.matrix(mta_hits_dc[, -1])
+  rownames(mta_hits) <- mta_hits_dc[[1]]
+  
+  # Convert to a binary indicator matrix (1 if hit count > 0, otherwise 0)
+  mta_hits_ind <- (mta_hits > 0) * 1
+  
+  # Count co-occurrences of all pairs of motifs using matrix multiplication
+  count_matrix <- crossprod(mta_hits_ind)
+  
+  # Set diagonal to the number of motifs with at least 2 hits
+  diag(count_matrix) <- colSums(mta_hits >= 2)
+  
+  # Return count matrix with motif names
+  rownames(count_matrix) <- colnames(count_matrix) <- colnames(mta_hits_ind)
+  
+  return(count_matrix)
+}
+
+mta_novl_counts <- count_co_occurrences(mta_novl_dt)
+saveRDS(
+  mta_novl_counts, 
+  file.path(syn_dir, sprintf("motif-co-occurrences-%s-mona-q-%s.rds", arc_id, q))
+)
+```
+
+Per cell type-specific peaks
+
+```{r}
+ct <- "cnidocyte"
+
+# cell type peaks
+pks_dt <- fread(file.path(pks_dir, "Peaks_cell_type_mapped_cell_type_assignment.tsv.gz"))
+pks_ct <- pks_dt[broad_cell_type == ct]
+
+# motif overlap in selected peaks
+mta_novl_ct <- mta_novl_dt[peak %in% pks_ct$peak]
+mta_novl_ct_counts <- count_co_occurrences(mta_novl_ct)
+
+# save
+saveRDS(
+  mta_novl_ct_counts, 
+  file.path(syn_dir, sprintf("motif-co-occurrences-%s-%s-mona-q-%s.rds", ct, arc_id, q))
+)
+```
+
+Co-occurence enrichment: 
+the fraction of peaks with hits of both motif1 and motif2
+/ 
+fractions of peaks with motif1 hits * fraction of peaks with motif2 hits
+
+```{r}
+n_peaks <- length(unique(mta_novl_ct$peak))
+
+# fraction of peaks with hites to each motif
+mta_novl_frac <- unique(mta_novl_ct[, .(motif, peak, motif_count)])
+mta_novl_frac <- mta_novl_frac[, .(frac_peak = length(unique(.SD$peak))/n_peaks), by = motif][order(-frac_peak)]
+
+# fraction of peaks with hits to both motifs
+mta_pair_frac <- mta_novl_ct_counts / n_peaks
+
+# enrichment
+mta_novl_prod <- matrix(0, nrow = nrow(mta_pair_frac), ncol = ncol(mta_pair_frac))
+rownames(mta_novl_prod) <- colnames(mta_novl_prod) <- colnames(mta_pair_frac)
+for (i in rownames(mta_novl_prod)) {
+  for (j in colnames(mta_novl_prod)) {
+    mta_novl_prod[i, j] <- mta_pair_frac[i, j] / (mta_novl_frac[motif == i]$frac_peak * mta_novl_frac[motif == j]$frac_peak)
+  }
+}
+
+# save
+saveRDS(
+  mta_novl_prod, 
+  file.path(syn_dir, sprintf("motif-co-occurrence-enrichment-%s-%s-mona-q-%s.rds", ct, arc_id, q))
+)
+```
+
+Inspect the results
+
+```{r}
+# get motif pairs from the lower triangle of the matrix
+mta_novl_prod_lt <- mta_novl_prod
+mta_novl_prod_lt[upper.tri(mta_novl_prod_lt)] <- NA
+mta_novl_prod_dt <- as.data.table(mta_novl_prod_lt, keep.rownames = "motif1")
+mta_novl_prod_dt <- melt(mta_novl_prod_dt, value.name = "enrichment", variable.name = "motif2", id.vars = "motif1")
+mta_novl_prod_dt <- mta_novl_prod_dt[!is.na(enrichment)]
+
+# add counts of hits to pair of motifs
+mta_novl_count_dt <- as.data.table(mta_novl_ct_counts, keep.rownames = "motif1")
+mta_novl_count_dt <- melt(mta_novl_count_dt, value.name = "count", variable.name = "motif2", id.vars = "motif1")
+mta_enr <- merge.data.table(mta_novl_prod_dt, mta_novl_count_dt, by = c("motif1", "motif2"))
+
+# add fractions of peaks with hits to both motifs
+mta_novl_frac_dt <- as.data.table(mta_pair_frac, keep.rownames = "motif1")
+mta_novl_frac_dt <- melt(mta_novl_frac_dt, value.name = "fraction", variable.name = "motif2", id.vars = "motif1")
+mta_enr <- merge.data.table(mta_enr, mta_novl_frac_dt, by = c("motif1", "motif2"))
+
+# for motifs with less than 2 hits, set enrichment to NA
+mta_enr[count <= 2, enrichment := pmin(2, enrichment)]
+
+# get top pairs
+setorder(mta_enr, -enrichment)
+
+# plot
+mta_enr_gp <- mta_enr[enrichment > 1 & fraction > 0.1]
+mta_enr_gp[, motif_pair := sprintf("%s + %s", motif1, motif2)]
+gp_enr <- ggplot(mta_enr_gp, aes(count, enrichment)) +
+  geom_point() +
+  #geom_text_repel(
+  #  data = mta_enr_gp[enrichment > 9 | count > 8000],
+  #  aes(label = motif_pair), max.overlaps = Inf
+  #) +
+  labs(
+    x = "Peaks with motif co-occurrence",
+    y = "Co-occurence enrichment"
+  ) +
+  theme(
+    panel.grid.major = element_line(color = "grey", linewidth = 0.2),
+    panel.grid.minor = element_line(color = "grey", linewidth = 0.2)
+  )
+ggsave(file.path(
+  fig_dir, sprintf("motif-co-occurrence-enrichment-%s-%s-mona-q-%s.pdf", ct, arc_id, q)
+), gp_enr)
+
+```
+
+```{r}
+n_peaks <- length(unique(mta_novl_ct$peak))
+
+# Fraction of peaks with hits to each motif
+mta_novl_frac <- mta_novl_ct[, .(frac_peak = length(unique(peak)) / n_peaks), by = motif]
+
+# Fraction of peaks with hits to both motifs
+mta_pair_frac <- mta_novl_ct_counts / n_peaks
+
+# Create a lookup table for the motif fractions
+motif_frac_lookup <- setNames(mta_novl_frac$frac_peak, mta_novl_frac$motif)[rownames(mta_pair_frac)]
+
+# Compute the enrichment matrix
+mta_novl_prod <- mta_pair_frac / (outer(motif_frac_lookup, motif_frac_lookup, FUN = "*"))
+
+range(mta_novl_prod)
+```
+
+
 ## Reduce overlapping motifs (top-down approach, not used)
 
 We will derive motif lexicons by starting from motif hits in all peaks.  
@@ -493,7 +735,7 @@ fwrite(
 ## Reduce overlapping motifs (bottom-up approach)
 
 We will derive motif lexicons by starting from motif hits in cell type specific 
-peaks. First, get locations of all hits (motif scores above the 95th quantile of 
+peaks. First, get locations of all hits (motif scores above the nth quantile of 
 genomic binding energy) for cell-type enriched motifs. Then we identify groups 
 of overlapping motif hits, and select the most enriched motif as representative 
 motif hit per group. 
@@ -516,7 +758,17 @@ mta_dt[, relative_motif_score := motif_score / max(motif_score)]
 mta_dt <- unique(mta_dt)
 
 # subset enriched motifs
-mta_en <- fread(file.path(mta_dir, "motif-enrichment-mona-q0.98-FC-1-padj-0.001.tsv"))
+mta_en <- rbindlist(lapply(c(
+  # archetypes
+  file.path(arc_dir, sprintf("motif-enrichment-cell-type-archetypes-%s-mona-q0.98.tsv.gz", arc_id)),
+  # experimental motifs
+  file.path(mta_dir, "motif-enrichment-mona-q0.98-FC-1-padj-0.001.tsv.gz")
+), function(fn) {
+  dt <- fread(fn)
+  if ("motif" %in% colnames(dt)) setnames(dt, "motif", "archetype_name")
+  cols <- c("archetype_name", "cell_type", "fc", "pval", "padj", "f_fg", "f_bg", "n_fg", "n_bg")
+  dt[, ..cols]
+}), use.names = TRUE, fill = TRUE)
 mta_en[, cell_type := factor(cell_type, levels = cell_types)]
 mta_en <- unique(mta_en[,.(cell_type, archetype_name, fc, pval, padj)])
 setnames(mta_en, "archetype_name", "motif")
@@ -560,10 +812,10 @@ fwrite(
 # mta_dt <- merge.data.table(mta_dt, ics_dt[, .(peak, motif)], by = c("peak", "motif"))
 # mta_dt <- unique(mta_dt)
 
-# add gene assignment info
+# add gene-motif assignment info
 arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
-arc_as <- fread(file.path(arc_dir, sprintf(
-  "motif-assignment-archetypes-%s.tsv", arc_id
+arc_as <- fread(file.path(mta_dir, sprintf(
+  "motif-assignment-archetypes-%s.tsv.gz", arc_id
 )))
 setnames(arc_as, "archetype_name", "motif")
 mta_dt <- merge.data.table(
@@ -790,7 +1042,7 @@ pks_sub_list <- sapply(names(pks_list), function(ct) {
 }, simplify = FALSE, USE.NAMES = TRUE)
 
 # reduced motif hits results
-syn_sub_dir <- "q0.9-hits-enrich-assign-motifs-ovl-0.5"
+syn_sub_dir <- "q0.8-hits-enrich-assign-motifs-ovl-0.5"
 inputs_hits <- fread(file.path(syn_dir, syn_sub_dir, "motif-hits-all.tsv.gz"))
 select_hits <- fread(file.path(syn_dir, syn_sub_dir, "motif-hits-selected.tsv.gz"))
 
@@ -1711,16 +1963,16 @@ dev.off()
 Load results
 
 ```{r}
-syn_sub_dir <- "q0.8-hits-active-motifs-ovl-0.5"
+syn_sub_dir <- "q0.8-hits-enrich-assign-motifs-ovl-0.5"
 mts_ct <- fread(file.path(syn_dir, syn_sub_dir, "motif-hits-selected.tsv.gz"))
-# amt_ct <- fread(file.path(syn_dir, syn_sub_dir, "motif-hits-all.tsv.gz"))
+amt_ct <- fread(file.path(syn_dir, syn_sub_dir, "motif-hits-all.tsv.gz"))
 ```
 
 Compare number of motif hits per peak before and after reducing motif hits.
 
 ```{r}
 all_hits <- rbindlist(list(
-  #"all" = amt_ct, 
+  "all" = amt_ct, 
   "reduced" = mts_ct
 ), idcol = "set")
 
@@ -1729,16 +1981,16 @@ mta_pks_mts_diff <- unique(all_hits[,.(motif, peak, set)])[, .N, .(peak, set)]
 mta_pks_mts_same <- unique(all_hits[, .N, .(motif, peak, set)])
 
 ggp_pks_mts_same <- ggplot(mta_pks_mts_same, aes(N)) + 
-  geom_histogram(bins = 50, color = "white") +
+  geom_histogram(bins = 20, color = "white") +
   scale_y_continuous(expand = expansion(mult = c(0, 0.1)), trans = "log10") +
-  facet_grid(set ~ ., scales = "free_y") +
+  facet_wrap(set ~ ., scales = "free") +
   labs(x = "Number of same motif hits per peak", y = "Number of peaks") +
   theme(panel.grid.major = element_line())
   
 ggp_pks_mts_diff <- ggplot(mta_pks_mts_diff, aes(N)) + 
-  geom_histogram(bins = 50, color = "white") +
-  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
-  facet_grid(set ~ ., scales = "free_y") +
+  geom_histogram(bins = 20, color = "white") +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1)), trans = "log10") +
+  facet_wrap(set ~ ., scales = "free") +
   labs(x = "Number of different motifs hits per peak", y = "Number of peaks") +
   theme(panel.grid.major = element_line())
 
@@ -1753,7 +2005,7 @@ Number of motif hits per peak per cell type.
 
 ```{r}
 # count motifs per peaks in cell types
-mta_pks_mts_cts <- unique(mts_ct[,.(motif, peak, cell_type, set)])[, .N, .(peak, cell_type, set)]
+mta_pks_mts_cts <- unique(mts_ct[,.(motif, peak, cell_type)])[, .N, .(peak, cell_type)]
 
 # order cell types
 mta_pks_mts_cts[, cell_type := factor(cell_type, levels = cell_types)]
@@ -1866,11 +2118,6 @@ mts_ct[, archetype_name := motif]
 # load peaks classification
 pks_dt <- fread(file.path(pks_dir, "Peaks_cell_type_promoter_annotation.tsv.gz"))
 
-# cell type entries into separate rows
-#pks_dt <- separate_rows(pks_dt, "cell_types", sep = ",")
-#setDT(pks_dt)
-#setnames(pks_dt, "cell_types", "cell_type")
-
 # annotations for each peak: CP > SP > AP > NO
 pks_dt <- unique(pks_dt[, .(peak, promoter, cell_type)])
 pks_dt[promoter == "AP+", promoter := "AP"]
@@ -1900,7 +2147,7 @@ mts_ct[is.na(promoter), promoter := "NO"]
 # load archetype family info
 arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
 cor_dt <- fread(file.path(
-  "results", 
+  "results", "Archetypes",
   sprintf("ChromVAR-%s", arc_id), 
   "correlation-seacells-archetype-motif-score-gene.tsv.gz"
 ))
@@ -1920,8 +2167,8 @@ mts_ct[archetype_name == "FoxQ2d", archetype_family := "Forkhead"]
 
 # load motif-to-TF assignments
 arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
-arc_as <- fread(file.path(arc_dir, sprintf(
-  "motif-assignment-archetypes-%s.tsv", arc_id
+arc_as <- fread(file.path(mta_dir, sprintf(
+  "motif-assignment-archetypes-%s.tsv.gz", arc_id
 )))
 
 # merge hits results with motif assignments
@@ -2102,16 +2349,18 @@ Count motif combinations (not considering order, distance...) per cell type.
 
 ```{r}
 # subset motifs assigned to TFs
-use_genes_assigned_to_motfs <- TRUE
+use_genes_assigned_to_motfs <- FALSE
 
 # subset motifs assigned to active TFs
 use_active_tfs <- FALSE
-grn_tfs <- fread(file.path(
-  grn_dir, 
-  "networks", 
-  "grn_tfs_info_expression_fc_0.4_accessibility_access_0.4_chromvar_4.tsv"
-))
-grn_tfs <- unique(grn_tfs[,.(motif, gene, zscore, cell_type)])
+if (use_active_tfs == TRUE) {
+  grn_tfs <- fread(file.path(
+    grn_dir, 
+    "networks", 
+    "grn_tfs_info_expression_fc_0.4_accessibility_access_0.4_chromvar_4.tsv"
+  ))
+  grn_tfs <- unique(grn_tfs[,.(motif, gene, zscore, cell_type)])
+}
 
 # list to save results
 cmb_ls <- structure(vector("list", length = length(cell_types)), names = cell_types)
@@ -2128,7 +2377,7 @@ for (ct in cell_types) {
     mts_dat <- unique(
       mts_ct[cell_type == ct & gene != "", .(
         cell_type, peak, promoter, motif,
-        # motif_start, motif_end,  # include if we want all instances of motif in a peak
+        start, end,  # include if we want all instances of motif in a peak
         gene, gene_label, common_name
       )]
     )
@@ -2143,7 +2392,7 @@ for (ct in cell_types) {
     mts_dat <- unique(
       mts_ct[cell_type == ct, .(
         cell_type, peak, promoter, motif,
-        # motif_start, motif_end,  # include if we want all instances of motif in a peak
+        start, end  # include if we want all instances of motif in a peak
       )]
     )
   }
@@ -2182,20 +2431,22 @@ for (ct in cell_types) {
     mts_dat[, motif := NULL]
     setnames(mts_dat, "gene_label", "motif")
   }
-  
+
   # select motifs that have hits in more than 10% of peaks
-  mts_top <- mts_dat[motif_occur > 0.1 * length(unique(mts_dat$peak))]
+  # mts_top <- mts_dat[motif_occur > 0.1 * length(unique(mts_dat$peak))]
+  mts_top <- copy(mts_dat)
   mts_top[, N := 1]
   mts_top <- unique(mts_top[, ..cols])
   
   # find top combinations of motifs
-  mts_com <- rbindlist(lapply(c(2:4), function(n) {
+  mts_com <- rbindlist(lapply(c(2), function(n) {
     tryCatch({
       message("Counting combinations of ", n, " motifs in ", ct, " peaks:")
       mts_comb <- combn(
         unique(mts_top$motif), n, simplify = FALSE
       )
-      rbindlist(pblapply(mts_comb, function(x) {
+      message("Number of combinations: ", length(mts_comb))
+      rbindlist(pbapply::pblapply(mts_comb, function(x) {
         dt <- unique(mts_top[motif %in% x, .(peak, promoter, motif)])[, N := .N, peak]
         unique(dt[N == n][, motif := paste(x, collapse = " + ")])
       }))      

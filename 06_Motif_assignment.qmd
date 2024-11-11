@@ -2320,7 +2320,7 @@ assign_dt <- fread(file.path(
 
 # gene-archetype correlations
 cor_dt <- fread(file.path(
-  "results", 
+  "results", "Archetypes",
   sprintf("ChromVAR-%s", arc_id),
   "correlation-seacells-archetype-motif-score-gene.tsv.gz"
 ))
