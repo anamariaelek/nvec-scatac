@@ -2297,6 +2297,61 @@ fwrite(
 )
 ```
 
+We have many redundant motifs, we will calculate similarity between all pairs.
+
+```{r}
+# load motifs
+mta_pwm <- read_meme(file.path(mta_dir, "motif-archetypes-all.meme"))
+names(mta_pwm) <- sapply(mta_pwm, function(m) m@name)
+
+# motifs pairwise similarities
+similarity <- "PPM"
+method <- "PCC"
+sim_mat <- compare_motifs(
+  motifs = mta_pwm,
+  use.type = similarity,
+  method = method,
+  normalise.scores = FALSE,
+  min.position.ic = 0,
+  min.mean.ic = 0,
+  nthreads = 0
+)
+
+# ordering
+hclust_method <- "complete"
+ord <- rownames(sim_mat)
+hc <- hclust(tgs_dist(sim_mat), method = hclust_method)
+ord <- hc$labels[hc$order]
+sim_mat <- sim_mat[ord, ord]
+
+# save
+saveRDS(
+  sim_mat, 
+  file.path(mta_dir, sprintf(
+    "motif-archetypes-all-similarity-%s-%s.rds", 
+    similarity, method
+  ))
+)
+
+# clusters
+min_sim <- 0
+k <- 1000
+while (min_sim < 0.65 & k < nrow(sim_mat)) {
+  k <- k + 1
+  message(k)
+  ctr <- cutree(hc, k = k)
+  ctr_sim <- sapply(unique(ctr), function(cl) {
+    ms <- names(which(ctr == cl))
+    mean(sim_mat[ms, ms], na.rm = TRUE)
+  })
+  min_sim <- min(ctr_sim)
+}
+# 0.65: 1148
+# 0.70: 1219
+# 0.75: 1413
+ctr <- cutree(hc, k = k)
+
+```
 
 ## Combine motif metrics with other gene metrics
 
