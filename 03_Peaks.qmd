@@ -304,6 +304,76 @@ fwrite(
 )
 ```
 
+Save mapped peaks for individual cell types
+
+```{r}
+# Get peaks for all cell types
+for (lvl %in% c("cell_type", "cell_type_differential")) {
+
+  # For all cell types
+  pks_ct_lst <- lapply(cts, function(ct) {
+
+    tryCatch({
+
+      # Stage
+      if (ct %in% adult_cell_types) {
+        stage_dir <- "ArchRProj_Nvec_TSS4_frag200"
+      } else {
+        stage_dir <- "ArchRProj_Nvec_gastrula"
+      }
+
+      # Cell type peaks
+      if (lvl == "cell_type") {
+        pks_fn <- file.path(
+          stage_dir, "ArchRProj", "Peaks", 
+          "cell_type_filtered",
+          sprintf("Peaks-%s.bed", ct)
+        )
+        pks_ct <- fread(pks_fn)[, 1:3]
+        setnames(pks_ct, c("seqnames", "start", "end"))
+
+      # Cell type differential peaks
+      } else if (lvl == "cell_type_differential") {
+        pks_fn <- file.path(
+          stage_dir, "ArchRProj", "PeakDifferential", 
+          "cell_type_filtered",
+          sprintf("Peaks-%s-vs-others.tsv", ct)
+        )
+        pks_ct <- fread(pks_fn)
+
+      }
+
+      # Translate per-stage peak ids to mapped peaks ids
+      pks_ct_gr <- makeGRangesFromDataFrame(pks_ct[, 1:3])
+      pks_dt_gr <- makeGRangesFromDataFrame(pks_dt[, 1:3])
+      pks_ovl <- findOverlaps(
+        query = pks_ct_gr, subject = pks_dt_gr, 
+        minoverlap = 100, type = "any", ignore.strand = TRUE
+      )
+      pks_ct <- pks_ct[queryHits(pks_ovl)]
+      pks_ct$peak <- pks_dt[subjectHits(pks_ovl)]$peak
+      pks_ct[, cell_type := ct]
+      pks_ct
+
+    }, error = function(e) {
+      warning(sprintf("Error: %s", e$message))
+      return(NULL)
+    })
+
+  })
+
+  # Save combined peaks
+  pks_dt <- rbindlist(pks_ct_lst)
+  fwrite(
+    pks_dt,
+    file.path(pks_dir, sprintf("Peaks_per_%s_mapped.tsv.gz", lvl)),
+    sep = "\t"
+  )
+
+}
+
+```
+
 Combine metadata
 
 ```{r}

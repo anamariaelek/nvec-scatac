@@ -1,0 +1,9 @@
+name="nvec-motif-syntax"
+mkdir -p /data/shiny/${name}/tmp
+docker build -t ${name} .
+docker run -d \
+  -v /data/shiny/${name}:/srv/shiny-server \
+  -v /data/shiny/${name}/shiny-server.conf:/etc/shiny-server/shiny-server.conf \
+  -v /data/shiny/${name}/shinylog/:/var/log/shiny-server/ \
+  -v /data/shiny/${name}/tmp:/tmp \
+  --restart unless-stopped --name ${name} -p 9006:3838 ${name}

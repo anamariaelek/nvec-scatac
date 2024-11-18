@@ -486,25 +486,63 @@ system("./10_Motif_syntax_co-occurrence.sh")
 Co-occurnece while checking overlap results.
 
 ```{r}
+# Load results of binned analysis
 res_fns <- list.files(file.path(syn_dir, "bins"), pattern = "co-occurrences-.*.rds", full.names = TRUE)
 res_lst <- lapply(res_fns, function(x) {
   message(sprintf("(%d/%d) %s", which(res_fns == x), length(res_fns), x))
   readRDS(x)[[2]][nonoverlapping == TRUE]
 })
-res_dt <- rbindlist(res_lst)
+mta_pair_novl_dt <- rbindlist(res_lst)
+
+# Save
 saveRDS(
-  res_dt, 
+  mta_pair_novl_dt, 
   file.path(syn_dir, sprintf(
     "motif-co-occurrences-nonovl-%s-mona-q-%s.rds", 
     arc_id, q
   ))
 )
 
-res_dt_ <- res_dt[, .N, .(m1, m2)]
-fwrite(
-  res_dt_, 
+# Motifs assigned to TFs
+arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
+assign_dt <- fread(file.path(
+  "results", "Motifs",
+  sprintf("motif-assignment-archetypes-%s.tsv.gz", arc_id)
+))
+assign_dt <- assign_dt[, .(archetype_name, gene, gene_name, og, common_name, tf_family)]
+assign_dt[common_name != "", gene_name := common_name][, common_name := NULL]
+assign_dt[gene_name == "", gene_name := ifelse(nchar(og) > 40, paste0(substr(og, 1, 37), "..."), og)][, og := NULL]
+
+# Combine rows for same motif with ,
+assign_dt <- assign_dt[, lapply(.SD, paste, collapse = ";"), .SDcols = c("gene", "gene_name", "tf_family"), by = archetype_name]
+
+# Combine with motifs pairs data
+setnames(mta_pair_novl_dt, c("m1", "m2"), c("motif1", "motif2"))
+setnames(assign_dt, c("motif1", "gene_motif1", "gene_name_motif1", "tf_family_motif1"))
+mta_pair_novl_gen_1 <- merge.data.table(
+  mta_pair_novl_dt, assign_dt, by = "motif1", allow.cartesian = TRUE
+)
+setnames(assign_dt, c("motif2", "gene_motif2", "gene_name_motif2", "tf_family_motif2"))
+mta_pair_novl_gen <- merge.data.table(
+  mta_pair_novl_gen_1, assign_dt, by = "motif2", allow.cartesian = TRUE
+)
+mta_pair_novl_gen[, gene_pair := sprintf("%s + %s", gene_name_motif1, gene_name_motif2)]
+
+# Save gene annotated non-overlapping co-occurence pairs
+saveRDS(
+  mta_pair_novl_gen, 
   file.path(syn_dir, sprintf(
-    "motif-co-occurrences-nonovl-%s-mona-q-%s.tsv.gz", 
+    "motif-co-occurrences-nonovl-%s-mona-q-%s-TFs.rds", 
+    arc_id, q
+  ))
+)
+
+# Save co-occurence counts
+mta_pair_novl_count_dt <- mta_pair_novl_dt[, .N, .(m1, m2)]
+fwrite(
+  mta_pair_novl_count_dt, 
+  file.path(syn_dir, sprintf(
+    "motif-co-occurrences-nonovl-%s-mona-q-%s-counts.tsv.gz", 
     arc_id, q
   ))
 )
@@ -543,8 +581,11 @@ sim_mat <- readRDS(
   file.path(mta_dir, "motif-archetypes-all-similarity-PPM-PCC.rds")
 )
 
-# Peaks per cell type
-pks_dt <- fread(file.path(pks_dir, "Peaks_cell_type_mapped_cell_type_assignment.tsv.gz"))
+# All peaks
+pks_dt <- fread(file.path(pks_dir, "Peaks_cell_type_mapped.tsv.gz"))
+
+# Peaks per broad cell type
+# pks_dt <- fread(file.path(pks_dir, "Peaks_cell_type_mapped_cell_type_assignment.tsv.gz"))
 
 # Where to save the results
 lvl <- "broad_cell_type"
@@ -553,45 +594,21 @@ cts <- unique(pks_dt[[lvl]])
 lvl <- "cell_type"
 cts <- names(ct_cols)
 
+lvl <- "cell_type_differential"
+cts <- names(ct_cols)
+
 dir.create(file.path(syn_dir, lvl), showWarnings = FALSE)
 
-# Loop over cell types
+# Count motif pairs in cell type peaks
 for (ct in cts) {
 
-  tryCatch({
+  pks_ct_peaks <- tryCatch({
       
-    # Broad cell type peaks
-    #pks_ct <- pks_dt[get(lvl) == ct]
-    #pks_ct_peaks <- pks_ct$peak
-
-    # Cell type differential peaks
-    if (ct %in% adult_cell_types) {
-      stage_dir <- "ArchRProj_Nvec_TSS4_frag200"
-    } else {
-      stage <- "ArchRProj_Nvec_gastrula"
-    }
-    pks_fn <- file.path(
-      stage_dir, "ArchRProj", "PeakDifferential", 
-      sprintf("%s_filtered", lvl),
-      sprintf("Peaks-%s-vs-others.tsv", ct)
-    )
-    pks_dif <- fread(pks_fn)
-    pks_dif <- pks_dif[FDR < 0.001 & Log2FC > 1]
-
-    # Translate per-stage peak ids to mapped peaks ids
-    pks_dif_gr <- makeGRangesFromDataFrame(pks_dif[, 1:3])
-    pks_dt_gr <- makeGRangesFromDataFrame(pks_dt[, 1:3])
-    pks_ovl <- findOverlaps(
-      query = pks_dif_gr, subject = pks_dt_gr, 
-      minoverlap = 100, type = "any", ignore.strand = TRUE
-    )
-    pks_ct <- pks_dif[queryHits(pks_ovl)]
-    pks_ct$peak <- pks_dt[subjectHits(pks_ovl)]$peak
+    pks_ct <- fread(file.path(pks_dir, sprintf("Peaks_per_%s_mapped.tsv.gz", lvl)))
     pks_ct_peaks <- pks_ct$peak
 
   }, error = function(e) {
     warning(sprintf("Error: %s", e$message))
-    pks_ct_peaks <- NULL
     return(NULL)
   })
 
@@ -662,6 +679,74 @@ for (ct in cts) {
   }
 }
 
+# Load co-occurence enrichment in all cell types
+cts <- names(ct_cols)
+enr_dt <- rbindlist(lapply(cts, function(ct) {
+  message(ct)
+  mta_enr <- fread(
+      file.path(syn_dir, lvl, sprintf(
+          "motif-co-occurrences-enrichment-%s-%s-mona-q-%s.tsv.gz",
+          ct, arc_id, q
+      ))
+  )
+  mta_enr[, cell_type := ct]
+}))
+
+# Save all data
+saveRDS(
+    enr_dt,
+    file.path(syn_dir, lvl, sprintf(
+        "motif-co-occurrences-enrichment-%s-mona-q-%s.rds",
+        arc_id, q
+    ))
+)
+
+# Annotate
+enr_dt[, log_enrichment := log2(enrichment)]
+enr_dt[, motif_pair := sprintf("%s + %s", motif1, motif2)]
+    
+# Add 0s for missing cell types
+all_combinations <- CJ(
+  motif_pair = unique(enr_dt$motif_pair),
+  cell_type = unique(enr_dt$cell_type)
+)
+
+# Join with the original data.table
+dt <- merge(
+  all_combinations, enr_dt,
+  by = c("motif_pair", "cell_type"),
+  all.x = TRUE
+)
+dt[is.na(motif1), "motif1" := str_split(motif_pair, " \\+ ")[[1]][1], by = .I]
+dt[is.na(motif2), "motif2" := str_split(motif_pair, " \\+ ")[[1]][2], by = .I]
+dt[is.na(dt)] <- 0
+
+# Motifs assigned to TFs
+arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
+assign_dt <- fread(file.path(
+  "results", "Motifs",
+  sprintf("motif-assignment-archetypes-%s.tsv.gz", arc_id)
+))
+
+assign_dt <- assign_dt[, .(archetype_name, gene, gene_name, og, common_name, tf_family)]
+assign_dt[common_name != "", gene_name := common_name][, common_name := NULL]
+assign_dt[gene_name == "", gene_name := ifelse(nchar(og) > 40, paste0(substr(og, 1, 37), "..."), og)][, og := NULL]
+
+# Combine rows for same motif with ,
+assign_dt <- assign_dt[, lapply(.SD, paste, collapse = ";"), .SDcols = c("gene", "gene_name", "tf_family"), by = archetype_name]
+
+# Combine with motifs pairs data
+setnames(assign_dt, c("motif1", "gene_motif1", "gene_name_motif1", "tf_family_motif1"))
+mta_enr_gen <- merge.data.table(dt, assign_dt, by = "motif1", allow.cartesian = TRUE)
+setnames(assign_dt, c("motif2", "gene_motif2", "gene_name_motif2", "tf_family_motif2"))
+mta_enr_gen <- merge.data.table(mta_enr_gen, assign_dt, by = "motif2", allow.cartesian = TRUE)
+mta_enr_gen[, gene_pair := sprintf("%s + %s", gene_name_motif1, gene_name_motif2)]
+
+# save data for shiny app
+saveRDS(
+  mta_enr_gen, 
+  file.path(syn_dir, lvl, "motif-co-occurrences-enrichment.rds")
+)
 ```
 
 Inspect the results
@@ -768,75 +853,6 @@ require(htmlwidgets)
 html_file <- file.path(fig_dir, sprintf("motif-co-occurrence-enrichment-%s-%s-mona-q-%s.html", ct, arc_id, q))
 saveWidget(plotly_enr, file = html_file, selfcontained = TRUE)
 
-```
-
-Check enrichmenat of motif pairs accross different cell types.
-
-```{r}
-# load co-occurence enrichment in all cell types
-cts <- names(ct_cols)
-enr_dt <- rbindlist(lapply(cts, function(ct) {
-  message(ct)
-  mta_enr <- fread(
-      file.path(syn_dir, lvl, sprintf(
-          "motif-co-occurrences-enrichment-%s-%s-mona-q-%s.tsv.gz",
-          ct, arc_id, q
-      ))
-  )
-  mta_enr[, cell_type := ct]
-}))
-
-# save all data
-saveRDS(
-    enr_dt,
-    file.path(syn_dir, lvl, sprintf(
-        "motif-co-occurrences-enrichment-%s-mona-q-%s.rds",
-        arc_id, q
-    ))
-)
-
-# save data for shiny app
-enr_ct <- unique(enr_dt[, .(motif1, motif2, cell_type, enrichment)])
-saveRDS(
-  enr_ct, 
-  file.path(syn_dir, lvl, "motif-co-occurrences-enrichment.rds")
-)
-
-
-```
-
-Combine with gene assignment data
-
-```{r}
-# load data
-enr_dt <- readRDS(file.path(syn_dir, lvl, sprintf(
-  "motif-co-occurrences-enrichment-%s-mona-q-%s.rds",
-  arc_id, q
-)))
-enr_dt[, log_enrichment := log2(enrichment)]
-enr_dt[, motif_pair := sprintf("%s + %s", motif1, motif2)]
-
-# Motifs assigned to TFs
-arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
-assign_dt <- fread(file.path(
-  "results", "Motifs",
-  sprintf("motif-assignment-archetypes-%s.tsv.gz", arc_id)
-))
-
-assign_dt <- assign_dt[, .(archetype_name, gene, gene_name, og, common_name, tf_family)]
-assign_dt[common_name != "", gene_name := common_name][, common_name := NULL]
-assign_dt[gene_name == "", gene_name := ifelse(nchar(og) > 40, paste0(substr(og, 1, 37), "..."), og)][, og := NULL]
-
-# Combine rows for same motif with ,
-assign_dt <- assign_dt[, lapply(.SD, paste, collapse = ";"), .SDcols = c("gene", "gene_name", "tf_family"), by = archetype_name]
-
-# Combine with motifs pairs data
-mta_enr_gen <- copy(enr_dt)
-setnames(assign_dt, c("motif1", "gene_motif1", "gene_name_motif1", "tf_family_motif1"))
-mta_enr_gen <- merge.data.table(mta_enr_gen, assign_dt, by = "motif1", allow.cartesian = TRUE)
-setnames(assign_dt, c("motif2", "gene_motif2", "gene_name_motif2", "tf_family_motif2"))
-mta_enr_gen <- merge.data.table(mta_enr_gen, assign_dt, by = "motif2", allow.cartesian = TRUE)
-mta_enr_gen[, gene_pair := sprintf("%s + %s", gene_name_motif1, gene_name_motif2)]
 ```
 
 Plot heatmap of motif pair co-occurnece enrichment in cell types
