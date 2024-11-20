@@ -505,6 +505,11 @@ saveRDS(
 
 # Motifs assigned to TFs
 arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
+q <- 0.95
+mta_pair_novl_dt <- readRDS(file.path(syn_dir, sprintf(
+  "motif-co-occurrences-nonovl-%s-mona-q-%s.rds", 
+  arc_id, q
+)))
 assign_dt <- fread(file.path(
   "results", "Motifs",
   sprintf("motif-assignment-archetypes-%s.tsv.gz", arc_id)
@@ -538,7 +543,7 @@ saveRDS(
 )
 
 # Save co-occurence counts
-mta_pair_novl_count_dt <- mta_pair_novl_dt[, .N, .(m1, m2)]
+mta_pair_novl_count_dt <- mta_pair_novl_dt[, .N, .(motif1, motif2)]
 fwrite(
   mta_pair_novl_count_dt, 
   file.path(syn_dir, sprintf(
@@ -548,11 +553,247 @@ fwrite(
 )
 ```
 
+Counts of pairs of enriched motifs in cell type (differential) peaks.
+
+```{r}
+# load peaks cell type annotation
+pks_aces_dt <- fread(file.path(pks_dir, "Peaks_per_cell_type_mapped.tsv.gz")) 
+pks_diff_dt <- fread(file.path(pks_dir, "Peaks_per_cell_type_differential_mapped.tsv.gz"))
+pks_annt_dt <- merge.data.table(
+  pks_aces_dt[, .(peak, cell_type)], 
+  pks_diff_dt[, .(peak, Log2FC, Pval, FDR, cell_type)],
+  by = c("peak", "cell_type"),
+  all = TRUE
+)
+pks_dt[is.na(Log2FC), Log2FC := 0]
+pks_dt[is.na(Pval), Pval := 1]
+pks_dt[is.na(FDR), FDR := 1]
+
+# save
+saveRDS(
+  pks_dt, 
+  file.path(syn_dir, "peaks-per-cell-type-annotation.rds")
+)
+
+# use all peaks
+pks_dt <- copy(pks_annt_dt)
+
+# alternatively, use differential peaks
+# pks_dt <- pks_annt_dt[Log2FC>1.5][FDR<0.05]
+
+# count peaks
+pks_num <- pks_dt[, .(n_peaks = .N), cell_type]
+
+# only consider cell types with sufficient peaks
+cell_types_sub <- pks_num[n_peaks > 100]$cell_type
+pks_num <- pks_num[cell_type %in% cell_types_sub]
+
+# load enriched motifs per cell type
+mta_enr_ls <- lapply(c(
+  file.path(mta_dir, sprintf("motif-enrichment-cell-type-mona-q%s.tsv.gz", q)),
+  file.path(arc_dir, sprintf("motif-enrichment-cell-type-archetypes-%s-mona-q%s.tsv.gz", arc_id, q))
+), fread)
+mta_enr_dt <- rbindlist(mta_enr_ls)
+
+# save
+saveRDS(
+  mta_enr_dt, 
+  file.path(syn_dir, sprintf(
+    "motif-enrichment-cell-type-%s-mona-q-%s-enr.rds", 
+    arc_id, q
+  ))
+)
+
+# get significant enriched motifs per cell type
+mta_enr_dt <- mta_enr_dt[padj < 0.01 & fc > 1.5]
+
+
+# load data for co-occurence of motifs assigned to TFs
+arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
+q <- 0.95
+mta_pair_novl_gen <- readRDS(file.path(
+  syn_dir, sprintf(
+    "motif-co-occurrences-nonovl-%s-mona-q-%s-TFs.rds",
+    arc_id, q
+  )
+))
+
+# subset motif occurence data for enriched motifs
+mta_pair_novl_enr <- mta_pair_novl_gen[
+  motif1 %in% mta_enr_dt$motif | 
+  motif2 %in% mta_enr_dt$motif
+]
+
+# subset motif occurence data for hits in significant peaks
+mta_pair_novl_pks <- merge.data.table(
+  mta_pair_novl_enr, pks_dt, by = "peak",
+  all = FALSE, allow.cartesian = TRUE
+)
+
+# count motif pairs in significan peaks per cell type
+mta_pair_novl_sig <- mta_pair_novl_pks[, .(count_peak_pair = .N), .(
+  cell_type, 
+  motif1, motif2, 
+  gene_motif1, gene_motif2, 
+  gene_name_motif1, gene_name_motif2, 
+  tf_family_motif1, tf_family_motif2
+)]
+
+# add number of significant peaks
+mdt_cnt <- merge.data.table(mta_pair_novl_sig, pks_num, by = "cell_type")
+mdt_cnt[, frac_peak_pair := count_peak_pair / n_peaks, by = 1:nrow(mdt_cnt)]
+
+# add motif pair column
+mdt_cnt[, motif_pair := sprintf("%s + %s", motif1, motif2), by = 1:nrow(mdt_cnt)]
+mdt_cnt[, gene_pair := sprintf("%s + %s", gene_motif1, gene_motif2), by = 1:nrow(mdt_cnt)]
+mdt_cnt[, gene_name_pair := sprintf("%s + %s", gene_name_motif1, gene_name_motif2), by = 1:nrow(mdt_cnt)]
+
+# save
+saveRDS(
+  mdt_cnt, 
+  file.path(syn_dir, sprintf(
+    "motif-co-occurrences-nonovl-%s-mona-q-%s-TFs-enr-counts-pks.rds", 
+    arc_id, q
+  ))
+)
+```
+
+Inspect top pairs of enriched motifs per cell type.
+
+```{r}
+# top enriched motifs per cell type
+ct <- "cnidocyte"
+mdt_top <- mdt_cnt[cell_type==ct][order(-frac_peak_pair)]
+mdt_oth <- mdt_cnt[cell_type!=ct][motif_pair %in% mdt_top$motif_pair]
+mdt_cts <- rbindlist(list(mdt_top, mdt_oth))
+
+# subset to cell types with sufficient peaks
+mdt_cts <- mdt_cts[cell_type %in% cell_types_sub]
+
+# fill in missing cell type
+all_com <- CJ(
+  motif_pair = unique(mdt_cts$motif_pair),
+  cell_type = unique(mdt_cts$cell_type)
+)
+mdt_all <- merge(
+  all_com, mdt_cts,
+  by = c("cell_type", "motif_pair"),
+  all.x = TRUE
+)
+mdt_all[is.na(count_peak_pair), count_peak_pair := 0]
+mdt_all[is.na(frac_peak_pair), frac_peak_pair := 0]
+
+# order motif pairs
+mdt_all[, motif_pair := factor(motif_pair, levels = unique(mdt_top$motif_pair))]
+
+# order cell types
+stopifnot(all(mdt_all$cell_type %in% cell_types))
+mdt_all[, cell_type := factor(cell_type, levels = unique(cell_types))]
+
+# subset to plot
+#n_pairs <- 200
+#top_pairs <- unique(mdt_top$motif_pair)[1:n_pairs]
+f_pairs <- 0.05
+top_pairs <- unique(mdt_top[frac_peak_pair>f_pairs]$motif_pair)
+mdt_gp <- mdt_all[motif_pair %in% top_pairs]
+
+# cluster motif pairs
+mdt_dc <- dcast.data.table(
+  unique(mdt_gp[, .(motif_pair, cell_type, frac_peak_pair)]),
+  motif_pair ~ cell_type, value.var = "frac_peak_pair"
+)
+mdt_mt <- as.matrix(mdt_dc[, -1])
+rownames(mdt_mt) <- mdt_dc[[1]]
+hclust_res <- stats::hclust(dist(mdt_mt, method = "manhattan"), method = "ward.D2")
+motif_pair_lvl <- rownames(mdt_mt)[hclust_res$order]
+mdt_gp[, motif_pair := factor(motif_pair, levels = motif_pair_lvl)]
+
+# alternatively, order motif pairs by max value cell type
+# mdt_gp[, max_ct := as.integer(.SD[order(-frac_peak_pair)][1]$cell_type), by = motif_pair]
+# mdt_gp[, motif_pair := factor(motif_pair, levels = unique(mdt_gp[order(max_ct)]$motif_pair))]
+
+# plot
+names_dt <- unique(mdt_gp[!is.na(gene_name_pair), .(motif_pair, gene_name_pair)])
+hm_gp <- ggplot(mdt_gp, aes(
+    x = cell_type, 
+    y = motif_pair, 
+    fill = frac_peak_pair
+  )) +
+  geom_tile() +
+  scale_y_discrete(
+    breaks = names_dt$motif_pair,
+    labels = sapply(unique(names_dt$gene_name_pair), function(x) {
+      gs = str_split(x, " \\+ ")[[1]]
+      paste0(
+        ifelse(nchar(gs[1]) > 25, paste(substr(gs[1], 1, 23), "..."), gs[1]), 
+        " + ",
+        ifelse(nchar(gs[2]) > 25, paste(substr(gs[2], 1, 23), "..."), gs[2])
+      )
+    })
+  ) +
+  scale_fill_gradientn(
+    colours = c("#edf8b1", "#7fcdbb", "#2c7fb8", "#225ea8", "#081d58", "#000b29"), 
+    na.value = "#edf8b1"
+  ) +
+  labs(
+    x = "cell type peaks",
+    y = sprintf(
+      "%s motif pairs present in > %.0f%% peaks", 
+      length(unique(mdt_gp$motif_pair)),
+      f_pairs * 100
+    ),
+    fill = "fraction of \ncell type peaks\nwith both motifs"
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "right"
+  )
+
+# barplot with number of peaks
+stopifnot(all(pks_num$cell_type %in% cell_types))
+pks_num[, cell_type := factor(cell_type, levels = unique(cell_types))]
+ct_gp <- ggplot(pks_num, aes(x = cell_type, y = n_peaks, fill = cell_type)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values = ct_cols) +
+  labs(
+    y = "# peaks",
+    title = sprintf("Motifs enriched in %s", ct)
+  ) +
+  theme(
+    legend.position = "none",
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    axis.title.x = element_blank()
+  )
+
+# combine plots
+require(patchwork)
+gp <- ct_gp + hm_gp + plot_layout(ncol = 1, heights = c(1, 8))
+
+# save
+ggsave(
+  file.path(fig_dir, sprintf("motif-co-occurrence-%s-heatmap-%s.pdf", f_pairs, ct)),
+  gp, width = 8.5, height = 12
+)
+
+# save plotly heatmap
+require(plotly)
+require(htmlwidgets)
+hm_gp <- ggplotly(hm_gp)
+saveWidget(hm_gp, file.path(fig_dir, sprintf("motif-co-occurrence-%s-heatmap-%s.html", f_pairs, ct)))
+```
+
+```{r}
+
+```
+
 ### Per cell type
 
 Co-occurence enrichment in per cell type-specific peaks:
 the fraction of peaks with hits of both motif1 and motif2
-/ 
+/ l
 fractions of peaks with motif1 hits * fraction of peaks with motif2 hits
 
 ```{r}
@@ -3131,5 +3372,6 @@ tryCatch(print(cpl_ls), error = function(e) warning(e))
 dev.off()
 
 ```
+
 
 

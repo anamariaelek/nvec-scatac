@@ -57,12 +57,12 @@ results/Syntax/motif-hits-all.bed.gz
 results/Syntax/motif-co-occurrences-nonovl-PPM-PCC-0.8-IC0.5-5bp-mona-q-0.95.rds
 results/Syntax/broad_cell_type/motif-co-occurrences-enrichment-PPM-PCC-0.8-IC0.5-5bp-mona-q-0.95.rds
 results/Syntax/broad_cell_type/motif-co-occurrences-enrichment.rds
-results/Syntax/cell_type
 results/Syntax/cell_type/motif-co-occurrences-enrichment-PPM-PCC-0.8-IC0.5-5bp-mona-q-0.95.rds
 results/Syntax/cell_type/motif-co-occurrences-enrichment.rds
 results/Syntax/cell_type/motif-co-occurrences-enrichment-*tsv.gz
 results/Syntax/cell_type_differential/motif-co-occurrences-enrichment-*tsv.gz
 results/Syntax/cell_type_differential/motif-co-occurrences-enrichment-PPM-PCC-0.8-IC0.5-5bp-mona-q-0.95.rds
+results/Syntax/motif-co-occurrences-nonovl-PPM-PCC-0.8-IC0.5-5bp-mona-q-0.95-TFs-enr.rds
 results/Syntax/motif-co-occurrences-nonovl-PPM-PCC-0.8-IC0.5-5bp-mona-q-0.95-TFs.rds
 results/Syntax/motif-combinations-per-cell-type.tsv.gz
 results/Syntax/motif-hits-all.bed.gz
