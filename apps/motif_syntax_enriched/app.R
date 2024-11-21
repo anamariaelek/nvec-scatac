@@ -196,7 +196,7 @@ server <- function(input, output, session) {
 
   # Reactive variables
   rv_mt <- reactiveValues(
-    enr_mts = NULL, # motifs enriched in cell typs
+    enr_mts = NULL, # motifs enriched in cell types
     pks_sig = NULL, # peaks enriched in cell types
     cts_num = NULL, # peak and motif counts in cell types
     mtd_cnt = NULL # motif pairs counts in cell types
@@ -312,6 +312,8 @@ server <- function(input, output, session) {
     ignoreInit = TRUE,
     list(input$reload_peaks, input$reload_button_heatmap),
     {
+      rv_hm$enr_mts <- NULL
+      rv_hm$mtd_cnt <- NULL
       req(!is.null(rv_mt$mtd_cnt))
 
       print(sprintf(
@@ -339,28 +341,35 @@ server <- function(input, output, session) {
       mtd_cnt[, cell_type := factor(
         cell_type, levels = intersect(cts, unique(mtd_cnt$cell_type))
       )]
-      
+      print(sprintf("There are %d motif pairs", length(unique(mtd_cnt$motif_pair))))
+
       # Cluster motif pairs
-      print(sprintf("Clustering motif pairs"))
-      mdt_dc <- dcast.data.table(
-        unique(mtd_cnt[, .(motif_pair, cell_type, frac_peak_pair)]),
-        motif_pair ~ cell_type, value.var = "frac_peak_pair"
-      )
-      mdt_mt <- as.matrix(mdt_dc[, -1])
-      rownames(mdt_mt) <- mdt_dc[[1]]
-      hclust_res <- stats::hclust(dist(
-        mdt_mt, method = "manhattan"
-      ), method = "ward.D2")
-      motif_pair_lvl <- rownames(mdt_mt)[hclust_res$order]
-      mtd_cnt[, motif_pair := factor(motif_pair, levels = motif_pair_lvl)]
-      mtd_cnt[, motif_pair := factor(motif_pair, levels = motif_pair_lvl)]
-      mtd_cnt[, motif_pair_idx := as.integer(motif_pair)]
-      setorder(mtd_cnt, motif_pair_idx)
-      #print(head(unique(mtd_cnt[, .(gene_name_pair, motif_pair_idx)])))
-      #print("...")
-      #print(tail(unique(mtd_cnt[, .(gene_name_pair, motif_pair_idx)])))
-      rv_hm$mtd_cnt <- mtd_cnt
-      print(sprintf("Clustered %d motif pairs", nrow(mtd_cnt)))
+      if (nrow(mtd_cnt) > 2) {
+        print(sprintf("Clustering motif pairs"))
+        tryCatch({
+          mdt_dc <- dcast.data.table(
+            unique(mtd_cnt[, .(motif_pair, cell_type, frac_peak_pair)]),
+            motif_pair ~ cell_type, value.var = "frac_peak_pair"
+          )
+          mdt_mt <- as.matrix(mdt_dc[, -1])
+          rownames(mdt_mt) <- mdt_dc[[1]]
+          hclust_res <- stats::hclust(dist(
+            mdt_mt, method = "manhattan"
+          ), method = "ward.D2")
+          motif_pair_lvl <- rownames(mdt_mt)[hclust_res$order]
+          mtd_cnt[, motif_pair := factor(motif_pair, levels = motif_pair_lvl)]
+        }, error = function(e) {
+          message(e)
+          mtd_cnt[, motif_pair := factor(motif_pair)]
+        })
+        mtd_cnt[, motif_pair_idx := as.integer(motif_pair)]
+        setorder(mtd_cnt, motif_pair_idx)
+        #print(head(unique(mtd_cnt[, .(gene_name_pair, motif_pair_idx)])))
+        #print("...")
+        #print(tail(unique(mtd_cnt[, .(gene_name_pair, motif_pair_idx)])))
+        rv_hm$mtd_cnt <- mtd_cnt
+        print(sprintf("Selected %d motif pairs", length(unique(mtd_cnt$motif_pair))))
+      }
     }
   )
 
