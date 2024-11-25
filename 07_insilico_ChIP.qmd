@@ -334,6 +334,7 @@ mta_data <- merge.data.table(
     by = "motif",
     allow.cartesian = TRUE
 )
+stopifnot(!is.na(mta_data$max_motif_score))
 mta_data[, score := motif_score / max_motif_score]
 
 # subset for peaks and TFs for which we calculated correlation
@@ -373,6 +374,7 @@ mta_mt[is.na(mta_mt)] <- 0
 saveRDS(mta_mt, file.path(chp_dir, lvl, "motif_peak_scores.rds"))
 
 # correlation matrix
+stopifnot(all(mta_mu$gene %in% colnames(cor_mt)))
 cor_mt <- cor_mt[, mta_mu$gene]
 colnames(cor_mt) <- mta_mu$id
 saveRDS(cor_mt, file.path(chp_dir, lvl, "motif_peak_correlation.rds"))
@@ -567,10 +569,10 @@ pks <- intersect(rownames(predicted_score), rownames(agg_counts))
 predicted_score <- predicted_score[pks, ]
 agg_counts <- agg_counts[pks, ]
 
-# where to save in silico ChI chromVAR matrix
+# where to save in silico ChIP chromVAR matrix
 mat_dir <- file.path(
-  chp_dir,
-  sprintf("insilicoChIP-chromVAR-%s-%s", lvl, id)
+  chp_dir, "ChromVAR"
+  #sprintf("chromVAR-%s-%s", lvl, id)
 )
 dir.create(mat_dir, showWarnings = FALSE)
 
@@ -596,8 +598,9 @@ bgpks <- getBackgroundPeaks(
 
 # save background peaks
 saveRDS(
-  bgpks,
-  file.path(chp_dir, "Adult_Gastrula_Background_Peaks_SEACell.rds")
+  bgpks, file.path(
+    chp_dir, "Adult_Gastrula_Background_Peaks_SEACell.rds"
+  )
 )
 
 # different insilico chip thresholds
@@ -668,13 +671,16 @@ Inspect chromVAR scores with different insilico ChIP binding thresholds
 thrs_list <- c(0.1, 0.2, 0.3, 0.4, 0.5)
 chromvar_ls <- sapply(thrs_list, function(thrs) {
     fread(file.path(
-        chp_dir, sprintf("insilicoChIP-chromVAR-%s-%s", lvl, id), thrs,
+        chp_dir, 
+        "ChromVAR",
+        # sprintf("insilicoChIP-chromVAR-%s-%s", lvl, id), 
+        thrs,
         "results-chromVAR-insilicoChIP.tsv.gz"
     ))
 }, simplify = FALSE, USE.NAMES = TRUE)
 names(chromvar_ls) <- thrs_list
 chromvar_dt <- rbindlist(chromvar_ls, idcol = "insilico_ChIP_threshold")
-  
+
 # motif scores based chromvar
 chromvar_orig_dt <- fread(file.path(
     arc_dir, "ChromVAR-PPM-PCC-0.8-IC0.5-5bp",
@@ -1040,6 +1046,16 @@ thrs <- 0.1
 chr_exp_ct <- chr_exp_ct[insilico_ChIP_threshold == thrs]
 setnames(chr_exp_ct, c("motif", "zscore"), c("archetype_name", "motif_deviation"))
 
+# update dataset
+fwrite(
+    chr_exp_ct,
+    file.path(
+        chp_dir, lvl,
+        sprintf("gene_expression_%s_chromVAR_%s.tsv.gz", exp, id)
+    ),
+    sep = "\t"
+)
+
 # aggregate per cell type
 chr_exp_ct <- chr_exp_ct[, .(
   expression = mean(expression),
@@ -1056,14 +1072,11 @@ Plot per-TF scatterplots of expression vs activity (deviation Z score):
 # gene motif assignments
 arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
 assign_dt <- fread(file.path(
-  "results", "Motifs", sprintf("motif-assignment-archetypes-%s.tsv", arc_id)
+  "results", "Motifs", sprintf("motif-assignment-archetypes-%s.tsv.gz", arc_id)
 ))
 
 # archetypes pwms
-mots_arc_lst <- unlist(lapply(c(
-  file.path("results", "Archetypes", sprintf("motif-archetypes-%s-pwms.rds", arc_id)),
-  file.path("results", "Motifs", "motifs.rds")
-), readRDS))
+mots_arc_lst <- readRDS(file.path(mta_dir, "motifs.rds"))
 names(mots_arc_lst) <- sapply(mots_arc_lst, function(m) m@name)
 
 # loop over TFs-motifs pairs
@@ -1163,8 +1176,8 @@ dev.off()
 # plot markers on one page
 fg_vc <- c(
   "Nvec_vc1.1_XM_032363992.2" = "Pou4",
-  #"Nvec_vc1.1_XM_001631763.3" = "PaxA",
-  #"Nvec_vc1.1_XM_032378021.2" = "Brachyury",
+  "Nvec_vc1.1_XM_001631763.3" = "PaxA",
+  "Nvec_vc1.1_XM_032378021.2" = "Brachyury",
   "Nvec_vc1.1_XM_001623084.3" = "Six4/5",
   "Nvec_vc1.1_XM_032365096.2" = "Rfx4/6/8",
   "Nvec_vc1.1_XM_032367288.2" = "GATA",
@@ -1252,9 +1265,10 @@ pdf(
   file.path(fig_dir, sprintf(
     "tf-expression-activity-scatter-plots-%s-figure.pdf", arc_id
   )), 
-  width = 4, height = 4
+  width = 4, height = 5.5
 )
-wrap_plots(patch_list, axis_titles = "collect") +   plot_annotation(title = "TF expression vs activity")
+wrap_plots(patch_list, axis_titles = "collect") + 
+  plot_annotation(title = "TF expression vs activity")
 dev.off()
 ```
 
@@ -1474,7 +1488,7 @@ design <- "ABBBBBBBB
            #CCCCCCCC"
 
 gen_plt_gp <- gp_ctbar_v + gp_dotmap + gp_ctbar_h +
-  plot_layout(design = design, widths = c(20, 200), heights = c(200, 10), guides = "collect")
+  plot_layout(design = design, widths = c(1, 10), heights = c(30, 1), guides = "collect")
 
 
 # save

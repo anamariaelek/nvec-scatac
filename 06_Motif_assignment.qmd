@@ -1783,10 +1783,11 @@ mta_data <- as.data.table(mta_scor)
 
 # get max possible score for each motif
 maxs_mta <- sapply(
-  names(mots_mta_lst),
-  function(x) maxScore(convert_type(mots_mta_lst[[x]], "PWM")@motif),
-  USE.NAMES = TRUE, simplify = TRUE
+  names(mots_lst),
+  function(x) maxScore(convert_type(mots_lst[[x]], "PWM")@motif)
 )
+names(maxs_mta) <- sapply(mots_lst, function(m) m@name)
+stopifnot(all(mta_data$motif %in% names(maxs_mta)))
 mta_data[, max_motif_score := maxs_mta[motif]]
 mta_data[, max_motif_score := pmax(.SD$max_motif_score, .SD$motif_score), motif]
 
