@@ -92,6 +92,7 @@ pks_dir <- "results/Peaks"
 mta_dir <- "results/Motifs"
 arc_dir <- "results/Archetypes"
 map_dir <- "results/Metacells"
+chp_dir <- "results/insilicoChIP"
 grn_dir <- "results/GRN"
 dir.create(grn_dir, showWarnings = FALSE)
 dir.create(file.path(grn_dir, "networks"), showWarnings = FALSE)
@@ -219,17 +220,22 @@ In this way, we link TFs with target genes they regulate.
 ```{r}
 # peak to gene assignment
 peaks_dt <- fread(file.path(
-    pks_dir, "Peaks_cell_type_mapped_gene_assignment_coaccess.tsv"
+    pks_dir, "Peaks_cell_type_mapped_gene_assignment_coaccess.tsv.gz"
 ))[, .(seqnames, start, end, peak, gene)][gene != ""]
 setnames(peaks_dt, "gene", "target_gene")
 
 # in silico ChIP binding score
+lvl <- "metacell"
 res_dt <- fread(file.path(
-    grn_dir, lvl,
-    sprintf("insilico-chip-binding-score-%s.tsv.gz", id)
+    chp_dir, lvl,
+    "insilico_chip_binding_score.tsv.gz"
 ))
 
-# GRN
+# filter only motif hits in peaks with in silico chip score above threshold
+thrs <- 0.1
+res_dt <- res_dt[in_silico_chip_score > thrs]
+
+# GRN: link TFs (motifs) with target genes (assigned to peaks)
 grn_dt <- merge.data.table(
     res_dt, peaks_dt,
     by = c("seqnames", "start", "end", "peak"),
@@ -241,7 +247,7 @@ target_gnan <- copy(gnan)
 target_gnan[, gene_list := NULL]
 setnames(target_gnan, colnames(target_gnan), paste0("target_", colnames(target_gnan)))
 grn_dt <- merge.data.table(
-    grn_dt, gnan, by = "target_gene",
+    grn_dt, target_gnan, by = "target_gene",
     all.x = TRUE, sort = FALSE
 )
 grn_dt[is.na(target_gene_name), target_gene_name := ""]
@@ -249,13 +255,17 @@ grn_dt[is.na(target_common_name), target_common_name := ""]
 grn_dt[is.na(target_og), target_og := ""]
 grn_dt[is.na(target_pfam), target_pfam := ""]
 
+setcolorder(grn_dt, c(
+    "seqnames", "start", "end", "peak", "motif", "id", 
+    "motif_score", "peak_tf_correlation_score", "in_silico_chip_score",
+    "gene", "gene_name", "common_name", "og", "pfam",
+    "target_gene", "target_gene_name", "target_common_name", "target_og", "target_pfam"
+))
+
 # save
 saveRDS(
     grn_dt,
-    file.path(
-        grn_dir, lvl,
-        sprintf("insilico-chip-grn-%s.rds", id)
-    )
+    file.path(grn_dir, "global-grn.rds")
 )
 ```
 

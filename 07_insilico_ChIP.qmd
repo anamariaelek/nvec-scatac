@@ -238,10 +238,7 @@ cor_mt <- cor(t(acc_mt), t(exp_mt))
 # save
 saveRDS(
     cor_mt,
-    file.path(
-        chp_dir, lvl,
-        sprintf("peak_TF_expression_correlation_%s.rds", id)
-    )
+    file.path(chp_dir, "peak_TF_expression_correlation.rds")
 )
 ```
 
@@ -249,8 +246,8 @@ Inspect accessibility peak-TF expression correlations.
 
 ```{r}
 cor_mt <- readRDS(file.path(
-    chp_dir, lvl,
-    sprintf("peak_TF_expression_correlation_%s.rds", id)
+    chp_dir,
+    "peak_TF_expression_correlation.rds"
 ))
 
 # top correlated peak-TF pairs
@@ -261,7 +258,7 @@ gp_top_cor <- ggplot(cor_dt, aes(correlation)) +
     geom_histogram(color = "white") +
     scale_x_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.25))
 ggsave(file.path(
-    fig_dir, sprintf("peak-TF-expression-correlation-%s.pdf", lvl)
+    fig_dir, "peak-TF-expression-correlation.pdf"
 ), width = 6, height = 6)
 ```
 
@@ -281,12 +278,11 @@ mot2gene[, motif := archetype_name]
 Calculate *in silico* ChIP binding score
 
 ```{r}
-lvl <- "metacell"
 id <- "genes_exp_FC2_acc_FC4_spearman"
 
 # peak accessibility - TF expression correlation
 cor_mt <- readRDS(file.path(
-    chp_dir, lvl, sprintf("peak_TF_expression_correlation_%s.rds", id)
+    chp_dir, "peak_TF_expression_correlation.rds"
 ))
 
 # subset for TFs with motif
@@ -300,7 +296,7 @@ pks <- unique(paste0("peak",sort(as.integer(str_extract(pks, "\\d+")))))
 cor_mt <- cor_mt[pks,]
 
 # save
-saveRDS(cor_mt, file.path(chp_dir, lvl, "peak_TF_expression_correlation.rds"))
+saveRDS(cor_mt, file.path(chp_dir, "peak_TF_expression_correlation.rds"))
 
 # peak accessibility scores
 sum_clusters <- readRDS(file.path(
@@ -309,7 +305,7 @@ sum_clusters <- readRDS(file.path(
 ))
 stopifnot(all(pks %in% rownames(sum_clusters)))
 acc_mt <- sum_clusters[pks, ]
-saveRDS(acc_mt, file.path(chp_dir, lvl, "peak_accessibility.rds"))
+saveRDS(acc_mt, file.path(chp_dir, "peak_accessibility.rds"))
 
 # transform accessibility scores
 acc_log_mt <- log2(
@@ -371,13 +367,13 @@ mta_dc <- dcast.data.table(mta_dt, peak ~ id, value.var = "score")
 mta_mt <- data.matrix(mta_dc[, -1])
 rownames(mta_mt) <- mta_dc[[1]]
 mta_mt[is.na(mta_mt)] <- 0
-saveRDS(mta_mt, file.path(chp_dir, lvl, "motif_peak_scores.rds"))
+saveRDS(mta_mt, file.path(chp_dir, "motif_peak_scores.rds"))
 
 # correlation matrix
 stopifnot(all(mta_mu$gene %in% colnames(cor_mt)))
 cor_mt <- cor_mt[, mta_mu$gene]
 colnames(cor_mt) <- mta_mu$id
-saveRDS(cor_mt, file.path(chp_dir, lvl, "motif_peak_correlation.rds"))
+saveRDS(cor_mt, file.path(chp_dir, "motif_peak_correlation.rds"))
 
 # calculate in silico ChIP score
 max_accessibility_score <- acc_max[pks]
@@ -391,9 +387,7 @@ predicted_score <- correlation_score * minmax.normalisation(
 )
 predicted_score <- round(predicted_score, 2)
 saveRDS(predicted_score, file.path(
-    chp_dir, lvl, sprintf(
-        "insilico-chip-binding-score-%s-matrix.rds", id
-    )
+    chp_dir, "insilico_chip_binding_score.tsv.gz"
 ))
 
 # table with results
@@ -441,9 +435,7 @@ setcolorder(res_dt, c(
 fwrite(
     res_dt,
     file.path(
-        chp_dir, lvl, sprintf(
-            "insilico-chip-binding-score-%s.tsv.gz", id
-        )
+        chp_dir, "insilico_chip_binding_score.tsv.gz"
     ),
     sep = "\t"
 )
@@ -452,12 +444,8 @@ fwrite(
 Now we will inspect *in silico* ChIP binding scores.
 
 ```{r}
-lvl <- "metacell"
-id <- "genes_exp_FC2_acc_FC4_spearman"
 res_dt <- fread(file.path(
-    chp_dir, lvl, sprintf(
-        "insilico-chip-binding-score-%s.tsv.gz", id
-    )
+    chp_dir, "insilico_chip_binding_score.tsv.gz"
 ))
 ```
 
@@ -476,13 +464,13 @@ gp_den <- ggplot(plot_dt, aes(in_silico_chip_score)) +
     theme(panel.grid.major = element_line(colour = "grey", linewidth = 0.2))
 ggsave(file.path(
     fig_dir,
-    sprintf("insilico-chip-binding-score-%s-histogram.pdf", lvl)
+    "insilico-chip-binding-score-histogram.pdf"
 ), gp_den, width = 6, height = 4)
 
 
 pdf(file.path(
     fig_dir,
-    sprintf("insilico-chip-binding-score-%s-histogram-tfs.pdf", lvl)
+    "insilico-chip-binding-score-histogram-tfs.pdf"
 ), width = 6, height = 5)
 for (x in unique(plot_dt$id)) {
     x_dt <- plot_dt[id == x]
@@ -529,9 +517,8 @@ gp_thr <- ggplot(
     ) +
     labs(x = "threshold", y = "number of peaks where TF is bound")
 ggsave(file.path(
-    fig_dir, sprintf(
-        "insilico-chip-num-binding-sites-vs-threshold-%s.pdf", lvl
-    )
+    fig_dir,
+    "insilico-chip-num-binding-sites-vs-threshold.pdf"
 ), width = 6, height = 8)
 ```
 
@@ -551,17 +538,14 @@ https://github.com/rargelaguet/mouse_organogenesis_10x_multiome_publication/)
 require(chromVAR)
 source("scripts/chromvar_utils.R")
 
-lvl <- "metacell"
-id <- "genes_exp_FC2_acc_FC4_spearman"
-
 # aggregated peak counts
-agg_counts <- readRDS(file.path(chp_dir, lvl, "peak_accessibility.rds"))
+agg_counts <- readRDS(file.path(chp_dir, "peak_accessibility.rds"))
 agg_counts <- agg_counts[rowSums(agg_counts) > 0, ]
 
 # matrix of motif hits
 predicted_score <- readRDS(file.path(
-    chp_dir, lvl,
-    sprintf("insilico-chip-binding-score-%s-matrix.rds", id)
+    chp_dir,
+    "insilico_chip_binding_score_matrix.rds"
 ))
 
 # use peaks present in both matrices
@@ -572,7 +556,6 @@ agg_counts <- agg_counts[pks, ]
 # where to save in silico ChIP chromVAR matrix
 mat_dir <- file.path(
   chp_dir, "ChromVAR"
-  #sprintf("chromVAR-%s-%s", lvl, id)
 )
 dir.create(mat_dir, showWarnings = FALSE)
 
@@ -648,7 +631,7 @@ for (thrs in c(0.1, 0.2, 0.3, 0.4, 0.5)) {
     # add annotations
     chromvar_dt <- melt.data.table(
         as.data.table(as.matrix(chromvar_mat), keep.rownames = "id"),
-        id.vars = "id", value.name = "zscore", variable.name = lvl
+        id.vars = "id", value.name = "zscore", variable.name = "metacell"
     )
     chromvar_dt[, gene := str_remove(id, "__.+")]
     chromvar_dt[, motif := str_remove(id, sprintf("%s__", gene))]
@@ -672,8 +655,7 @@ thrs_list <- c(0.1, 0.2, 0.3, 0.4, 0.5)
 chromvar_ls <- sapply(thrs_list, function(thrs) {
     fread(file.path(
         chp_dir, 
-        "ChromVAR",
-        # sprintf("insilicoChIP-chromVAR-%s-%s", lvl, id), 
+        "ChromVAR",, 
         thrs,
         "results-chromVAR-insilicoChIP.tsv.gz"
     ))
@@ -698,9 +680,6 @@ cols <- intersect(colnames(chromvar_dt), colnames(chromvar_orig_dt))
 chromvar_all_dt <- rbindlist(list(
     chromvar_dt[,..cols], chromvar_orig_dt[,..cols]
 ), use.names = TRUE, fill = TRUE)
-if (lvl == "cell_type") {
-    chromvar_all_dt[, cell_type := str_remove(cell_type, "(adult|gastrula)__")]
-}
 ```
 
 Plot chromVAR scores on 2D projections.
@@ -810,6 +789,7 @@ Combine chromVAR scores with gene expression
 ```{r}
 # expression data
 exp <- "fc"
+lvl <- "metacell"
 exp_mt <- readRDS(file.path(
     map_dir, lvl, sprintf("gene_expression_%s_%s.rds", lvl, exp)
 ))
@@ -872,7 +852,7 @@ fwrite(
     exp_chromvar_dt,
     file.path(
         chp_dir, lvl,
-        sprintf("gene_expression_%s_chromVAR_%s.tsv.gz", exp, id)
+        sprintf("gene_expression_%s_chromVAR.tsv.gz", exp)
     ),
     sep = "\t"
 )
@@ -885,7 +865,7 @@ Plot correlations of chromVAR score and gene expression aggregated per cell type
 exp <- "fc"
 exp_chromvar_dt <- fread(file.path(
     chp_dir, lvl,
-    sprintf("gene_expression_%s_chromVAR_%s.tsv.gz", exp, id)
+    sprintf("gene_expression_%s_chromVAR.tsv.gz", exp)
 ))
 
 # aggregate per cell type
@@ -907,8 +887,8 @@ genes <- gold[gene %in% genes][, setNames(gene, common_name)]
 pdf(file.path(
     fig_dir,
     sprintf(
-        "insilico-chip-chromvar-expression-%s-marks-%s-scatterplot.pdf",
-        exp, lvl
+        "insilico-chip-chromvar-expression-%s-marks-scatterplot.pdf",
+        exp
     )
 ), width = 12, height = 9)
 for (gn in names(genes)) {
@@ -964,7 +944,7 @@ Use chromVAR-expression correlation to select the best in silico ChIP binding th
 exp <- "fc"
 exp_chromvar_dt <- fread(file.path(
     chp_dir, lvl,
-    sprintf("gene_expression_%s_chromVAR_%s.tsv.gz", exp, id)
+    sprintf("gene_expression_%s_chromVAR.tsv.gz", exp)
 ))
 
 # correlation
@@ -1027,8 +1007,8 @@ ggsave(
     file.path(
     fig_dir,
     sprintf(
-        "insilico-chip-chromvar-expression-%s-%s-top-correlations.pdf",
-        exp, lvl
+        "insilico-chip-chromvar-expression-%s-top-correlations.pdf",
+        exp
     )
 ), gp_thrs + gp_thrs_top, width = 8, height = 5)
 
@@ -1040,7 +1020,7 @@ Aggregate chromVAR scores per cell type for plotting.
 # combined data
 chr_exp_ct <- fread(file.path(
   chp_dir, lvl,
-  sprintf("gene_expression_%s_chromVAR_%s.tsv.gz", exp, id)
+  sprintf("gene_expression_%s_chromVAR.tsv.gz", exp)
 ))
 thrs <- 0.1
 chr_exp_ct <- chr_exp_ct[insilico_ChIP_threshold == thrs]
@@ -1051,7 +1031,7 @@ fwrite(
     chr_exp_ct,
     file.path(
         chp_dir, lvl,
-        sprintf("gene_expression_%s_chromVAR_%s.tsv.gz", exp, id)
+        sprintf("gene_expression_%s_chromVAR.tsv.gz", exp)
     ),
     sep = "\t"
 )
