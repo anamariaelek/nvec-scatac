@@ -31,8 +31,8 @@ results/insilicoChIP/insilico_chip_binding_score.tsv.gz
 results/insilicoChIP/motif_peak_correlation.rds
 results/insilicoChIP/peak_accessibility.rds
 results/insilicoChIP/peak_TF_expression_correlation.rds
-results/GRN/networks/grn_genes_expression_fc_0.4_accessibility_access_0.4_chromvar_4.tsv
-results/GRN/networks/grn_peaks_expression_fc_0.4_accessibility_access_0.4_chromvar_4.tsv
+results/GRN/networks/grn_*.tsv
+results/GRN/grn_tf_targets_expression_accessibility.rds
 results/Metacells/metacell/gene_expression_*.rds
 results/Metacells/metacell/gene_scores_*.rds
 results/Metacells/metacell/peak_accessibility_genes_*.rds
