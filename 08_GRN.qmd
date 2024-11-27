@@ -292,8 +292,8 @@ dt_tf_gen[, target_self := gene %in% tfs_target_self]
 dt_tf_gen <- dt_tf_gen[order(gene)]
 dt_tf_gen <- dt_tf_gen[, .N, .(gene, target_self)]
 dt_tf_gen[, median(N), target_self]
-# FALSE    70
-#  TRUE   216
+# FALSE    68
+#  TRUE   212.5
 
 # plot
 gp_tf_gen <- ggplot(
@@ -863,12 +863,6 @@ saveRDS(
 ### Filter GRN per cell type
 
 ```{r}
-# how peak-TF correlations were calculated
-# lvl <- "metacell"
-
-# mapping between metacells
-# id <- "genes_exp_FC2_acc_FC4_spearman"
-
 # in silico ChIP threshold
 thrs <- 0.1
 
@@ -1220,14 +1214,8 @@ saveWorkbook(
 Inspect networks, plot stats and diagnostic plots.
 
 ```{r}
-# how peak-TF correlations were calculated
-# lvl <- "metacell"
-
-# mapping between metacells
-# id <- "genes_exp_FC2_acc_FC4_spearman"
-
 # in silico ChIP threshold
-# thrs <- 0.1
+thrs <- 0.1
 
 # expression quantification: fc or umifrac
 exp <- "fc"
@@ -1262,7 +1250,7 @@ if (is.null(thr_fc_exp)) {
 
 # load network
 grn_ct_dt <- fread(file.path(
-  grn_dir, "networks", sprintf("grn_genes_%s.tsv", fn)
+  grn_dir, "networks", sprintf("grn_genes_%s.tsv.gz", fn)
 ))
 stopifnot(all(grn_ct_dt$cell_type %in% cell_types))
 grn_ct_dt[, cell_type := factor(cell_type, levels = cell_types)]

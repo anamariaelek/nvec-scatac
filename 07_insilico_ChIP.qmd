@@ -387,7 +387,7 @@ predicted_score <- correlation_score * minmax.normalisation(
 )
 predicted_score <- round(predicted_score, 2)
 saveRDS(predicted_score, file.path(
-    chp_dir, "insilico_chip_binding_score.tsv.gz"
+    chp_dir, "insilico_chip_binding_score_matrix.rds"
 ))
 
 # table with results
@@ -655,7 +655,7 @@ thrs_list <- c(0.1, 0.2, 0.3, 0.4, 0.5)
 chromvar_ls <- sapply(thrs_list, function(thrs) {
     fread(file.path(
         chp_dir, 
-        "ChromVAR",, 
+        "ChromVAR",
         thrs,
         "results-chromVAR-insilicoChIP.tsv.gz"
     ))
@@ -751,7 +751,7 @@ pdf(
     file.path(fig_dir, sprintf(
         "insilico-chip-chromvar-marks-boxplot.pdf", id
     )),
-    width = 7, height = 7
+    width = 7, height = 14
 )
 for (gn in names(genes)) {
     gs <- genes[gn]
@@ -768,7 +768,7 @@ for (gn in names(genes)) {
           scale_y_continuous(
               expand = expand_scale(mult = c(0.05, 0.05), add = c(0, 0))
           ) +
-          #facet_grid(insilico_ChIP_threshold ~ .) +
+          facet_grid(insilico_ChIP_threshold ~ .) +
           labs(x = "cell type", y = "Z score") +
           theme(
               axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
@@ -791,7 +791,7 @@ Combine chromVAR scores with gene expression
 exp <- "fc"
 lvl <- "metacell"
 exp_mt <- readRDS(file.path(
-    map_dir, lvl, sprintf("gene_expression_%s_%s.rds", lvl, exp)
+    map_dir, sprintf("gene_expression_%s_%s.rds", lvl, exp)
 ))
 exp_dt <- melt.data.table(
     as.data.table(exp_mt, keep.rownames = "gene"),
@@ -851,7 +851,7 @@ exp_chromvar_dt <- exp_chromvar_dt[, ..scols]
 fwrite(
     exp_chromvar_dt,
     file.path(
-        chp_dir, lvl,
+        chp_dir,
         sprintf("gene_expression_%s_chromVAR.tsv.gz", exp)
     ),
     sep = "\t"
@@ -864,7 +864,7 @@ Plot correlations of chromVAR score and gene expression aggregated per cell type
 # correlation data
 exp <- "fc"
 exp_chromvar_dt <- fread(file.path(
-    chp_dir, lvl,
+    chp_dir,
     sprintf("gene_expression_%s_chromVAR.tsv.gz", exp)
 ))
 
@@ -943,7 +943,7 @@ Use chromVAR-expression correlation to select the best in silico ChIP binding th
 # correlation data
 exp <- "fc"
 exp_chromvar_dt <- fread(file.path(
-    chp_dir, lvl,
+    chp_dir,
     sprintf("gene_expression_%s_chromVAR.tsv.gz", exp)
 ))
 
@@ -1019,7 +1019,7 @@ Aggregate chromVAR scores per cell type for plotting.
 ```{r}
 # combined data
 chr_exp_ct <- fread(file.path(
-  chp_dir, lvl,
+  chp_dir,
   sprintf("gene_expression_%s_chromVAR.tsv.gz", exp)
 ))
 thrs <- 0.1
@@ -1030,7 +1030,7 @@ setnames(chr_exp_ct, c("motif", "zscore"), c("archetype_name", "motif_deviation"
 fwrite(
     chr_exp_ct,
     file.path(
-        chp_dir, lvl,
+        chp_dir,
         sprintf("gene_expression_%s_chromVAR.tsv.gz", exp)
     ),
     sep = "\t"
@@ -1046,7 +1046,7 @@ chr_exp_ct <- chr_exp_ct[, .(
 
 Plot per-TF scatterplots of expression vs activity (deviation Z score):
 
-  - all TFs on imdividual pages
+  - all TFs on individual pages
 
 ```{r}
 # gene motif assignments
@@ -1475,6 +1475,6 @@ gen_plt_gp <- gp_ctbar_v + gp_dotmap + gp_ctbar_h +
 ggsave(
   file.path(fig_dir, sprintf("motif-activity-gene-expression-FC-%s-zscore-%s.pdf", fc_thr, zs_thr)),
   gen_plt_gp,
-  height = 15, width = 8, limitsize = FALSE
+  height = 16, width = 8, limitsize = FALSE
 )
 ```
