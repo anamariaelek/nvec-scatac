@@ -2292,6 +2292,7 @@ all_list <- c(arch_lst, mots_lst)
 names(all_list) <- sapply(all_list, function(m)  m@name)
 stopifnot(all(mta_gen_dt$archetype_name %in% names(all_list)))
 all_list <- all_list[mta_gen_dt$archetype_name]
+all_list <- unique(all_list)
 write_meme(all_list, file.path(mta_dir, "motifs.meme"), overwrite = TRUE)
 saveRDS(all_list, file.path(mta_dir, "motifs.rds"))
 

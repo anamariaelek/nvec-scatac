@@ -1389,5 +1389,15 @@ ggsave(
 )
 ```
 
+Cartography
 
+```{r}
+source("motif-analysis/mta_grn_functions.R")
 
+cart_list <- lapply(cell_types, function(ct) {
+  message("Cartography for ", ct, " GRN")
+  grn_ct <- grn_ct_dt[cell_type == ct][, .(gene, target_gene, in_silico_chip_score)]
+  mta_network_scores(coef_dt = grn_ct)[, cell_type_stage := ct]
+})
+
+```
