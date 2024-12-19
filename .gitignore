@@ -19,6 +19,10 @@ results/Archetypes/motif-scores-archetypes*
 results/Archetypes/motif-scores-archetypes-PPM-PCC-0.8-IC0.5-5bp-mona.rds
 results/Archetypes/motif-scores-input-motifs*
 results/Archetypes/motif-similarity-PPM-PCC.rds
+results/Archetypes/motif-similarity-JSD.pkl
+results/Archetypes/motif-similarity-JSD.tsv.gz
+results/Archetypes/motif-similarity-PPM-JSD.rds 
+results/Archetypes/motifs-similarity-PPM-JSD.rds
 results/Archetypes/ChromVAR*/ArchetypesSEACellsMatrix/
 results/Archetypes/ChromVAR*/correlation-seacells-archetype-motif-score-gene-expression-metacell.rds
 results/Archetypes/ChromVAR*/correlation-seacells-archetype-motif-score-gene-score.rds

@@ -454,6 +454,7 @@ length(pwms_uniq)
 names_pwms_uniq <- sapply(pwms_uniq, function(m) m@name)
 names(pwms_uniq) <- names_pwms_uniq
 saveRDS(pwms_uniq, file.path(arc_dir, "input-pwms.rds"))
+universalmotif::write_meme(pwms_uniq, file.path(arc_dir, "input-pwms.meme"), overwrite = TRUE)
 
 # keep track of motif metadata: homer or cisbp
 mt_meta <- data.table(
@@ -490,14 +491,14 @@ cisbp_sta <- unique(cisbp_dta[, .(TF_Name, Motif_ID, TF_Status)])
 cisbp_sta[, TF_Status := factor(TF_Status, levels = c("D", "I", "N"))]
 setnames(cisbp_sta, c("Motif_ID", "TF_Name"), c("motif_name", "TF_Name"))
 setorder(cisbp_sta, TF_Status)
-mt_meta <- rbindlist(list(
-  merge.data.table(
-    mt_meta[source == "CisBP"], cisbp_sta,
-    by = "motif_name", all.x = TRUE, sort = FALSE
-  )[, source := paste0("CisBP_", TF_Status)][, TF_Status := NULL],
-  mt_meta[grep("Homer", source)]
-), fill = TRUE, use.names = TRUE)
-mt_meta[is.na(TF_Name), TF_Name := ""]
+#mt_meta <- rbindlist(list(
+#  merge.data.table(
+#    mt_meta[source == "CisBP"], cisbp_sta,
+#    by = "motif_name", all.x = TRUE, sort = FALSE
+#  )[, source := paste0("CisBP_", TF_Status)][, TF_Status := NULL],
+##  mt_meta[grep("Homer", source)]
+#), fill = TRUE, use.names = TRUE)
+# mt_meta[is.na(TF_Name), TF_Name := ""]
 
 # save metadata
 fwrite(mt_meta, file.path(arc_dir, "input-pwms-meta.tsv"))
@@ -508,14 +509,22 @@ Parameters for similarity calculation and archetyping.
 ```{r}
 # motif similarity
 similarity <- "PPM"
-method <- "PCC"
+method <- "PCC" # or "JSD"
+
 # clustering for archetyping
-min_cluster_similarity <- 0.8
+min_cluster_similarity <- switch(
+  method,
+  PCC = 0.8,
+  JSD = 1
+)
+
 hclust_method <- "complete"
 dist_method <- "euclidean"
+
 # archetyping threshold
 ic_threshold <- 0.5
 len_threshold <- 5
+
 # id to save output files and plot
 arc_id <- sprintf(
   "%s-%s-%s-IC%s-%sbp", 
@@ -527,7 +536,7 @@ arch_file <- file.path(
 )
 ```
 
-Calculate pairwise similarities between input motifs.
+Calculate pairwise similarities (PCC) between input motifs.
 
 ```{r}
 # similarity
@@ -549,32 +558,102 @@ saveRDS(
 )
 ```
 
-Cluster and order similarity matrix, then choose the minimum cluster
-similarity so that clusters of motifs to archetype contain only similar
-motifs (e.g. when using a higher value of 0.8, many cluster contain
-outlier motifs, with lower values these get split).
+Alternatively, we can use JSD similarities calculated in `05_Archetypes_JSD.ipynb`.
 
 ```{r}
-sim_mat <- readRDS(file.path(arc_dir, sprintf(
-  "motifs-similarity-%s-%s.rds", similarity, method
-)))
+if (method == "PCC") {
 
+  # load motifs PCC similarity
+  sim_mat <- readRDS(file.path(arc_dir, sprintf(
+    "motifs-similarity-%s-%s.rds", similarity, method
+  )))
+
+} else if (method == "JSD") {
+    
+  # load patterns pairwise JSD similarity
+  jsd_dat <- fread(
+    file.path(arc_dir, "motif-similarity-JSD.tsv.gz")
+  )
+  jsd_dcs <- dcast.data.table(jsd_dat, motif1 ~ motif2, value.var = "JSD")
+  stopifnot(all.equal(sort(jsd_dcs[[1]]), sort(colnames(jsd_dcs)[-1])))
+  jsd_mat <- as.matrix(jsd_dcs[, -1])
+  rownames(jsd_mat) <- jsd_dcs[[1]]
+  stopifnot(all.equal(rownames(jsd_mat), colnames(jsd_mat)))
+
+  # convert to similarities
+  sim_mat <- 1 / jsd_mat
+  sim_max <- max(sim_mat[!is.infinite(sim_mat)], na.rm = TRUE)
+  sim_mat <- sim_mat / sim_max
+  sim_mat[is.infinite(sim_mat)] <- 1
+  diag(sim_mat) <- 1
+  range(sim_mat)
+}
+```
+
+Order similarity matrix, then choose the minimum cluster
+similarity so that clusters of motifs to archetype contain only similar
+motifs.
+
+```{r}
 # ordering
 ord <- rownames(sim_mat)
-hc <- hclust(
-  tgs_dist(sim_mat # method = dist_method
-), method = hclust_method)
+hc <- hclust(tgs_dist(jsd_mat), method = hclust_method)
+
+pdf(
+  file.path(fig_dir, sprintf("motif-input-similarity-%s-hc-%s.pdf", method, hclust_method)),
+  width = 92, height = 12
+)
+plot(hc)
+dev.off()
+
 ord <- hc$labels[hc$order]
 sim_mat <- sim_mat[ord, ord]
+
 saveRDS(
   sim_mat, 
   file.path(arc_dir, sprintf(
     "motifs-similarity-%s-%s.rds", similarity, method
   ))
 )
+```
 
-# clusters
-cuts <- seq(200, 300, 10)
+- inspect different similarity matrices
+
+```{r}
+sim_mat_pcc <- readRDS(file.path(arc_dir, "motif-similarity-PPM-PCC.rds"))
+sim_mat_jsd <- readRDS(file.path(arc_dir, "motif-similarity-PPM-JSD.rds"))
+jsd_mat_jsd <- jsd_mat
+rn <- ord
+cn <- ord
+
+pdf(file.path(fig_dir, "motif-input-similarity-mats.pdf"), width = 12, height = 12)
+
+Heatmap(
+  sim_mat_pcc[rn, cn], name = "PCC_similarity",
+  show_row_names = FALSE, show_column_names = FALSE, 
+  cluster_rows = FALSE, cluster_columns = FALSE,
+  use_raster = TRUE
+)
+Heatmap(
+  sim_mat_jsd[rn, cn], name = "JSD_similarity",
+  show_row_names = FALSE, show_column_names = FALSE, 
+  cluster_rows = FALSE, cluster_columns = FALSE,
+  use_raster = TRUE
+)
+Heatmap(
+  jsd_mat_jsd[rn, cn], name = "JSD",
+  show_row_names = FALSE, show_column_names = FALSE,
+  cluster_rows = FALSE, cluster_columns = FALSE, 
+  use_raster = TRUE
+)
+dev.off()
+```
+
+Initial clusters for archetyping
+
+```{r}
+# estimate number of clusters
+cuts <- seq(300, 600, 10)
 cuts_scores <- sapply(cuts, function(h) {
   ctr <- cutree(hc, k = h)
   cl_scores <- sapply(unique(ctr), function(x) {
@@ -591,15 +670,22 @@ cuts_scores <- sapply(cuts, function(h) {
   mean(cl_scores, na.rm = TRUE)
 })
 k <- cuts[which.max(cuts_scores)]
-k <- 300
 pdf(file.path(fig_dir, "motif-input-archetypes-clusters.pdf"))
 plot(cuts, cuts_scores)
 abline(v = k)
 dev.off()
+
+# cut clusters
+k <- 2000
 ctr <- cutree(hc, k = k)
 
 # add cluster info to metadata
+mt_meta <- fread(file.path(arc_dir, "input-pwms-meta.tsv"))
 mt_meta[, cluster := ctr[motif_name]]
+mt_cls <- mt_meta[, .N, cluster][order(-N)]$cluster
+mt_meta[, cluster := factor(cluster, levels = mt_cls)]
+setorder(mt_meta, cluster)
+mt_meta[, .N, cluster]
 fwrite(
   mt_meta,
   file.path(arc_dir, "input-motifs-meta.tsv"),
@@ -607,23 +693,64 @@ fwrite(
 )
 ```
 
+- inspect similarity clusters
+
+```{r}
+pdf(file.path(
+  fig_dir, "input-motifs-clusters.pdf"
+), width = 8, height = 46)
+
+cls <- unique(mt_meta$cluster)
+for (x in seq_along(cls)) {
+
+  mts <- mt_meta[cluster == cls[x]]$motif_name
+  print(sprintf("%s/%s %s motifs", x, length(cls), length(mts)))
+
+  # motifs
+  ppms <- pwms_uniq[mts]
+  if ("universalmotif" %in% class(ppms)) ppms <- list(ppms)
+  ppms <- lapply(ppms, function(m) {
+    m@alphabet <- "DNA"
+    m
+  })
+
+  # plot logos
+  mots <- view_motifs(ppms)
+
+  # add spacer for small number of motifs
+  np <- length(ppms)
+  if (np < 40) {
+    mots <- mots + plot_spacer() + plot_layout(ncol = 1, heights = c(np, 20-np))
+  }
+
+  tryCatch({
+    print(mots)
+  }, error = function (e) message(sprintf("Failed to plot cluster %s\n%s", x, e)))
+}
+dev.off()
+
+```
+
 To construct archetypes, we use `mta_merge_archetype()` function (from
 `motif-analysis/mta_downstream_functions.R`).
 
 ```{r message=FALSE}
 # similarities
-sim_mat <- readRDS(file.path(arc_dir, sprintf(
-  "motifs-similarity-%s-%s.rds", similarity, method
-)))
+sim_mat <- readRDS(file.path(arc_dir, 
+  sprintf("motifs-similarity-%s-%s.rds", similarity, method)
+))
 
 # motif clusters
-mt_meta <- fread(file.path(arc_dir, "input-pwms-meta.tsv"))
+mt_meta <- fread(file.path(arc_dir, "input-motifs-meta.tsv"))
 ctr <- mt_meta[match(rownames(sim_mat), motif_name)][, setNames(cluster, motif_name)]
+
+# motif pwms
+pwms_uniq <- readRDS(file.path(arc_dir, "input-pwms.rds"))
 
 # archetyping
 arch <- mta_merge_archetype(
   sim_mat = sim_mat,
-  motifs = pwms,
+  motifs = pwms_uniq,
   clusters = ctr,
   min_cluster_similarity = min_cluster_similarity,
   recluster = FALSE,
@@ -633,20 +760,13 @@ arch <- mta_merge_archetype(
   ic_threshold = ic_threshold,
   len_threshold = len_threshold,
   occupancy_threshold = 1,
-  verbose = FALSE
+  verbose = TRUE
 )
-# len_threshold = 8
-# list of 1644 archetypes including 5168 motifs (201 archetype(s) fail filters)
-# len_threshold = 5 <------
-# list of 1829 archetypes including 6908 motifs (16 archetype(s) fail filters)
-# len_threshold = 3
-# list of 1845 archetypes including 6976 motifs (0 archetype(s) fail filters)
-
 arch <- arch[sapply(arch, function(x) length(x) > 0)]
 length(arch)
-# 1292
-# 1727 <------
-# 1744
+
+# add names
+names(arch) <- paste("ARCH", seq_along(arch), sep = "")
 
 # save
 arch_file <- file.path(arc_dir, sprintf(
@@ -655,16 +775,30 @@ arch_file <- file.path(arc_dir, sprintf(
 ))
 saveRDS(arch, arch_file)
 
-# quickly check how many direct motifs survived
-direct_mta <- cisbp_dta[TF_Status=="D"]$Motif_ID
-nms_l <- lapply(arch, function(x) tryCatch(sapply(x$ppms, function(y) y@name), error=function(e) x$ppms@name))
-nms_v <- unname(unlist(nms_l))
-direct_mta[direct_mta %in% nms_v]
-
+# save metadata
+arch <- readRDS(arch_file)
+arch_meta <- data.table(
+  archetype = names(arch),
+  num_motifs = sapply(arch, function(x) length(x$ppms)),
+  ic = sapply(arch, function(x) x$ic_consensus@icscore),
+  len = sapply(arch, function(x) dim(x$ic_consensus@motif)[2])
+)
+mots_meta <- rbindlist(lapply(names(arch), function(x) {
+  ppms <- arch[[x]]$ppms
+  if ("universalmotif" %in% class(ppms)) ppms <- list(ppms)
+  mots <- sapply(ppms, function(y) y@name)
+  data.table(motif_name = mots)[, archetype := x]
+}))
+arch_meta <- merge.data.table(mots_meta, arch_meta, by = "archetype", all.x = TRUE, sort = FALSE)
+arch_meta <- merge.data.table(arch_meta, mt_meta, by = "motif_name", all.x = TRUE, sort = FALSE)
+fwrite(
+  mt_meta,
+  file.path(arc_dir, "input-motifs-archetypes-meta.tsv"),
+  sep = "\t"
+)
 ```
 
-Annotate archetype motifs i.e. create a dictionary with
-motif-to-archetype mappings and other metadata.
+Annotate archetype motifs i.e. create a dictionary with motif-to-archetype mappings and other metadata.
 
 ```{r}
 # archetype motifs
@@ -771,6 +905,97 @@ fwrite(
 
 ```
 
+Plot heatmap of similarity of all motifs used in archetyping (i.e. motifs after filtering), with archetyping clusters indicated.
+
+```{r eval=FALSE}
+require(ComplexHeatmap)
+
+# motifs
+pwms <- readRDS(file.path(arc_dir, "input-pwms.rds"))
+
+# similarities
+sim_mat_file <- file.path(arc_dir, sprintf(
+  "motif-similarity-%s-%s.rds", similarity, method
+))
+sim_mat <- readRDS(sim_mat_file)
+
+# archetypes
+arch_file <- file.path(arc_dir, sprintf(
+  "motif-archetypes-%s-%s-%s-IC%s-%sbp.rds",
+  similarity, method, min_cluster_similarity, ic_threshold, len_threshold
+))
+arch <- readRDS(arch_file)
+
+# dictionary
+dict <- fread(str_replace(arch_file, ".rds$", ".dict"))
+
+# where to save heatmap
+heatmap_file <- file.path(
+  fig_dir, str_replace_all(
+    basename(sim_mat_file),
+    c("similarity" = "similarity-archetypes", ".rds$" = ".pdf")
+  )
+)
+
+# make heatmap
+hm_mat <- mta_plot_archetype_heatmap(
+  sim_mat = sim_mat,
+  arch = arch,
+  dict = dict,
+  output_file = heatmap_file,
+  height = 14,
+  width = 16,
+  return_mat = TRUE
+)
+
+# save matrix for heatmap
+saveRDS(
+  hm_mat, str_replace_all(
+    basename(sim_mat_file),
+    c("similarity" = "similarity-archetypes", ".rds$" = "-heatmap.rds")
+  )
+)
+```
+
+Plot archetype logos
+
+```{r}
+pdf(file.path(
+  fig_dir, basename(str_replace(arch_file, "\\.rds$", "-archetypes-logo-filled.pdf"))
+), width = 8, height = 26)
+for (x in names(arch)) {
+  print(sprintf("%s/%s", x, length(arch)))
+
+  # pattern motifs
+  patts_ppm <- arch[[x]]$ppms
+  if ("universalmotif" %in% class(patts_ppm)) patts_ppm <- list(patts_ppm)
+  patts_ppm <- lapply(patts_ppm, function(m) {
+    m@alphabet <- "DNA"
+    m
+  })
+
+  # archetype
+  motif_ppm <- arch[[x]]$ppm_consensus
+  motif_ppm@alphabet <- "DNA"
+  motif_ppm@name <- x
+  
+  # plot logos
+  mots <- view_motifs(c(motif_ppm, patts_ppm))
+
+  # add spacer for small number of motifs
+  np <- length(patts_ppm)
+  if (np < 20) {
+    mots <- mots + plot_spacer() + plot_layout(ncol = 1, heights = c(np, 20-np))
+  }
+
+  tryCatch({
+    print(mots)
+  }, error = function (e) message(sprintf("Failed to plot ARCH%s\n%s", x, e)))
+}
+dev.off()
+
+```
+
 Plot number of motifs per archetype.
 
 ```{r}
@@ -796,139 +1021,6 @@ ggsave(
   file.path(fig_dir, sprintf("motifs-archetypes-number-%s.pdf", arc_id)),
   gp_nmot,
   width = 6, height = 4
-)
-```
-
-Save archetype motifs.
-
-```{r}
-# load archetyping results
-arch <- readRDS(arch_file)
-arch <- unique(arch)
-arch_list <- lapply(arch, function(x) x$ppm_consensus)
-
-# add archetype names to motifs
-dict <- fread(str_replace(arch_file, ".rds$", ".dict"))
-arch_nms <- dict[match(
-  sapply(arch_list, function(x) x@name),
-  archetype
-)]$archetype_name
-names(arch_list) <- arch_nms
-arch_list_nm <- lapply(seq_along(arch_list), function(i) {
-  x <- arch_list[[i]]
-  x@name <- arch_nms[i]
-  x@alphabet <- "DNA"
-  x
-})
-names(arch_list_nm) <- arch_nms
-saveRDS(arch_list_nm, str_replace(arch_file, ".rds$", "-pwms.rds"))
-
-universalmotif::write_homer(
-  motifs = arch_list_nm,
-  file = str_replace(arch_file, ".rds$", "-pwms.homer"),
-  overwrite = TRUE
-)
-
-universalmotif::write_meme(
-  motifs = arch_list_nm,
-  file = str_replace(arch_file, ".rds$", "-pwms.meme"),
-  overwrite = TRUE
-)
-```
-
-Plot archetyping clusters.
-
-```{r message=FALSE, warning=FALSE}
-# plot archetyping clusters
-archetyping_file <- file.path(
-  fig_dir,
-  basename(file.path(str_replace(arch_file, "\\.rds$", "-archetyping.pdf")))
-)
-# plot archetypes clusters
-mta_plot_archetype(
-  arch = arch,
-  dict = dict,
-	dict_archetype_name = "archetype_name",
-	dict_motif_name = "tf_cisbp_name",
-  type = "PWM",
-  output_file = archetyping_file,
-  height = 10, width = 8
-)
-
-# plot archetype logos
-pdf(file.path(
-  fig_dir, basename(str_replace(arch_file, "\\.rds$", "-archetypes.pdf"))
-), width = 8, height = 3)
-for (x in seq_along(arch_list_nm)) {
-  motif <- arch_list_nm[[x]]
-  motif@alphabet <- "DNA"
-  mn <- motif@name
-  print(mn)
-  motif_dict <- dict[archetype_name==mn]
-  motif_name <- mn
-  motif_fami <- motif_dict$tf_family[1]
-  motif_titl <- sprintf("%s (%s)", motif_name, motif_fami)
-  nvect_gens <- sapply(
-    unique(motif_dict[gene != ""]$gene), function(g) {
-      gn <- unique(
-        motif_dict[gene == g, .(gene,common_name,gene_name)]
-      )$common_name
-      if (gn == "") gn <- motif_dict[gene == g]$gene_name
-      ifelse(gn != "", sprintf("%s (%s)", gn, g), g)
-    }
-  )
-  cisbp_gens <- unique(motif_dict[tf_cisbp_name!=""]$tf_cisbp_name)
-  motif_subt <- sprintf(
-    "CisBP TF name(s): %s\nCisBP Nvec gene(s): %s", 
-    substr(paste(cisbp_gens, collapse = ","), 1, 80),
-    substr(paste(nvect_gens, collapse = ","), 1, 80)
-  )
-  tryCatch({
-    print(view_motifs(motifs = motif) + labs(
-      title = substr(motif_titl, 1, 60),
-      subtitle = motif_subt
-    ))
-  }, error = function (e) message(sprintf("Failed to plot ARCH%s\n%s", x, e))
-  )
-}
-dev.off()
-```
-
-Plot heatmap of similarity of all motifs used in archetyping (i.e.
-motifs after filtering), with archetyping clusters indicated.
-
-```{r eval=FALSE}
-require(ComplexHeatmap)
-
-pwms <- readRDS(file.path(arc_dir, "input-pwms.rds"))
-sim_mat_file <- file.path(arc_dir, "motifs-similarity-PPM-PCCnorm.rds")
-sim_mat <- readRDS(sim_mat_file)
-arch_file <- file.path(
-  arc_dir, "motif-archetypes-PPM-PCCnorm-0.8-IC0.5-8bp.rds"
-)
-arch <- readRDS(arch_file)
-dict <- fread(str_replace(arch_file, ".rds$", ".dict"))
-names(arch) <- unique(dict$archetype_name)
-heatmap_file <- file.path(
-  fig_dir, str_replace_all(
-    basename(sim_mat_file),
-    c("similarity" = "similarity-archetypes", ".rds$" = ".pdf")
-  )
-)
-hm_mat <- mta_plot_archetype_heatmap(
-  sim_mat = sim_mat,
-  arch = arch,
-  dict = dict,
-  output_file = heatmap_file,
-  height = 14,
-  width = 16,
-  return_mat = TRUE
-)
-saveRDS(
-  hm_mat, str_replace_all(
-    basename(sim_mat_file),
-    c("similarity" = "similarity-archetypes", ".rds$" = "-heatmap.rds")
-  )
 )
 ```
 
