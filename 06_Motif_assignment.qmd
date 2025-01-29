@@ -250,6 +250,11 @@ ctfp_mat <- readRDS(file.path(
   "gene_expression_fc_genes_exp_FC2_acc_FC4_spearman.rds"
 ))
 
+# we need to subset gene expression matrix to the same seacells as in chromVAR matrix
+stopifnot(all(colnames(chromvar_mat) %in% colnames(ctfp_mat)))
+ctfp_mat <- ctfp_mat[, colnames(chromvar_mat)]
+saveRDS(ctfp_mat, file.path("results", "Metacells", "metacell", "Matrix-Gene-Expression-SEACell-FC.rds"))
+
 # mapping of metacells between RNA and ATAC
 ctfp_dt <- rbindlist(lapply(c("adult", "gastrula"), function(x) {
   dt <- fread(file.path(
@@ -1536,7 +1541,7 @@ experimentally:
    
 ```{r}
 #| label: cisbp_direct_motifs
- 
+
  # TF and motif info
 cisbp_dt_all <- fread(file.path(cisbp_dir, "cisbp_nvec_motifs.tsv"))
 cisbp_dt <- cisbp_dt_all[TF_Status == "D" & Motif_Species == "Nematostella_vectensis" & TF_Name != ""]
@@ -1599,23 +1604,18 @@ dapseq_dt <- rbindlist(list(
     tf_family = "Forkhead"
   )
 ))
-fwrite(
-  dapseq_dt,
-  file.path(mta_dir, "dapseq-motifs.tsv.gz"),
-  sep = "\t", quote = FALSE
-)
 
 # genes vector
-genes_dapseq <- structure(dapseq_dt$gene, names = dapseq_dt$gene_name)
+# genes_dapseq <- structure(dapseq_dt$gene, names = dapseq_dt$gene_name)
 
 # tf family vector
-tffam_dapseq <- structure(dapseq_dt$tf_family, names = dapseq_dt$gene_name)
+# tffam_dapseq <- structure(dapseq_dt$tf_family, names = dapseq_dt$gene_name)
 
 # motifs vector
 motifs_dapseq <- sapply(
   dapseq_dt$sample,
   function(x) {
-    m_name <- dapseq_dt[sample == x]$gene_name
+    m_name <- dapseq_dt[sample == x]$sample
     m_altname <- dapseq_dt[sample == x]$gene
 
     dreme_fn <- file.path("../../DAPseq", x, "streme", "streme.txt")
@@ -1646,7 +1646,26 @@ motifs_dapseq <- sapply(
 )
 
 motifs_dapseq <- unlist(motifs_dapseq)
+names(motifs_dapseq) <- sapply(motifs_dapseq, function(m) m@name)
+saveRDS(motifs_dapseq, file.path(mta_dir, "dapseq-motifs.rds"))
 
+# update data frame
+genes_dt <- CJ(
+  gene = unique(dapseq_dt$gene), 
+  motif_type = c("dimont", "streme", "homer")
+)
+dapseq_dt <- merge.data.table(
+  dapseq_dt, genes_dt, by = "gene", sort = FALSE, all.x = TRUE
+)
+dapseq_dt[, motif := sprintf("%s_%s", sample, motif_type)]
+dapseq_dt <- dapseq_dt[motif %in% names(motifs_dapseq)]
+
+# save
+fwrite(
+  dapseq_dt,
+  file.path(mta_dir, "dapseq-motifs.tsv.gz"),
+  sep = "\t", quote = FALSE
+)
 ```
 
 First we will recalculate motif stats.
@@ -1685,11 +1704,11 @@ mta_scores_mona <- mta_gw_motif_score_monalisa(
   index_object = seqdt,
   bin_width = 250,
   subsample_fraction = 0.10,
-  score_quantiles = c(0, 0.05, 0.1, 0.25, 0.5, 0.75, 0.80, 0.90, 0.95, 0.98, 0.99, 0.995, 0.999, 1.0),
+  score_quantiles = c(0, 0.05, 0.1, 0.25, 0.5, 0.75, 0.80, 0.90, 0.95, 0.98, 0.99, 0.999, 1.0),
   score_quantile_thr = q,
   do_gw_scan = TRUE,
   given_gr = peaks_gr,
-  nthreads = 16
+  nthreads = 12
 )
 
 # save
@@ -1799,6 +1818,7 @@ source("scripts/chromvar_utils.R")
 peaks_mat_seacells <- readRDS(file.path(
   pks_dir, "Sum_Adult_Gastrula_Peaks_SEACell_qnorm.rds"
 ))
+
 peaks_mat_seacells <- as(peaks_mat_seacells, "dgCMatrix")
 
 # background peaks 

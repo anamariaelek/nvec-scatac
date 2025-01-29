@@ -1111,6 +1111,10 @@ Calculate pairwise similarities between archetypes.
 ```{r}
 similarity <- "PPM"
 method <- "PCC"
+arc_id <- sprintf("%-%s-0.8-IC0.5-5bp", similarity, method)
+arch_fn <- file.path(arc_dir, sprintf("motif-archetypes-%s-pwms.rds", arc_id))
+mots_arc_lst <- readRDS(arch_fn)
+
 sim_mat <- compare_motifs(
   motifs = mots_arc_lst,
   use.type = "PPM",

@@ -362,6 +362,106 @@ mc_ann_adult <- fread(file.path(
 ))
 ```
 
+How many TFs are expressed in gastrula?
+
+```{r}
+ct_gastr <- sca_cell_type_fp(mc_ann_gastr, mc_gastr, mat_gastr)
+mcfp_gastr_tf <- ct_gastr@mc_fp[tfan[gene %in% rownames(mc_gastr@mc_fp)]$gene,]
+dim(mcfp_gastr_tf)
+
+# max gene FC
+max_mcfp_gastr_tf <- apply(mcfp_gastr_tf, 1, max)
+max_msfp_gastr_cl <- apply(mcfp_gastr_tf, 1, which.max)
+max_mcfp_gastr_ct <- colnames(mcfp_gastr_tf)[max_msfp_gastr_cl]
+names(max_mcfp_gastr_ct) <- names(max_msfp_gastr_cl)
+mcfp_dt <- data.table(
+    gene = names(max_mcfp_gastr_tf),
+    mcfp = max_mcfp_gastr_tf,
+    cell_type = max_mcfp_gastr_ct
+)
+
+# rank
+# ct_gastr_rank <- apply(ct_gastr@mc_fp, 2, order, decreasing = TRUE)
+# rownames(ct_gastr_rank) <- rownames(ct_gastr@mc_fp)
+# colnames(ct_gastr_rank) <- colnames(ct_gastr@mc_fp)
+rank_gastr_tf <- sapply(mcfp_dt$gene, function(g) {
+    # rank = ct_gastr_rank[g, mcfp_dt[gene == g]$cell_type] 
+    ranked = sort(ct_gastr@mc_fp[, mcfp_dt[gene == g]$cell_type], decreasing=TRUE)
+    which(names(ranked) == g)
+})
+mcfp_dt[, rank := rank_gastr_tf[gene]]
+
+# gene UMIs in max FC cell type
+ct_counts <- sca_mc_gene_counts(ct_gastr, mat_gastr)
+max_umi_gastr_tf <- sapply(mcfp_dt$gene, function(g) {
+    ct_counts[g, mcfp_dt[gene == g]$cell_type]
+})
+mcfp_dt[, umi := max_umi_gastr_tf[gene]]
+
+# total gene UIMs
+umi_gastr_tf <- mat_gastr@mat[rownames(mcfp_gastr_tf), ]
+sum_umi_gastr_tf <- rowSums(umi_gastr_tf)
+mcfp_dt[, total_umi := sum_umi_gastr_tf[gene]]
+
+# order
+setcolorder(mcfp_dt, c("gene", "cell_type", "rank", "mcfp", "umi", "total_umi"))
+
+chromvar <- readRDS(file.path("results", "insilicoChIP", "ChromVAR", 0.1, "Matrix-chromVAR-insilicoChIP.rds"))
+dim(chromvar)
+rownames(chromvar) <- str_split(rownames(chromvar), "__", simplify = TRUE)[, 1]
+
+sum(rownames(chromvar) %in% rownames(mcfp_gastr_tf))
+max_chromvar <- apply(chromvar, 1, max)
+chromvar_dt <- data.table(
+    gene = names(max_chromvar),
+    max_chromvar = max_chromvar
+)
+
+dt <- merge.data.table(mcfp_dt, chromvar_dt, by = "gene", all.x = TRUE)
+dt[, .N, is.na(max_chromvar)]
+setorder(dt, -max_mcfp)
+
+# add gene annotation
+dt <- merge.data.table(dt, tfan, by = "gene")
+
+# save
+fwrite(dt, file.path("results", "Metacells", "gastrula_tfs.tsv"), sep = "\t")
+
+# plot
+ggplot(dt, aes(rank, umi, color = mcfp)) + 
+    geom_point() + 
+    scale_y_continuous(trans = "log10") + 
+    scale_color_gradientn(
+        colours = c("#fff1e0","orange","orangered2","#520c52"),
+        limits = c(1, 8),
+        oob = scales::squish
+    )
+ggsave(file.path("plots", "Metacells", "gastrula_tfs.png"), width = 6, height = 6)
+
+name="Lwamide"
+
+for (name in gold$common_name) {
+    name <- str_replace_all(name, "/", "_")
+    g=gold[common_name==name]$gene
+    png(file.path("plots", "Metacells", sprintf("gastrula_tfs_examples_%s.png",name)), width = 8, height = 6, units = "in", res = 300)
+    plot(
+        ct_gastr_rank[g,cts],
+        ct_gastr@mc_fp[g,cts],
+        main=sprintf("%s (%s)", g, name),
+        xlab="rank",
+        ylab="mcfp",
+        ylim=c(0, max(ct_gastr@mc_fp[g,cts])+1),
+    )
+    text(
+        ct_gastr_rank[g,cts],
+        ct_gastr@mc_fp[g,cts],
+        labels = cts,
+        srt = 90, adj = c(0.5, 1)
+    )
+    dev.off()
+}
+```
+
 Combine expression data for adult and gastrula.
 
 ```{r}

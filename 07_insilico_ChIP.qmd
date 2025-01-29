@@ -867,18 +867,37 @@ exp_chromvar_dt <- fread(file.path(
     chp_dir,
     sprintf("gene_expression_%s_chromVAR.tsv.gz", exp)
 ))
+setnames(exp_chromvar_dt, "archetype_name", "motif")
 
 # aggregate per cell type
-exp_chromvar_dt[, zscore := mean(zscore), .(gene, motif, cell_type, insilico_ChIP_threshold)]
+exp_chromvar_dt[, motif_deviation := mean(motif_deviation), .(gene, motif, cell_type, insilico_ChIP_threshold)]
 exp_chromvar_dt[, expression := mean(expression), .(gene, motif, cell_type, insilico_ChIP_threshold)]
 
 exp_chromvar_dt <- unique(
   exp_chromvar_dt[, .(
-    motif, gene, gene_name, common_name, og, pfam, id,
-    zscore, expression, cell_type, stage, insilico_ChIP_threshold
+    motif, gene, gene_name, common_name, og, pfam,
+    motif_deviation, expression, cell_type, stage, insilico_ChIP_threshold
   )]
 )
 
+# save
+fwrite(
+    exp_chromvar_dt,
+    file.path(
+        chp_dir,
+        sprintf("gene_expression_%s_chromVAR_cell_type_aggregated.tsv.gz", exp)
+    ),
+    sep = "\t"
+)
+
+# for shiny app
+saveRDS(
+    exp_chromvar_dt[insilico_ChIP_threshold == 0.1],
+    file.path(
+        chp_dir,
+        sprintf("gene_expression_%s_chromVAR_cell_type_aggregated.rds", exp)
+    )
+)
 # genes
 genes <- unique(exp_chromvar_dt$gene)
 genes <- gold[gene %in% genes][, setNames(gene, common_name)]
