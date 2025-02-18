@@ -2029,8 +2029,13 @@ Load scores
 
 ```{r}
 # all classified peaks
-pks <- fread(file.path(pks_dir, "Peaks_cell_type_mapped.tsv"))
+pks <- fread(file.path(pks_dir, "Peaks_cell_type_mapped.tsv.gz"))
 pks_gr <- makeGRangesFromDataFrame(pks, keep.extra.columns = TRUE)
+
+# genomic ovls
+all_peaks_ovl <- fread(
+  file.path(pks_dir, "annotation_peaks_genomic_overlap.tsv.gz")
+)
 
 # phylop scores for peaks and other features
 phylop_fn <- c(
@@ -2043,6 +2048,7 @@ phylop_fn <- c(
   tfbs = "phastcons.Nvec.phylop_tfbs.bed",
   loops = "phastcons.Nvec.phylop_loops.bed"
 )
+
 phastc_list <- lapply(
   names(phylop_fn), function(x) {
 
@@ -2479,6 +2485,7 @@ gp_tau_1 <- ggplot(
   ) +
   labs(x = "", y = "# peaks\nper gene")
 
+# cpmparison SP-CP
 gp_tau_2 <- ggplot(
     tau_dt[!is.na(gene_tau_index)],
     aes(x = tau_bin, y = n_peaks_per_gene_not_promoters, fill = gene_promoter, color = gene_promoter)
@@ -2486,7 +2493,7 @@ gp_tau_2 <- ggplot(
   geom_boxplot(outlier.shape = 20, outlier.size = 1) +
   stat_compare_means(
     label = "p.signif", hide.ns = TRUE,
-    method = "t.test", 
+    method = "t.test",
     method.args = list(formula = n_peaks_per_gene_not_promoters ~ gene_promoter)
   ) +
   scale_fill_manual(values = pro_cols, drop = FALSE) +
@@ -2505,6 +2512,18 @@ gp_tau_2 <- ggplot(
     legend.position = "none"
   ) +
   labs(x = "", y = "# non-promoter peaks\nper gene")
+
+# pairwise comparisons for all tau_bin values
+comp_dt <- tau_dt[!is.na(gene_tau_index)]
+comp_dt[, tau_bin := as.character(tau_bin)]
+comparisons_list <- combn(unique(comp_dt$tau_bin), 2, simplify = FALSE)
+gp_tau_comp <- ggboxplot(comp_dt, x = "tau_bin", y = "n_peaks_per_gene_not_promoters")+ 
+  stat_compare_means(comparisons = comparisons_list, label.y = seq(50, 140, 10), label = "p.signif", hide.ns = TRUE)+
+  stat_compare_means(label.y = 150)
+ggsave(
+    file.path(fig_dir, "num_pks_gene_expression_tau_comp.pdf"),
+    gp_tau_comp, width = 4, height = 8
+)
 
 gp_tau_3 <- ggplot(
     unique(tau_dt[!is.na(gene_tau_index), .(gene, tau_bin, gene_promoter)]),

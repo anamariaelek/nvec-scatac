@@ -81,12 +81,12 @@ Define directories to read the data from and save the results to.
 
 adult_dir <- "ArchRProj_Nvec_TSS4_frag200"
 gastr_dir <- "ArchRProj_Nvec_gastrula"
-pks_dir <- "Results/Peaks"
-res_dir <- "Results/Metacells/"
+pks_dir <- "results/Peaks"
+res_dir <- "results/Metacells/"
 dir.create(res_dir, showWarnings = FALSE)
 dir.create(file.path(res_dir, "metacell"), showWarnings = FALSE)
 dir.create(file.path(res_dir, "cell_type"), showWarnings = FALSE)
-fig_dir <- "Plots/Metacells"
+fig_dir <- "plots/Metacells"
 dir.create(fig_dir, showWarnings = FALSE)
 ann_dir <- "annotation"
 ```
@@ -234,7 +234,7 @@ fp_celltype <- readRDS(file.path(
 ))
 
 # peak metadata
-peak_dt <- fread(file.path(pks_dir, "Peaks_cell_type_mapped.tsv"))
+peak_dt <- fread(file.path(pks_dir, "Peaks_cell_type_mapped.tsv.gz"))
 peak_dt[, idx := sprintf("%s:%s-%s", seqnames, start, end)]
 
 ```

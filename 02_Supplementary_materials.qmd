@@ -1,0 +1,31 @@
+---
+title: "Supplementary materials"
+execute:
+  eval: false
+  message: false
+  warning: false
+output: html_notebook
+---
+
+# Setup
+
+```{r}
+library(data.table)
+```
+
+```{r}
+proj_adult <- loadArchRProject("ArchRProj_Nvec_TSS4_frag200")
+proj_gastrula <- loadArchRProject("ArchRProj_Nvec_gastrula")
+adt <- as.data.table(proj_adult@cellColData, keep.rownames="Cell")
+gdt <- as.data.table(proj_gastrula@cellColData, keep.rownames="Cell")
+dt <- rbindlist(list(
+    adult = adt[, .(Cell, nFrags)],
+    gastrula = gdt[, .(Cell, nFrags)]
+), idcol = "Stage")
+median(dt$nFrags)
+# 908
+dt[, median(nFrags), Stage]
+# adult: 873
+# gastrula: 1362
+
+```
