@@ -1,1 +1,0 @@
-(((cnidocyte_gastrula,NPC_2)1,(gland_mucin,neuronal)1)1,((ecto_pharynx,EMS_ecto_boundary)1,EMS)1,((ectoderm,ecto_aboral)1,NPC_1)1)1;

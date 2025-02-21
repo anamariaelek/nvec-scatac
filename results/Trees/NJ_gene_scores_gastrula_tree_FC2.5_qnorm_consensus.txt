@@ -1,0 +1,1 @@
+((((ectoderm,NPC_1)1,ecto_aboral)1,ecto_pharynx)1,(((cnidocyte_gastrula,NPC_2)1,gland_mucin)1,neuronal)1,(EMS_ecto_boundary,EMS)1)1;

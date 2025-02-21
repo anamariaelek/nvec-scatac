@@ -9,8 +9,7 @@ output: html_notebook
 
 # Setup
 
-```{r setup}
-
+```{r}
 #| label: setup
 #| warning: FALSE
 #| message: FALSE
@@ -33,6 +32,8 @@ library(GenomicRanges)
 library(ArchR)
 library(metacell)
 library(ComplexHeatmap)
+library(ape)
+library(ggtree)
 
 # set ggplot2 theme
 theme_py <- theme_light() + theme(
@@ -59,7 +60,6 @@ Data directories and colors
 
 ```{r}
 #| label: dirs
-
 adult_dir <- "ArchRProj_Nvec_TSS4_frag200"
 gastr_dir <- "ArchRProj_Nvec_gastrula"
 pks_dir <- "results/Peaks"
@@ -177,6 +177,26 @@ bct_maps <- setDT(cbind.data.frame(
   cell_type = cell_types,
   broad_cell_type = str_extract(cell_types, paste(names(bct_cols), collapse = "|"))
 ))
+cell_type_rename <- c(
+  "cnidocyte_precursors" = "NPC_2",
+  "^muscle_1" = "muscle_tentacle_retractor",
+  "^muscle_2" = "muscle_mesentery_retractor",
+  "adult_muscle_1" = "adult_muscle_tentacle_retractor",
+  "adult_muscle_2" = "adult_muscle_mesentery_retractor",
+  "gastro_unknown_1" = "gastro_IRF1_2",
+  "gastro_unknown_2" = "gastro_somatic_gonad",
+  "gland_mucous" = "gland",
+  "ectoderm_embryonic_oral" = "ecto_pharynx",
+  "ectoderm_embryonic$" = "ectoderm",
+  "ectoderm_embryonic_aboral" = "ecto_aboral",
+  "mesendoderm_embryonic" = "EMS",
+  "mesendoderm_ectoderm" = "EMS_ecto_boundary",
+  "neuron_GATA_Islet_3" = "neuron_Pou4_FoxL2_3",
+  "NPC$" = "NPC_1",
+  "precursors_1" = "precursors_PGC",
+  "precursors_2" = "precursors_endoNPC",
+  "precursors_3" = "precursors_NPC"
+)
 
 ```
 
@@ -698,7 +718,7 @@ subset_genes <- c(
   "Minicollagen-3/Ncol-3", "Wnt1", "Brachyury",
   "Ptx1", "FGFa1", "Tbx1/10-2",
   "SnailA", "MuscleLIM1.1", "EP2A",
-  "NvSoxB(2)", "AshA", "Prdm14d",
+  "NvSoxB(2)", "Prdm14d", "Prdm9-like",
   "Lwamide", "Shak1 ion channel", "Mucin"
 )
 subset_genes <- gold[match(subset_genes, name)]$gene
@@ -813,7 +833,6 @@ ggsave(file.path(
 ```
 
 
-## Pseudobulk tracks
 
 ## pyGenomeTracks
 
@@ -5497,21 +5516,21 @@ dir.create(tree_dir, showWarnings = FALSE)
 dir.create(file.path(tree_dir, "data"), showWarnings = FALSE)
 
 # function for bootstrap
-boot.tree <- function(data, B = 100, tree = "nj") {
+boot.tree <- function(data, B = 100, tree = "nj", func = dist, ...) {
     library(phangorn)
-    func <- function(x) upgma(dist(x, method = "euclidean"), method="average")
-    if (tree == "nj") {
-        func <- function(x) nj(dist(x, method = "euclidean"))
-    }
-    if (tree == "hclust") {
-        func <- function(x) {
-            tr = hclust(dist(x, method = "euclidean"))
+    if (tree == "UPGMA") {
+      tree_func <- function(x) upgma(func(x, ...), method = "average")
+    } else if (tree == "nj") {
+      tree_func <- function(x) nj(func(x, ...))
+    } else if (tree == "hclust") {
+        tree_func <- function(x) {
+            tr = hclust(func(x, ...))
             tr = as.phylo(tr)
             return(tr)
         }
     }
-    tr_real <- func(data)
-    bp <- boot.phylo(tr_real, data, FUN=func, B=B)
+    tr_real <- tree_func(data)
+    bp <- boot.phylo(tr_real, data, FUN = tree_func, B = B)
     tr_real$node.label <- as.character(bp)
     return(tr_real)
 }
@@ -5730,12 +5749,11 @@ for (stage in c("adult", "gastrula")) {
 
 ```{r}
 # load tree data
-data_dir <- file.path(adult_dir, "Metacells", "cell_type")
+data_dir <- file.path(res_dir, "Metacells", "cell_type")
 gene_sco <- readRDS(file.path(
   data_dir, "gene_scores_cell_type.rds"
 ))
-colnames(gene_sco) <- str_replace_all(colnames(gene_sco), "\\.", "_")
-colnames(gene_sco) <- str_replace_all(colnames(gene_sco), cell_type_rename)
+stopifnot(all(colnames(gene_sco) %in% cell_types))
 
 # save peaks matrix
 saveRDS(
@@ -5748,12 +5766,11 @@ for (stage in c("adult", "gastrula")) {
 
   gene_sco_fn <- switch(
     stage,
-    "adult" = file.path(adult_dir, "GeneScoreMatrix", "Matrix-Gene-Scores-Dist-Var-Coacces-cell-type.rds"),
-    "gastrula" = file.path(gastr_dir, "GeneScoreMatrix", "Matrix-Gene-Scores-Dist-Var-Weighted-cell_type-FC.rds")
+    "adult" = file.path(adult_dir, "ArchRProj", "GeneScoreMatrix", "Matrix-Gene-Scores-Dist-Var-Coacces-cell-type-FC.rds"),
+    "gastrula" = file.path(gastr_dir, "ArchRProj", "GeneScoreMatrix", "Matrix-Gene-Scores-Dist-Var-Weighted-cell_type-FC.rds")
   )
   gene_sco <- readRDS(gene_sco_fn)
-  colnames(gene_sco) <- str_replace_all(colnames(gene_sco), "\\.", "_")
-  colnames(gene_sco) <- str_replace_all(colnames(gene_sco), cell_type_rename)
+  stopifnot(all(colnames(gene_sco) %in% cell_types))
 
   # save peaks matrix
   saveRDS(
@@ -5772,8 +5789,6 @@ fp_clusters <- readRDS(
 )
 
 # features for clustering
-adult_ids <- grep("adult", colnames(fp_clusters))
-gastr_ids <- grep("gastrula", colnames(fp_clusters))
 fc_thrs <- 2.5
 thrs <- sprintf("FC%s_qnorm", fc_thrs)
 feats <- names(which(apply(
@@ -5787,74 +5802,79 @@ mean(rownames(fp_clusters) %in% feats)
 # selected features
 feats_select <- intersect(feats, rownames(fp_clusters))
 
-# subset matrices
-table_fp <- fp_clusters[feats_select, ]
-q <- quantile(table_fp, probs = c(0.01, 0.99))
-table_fp_trimmed <- pmin(pmax(table_fp, q[1]), q[2])
-table_fp_norm <- scale(table_fp)
-
-# distance matrix
-# dmatrix <- tgstat::tgs_dist(t(table_fp))
-
-# NJ clustering
-require(ape)
-tmatrix <- t(table_fp_norm)
-tree <- boot.tree(tmatrix, B=100, tree='nj')
-tree_nm <- sprintf("NJ_gene_score_adult_gastrula_tree_%s", thrs)
-tree_fn <- file.path(fig_dir, paste0(tree_nm, ".txt"))
-ape::write.tree(tree, tree_fn)
-
-# tree visuals
-tree <- ape::read.tree(tree_fn)
-tips <- tree$tip.label
-tree <- groupOTU(
-    tree,
-    sapply(
-        cell_types,
-        function(ct) grep(ct, tips),
-        USE.NAMES = TRUE,
-        simplify = FALSE
+# make trees with different data processing
+gt_list <- list()
+set.seed(123)
+for (trim in c(TRUE, FALSE)) {
+  for (scale in c(TRUE, FALSE)) {
+    proc <- sprintf(
+      "%s %s",
+      ifelse(trim, "trim", ""),
+      ifelse(scale, "scale", "")
     )
-)
-gt <- ggtree(tree, aes(color = group), ladderize = FALSE) +
-  scale_color_manual(values = ct_cols) +
-  theme_tree2() +
-  geom_tiplab() +
-  scale_x_continuous(limits = c(NA, 150)) +
-  geom_text2(aes(label = node), hjust = -0.2, size = 3) +   
-  theme(legend.position = "none") +
-  labs(caption = sprintf("%s genes", length(feats_select)))
-ggsave(file.path(
-    fig_dir,
-    paste0(tree_nm, ".pdf")
-), gt, height = 6, width = 7)
+    proc <- str_trim(proc)
 
-# consensus tree
-library(ape)
-bptree <- boot.tree(tmatrix, B = 100, tree = "nj")
-con_tree <- consensus(bptree, p = 0.5) 
-tips <- con_tree$tip.label
-con_tree <- groupOTU(
-    con_tree,
-    sapply(
-        cell_types,
-        function(ct) grep(ct, tips),
-        USE.NAMES = TRUE,
-        simplify = FALSE
-    )
-)
-gt <- ggtree(con_tree, aes(color = group), ladderize = FALSE) +
-  scale_color_manual(values = ct_cols) +
-  theme_tree2() +
-  geom_tiplab() +
-  scale_x_continuous(limits = c(NA, 20)) +
-  geom_text2(aes(label = node), hjust = -0.2, size = 3) +   
-  theme(legend.position = "none") +
-  labs(caption = sprintf("%s genes", length(feats_select)))
-ggsave(file.path(
+    # subset matrices
+    table_fp <- fp_clusters[feats_select, ]
+    if (trim) {
+      q <- quantile(table_fp, probs = c(0.01, 0.99))
+      table_fp <- pmin(pmax(table_fp, q[1]), q[2])
+    }
+    if (scale) {
+      table_fp <- scale(table_fp)
+    }
+    tmatrix <- t(table_fp)
+
+    require(ape)
+    if (proc != "") {
+      tree_nm <- sprintf("NJ_gene_scores_adult_gastrula_tree_%s_%s_bootstrap", thrs, proc)
+      tree_cp <- sprintf(
+        "%s genes with gene score > %s; %s; BP %.1f", 
+        length(feats_select), fc_thrs, proc, bp
+      )
+    } else {
+      tree_nm <- sprintf("NJ_gene_scores_adult_gastrula_tree_%s_bootstrap", thrs)
+      tree_cp <- sprintf(
+        "%s genes with gene score > %s; BP %.1f", 
+        length(feats_select), fc_thrs, bp
+      )
+    }
+
+    # bootstrap tree
+    bptree <- boot.tree(tmatrix, B = 100, tree = "nj")
+    bp <- sum(as.integer(bptree$node.label), na.rm=TRUE)/bptree$Nnode
+
+    # save tree
+    tree_fn <- paste0(tree_nm, ".txt")
+    ape::write.tree(bptree, file.path(tree_dir, tree_fn))
+
+    # plot tree
+    require(ggtree)
+    gt <- ggtree(bptree, ladderize = FALSE, branch.length = "none") +
+      theme_tree2() +
+      geom_tiplab(aes(color = label)) +
+      geom_nodelab(aes(label = label), size = 2, hjust = -0.2) +
+      scale_x_continuous(expand = expansion(mult = c(0, 2))) +
+      scale_color_manual(values = ct_cols) +
+      theme(
+        legend.position = "none",
+        axis.line.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()
+      ) +
+      labs(caption = tree_cp)
+    gt_list[[proc]] <- gt
+  }
+}
+
+# save all trees plots
+tree_nm <- sprintf("NJ_gene_scores_adult_gastrula_tree_%s_bootstrap", thrs)
+pdf(file.path(
     fig_dir,
-    paste0(tree_nm, "_consensus.pdf")
-), gt, height = 6, width = 7)
+    paste0("fig4_", tree_nm, ".pdf")
+), height = 6, width = 5)
+print(gt_list)
+dev.off()
 
 ```
 
@@ -5882,47 +5902,57 @@ for (stage in c("adult", "gastrula")) {
 
   # subset matrices
   table_fp <- fp_clusters[feats_select, ]
-  stage_dmatrix <- tgstat::tgs_dist(t(table_fp))
-  stage_tmatrix <- as.matrix(stage_dmatrix)
-  
-  # NJ clustering
-  require(ape)
-  #tree <- nj(stage_dmatrix)
-  tree <- boot.tree(stage_tmatrix, B=100, tree='nj')
-  tree_nm <- sprintf("NJ_gene_scores_%s_tree_%s", stage, thrs)
-  tree_fn <- file.path(fig_dir, paste0(tree_nm, ".txt"))
-  ape::write.tree(tree, tree_fn)
+  trim <- FALSE
+  scale <- TRUE
+  if (trim) {
+    q <- quantile(table_fp, probs = c(0.01, 0.99))
+    table_fp <- pmin(pmax(table_fp, q[1]), q[2])
+  }
+  if (scale) {
+    table_fp <- scale(table_fp)
+  }
+  tmatrix_stage <- t(table_fp)
 
-  # tree visuals
-  tree <- ape::read.tree(tree_fn)
-  tips <- tree$tip.label
-  tree <- groupOTU(
-      tree,
-      sapply(
-          cell_types,
-          function(ct) grep(ct, tips),
-          USE.NAMES = TRUE,
-          simplify = FALSE
-      )
-  )
-  gt <- ggtree(tree, aes(color = group), ladderize = FALSE) +
-    scale_color_manual(values = ct_cols) +
+  require(ape)
+
+  # bootstrap tree
+  bptree_stage <- boot.tree(tmatrix_stage, B = 100, tree = "nj")
+  bp_stage <- sum(as.integer(bptree$node.label), na.rm=TRUE)/bptree$Nnode
+
+  # save tree
+  tree_nm <- sprintf("NJ_gene_scores_%s_tree_%s_bootstrap", stage, thrs)
+  tree_fn <- paste0(tree_nm, ".txt")
+  ape::write.tree(bptree_stage, file.path(tree_dir, tree_fn))
+
+  # plot tree
+  require(ggtree)
+  gt_stage <- ggtree(bptree_stage, ladderize = FALSE, branch.length = "none") +
     theme_tree2() +
-    geom_tiplab() +
-    geom_text2(aes(label = node), hjust = -0.2, size = 3) +   
-    scale_x_continuous(limits = c(NA, 50)) +
-    theme(legend.position = "none") +
-    labs(caption = sprintf("%s genes", length(feats_select)))
+    geom_tiplab(aes(color = label)) +
+    geom_nodelab(aes(label = label), hjust = -0.2, size = 3) +
+    scale_color_manual(values = ct_cols) +
+    scale_x_continuous(expand = expansion(mult = c(0, 2))) +
+    theme(
+      legend.position = "none",
+      axis.line.x = element_blank(),
+      axis.text.x = element_blank(),
+      axis.ticks.x = element_blank()
+    ) +
+    labs(caption = sprintf(
+      "%s genes with gene score > %s; BP %.1f", 
+      length(feats_select), fc_thrs, bp_stage
+    ))
   ggsave(file.path(
       fig_dir,
-      paste0(tree_nm, ".pdf")
-  ), gt, height = 6, width = 7)
-
+      paste0("fig4_", tree_nm, ".pdf")
+  ), gt_stage, height = 6, width = 7)
 
 }
 ```
 
 ## Peak based trees
+
+Prepare data
 
 ```{r}
 # load tree data
@@ -5952,8 +5982,6 @@ for (stage in c("adult", "gastrula")) {
   )
 }
 ```
-
-### Peaks overlap
 
 Euler diagram of overlapping adult and gastrula peaks
 
@@ -6023,7 +6051,7 @@ jacc_mt <- jacc_ovl(t(table_fp), fc_thrs)
 
 ```
 
-Tree based on peaks overlap
+Peaks based tree
 
 ```{r}
 # data
@@ -6031,40 +6059,32 @@ require(ape)
 tmatrix <- t(table_fp)
 
 # bootstrap tree
-bptree <- boot.tree(tmatrix, B = 1000, tree = "nj")
-
-# concensus tree
-con_tree <- consensus(bptree, p = 0.5) 
+bptree <- boot.tree(tmatrix, B = 100, tree = "nj") # func = jacc_ovl, thrs = fc_thrs
 
 # save tree
-tree_nm <- sprintf("NJ_peaks_ovl_adult_gastrula_tree_%s_consensus", thrs)
+tree_nm <- sprintf("NJ_peaks_ovl_adult_gastrula_tree_%s_bootstrap", thrs)
 tree_fn <- paste0(tree_nm, ".txt")
-ape::write.tree(con_tree, file.path(tree_dir, tree_fn))
+ape::write.tree(bptree, file.path(tree_dir, tree_fn))
 
 # plot tree
 require(ggtree)
-tips <- con_tree$tip.label
-con_tree <- groupOTU(
-    con_tree,
-    sapply(
-        cell_types,
-        function(ct) grep(ct, tips),
-        USE.NAMES = TRUE,
-        simplify = FALSE
-    )
-)
-gt <- ggtree(con_tree, ladderize = FALSE) +
-  scale_color_manual(values = ct_cols) +
+gt <- ggtree(bptree, ladderize = FALSE, branch.length = "none") +
   theme_tree2() +
-  geom_tiplab(aes(color = group), offset = 0.5) +
-  geom_text2(aes(label = node), hjust = -0.2, size = 3) +
-  scale_x_continuous(expand = expansion(mult = c(0, 0.5))) +
-  theme(legend.position = "none") +
+  geom_tiplab(aes(color = label)) +
+  geom_nodelab(aes(label = label), hjust = -0.2, size = 3) +
+  scale_color_manual(values = ct_cols) +
+  scale_x_continuous(expand = expansion(mult = c(0, 2))) +
+  theme(
+    legend.position = "none",
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
+  ) +
   labs(caption = sprintf("%s peaks", length(feats_select)))
 ggsave(file.path(
     fig_dir,
     paste0("fig4_", tree_nm, ".pdf")
-), gt, height = 6, width = 7)
+), gt, height = 6, width = 4)
 
 ```
 
@@ -6088,40 +6108,32 @@ for (stage in c("adult", "gastrula")) {
   tmatrix <- t(table_fp_stage)
 
   # bootstrap tree
-  bptree <- boot.tree(tmatrix, B = 1000, tree = "nj")
-
-  # concensus tree
-  con_tree <- consensus(bptree, p = 0.5) 
+  bptree <- boot.tree(tmatrix, B = 100, tree = "nj")
 
   # save tree
-  tree_nm <- sprintf("NJ_peaks_ovl_%s_tree_FC%s_consensus", stage, fc_stage_thrs)
+  tree_nm <- sprintf("NJ_peaks_ovl_%s_tree_FC%s_bootstrap", stage, fc_stage_thrs)
   tree_fn <- paste0(tree_nm, ".txt")
-  ape::write.tree(con_tree, file.path(tree_dir, tree_fn))
+  ape::write.tree(bptree, file.path(tree_dir, tree_fn))
 
   # plot tree
   require(ggtree)
-  tips <- con_tree$tip.label
-  con_tree <- groupOTU(
-      con_tree,
-      sapply(
-          cell_types,
-          function(ct) grep(ct, tips),
-          USE.NAMES = TRUE,
-          simplify = FALSE
-      )
-  )
-  gt <- ggtree(con_tree, ladderize = FALSE) +
-    scale_color_manual(values = ct_cols) +
+  gt <- ggtree(bptree, ladderize = FALSE, branch.length = "none") +
     theme_tree2() +
-    geom_tiplab(aes(color = group), offset = 0.5) +
-    geom_text2(aes(label = node), hjust = -0.2, size = 3) +
-    scale_x_continuous(expand = expansion(mult = c(0, 0.5))) +
-    theme(legend.position = "none") +
+    geom_tiplab(aes(color = label)) +
+    geom_nodelab(aes(label = label), hjust = -0.2, size = 3) +
+    scale_color_manual(values = ct_cols) +
+    scale_x_continuous(expand = expansion(mult = c(0, 2))) +
+    theme(
+      legend.position = "none",
+      axis.line.x = element_blank(),
+      axis.text.x = element_blank(),
+      axis.ticks.x = element_blank()
+    ) +
     labs(caption = sprintf("%s peaks", length(feats_select)))
   ggsave(file.path(
       fig_dir,
       paste0("fig4_", tree_nm, ".pdf")
-  ), gt, height = 6, width = 7)
+  ), gt, height = 6, width = 4)
 
 }
 ```
@@ -6717,7 +6729,7 @@ for (thr_q_exp in c(1.4)) {
           paste0(tree_nm, ".pdf")
       ), gt, height = 6, width = 7)
   
-      # rows and columns per dtage
+      # rows and columns per stage
       gastr_ids_row <- grep("gastrula", rownames(jac_mt))
       gastr_ids_col <- grep("gastrula", colnames(jac_mt))
       adult_ids_row <- grep("adult", rownames(jac_mt))
@@ -6780,154 +6792,162 @@ Separate trees for adult and gastrula
 Load data
 
 ```{r}
-itr <- "03"
-gkmsvm_dir <- file.path(
-  adult_dir, "gkmSVM", "PeakDifferential_cell_type", itr
-)
-roc_dt <- fread(file.path(gkmsvm_dir, "models.roc.tsv.gz"))
+gkmsvm_dir <- file.path(res_dir, "gkmSVM")
+test_dt <- fread(file.path(gkmsvm_dir, "models.test.scores.tsv.gz"))
 ```
 
-AUC
+Bootstrap trees
 
 ```{r}
-auc_dt <- unique(roc_dt[, .(model, testset, auc)])
-auc_dt[, model := str_replace_all(model, cell_type_rename)]
-auc_dt[, testset := str_replace_all(testset, cell_type_rename)]
-auc_dt[, model_cell_type := str_remove(model, "(adult|gastrula)_")]
-auc_dt[, test_cell_type := str_remove(testset, "(adult|gastrula)_")]
-auc_dt[, model_stage := str_extract(model, "(adult|gastrula)")]
-auc_dt[, test_stage := str_extract(testset, "(adult|gastrula)")]
-auc_dt[, model_stage := factor(model_stage, levels = c("adult", "gastrula"))]
-auc_dt[, test_stage := factor(test_stage, levels = c("adult", "gastrula"))]
-auc_dt[, model_cell_type := factor(model_cell_type, levels = unique(names(c(ct_cols, bct_cols))))]
-auc_dt[, test_cell_type := factor(test_cell_type, levels = unique(names(c(ct_cols, bct_cols))))]
-setorder(auc_dt, model_cell_type, model_stage, test_cell_type, test_stage)
-auc_dt[, model := factor(model, levels = unique(auc_dt$model))]
-auc_dt[, testset := factor(testset, levels = unique(auc_dt$testset))]
-```
-
-Matrix
-
-```{r}
-auc_dc <- dcast.data.table(auc_dt, model ~ testset, value.var = "auc")
-auc_mt <- as.matrix(auc_dc[, -1])
-rownames(auc_mt) <- auc_dc[[1]]
-auc_mt <- auc_mt[rownames(auc_mt), rownames(auc_mt)]
-all.equal(rownames(auc_mt), colnames(auc_mt))
-auc_mt[is.na(auc_mt)] <- 1
-
-# save matrix
-saveRDS(
-  auc_mt,
-  file.path(tree_dir, "data", sprintf("gksvm_%s.rds", itr))
-)
-```
-
-Clustering
-
-```{r}
-# NJ clustering
+require(pROC)
 require(ape)
-tree <- nj(dist(auc_mt))
-tree_nm <- sprintf("NJ-LS-GKM-auc-adult-gastrula-tree-%s", itr)
-tree_fn <- file.path(fig_dir, paste0(tree_nm, ".txt"))
-ape::write.tree(tree, tree_fn)
-```
 
-Plot heatmap
+# Function to compute AUC matrix
+compute_auc_matrix <- function(test_dt, mds, tst) {
+    auc_mat <- matrix(NA, nrow = length(mds), ncol = length(tst), 
+                      dimnames = list(mds, tst))
+    for (i in mds) {
+        for (j in tst) {
 
-```{r fig.height=10, fig.width=11}
-# load order from the tree
-tree_nm <- sprintf("NJ-LS-GKM-auc-adult-gastrula-tree-%s", itr)
-tree_fn <- file.path(fig_dir, paste0(tree_nm, ".txt"))
-tree <- ape::read.tree(tree_fn)
+            cvp <- test_dt[model == i]
+            cfg <- cvp[testset == j]
+            cbg <- cvp[!peak %in% cfg$peak]
+            
+            # Skip if empty
+            if (nrow(cfg) == 0 || nrow(cbg) == 0) next
+            
+            vpo <- cfg$score
+            vne <- cbg$score
+            
+            roc <- tryCatch(
+                pROC::roc(controls = vpo, cases = vne, direction = ">", ci = TRUE),
+                error = function(e) return(NULL)
+            )
+            
+            if (!is.null(roc)) {
+                auc_mat[i, j] <- roc$auc
+            }
+        }
+    }
+    
+    return(auc_mat)
+}
 
-auc_dt[, model := factor(model, levels = tree$tip.label)]
-auc_dt[, testset := factor(testset, levels = tree$tip.label)]
+# bootstrap parameters
+n_bootstrap <- 100
+testsets <- unique(test_dt$testset)
+models <- unique(test_dt$model)
 
-ggplot(auc_dt, aes(testset, model, fill = auc^2)) + 
-  geom_tile() +
-  scale_fill_viridis(option = 'F') +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
-<!-- ``` -->
+# store bootstrap trees
+bootstrap_trees <- vector("list", n_bootstrap)
 
-Tree
+set.seed(123)
 
-```{r}
-# tree visuals
-tree <- ape::read.tree(tree_fn)
-tips <- tree$tip.label
-tree <- groupOTU(
-    tree,
-    sapply(
-        cell_types,
-        function(ct) grep(ct, tips),
-        USE.NAMES = TRUE,
-        simplify = FALSE
-    )
-)
-gt <- ggtree(tree, aes(color = group), ladderize = FALSE) +
-  scale_color_manual(values = ct_cols) +
-  theme_tree2() +
-  geom_tiplab() +
-  scale_x_continuous(limits = c(NA, 0.8)) +
-  theme(legend.position = "none")
-ggsave(file.path(
+for (b in seq_len(n_bootstrap)) {
+
+    print(sprintf("Bootstrap %i/%i", b, n_bootstrap))
+
+    # sample peaks with replacement within each testset
+    boot_dt <- test_dt[, .SD[sample(.N, .N, replace = TRUE)], by = .(model, testset)]
+    
+    # compute AUC matrix
+    auc_mat <- compute_auc_matrix(boot_dt, models, testsets)
+    stopifnot(all.equal(sort(rownames(auc_mat)),sort(colnames(auc_mat))))
+
+    # construct NJ tree
+    tree <- nj(dist(auc_mat))
+    bootstrap_trees[[b]] <- tree
+}
+
+# remove null trees
+bootstrap_trees <- bootstrap_trees[!sapply(bootstrap_trees, is.null)]
+
+# plot bootstrap trees
+require(ggtree)
+pdf(file.path(
     fig_dir,
-    paste0(tree_nm, ".pdf")
-), gt, height = 6, width = 7)
-```
+    paste0("fig4_NJ_gkmSVM_auc_adult_gastrula_trees_bootstrap.pdf")
+), height = 6, width = 4)
+for (bptree in bootstrap_trees) {
 
-Separate trees for adult and gastrula
-
-```{r}
-# rows and columns per dtage
-adult_ids_row <- grep("adult", rownames(auc_mt))
-adult_ids_col <- grep("adult", colnames(auc_mt))
-gastr_ids_row <- grep("gastrula", rownames(auc_mt))
-gastr_ids_col <- grep("gastrula", colnames(auc_mt))
-
-for (stage in c("adult", "gastrula")) {
-  
-  # get ids
-  ids <- switch(
-    stage,
-    "adult" = list(adult_ids_row, adult_ids_col),
-    "gastrula" = list(gastr_ids_row, gastr_ids_col)
+  clade_freqs <- prop.clades(
+    phy = bptree, 
+    part = prop.part(bootstrap_trees)
   )
+  bptree$node.label <- clade_freqs
 
-  # NJ clustering
-  require(ape)
-  tree <- nj(dist(auc_mt[ids[[1]], ids[[2]]]))
-  tree_nm <- sprintf("NJ-LS-GKM-auc-%s-tree-%s", stage, itr)
-  tree_fn <- file.path(fig_dir, paste0(tree_nm, ".txt"))
-  ape::write.tree(tree, tree_fn)
+  # turn nodes with low support into ploitomies
+  # bptree <- di2multi(bptree, tol = 0.01)
 
-  # tree visuals
-  tree <- ape::read.tree(tree_fn)
-  tips <- tree$tip.label
-  tree <- groupOTU(
-      tree,
-      sapply(
-          cell_types,
-          function(ct) grep(ct, tips),
-          USE.NAMES = TRUE,
-          simplify = FALSE
-      )
-  )
-  gt <- ggtree(tree, aes(color = group), ladderize = FALSE) +
-    scale_color_manual(values = ct_cols) +
+  # plot tree
+  require(ggtree)
+  gt <- ggtree(bptree, ladderize = FALSE) +
     theme_tree2() +
-    geom_tiplab() +
-    scale_x_continuous(limits = c(NA, 0.8)) +
-    theme(legend.position = "none")
-  ggsave(file.path(
-      fig_dir,
-      paste0(tree_nm, ".pdf")
-  ), gt, height = 6, width = 7)
-
+    geom_tiplab(aes(color = label)) +
+    geom_nodelab(aes(label = label), hjust = -0.2, size = 3) +
+    scale_color_manual(values = ct_cols) +
+    scale_x_continuous(expand = expansion(mult = c(0, 2))) +
+    theme(
+      legend.position = "none",
+      axis.line.x = element_blank(),
+      axis.text.x = element_blank(),
+      axis.ticks.x = element_blank()
+    )
+  print(gt)
 
 }
+dev.off()
+
+# save trees
+tree_nm <- "NJ_gkmSVM_auc_adult_gastrula_tree_bootstrap"
+saveRDS(
+  bootstrap_trees, file.path(tree_dir, paste0(tree_nm, "s.rds"))
+)
+```
+
+Build consensus from bootstrap trees
+
+```{r}
+# load bootstrap trees
+tree_nm <- "NJ_gkmSVM_auc_adult_gastrula_tree_bootstrap"
+bootstrap_trees <- readRDS(file.path(tree_dir, paste0(tree_nm, "s.rds")))
+
+# plot one tree
+bptree <- bootstrap_trees[[5]]
+clade_freqs <- prop.clades(
+  phy = bptree, 
+  part = prop.part(bootstrap_trees)
+)
+bptree$node.label <- clade_freqs
+
+# turn nodes with low support into ploitomies
+# bptree <- di2multi(bptree, tol = 0.01)
+
+# save tree
+tree_fn <- paste0(tree_nm, ".txt")
+ape::write.tree(bptree, file.path(tree_dir, tree_fn))
+
+# plot tree
+require(ggtree)
+gt <- ggtree(bptree, ladderize = FALSE, branch.length = "none") +
+  theme_tree2() +
+  geom_tiplab(aes(color = label)) +
+  geom_nodelab(aes(label = label), hjust = -0.2, size = 3) +
+  scale_color_manual(values = ct_cols) +
+  scale_x_continuous(expand = expansion(mult = c(0, 2))) +
+  theme(
+    legend.position = "none",
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
+  )
+ggsave(file.path(
+    fig_dir,
+    paste0("fig4_", tree_nm, ".pdf")
+), gt, height = 6, width = 4)
+
+
+
 ```
 
 ## Examples

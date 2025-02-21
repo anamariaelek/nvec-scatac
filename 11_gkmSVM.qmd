@@ -1,0 +1,1932 @@
+---
+title: "gkmSVM cell type classifiers"
+execute:
+  eval: false
+  message: false
+  warning: false
+output: html_notebook
+---
+
+# Setup
+
+```{r}
+#| label: setup
+#| warning: FALSE
+#| message: FALSE
+
+# load in-house functions
+source("metacell_downstream_functions/Downstream_functions.R")
+source("metacell_downstream_functions/utils.R")
+source("motif-analysis/mta_downstream_functions.R")
+source("motif-analysis/mta_gkmsvm_functions.R")
+source("scripts/scatac_helper_functions.R")
+
+# global settings
+options(stringsAsFactors = FALSE)
+
+# load packages
+library(data.table)
+library(stringr)
+library(ggplot2)
+library(patchwork)
+library(BSgenome.jaNemVect1.1.DToL.Assembly)
+library(GenomicRanges)
+library(ArchR)
+library(metacell)
+library(gkmSVM)
+
+# set ggplot2 theme
+theme_py <- theme_light() + theme(
+  panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank(),
+  panel.border = element_rect(colour = "black", fill = NA),
+  text = element_text(size = 20),
+  strip.placement = "outside",
+  strip.text = element_text(size = 20, color = "black"),
+  strip.background = element_rect(fill = "white")
+)
+theme_set(theme_py)
+blank_theme <- theme_minimal() + theme(
+  axis.title.x = element_blank(),
+  axis.title.y = element_blank(),
+  panel.border = element_blank(),
+  panel.grid = element_blank(),
+  axis.ticks = element_blank(),
+  text = element_text(size = 20)
+)
+
+```
+
+Data
+
+```{r}
+#| label: dirs
+gastr_dir <- "ArchRProj_Nvec_gastrula"
+proj_gastr <- loadArchRProject(gastr_dir)
+adult_dir <- "ArchRProj_Nvec_TSS4_frag200"
+proj_adult <- loadArchRProject(adult_dir)
+pks_dir <- "results/Peaks"
+res_dir <- "results/gkmSVM"
+dir.create(res_dir, showWarnings = FALSE)
+fig_dir <- "plots/gkmSVM"
+dir.create(fig_dir, showWarnings = FALSE)
+ann_dir <- "annotation"
+```
+
+Load gene annotations.
+
+```{r}
+# gene annotation
+gnan <- fread(file.path(
+  ann_dir, "Nematostella_DToL_FINAL.tsv"
+))
+
+# TF annotation
+tfan <- fread(file.path(
+  ann_dir, "Nematostella_DToL_TFs_FINAL.tsv"
+))
+
+# golden markers
+gold <- fread(file.path(
+  ann_dir, "golden-marks-231124.tsv"
+), header = FALSE)
+setnames(gold, c("name", "gene", "cells"))
+marker_genes <- structure(
+  gold$gene,
+  names = gold$name
+)
+```
+
+Load genome data.
+
+```{r}
+# sequence
+dna_fn <- file.path("genome", "Nvec_vc1.1_gDNA.fasta")
+dna <- Biostrings::readDNAStringSet(dna_fn)
+```
+
+Project-specific variables:
+
+```{r}
+ct_cols <- c(
+  "cnidocyte"                  = "#ff42ff",
+  "cnidocyte_gastrula"         = "#f7abf7",
+  "ecto_pharynx"               = "#5bc0e8",
+  "ectoderm"                   = "#51a0be",
+  "ecto_aboral"                = "#045170",
+  "EMS"                        = "#bdf5bd",
+  "EMS_ecto_boundary"          = "#93dbce",
+  "gastro_circular_muscle_1"   = "#85c90e",
+  "gastro_circular_muscle_2"   = "#73b009",
+  "gastro_parietal_muscle"     = "#8ceb10",
+  "gastro_IRF1_2"              = "#c1eb05",
+  "gastro_somatic_gonad"       = "#bde314",
+  "muscle_tentacle_retractor"  = "#ffd700",
+  "muscle_mesentery_retractor" = "#f0e229",
+  "digestive_filaments_1"      = "#e33d3d",
+  "digestive_filaments_2"      = "#d10606",
+  "digestive_filaments_3"      = "#ad0303",
+  "epidermis_1"                = "#04ccd4",
+  "epidermis_2"                = "#16bacc",
+  "precursors_PGC"             = "#bebebe",
+  "precursors_endoNPC"         = "#8a8686",
+  "precursors_NPC"             = "#636363",
+  "NPC_1"                      = "#808d91",
+  "NPC_2"                      = "#758d92",
+  "neuron_GATA_Islet_1"        = "#0c82f7",
+  "neuron_GATA_Islet_2"        = "#1175f0",
+  "neuron_Pou4_FoxL2_1"        = "#101cde",
+  "neuron_Pou4_FoxL2_2"        = "#0b16bf",
+  "neuron_Pou4_FoxL2_3"        = "#2e39dd",
+  "neuronal"                   = "#063cb9",
+  "gland"                      = "#ff6f08",
+  "gland_mucin"                = "#ff8f12"
+)
+cell_types <- names(ct_cols)
+adult_cell_types <- c(
+  "cnidocyte",
+  "gastro_circular_muscle_1", 
+  "gastro_circular_muscle_2",
+  "gastro_parietal_muscle",
+  "gastro_IRF1_2",
+  "gastro_somatic_gonad",
+  "muscle_mesentery_retractor",
+  "muscle_tentacle_retractor",
+  "digestive_filaments_1",
+  "digestive_filaments_2",
+  "digestive_filaments_3",
+  "epidermis_1",
+  "epidermis_2",
+  "precursors_PGC",
+  "precursors_endoNPC",
+  "precursors_NPC",
+  "neuron_GATA_Islet_1",
+  "neuron_GATA_Islet_2",
+  "neuron_Pou4_FoxL2_1",
+  "neuron_Pou4_FoxL2_2",
+  "neuron_Pou4_FoxL2_3",
+  "gland"
+)
+gastr_cell_types <- c(setdiff(cell_types, adult_cell_types))
+bct_cols <- toupper(c(
+  "cnidocyte"                 = "#FF42FF",
+  "ecto"                      = "#51a0be",
+  "EMS"                       = "#bdf5bd",
+  "gastro_circular_muscle"    = "#73b009",
+  "gastro_parietal_muscle"    = "#8ceb10",
+  "gastro"                    = "#85c90e",  
+  "muscle"                    = "#FFD700",
+  "digestive_filaments"       = "#e33d3d",
+  "precursors"                = "#BEBEBE",
+  "NPC"                       = "#808d91",
+  "epidermis"                 = "#04ccd4",
+  "neuron_GATA_Islet"         = "#1175f0",
+  "neuron_Pou4_FoxL2"         = "#101cde",
+  "neuronal"                  = "#063cb9",
+  "gland"                     = "#ff6f08"
+))
+bct_maps <- setDT(cbind.data.frame(
+  cell_type = cell_types,
+  broad_cell_type = str_extract(cell_types, paste(names(bct_cols), collapse = "|"))
+))
+```
+
+# gkmSVM
+
+## Prepare data
+
+Upon inspection of different filtering thresholds, we settled for itr `03`, i.e. relaxed filtering of peaks with Log2FC > 1 and Pval = 0.1 - this is because we want to train classifer on all accessible peaks in cell type (and not just specifically, differentially accessible peaks).
+
+```{r}
+thrs <- c(Log2FC = 1, Pval = 0.1, FDR = Inf)
+lvl <- "cell_type"
+
+for (stage_dir in c(adult_dir, gastr_dir)) {
+
+    # all peaks
+    pks_dir <- file.path(
+        stage_dir, "ArchRProj", "Peaks", sprintf("%s_filtered", lvl)
+    )
+    pk_fn <- list.files(pks_dir, full.names = TRUE)
+    pk_nm <- basename(pk_fn)
+    pk_nm <- str_remove(pk_nm, "Peaks-")
+    pk_nm <- str_remove(pk_nm, ".bed")
+    names(pk_fn) <- pk_nm
+
+    # diff peaks 
+    pkd_dir <- file.path(
+        stage_dir, "ArchRProj", "PeakDifferential", sprintf("%s_filtered", lvl)
+    )
+    pkd_fn <- list.files(pkd_dir, full.names = TRUE, pattern = ".tsv$")
+    pk_nm <- basename(pkd_fn)
+    pk_nm <- str_remove(pk_nm, "Peaks-")
+    pk_nm <- str_remove(pk_nm, "-vs-others.tsv")
+    names(pkd_fn) <- pk_nm
+
+    # filter diff peaks 
+    filt_dir <- file.path(stage_dir, "ArchRProj", "PeakDifferential", sprintf("%s_filtered_gkmSVM", lvl))
+    dir.create(filt_dir, showWarnings = FALSE)
+    for (nm in pk_nm) {
+
+        bed_inp <- fread(pkd_fn[nm])
+        bed_flt <- bed_inp[Log2FC > thrs["Log2FC"] & FDR < thrs["FDR"] & Pval < thrs["Pval"]]
+        if (nrow(bed_flt) < 1e3) {
+            bed_flt <- bed_inp[Log2FC > 1][order(Pval)][1:1e3, ]
+            if (nrow(bed_flt) < 1e3) {
+                bed_flt <- bed_inp[Log2FC > 0][order(Pval)][1:1e3, ]
+                if (nrow(bed_flt) < 1e3) {
+                    bed_flt <- bed_inp[order(Log2FC)][1:1e3, ]
+                }
+            }
+        }
+        bed_flt <- bed_flt[!is.na(start), 1:6]
+
+        message(nm, ": ", length(unique(bed_flt$peak)), " peaks")
+
+        out_fn <- basename(pkd_fn[nm])
+        fwrite(bed_flt, file.path(filt_dir, out_fn), sep = "\t", col.names = FALSE)
+
+    }
+}
+```
+
+Load both all peaks (to select background) and filtered peaks (for model training).
+
+```{r}
+# all peaks
+peaks_all <- rbindlist(list(
+    adult = fread(file.path(
+        adult_dir, "ArchRProj", "Promoters",
+        "scATAC_reduced_peaks_cell_type_assignment_filtered.tsv.gz"
+    )),
+    gastrula = fread(file.path(
+        gastr_dir, "ArchRProj", "Peaks",
+        "scATAC_reduced_peaks_cell_type_assignment.tsv.gz"
+    ))
+), idcol = "stage", use.names=TRUE, fill = TRUE)
+stopifnot(all(peaks_all$cell_type %in% cell_types))
+peaks_all[, peak := paste(stage, peak, sep = "_")]
+peaks_all[, seqlength := seqlengths(dna)[seqnames]]
+bed_cols <- c("seqnames", "start", "end", "peak", "score", "strand")
+peaks_all <- peaks_all[, ..bed_cols]
+fwrite(peaks_all, file.path(res_dir, "all_peaks.tsv"), sep = "\t", col.names = TRUE, compress = "gzip")
+
+# cell type peaks
+pks_dir <- sapply(c(adult_dir, gastr_dir), function(stage_dir)
+    file.path(stage_dir, "ArchRProj", "PeakDifferential", "cell_type_filtered_gkmSVM")
+)
+names(pks_dir) <- c("adult", "gastrula")
+pk_fn <- unlist(lapply(names(pks_dir), function(x) {
+    pk_fn <- list.files(pks_dir[x], full.names = TRUE)
+    pk_nm <- basename(pk_fn)
+    pk_nm <- str_remove(pk_nm, "Peaks-")
+    pk_nm <- str_remove(pk_nm, "-vs-others.tsv")
+    # pk_nm <- paste(x, pk_nm, sep = "_")
+    names(pk_fn) <- pk_nm
+    pk_fn
+}))
+pk_nm <- names(pk_fn)
+stopifnot(all(pk_nm %in% cell_types))
+```
+
+Save input peaks bed files for training (70%) and testing (30%).
+
+```{r}
+# where to save inputs
+dir.create(file.path(res_dir, "input"), showWarnings = FALSE)
+
+# loop over cell types
+setseed(123)
+for (nm in pk_nm) {
+
+    message(nm)
+    stage <- ifelse(nm %in% adult_cell_types, "adult", "gastrula")
+    bed <- fread(pk_fn[nm], select = 1:6)
+    if (nrow(bed) > 0) {
+        setnames(bed, c("seqnames", "start", "end", "peak", "score", "strand"))
+        bed[, peak := paste(stage, peak, sep = "_")]
+
+        # Save test peaks (~30%)
+        #test_chr <- c("NC_064041.1", "NC_064042.1", "NC_064043.1")
+        #test_bed <- bed[seqnames %in% test_chr]
+        test_peaks <- bed[sample(seq_len(nrow(bed)), 0.3 * nrow(bed))]$peak
+        test_bed <- bed[peak %in% test_peaks]
+        fwrite(
+            test_bed,
+            file.path(res_dir, "input", sprintf("%s.test.bed", nm)),
+            sep = "\t",
+            col.names = FALSE
+        )
+
+        # Save train peaks (~70%)
+        # train_bed <- bed[!seqnames %in% test_chr]
+        train_bed <- bed[!peak %in% test_peaks]
+        fwrite(
+            train_bed,
+            file.path(res_dir, "input", sprintf("%s.fg.bed", nm)),
+            sep = "\t",
+            col.names = FALSE
+        )
+
+        # Generate GC, length, and repeat matched negative set
+        # and extract fasta sequence files
+        gkm_mod_genNullSeqs(
+            inputBedFN = file.path(res_dir, "input", sprintf("%s.fg.bed", nm)),
+            genome = dna_fn,
+            #select_background_from_inputBedFN = file.path(
+            #    res_dir, sprintf("%s.unmatched.bg.bed", nm)
+            #),
+            outputBedFN = file.path(res_dir, "input", sprintf("%s.bg.bed", nm)),
+            outputPosFastaFN = file.path(res_dir, "input", sprintf("%s.fg.fasta", nm)),
+            outputNegFastaFN = file.path(res_dir, "input", sprintf("%s.bg.fasta", nm)),
+            xfold = 1, GC_match_tol = 0.02,
+            length_match_tol = 0.02, batchsize = 5000, nMaxTrials = 20
+        )
+
+        # Extract fasta sequence files for test set
+        test_bed <- fread(file.path(res_dir, sprintf("%s.test.bed", nm)))
+        setnames(
+            test_bed,
+            c("seqnames", "start", "end", "peak", "score", "strand")
+        )
+        ts_gr <- makeGRangesFromDataFrame(test_bed, keep.extra.columns = TRUE)
+        ts_fa <- Biostrings::getSeq(dna, unique(ts_gr))
+        names(ts_fa) <- unique(ts_gr)$peak
+        ts_fn <- file.path(res_dir, "input", sprintf("%s.test.fasta", nm))
+        Biostrings::writeXStringSet(ts_fa, ts_fn)
+
+    }
+}
+```
+
+## Train models
+
+Train gkm-SVM using libSVM (https://github.com/kundajelab/lsgkm). Fast but cannot be used to score all possible kmers to find enriched motifs.
+
+```{bash}
+cd Scripts
+
+mkdir -p logs_gkmsvm/train
+
+gmkdir=results/gkmSVM/output
+
+for ct in cnidocyte_gastrula cnidocyte digestive_filaments_1 digestive_filaments_2 digestive_filaments_3 ecto_aboral ecto_pharynx ectoderm EMS_ecto_boundary EMS epidermis_1 epidermis_2 gastro_circular_muscle_1 gastro_circular_muscle_2 gastro_IRF1_2 gastro_parietal_muscle gastro_somatic_gonad gland_mucin gland muscle_mesentery_retractor muscle_tentacle_retractor neuron_GATA_Islet_1 neuron_GATA_Islet_2 neuron_Pou4_FoxL2_1 neuron_Pou4_FoxL2_2 neuron_Pou4_FoxL2_3 neuronal NPC_1 NPC_2 precursors_endoNPC precursors_NPC precursors_PGC
+do
+    nohup bash gkmSVM_train.sh ${ct} ${gmkdir} > logs_gkmsvm/train_/gkmSVM_train_${ct}.out 2>&1 &
+done
+
+```
+
+Alternatively, build models with kmers and PWMs. This approach is slower but it can be used to score kmers later.
+
+```{bash}
+cd Scripts
+
+mkdir logs_gkmsvm/train_kmers
+
+for ct in cnidocyte_gastrula cnidocyte digestive_filaments_1 digestive_filaments_2 digestive_filaments_3 ecto_aboral ecto_pharynx ectoderm EMS_ecto_boundary EMS epidermis_1 epidermis_2 gastro_circular_muscle_1 gastro_circular_muscle_2 gastro_IRF1_2 gastro_parietal_muscle gastro_somatic_gonad gland_mucin gland muscle_mesentery_retractor muscle_tentacle_retractor neuron_GATA_Islet_1 neuron_GATA_Islet_2 neuron_Pou4_FoxL2_1 neuron_Pou4_FoxL2_2 neuron_Pou4_FoxL2_3 neuronal NPC_1 NPC_2 precursors_endoNPC precursors_NPC precursors_PGC
+do
+    nohup bash gkmSVM_train_kmers.sh ${ct} > logs_gkmsvm/train_kmers/gkmSVM_train_kmers_${ct}.out 2>&1 &
+done
+```
+
+## Inspect models
+
+CV scores distribution
+
+```{r}
+out_id <- "PeakDifferential_cell_type"
+itr <- "03"
+res_dir <- file.path(res_dir, out_id, itr)
+fig_dir <- file.path(fig_dir, out_id, itr)
+
+nm <- "neuronal"
+cvp_fn <- file.path(res_dir, sprintf("%s.cvpred.txt", nm))
+cvp <- fread(cvp_fn)
+setnames(cvp, c("region", "score", "label", "cvfold"))
+
+gp_all <- ggplot(cvp, aes(score)) +
+    geom_density() +
+    coord_flip() +
+    labs(title = "all")
+
+gp_cvs <- ggplot(cvp, aes(score, group = cvfold)) +
+    geom_density() +
+    coord_flip() +
+    labs(title = "CV")
+
+ggsave(
+    file.path(fig_dir, sprintf("LS-GKM-cv-scores-%s.pdf", out_id)),
+    gp_all + gp_cvs,
+    height = 5, width = 4
+)
+```
+
+ROC for models CV
+
+```{r}
+out_id <- "PeakDifferential_cell_type"
+itr <- "03"
+res_dir <- file.path(res_dir, out_id, itr)
+fig_dir <- file.path(fig_dir, out_id, itr)
+
+# for LS-GKM models (CL)
+pdf(
+    file.path(fig_dir, sprintf("LS-GKM-cv-roc-%s.pdf", out_id)),
+    height = 6, width = 5
+)
+roc_dt_all <- data.table()
+pk_nm <- str_remove(
+    list.files(res_dir, pattern = ".cvpred.txt$"),
+    ".cvpred.txt"
+)
+for (nm in pk_nm) {
+    cvp_fn <- file.path(res_dir, sprintf("%s.cvpred.txt", nm))
+    tryCatch({
+        cvp <- fread(cvp_fn)
+        setnames(cvp, c("region", "score", "label", "cvfold"))
+        message(nm)
+
+        # number of regions used in training
+        nr <- nrow(fread(file.path(
+            res_dir, sprintf("%s.fg.bed", nm)
+        )))
+
+        # cross validation iterations
+        cvs <- sort(unique(cvp$cvfold))
+
+        # ROC per cross vlaidation iterations
+        roc_dt <- rbindlist(sapply(cvs, function(x) {
+            vpo <- cvp[cvfold == x & label == +1, score]
+            vne <- cvp[cvfold == x & label == -1, score]
+            roc <- pROC::roc(
+                controls = vpo,
+                cases = vne,
+                direction = ">",
+                ci = TRUE
+            )
+            data.table(
+                specificities = roc$specificities,
+                sensitivities = roc$sensitivities
+            )[, auc := roc$auc][, training_peaks := nr]
+        }, simplify = FALSE, USE.NAMES = TRUE), idcol = "cvfold")
+
+        # overall ROC
+        roc <- pROC::roc(
+            controls = cvp[label == +1, score],
+            cases = cvp[label == -1, score],
+            direction = ">",
+            ci = TRUE
+        )
+
+        # plot
+        gp_roc <- ggplot(
+                roc_dt, aes(
+                    x = specificities, y = sensitivities, 
+                    group = cvfold, color = str_remove(nm, "(adult|gastrula)_")
+                )
+            ) +
+            geom_line(size = 0.5, alpha = 0.5) +
+            scale_x_continuous(expand = c(0, 0)) +
+            scale_y_continuous(expand = c(0, 0)) +
+            scale_color_manual(values = c(ct_cols, bct_cols)) +
+            coord_fixed() +
+            geom_abline(slope = -1, intercept = 1, linetype = 2) +
+            labs(
+                x = "TNR", y = "TPR",
+                title = sprintf("%s\ncross-validation", nm),
+                subtitle = sprintf(
+                    "AUC=%.3f [CI95=%.3f-%.3f]",
+                    roc$auc, roc$ci[1], roc$ci[3]
+                )
+            ) +
+            annotate(
+                "text", x = 0.1, y = 0.1,
+                label = sprintf(
+                    "n = %s", format(nr, nsmall = 1, big.mark = ",")
+                ),
+                size = 6, hjust = 0
+            ) +
+            theme(legend.position = "none")
+        print(gp_roc)
+
+        roc_dt_all <- rbindlist(list(roc_dt_all, roc_dt[, model := nm]))
+
+    }, error = function(e) NULL)
+}
+dev.off()
+
+# order
+roc_dt_all[, stage := str_extract(model, "(adult|gastrula)")]
+roc_dt_all[, stage := factor(stage, levels = c("adult", "gastrula"))]
+roc_dt_all[, cell_type := str_remove(model, "(adult|gastrula)_")]
+roc_dt_all[, cell_type := factor(cell_type, levels = unique(names(ct_cols), names(bct_cols)))]
+roc_dt_all[, model := factor(model, levels = unique(roc_dt_all[order(cell_type, stage)]$model))]
+setorder(roc_dt_all, model)
+
+# save
+fwrite(
+    roc_dt_all,
+    file.path(res_dir, sprintf("%s_cv_roc.tsv.gz", out_id)),
+    sep = "\t"
+)
+
+# AUC dist
+gp_auc <- ggplot(
+        unique(roc_dt_all[, .(model, auc, training_peaks)]),
+        aes(model, auc, fill = str_remove(model, "(adult|gastrula)_"))
+    ) +
+    #geom_boxplot() +
+    ggbeeswarm::geom_beeswarm(shape = 21) +
+    # geom_text(
+    #     data = unique(roc_dt_all[, .(model, training_peaks)]),
+    #     aes(
+    #         x = model, y = 0.95,
+    #         label = format(training_peaks, nsmall = 1, big.mark = ",")
+    #     ),
+    #     angle = 90, size = 4
+    # ) +
+    guides(x.sec = ggh4x::guide_axis_manual(
+        breaks = unique(roc_dt_all[, .(model, training_peaks)])$model,
+        labels = format(
+            unique(roc_dt_all[, .(model, training_peaks)])$training_peaks,
+            nsmall = 1, big.mark = ","
+        )
+    )) +
+    theme(
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+        panel.grid.major = element_line(linewidth = 0.2, color = "grey"),
+        legend.position = "none"
+    ) +
+    labs(y = "AUC") +
+    scale_y_continuous(limits = c(0.5, 1)) +
+    scale_fill_manual(values = c(ct_cols, bct_cols)) +
+    scale_color_manual(values = c(ct_cols, bct_cols))
+
+ggsave(
+    file.path(fig_dir, sprintf("LS-GKM-cv-auc-dist-%s.pdf", out_id)),
+    gp_auc, width = 6, height = 6
+)
+```
+
+## Predict
+
+Prepare test fastq file with test peakset from all cell type models.
+
+```{r}
+fasta_fns <- list.files(res_dir, pattern = "test.fasta", full.names = TRUE)
+fasta_seq <- Biostrings::readDNAStringSet(fasta_fns)
+names(fasta_seq) <- str_remove(names(fasta_seq), "_pos_\\d+")
+fasta_unx <- unique(fasta_seq)
+writeXStringSet(
+    fasta_unx,
+    file.path(res_dir, "all.fasta")
+)
+```
+
+We use `{cell_type}.model.txt` files to predict on all test sequences.
+
+```{bash}
+cd scripts
+
+mkdir logs_gkmsvm/test
+
+moddir="../results/gkmSVM/output"
+fastafile="all.fasta"
+outprefix=${fastafile%%.fasta}
+
+for modelprefix in cnidocyte_gastrula cnidocyte digestive_filaments_1 digestive_filaments_2 digestive_filaments_3 ecto_aboral ecto_pharynx ectoderm EMS_ecto_boundary EMS epidermis_1 epidermis_2 gastro_circular_muscle_1 gastro_circular_muscle_2 gastro_IRF1_2 gastro_parietal_muscle gastro_somatic_gonad gland_mucin gland muscle_mesentery_retractor muscle_tentacle_retractor neuron_GATA_Islet_1 neuron_GATA_Islet_2 neuron_Pou4_FoxL2_1 neuron_Pou4_FoxL2_2 neuron_Pou4_FoxL2_3 neuronal NPC_1 NPC_2 precursors_endoNPC precursors_NPC precursors_PGC
+do
+    nohup bash gkmSVM_predict.sh ${moddir} ${modelprefix} ${fastafile} > "logs_gkmsvm/test/gkmSVM_predict_${modelprefix}_${outprefix}.out" 2>&1 &
+done
+```
+
+## Inspect test results
+
+Get all model scores in test peaks from all cell types, while keeping the metadata for peaks 
+(i.e. in which cell types they were selected).
+
+```{r}
+# test peaks per cell type
+fasta_fns <- list.files(file.path(res_dir, "input"), pattern = "test.fasta", full.names = TRUE)
+names(fasta_fns) <- str_remove(basename(fasta_fns), "\\.test\\.fasta")
+peak_dt <- rbindlist(sapply(fasta_fns, function(fasta_fn) {
+    dna <- Biostrings::readDNAStringSet(fasta_fn)
+    data.table(peak = names(dna))
+}, USE.NAMES = TRUE, simplify = FALSE), idcol = "testset")
+stopifnot(all(peak_dt$testset %in% cell_types))
+
+# models
+pk_nm <- unique(str_remove(
+    list.files(file.path(res_dir, "output"), pattern = ".cvpred.txt$"),
+    ".cvpred.txt"
+))
+stopifnot(all(pk_nm %in% cell_types))
+
+# test scores on all peaks
+test_dt <- rbindlist(sapply(pk_nm, function(model_nm) {
+    tryCatch({
+        out_dt <- fread(file.path(
+            res_dir, "output", sprintf("%s.all.gkmpredict.txt", model_nm)
+        ))
+        message("\nModel: ", model_nm)
+        setnames(out_dt, c("peak", "score"))
+        out_dt[, peak := str_remove(peak, "_pos_\\d+")]
+    }, error = function(e) NULL)
+}, USE.NAMES = TRUE, simplify = FALSE), idcol = "model")
+test_dt <- test_dt[!is.na(peak)]
+
+# we will remove peaks that model saw in training
+train_dt <- rbindlist(sapply(pk_nm, function(model_nm) {
+    tryCatch({
+        message("\nModel: ", model_nm)
+        fread(file.path(
+            res_dir, "input", sprintf("%s.fg.bed", model_nm)
+        ))
+    }, error = function(e) NULL)
+}, USE.NAMES = TRUE, simplify = FALSE), idcol = "model")
+setnames(train_dt, c("model", "seqnames", "start", "end", "peak", "score", "strand"))
+
+mean(peak_dt$peak %in% test_dt$peak)
+mean(test_dt$peak %in% peak_dt$peak)
+mean(test_dt$peak %in% train_dt$peak)
+
+# merge models scores on all peaks with 
+# peaks test metadata (i.e. which cell type testset peaks are in)
+test_dt <- merge.data.table(
+    test_dt, peak_dt, by = "peak",
+    allow.cartesian = TRUE, sort = FALSE
+)
+# inverse merge scores in test peaks with training peaks
+# i.e. remove scores in peaks that model saw in training
+test_dt <- merge.data.table(
+    test_dt, train_dt[, .(trainset=model, peak)], by = "peak",
+    allow.cartesian = TRUE, all.x = TRUE, sort = FALSE
+)
+test_dt[model != trainset, trainset := NA]
+test_dt <- unique(test_dt[is.na(trainset)][, trainset := NULL])
+setcolorder(test_dt, c("model","peak","score","testset"))
+stopifnot(!any(test_dt[, .N,.(model,peak,testset)]$N>1))
+
+# order
+test_dt[, score := as.numeric(score)]
+stopifnot(all(test_dt$model %in% cell_types))
+test_dt[, model := factor(model, levels = cell_types)]
+stopifnot(all(test_dt$testset %in% cell_types))
+test_dt[, testset := factor(testset,levels = cell_types)]
+setorder(test_dt, model, testset, -score)
+
+# save
+fwrite(
+    test_dt,
+    file.path(res_dir, "models.test.scores.tsv.gz"),
+    sep = "\t", compress = "gzip"
+)
+
+```
+
+Plot ROC and AUC
+
+```{r}
+# test results
+test_dt <- fread(file.path(res_dir, "models.test.scores.tsv.gz"))
+
+# test cell types
+cts <- as.character(unique(test_dt$testset))
+
+# models
+mds <- as.character(unique(test_dt$model))
+
+# ROC per model and per cell type
+pdf(
+    file.path(fig_dir, sprintf("LS-GKM-test-roc.pdf")),
+    height = 6, width = 5
+)
+roc_dt <- rbindlist(sapply(mds, function(nm) {
+
+    message(nm)
+    cvp <- test_dt[model == nm]
+
+    # ROC
+    roc_dt <- rbindlist(sapply(cts, function(x) {
+        cfg <- cvp[testset == x]
+        cbg <- cvp[!peak %in% cfg$peak]
+        vpo <- cfg$score
+        vne <- cbg$score
+        pnr <- length(unique(cfg$peak))
+        nnr <- length(unique(cbg$peak))
+        roc <- pROC::roc(
+            controls = vpo,
+            cases = vne,
+            direction = ">",
+            ci = TRUE
+        )
+        data.table(
+            specificities = roc$specificities,
+            sensitivities = roc$sensitivities
+        )[, auc := roc$auc][, ":="(test_peaks_pos = pnr, test_peaks_neg = nnr)]
+    }, simplify = FALSE, USE.NAMES = TRUE), idcol = "testset", use.names = TRUE, fill = TRUE)
+
+    # plot
+    gp_roc <- ggplot(
+            roc_dt, aes(
+                x = specificities, y = sensitivities, 
+                group = testset,
+                color = str_remove(testset, "(adult|gastrula)_"),
+                label = sprintf("%s (AUC=%.2f)", testset, auc)
+            )
+        ) +
+        geom_line(size = 0.5, alpha = 0.5) +
+        scale_y_continuous(expand = c(0, 0)) +
+        scale_x_continuous(expand = expansion(mult = c(0, 0.45))) +
+        scale_color_manual(values = c(ct_cols, bct_cols)) +
+        geom_text_repel(
+            data = roc_dt[order(-auc, -specificities * sensitivities)][, .SD[1], testset][1:4],
+            nudge_x = 0.1, direction = "y", hjust = "left"
+        ) +
+        coord_fixed() +
+        geom_abline(slope = -1, intercept = 1, linetype = 2) +
+        labs(
+            x = "TNR", y = "TPR",
+            title = sprintf("%s\ntest ROC", nm)
+        ) +
+        theme(legend.position = "none")
+    print(gp_roc)
+    
+    roc_dt
+
+}, USE.NAMES = TRUE, simplify = FALSE), idcol = "model", use.names = TRUE, fill = TRUE)
+dev.off()
+
+roc_dt[, testset := factor(testset, levels = cell_types)]
+roc_dt[, model := factor(model, levels = cell_types)]
+setorder(roc_dt, model, testset)
+
+# save
+fwrite(
+    roc_dt,
+    file.path(res_dir, "models.roc.tsv.gz"),
+    sep = "\t", compress = "gzip"
+)
+
+# plor AUC for models
+gp_auc <- ggplot(
+        unique(roc_dt[, .(model, testset, auc)]),
+        aes(
+            model, auc, fill = testset, color = testset
+        )
+    ) +
+    ggbeeswarm::geom_beeswarm(shape = 21, size = 3) +
+    scale_y_continuous(limits = c(0.5, 1)) +
+    scale_fill_manual(values = c(ct_cols, bct_cols)) +
+    scale_color_manual(values = structure(
+      colorspace::darken(c(ct_cols, bct_cols), 0.5),
+        names = c(names(ct_cols), names(bct_cols))
+    )) +
+    theme(
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+        panel.grid.major = element_line(linewidth = 0.2, color = "grey")
+    ) +
+    guides(
+        shape = guide_legend(override.aes = list(size = 5, fill = "grey")),
+        fill = "none", color = "none"
+    ) +
+    labs(x = "", y = "AUC") 
+
+# plot number of peaks
+gp_pks <- ggplot(
+        unique(roc_dt[, .(model, testset, test_peaks_pos)]),
+        aes(
+            model, test_peaks_pos,
+            fill = testset, color = testset
+        )
+    ) +
+    geom_jitter(shape = 21, size = 3) +
+    scale_y_continuous(limits = c(0, NA), expand = expansion(c(0, 0.1))) +
+    scale_fill_manual(values = c(ct_cols, bct_cols)) +
+    scale_color_manual(values = structure(
+        colorspace::darken(c(ct_cols, bct_cols), 0.5),
+        names = c(names(ct_cols), names(bct_cols))
+    )) +
+    theme(
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        panel.grid.major = element_line(linewidth = 0.2, color = "grey")
+    ) +
+    guides(
+        shape = guide_legend(override.aes = list(size = 5, fill = "grey")),
+        fill = "none", color = "none"
+    ) +
+    labs(x = "", y = "test peaks")
+
+gp_gkm_auc <- gp_pks / gp_auc + plot_layout(guides = "collect")
+ggsave(
+    file.path(fig_dir, "LS-GKM-test-auc.pdf"),
+    gp_gkm_auc, height = 8, width = 10
+)
+```
+
+Cell type similarities based on AUC
+
+```{r}
+roc_dt <- fread(file.path(res_dir, "models.roc.tsv.gz"))
+auc_dt <- unique(roc_dt[, .(model, testset, auc)])
+auc_dt[, model := factor(model, levels = cell_types)]
+auc_dt[, testset := factor(testset, levels = cell_types)]
+setorder(auc_dt, model, testset)
+auc_dc <- dcast.data.table(auc_dt, model ~ testset, value.var = "auc")
+auc_mt <- as.matrix(auc_dc[, -1])
+rownames(auc_mt) <- auc_dc[[1]]
+auc_mt <- auc_mt[rownames(auc_mt), rownames(auc_mt)]
+all.equal(rownames(auc_mt), colnames(auc_mt))
+```
+
+Cell type tree based on AUC
+
+```{r}
+# NJ clustering
+require(ape)
+require(ggtree)
+tree <- nj(dist(auc_mt))
+tree_nm <- sprintf("LS-GKM-test-auc-NJ-adult-gastrula-tree")
+tree_fn <- file.path(res_dir, paste0(tree_nm, ".txt"))
+
+# tree visuals
+gt <- ggtree(tree, aes(color = label), ladderize = FALSE) +
+  scale_color_manual(values = ct_cols) +
+  theme_tree2() +
+  geom_tiplab() +
+  scale_x_continuous(expand = expansion(mult = c(0, 1))) +
+  theme(legend.position = "none")
+ggsave(file.path(
+    fig_dir,
+    paste0(tree_nm, ".pdf")
+), gt, height = 6, width = 7)
+```
+
+Tree with bootstrap in `90_Figures.qmd`.
+
+Order AUC matrix by tree.
+
+```{r}
+tips <- tree$tip.label
+hc_mt <- auc_mt[tips, tips]
+diag(hc_mt) <- NA
+
+row_ann <- HeatmapAnnotation(
+  which = "row", 
+  "cell type" = rownames(hc_mt), 
+  col = list("cell type" = c(ct_cols, bct_cols))
+)
+col_ann <- HeatmapAnnotation(
+  which = "column",
+  "cell type" = colnames(hc_mt), 
+  col = list("cell type" = c(ct_cols, bct_cols)), show_legend = FALSE
+)
+col_vec <- viridis::plasma(10)
+col_fun <- circlize::colorRamp2(seq(0, 1, length.out = length(col_vec)), col_vec)
+hm_cor <- Heatmap(
+  hc_mt, name = "AUC",
+  col = col_vec,
+  border = TRUE, use_raster = TRUE,
+  cluster_rows = FALSE, cluster_columns = FALSE, 
+  show_row_dend = FALSE, show_column_dend = FALSE,
+  show_row_names = TRUE, show_column_names = FALSE, 
+  top_annotation = col_ann, left_annotation = row_ann
+)
+pdf(file.path(
+    fig_dir,
+    sprintf("LS-GKM-test-auc-heatmap_%s.pdf", out_id)
+), width = 10.5, height = 6)
+print(hm_cor)
+dev.off()
+```
+
+## Explain
+
+Top scoring sequences for each model
+
+```{r}
+out_id <- "PeakDifferential_cell_type"
+itr <- "03"
+res_dir <- file.path(res_dir, out_id, itr)
+fig_dir <- file.path(fig_dir, out_id, itr)
+
+test_dt <- fread(file.path(res_dir, "models.test.scores.tsv"))
+test_fq <- readDNAStringSet(file.path(res_dir, "all.fasta"))
+
+# plot scores distributions
+setorder(test_dt, model, -score)
+test_dt[, rank := 1:.N, model]
+pdf(
+    file.path(fig_dir, "gkmexplain_input_peak_model_scores.pdf"),
+    gpe, width = 8, height = 8
+)
+for (mn in unique(test_dt$model)) {
+  message(mn)
+  gpe <- ggplot(test_dt[model == mn], aes(
+          rank, score, group = model
+      )) +
+      geom_line() +
+      geom_rug(aes(color = test_cell_type)) +
+      scale_color_manual(values = ct_cols) +
+      scale_fill_manual(values = structure(
+          colorspace::lighten(ct_cols, 0.8),
+          names = names(ct_cols)
+      )) +
+      theme(
+        panel.grid.major = element_line(color = "grey60", linewidth = 0.25),
+        panel.grid.minor = element_line(color = "grey80", linewidth = 0.05),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+        legend.position = "none"
+      ) +
+    labs(title = sprintf("model: %s", mn))
+  print(gpe)
+}
+dev.off()
+
+# get peaks with best scores per model
+setorder(test_dt, model, -score)
+best_dt <- test_dt[, .SD[score > quantile(.SD$score, 0.95)], model]
+best_dt <- test_dt[, unique(.SD[, .(model, peak, score)])[1:4000], model]
+best_dt <- test_dt[score > 0]
+best_dt[, .N, model]
+
+# plot best scores distributions
+gpe <- ggplot(best_dt, aes(model)) +
+    geom_bar(
+        aes(color = model_cell_type, fill = model_cell_type)
+    ) +
+    scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
+    scale_fill_manual(values = ct_cols) +
+    scale_color_manual(values = structure(
+        colorspace::darken(ct_cols, 0.5),
+        names = names(ct_cols)
+    )) +
+    theme(
+      panel.grid.major = element_line(color = "grey60", linewidth = 0.25),
+      axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+      legend.position = "none"
+    ) +
+  labs(x = "model", y = "top scored peaks")
+ggsave(
+    file.path(fig_dir, "gkmexplain_peaks.pdf"),
+    gpe, width = 10, height = 6
+)
+
+# save sequences
+for (x in unique(best_dt$model)) {
+    expl_fq <- test_fq[best_dt[model == x]$peak]
+    writeXStringSet(
+        expl_fq,
+        file.path(res_dir, sprintf("%s.explain.fasta", x))
+    )
+}
+```
+
+```{bash}
+cd Scripts
+itr="03"
+mkdir logs_gkmsvm/explain_${itr}
+wdir="/home/anamaria/cluster/aelek/proj/scATAC_nvec_v2/clustering/SEACells/Results/ArchRProj_Nvec_TSS4_frag200/ArchRProj/gkmSVM/PeakDifferential_cell_type"
+moddir=${wdir}/${itr} 
+modelprefix="adult_cnidocyte"
+for modelprefix in adult_digestive_filaments_1 adult_digestive_filaments_2 adult_digestive_filaments_3 adult_epidermis_1 adult_epidermis_2 adult_gastro_circular_muscle_1 adult_gastro_circular_muscle_2 adult_gastro_parietal_muscle adult_gastro_unknown_1 adult_gastro_unknown_2 adult_gland adult_muscle_1 adult_muscle_2 adult_neuron_GATA_Islet_1 adult_neuron_GATA_Islet_2 adult_neuron_GATA_Islet_3 adult_neuron_Pou4_FoxL2_1 adult_neuron_Pou4_FoxL2_2 adult_precursors_1 adult_precursors_2 adult_precursors_3 cnidocyte cnidocyte_precursors ectoderm_embryonic ectoderm_embryonic_aboral ectoderm_embryonic_oral gland mesendoderm_ectoderm mesendoderm_embryonic neuronal NPC
+do
+    fastafile=${modelprefix}".explain.fasta"
+    fastafile="all.fasta"
+    nohup bash 05_gkmSVM_explain.sh ${moddir} ${modelprefix} ${fastafile} > "logs_gkmsvm/explain_"${itr}"/02_gkmSVM_explain_PeakDifferential_cell_type_${modelprefix}.out" 2>&1 &
+done
+
+# create dnshuff.fasta file in 08_gkmSVM.ipynb
+
+for modelprefix in adult_cnidocyte 
+do
+    fastafile=${modelprefix}".dnshuff.fasta"
+    nohup bash 05_gkmSVM_explain_dnshuff.sh ${moddir} ${modelprefix} ${fastafile} > "logs_gkmsvm/explain_"${itr}"/02_gkmSVM_explain_dnshuff_PeakDifferential_cell_type_${modelprefix}.out" 2>&1 &
+done
+```
+
+### Inspect explanantions
+
+Load importance scores
+
+```{r}
+out_id <- "PeakDifferential_cell_type"
+itr <- "03"
+res_dir <- file.path(res_dir, out_id, itr)
+fig_dir <- file.path(fig_dir, out_id, itr)
+
+sct <- "adult_cnidocyte"
+imp_score_dir <- file.path(res_dir, sprintf("%s_norm_impscores", sct))
+
+# load normalized importance scores
+imp_score_fns <- list.files(imp_score_dir, pattern = "norm_impscores", full.names = TRUE)
+names(imp_score_fns) <- str_remove(str_remove(basename(imp_score_fns), ".txt"), "norm_impscores_")
+imp_dt <- rbindlist(sapply(
+    names(imp_score_fns),
+    function(x) fread(imp_score_fns[x]),
+    simplify = FALSE, USE.NAMES = TRUE
+), idcol = "peak")
+setnames(imp_dt, paste0("V", 1:4), c("A", "C", "G", "T"))
+
+
+# load normalized hypothetical importance scores
+imp_hyp_score_fns <- list.files(imp_score_dir, pattern = "norm_hyp_impscores", full.names = TRUE)
+names(imp_hyp_score_fns) <- str_remove(str_remove(basename(imp_hyp_score_fns), ".txt"), "norm_hyp_impscores_")
+imp_hyp_dt <- rbindlist(sapply(
+    names(imp_hyp_score_fns),
+    function(x) fread(imp_hyp_score_fns[x]),
+    simplify = FALSE, USE.NAMES = TRUE
+), idcol = "peak")
+setnames(imp_hyp_dt, paste0("V", 1:4), c("A", "C", "G", "T"))
+
+```
+
+Plot importance scores
+
+```{r}
+require(ggseqlogo)
+
+# plot normalized importance scores
+pdf(
+    file.path(fig_dir, sprintf("gkm_explain_score_%s.pdf", x)),
+    width = 14, height = 2
+)
+for (i in unique(imp_dt$peak)) {
+    imp <- imp_dt[peak == i][, peak := NULL]
+    sco <- sum(apply(imp, 1, sum))
+    pwm <- t(as.matrix(imp))
+    rownames(pwm) <- c("A", "C", "G", "T")
+
+    # plot
+    gg_pwm <- ggseqlogo(pwm, method = "custom", seq_type = "dna") +
+        theme(
+            axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 5)
+        ) +
+        labs(title = sprintf(
+            "peak idx %s (score: %.4f)", i, sco
+        ))
+    print(gg_pwm)
+
+}
+dev.off()
+
+# plot normalized hypothetical importance scores
+pdf(
+    file.path(fig_dir, sprintf("gkm_explain_hyp_score_%s.pdf", sct)),
+    width = 36, height = 3
+)
+for (i in unique(imp_hyp_dt$peak)) {
+    imp <- imp_hyp_dt[peak == i][, peak := NULL]
+    pwm <- t(as.matrix(imp))
+    rownames(pwm) <- c("A", "C", "G", "T")
+
+    # plot
+    gg_pwm <- ggseqlogo(pwm, method = "custom", seq_type = "dna") +
+        theme(
+            axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)
+        )
+    print(gg_pwm)
+
+}
+dev.off()
+```
+
+Do importance scores drop?
+
+```{r}
+imp_sco_dt <- rbindlist(lapply(unique(imp_dt$peak), function(i) {
+    imp <- imp_dt[peak == i][, peak := NULL]
+    sco <- sum(apply(imp, 1, sum))
+    data.table(peak = i, score = sco)
+}))
+imp_sco_dt[, peak := as.integer(peak)]
+gpe <- ggplot(imp_sco_dt, aes(
+        peak, score
+    )) +
+    geom_line() +
+    theme(
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+        legend.position = "none"
+    )
+ggsave(
+    file.path(fig_dir, sprintf("gkmexplain_imp_scores_%s.pdf", sct)),
+    gpe, width = 10, height = 6
+)
+
+```
+
+Search for motif hits in high importance scores subsequences
+
+```{r}
+# convert values below 0.1 to N
+seq_dt <- copy(imp_dt)
+seq_dt[A < 0.01, A := 0]
+seq_dt[C < 0.01, C := 0]
+seq_dt[G < 0.01, G := 0]
+seq_dt[T < 0.01, T := 0]
+
+# plot "filtered" importance scores
+pdf(
+    file.path(fig_dir, sprintf("gkm_explain_filt_score_%s.pdf", sct)),
+    width = 36, height = 3
+)
+for (i in unique(seq_dt$peak)) {
+    imp <- seq_dt[peak == i][, peak := NULL]
+    sco <- sum(apply(imp, 1, sum))
+    pwm <- t(as.matrix(imp))
+    rownames(pwm) <- c("A", "C", "G", "T")
+
+    # plot
+    gg_pwm <- ggseqlogo(pwm, method = "custom", seq_type = "dna") +
+        theme(
+            axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)
+        ) +
+        labs(title = sprintf(
+            "peak idx %s (score: %.4f)", i, sco
+        ))
+    print(gg_pwm)
+
+}
+dev.off()
+
+# get sequence for filtered importance scores
+nucs <- apply(seq_dt[ ,-1], 1, function(x) {
+    if (any(x > 0)) {
+        c("A", "C", "G", "T", "N")[which(x > 0)]
+    } else {
+        "N"
+    }
+})
+seq_dt[, nuc := nucs]
+
+# get chunks of important nucleotides
+seq_dt[, pos := 1:.N, peak][nuc == "N", pos := 0]
+seq_dt <- seq_dt[pos != 0]
+for(pk in unique(seq_dt$peak)) {
+  seq_pk <- seq_dt[peak == pk] 
+  for (i in seq_len(nrow(seq_pk))) {
+    ps <- seq_pk[i]$pos
+    if (i > 1) {
+      if (ps - seq_pk[i-1]$pos > 1) region <- region + 1
+    } else {
+      region <- 1
+    }
+    seq_dt[peak == pk & pos == ps, chunk := region]
+  }
+}
+
+# filter out small chunks
+seq_dt[, chunk_length := nrow(.SD), .(peak, chunk)]
+seq_dt <- seq_dt[chunk_length > 4]
+
+# sequences
+seq_dt[, peak_chunk := paste(peak, chunk, sep = "_")]
+seq_st <- sapply(unique(seq_dt$peak_chunk), function(x) {
+    sstr <- paste0(seq_dt[peak_chunk == x]$nuc, collapse = "")
+    if (nchar(sstr) < 40) {
+      w <- (40 - nchar(sstr)) / 2
+      ns <- paste0(rep("N", w), collapse = "")
+      sstr <- paste0(ns, sstr, ns)
+    }
+    sstr
+})
+seq_str <- DNAStringSet(seq_st)
+
+# among motifs that were assigned to genes with chromVAR
+# select best motif for each gene based on correlation
+exp_chromvar_dt <- fread(
+    file.path(
+        adult_dir, "insilicoChIP", "metacell", "03",
+        "gene_expression_fc_chromVAR_genes_exp_FC2_acc_FC4_spearman.tsv.gz"
+    )
+)
+exp_chromvar_dt[, cor := cor(.SD$expression, .SD$zscore), .(
+    gene, og, pfam, motif, id
+)]
+exp_chromvar_cor_dt <- unique(
+    exp_chromvar_dt[, .(gene, og, pfam, id, cor)]
+)
+exp_chromvar_cor_top <- exp_chromvar_cor_dt[
+    order(cor, decreasing = TRUE)
+][, .SD[1], gene]
+tf_dt <- exp_chromvar_dt[id %in% exp_chromvar_cor_top$id]
+tf_dt <- unique(tf_dt[, .(gene, motif)])
+
+# match motifs
+mots_lst <- readRDS(file.path(adult_dir, "Archetypes", "motif-archetypes-PPM-PCCnorm-0.8-IC0.5-8bp-pwms.rds")) # 1649
+mots_lst <- mots_mta_lst[names(mots_mta_lst) %in% tf_dt$motif] # 276
+mot_pwm  <- universalmotif::convert_type(mots_lst, "PWM", pseudocount = 1)
+mot_pwme <- universalmotif::convert_motifs(mot_pwm, "PWMEnrich-PWM")
+mot_lens <- sapply(mot_pwme, length, USE.NAMES=TRUE)
+
+# scanning archetypes
+scan_dt <- rbindlist(lapply(seq_along(seq_str), function(i) {
+    
+    seq <- seq_str[[i]]
+    sn <- names(seq_str)[i]
+    message(sprintf("%s (%s/%s)", sn, i, length(seq_str)))
+    seq_dt <- rbindlist(lapply(seq_along(mot_pwme), function(j) {
+
+        mot <- mot_pwme[[j]]
+        mn <- names(mot_pwme)[j]
+        gw_scan_c <- PWMEnrich::scanWithPWM(
+            mot, seq, 
+            both.strands = FALSE, strand.fun = "max"
+        )
+        gw_scan_dt <- data.table(motif_score = gw_scan_c)
+        gw_scan_dt[, motif := mn][, position := 1:.N]
+        gw_scan_dt
+    }))
+    seq_dt[, peak := sn]
+    setcolorder(seq_dt, c("peak", "motif", "position", "motif_score"))
+    seq_dt
+
+}))
+scan_dt[is.na(motif_score), motif_score := 0]
+scan_dt <- scan_dt[motif_score > 0]
+
+setnames(scan_dt, "peak", "peak_chunk")
+scan_dt[, peak := str_remove(peak_chunk, "_\\d+")]
+
+
+# nomr by motif length
+scan_dt[, motif_len := mot_lens[motif]]
+scan_dt[, motif_score_norm := motif_score / motif_len ]
+
+# distribution of motf scores
+gp_mot_sco <- ggplot(scan_dt[motif_score_norm > 0], aes(motif_score_norm, color = peak)) + 
+    geom_density() +
+    theme(legend.position = "none")
+ggsave(
+    file.path(fig_dir, sprintf("imp_scores_mot_score_%s.pdf", sct)),
+    width = 6, height = 5
+)
+
+# add gene info
+scan_dt <- merge.data.table(scan_dt, tf_dt, by = "motif", all.x = TRUE, sort = FALSE, allow.cartesian = TRUE)
+scan_dt <- merge.data.table(scan_dt, tfan[,.SD[1], gene], by = "gene", all.x = TRUE, sort = FALSE, allow.cartesian = FALSE)
+scan_dt <- merge.data.table(scan_dt, marks, by = "gene", all.x = TRUE, sort = FALSE, allow.cartesian = FALSE)
+scan_dt[!is.na(marker_name), og := marker_name]
+scan_dt[, arch := str_extract(motif, "ARCH\\d+")]
+scan_dt[, label := sprintf(
+    "%s | %s| %s", arch, str_remove(gene, "Nvec_((vc1.1_)|(v1g)_)*"), substr(og, 1, 30)
+)]
+
+# save
+fwrite(
+    scan_dt,
+    file.path(res_dir, sprintf("motif_scores_imp_scores_%s.tsv.gz", sct)),
+    sep = "\t"
+)
+```
+
+Inspect hits for all TFs
+
+```{r}
+scan_dt <- fread(
+    file.path(res_dir, sprintf("motif_scores_imp_scores_%s.tsv.gz", sct)),
+)
+
+# take top motifs per peak
+top_dt <- scan_dt[motif_score_norm > 0.5]
+
+# take one entry per motif
+top_dt <- top_dt[order(-motif_score)][, .SD[1], .(arch, peak, position)]
+
+# make a table
+top_dc <- dcast.data.table(top_dt, peak ~ label, value.var = "motif_score_norm", fun.aggregate = length)
+top_mt <- t(as.matrix(top_dc[, -1]))
+top_mt <- pmin(top_mt, 10)
+colnames(top_mt) <- top_dc[[1]]
+
+# cluster motifs
+hc <- hclust(dist(top_mt, method = "maximum"), method = "ward.D2")
+top_mt <- top_mt[hc$order, ]
+
+# cluster peaks
+hc <- hclust(dist(t(top_mt), method = "maximum"), method = "ward.D2")
+top_mt <- top_mt[, hc$order]
+
+# plot
+# RColorBrewer::brewer.pal(8, "Blues")[-1]
+hm_col <- c("white", rev(viridis::viridis(10)))
+top_hm <- Heatmap(
+    top_mt, name = "motif hits", col = hm_col,
+    border = TRUE,
+    rect_gp = gpar(col = "white", lwd = 0.1),
+    show_column_dend = FALSE, show_row_dend = FALSE,
+    cluster_columns = FALSE, cluster_rows = FALSE,
+    column_names_gp = gpar(fontsize = 5),
+    row_names_gp = gpar(fontsize = 5)
+)
+pdf(
+    file.path(fig_dir, sprintf("imp_scores_mot_score_all_heatmap_%s.pdf", sct)),
+    width = 14, height = 16
+)
+print(top_hm)
+dev.off()
+
+```
+
+Hits for motifs of TFs that are in GRN
+
+```{r}
+# subset for TFs active in cell type
+grn_ct_dt <- fread(file.path(
+    adult_dir, "insilicoChIP", "metacell", "03", sprintf(
+        "grn_tf_target_genes_expression_%s_%s_accessibility_%s_%s_chromvar_%s.tsv.gz",
+        "fc", "1.4", "access", "0.4", "4")
+))
+ct_st <- paste(
+    str_remove(sct, "(adult|gastrula)_"),
+    str_extract(sct, "(adult|gastrula)"),
+    sep = "_"
+)
+ct_st_grn <- grn_ct_dt[cell_type_stage == ct_st]
+top_dt <- scan_dt[gene %in% ct_st_grn$gene]
+
+# take top motifs per peak
+top_dt <- top_dt[motif_score_norm > 0]
+# top_dt <- scan_dt[order(-motif_score)][, .SD[1:10], motif]
+top_dt <- top_dt[motif_score_norm > 0.5]
+
+# take only peaks with good overall importance score
+top_dt <- top_dt[peak %in% imp_sco_dt[score > 1.2]$peak]
+
+# one entry per motif per chunk
+top_dt <- top_dt[order(-motif_score)][, .SD[1], .(motif, gene, peak, peak_chunk)]
+
+# take one entry per motif (multiple genes)
+top_dt <- top_dt[order(marker_name == "", -motif_score)][, .SD[1], .(arch, peak, peak_chunk, position)]
+
+# TBA do this systematically, for now manual inspection of other genes
+# top_dt[, annot_genes := paste(
+#   substr(og, 1, 10), str_remove(gene, "Nvec_((vc1.1_)|(v1g)_)*"), collapse = " "
+# ), gene]
+# top_dt[, arch_genes := paste(
+#   annot_genes, sep = " | "
+# ), arch]
+# top_dt[, label_unique := sprintf(
+#     "%s | %s", arch, arch_genes
+# )]
+
+# make a table
+maxs <- function(x) max(x[!is.infinite(x)], na.rm = TRUE)
+top_dc <- dcast.data.table(top_dt, peak ~ label, value.var = "motif_score_norm", fun.aggregate = length, fill = 0)
+top_mt <- t(as.matrix(top_dc[, -1]))
+top_mt <- pmin(top_mt, 10)
+colnames(top_mt) <- top_dc[[1]]
+
+# cluster motifs
+hc <- hclust(dist(top_mt, method = "euclidean"), method = "ward.D2")
+top_mt <- top_mt[hc$order, ]
+
+# cluster peaks
+hc <- hclust(dist(t(top_mt), method = "euclidean"), method = "ward.D2")
+top_mt <- top_mt[, hc$order]
+
+# plot
+# RColorBrewer::brewer.pal(8, "Blues")[-1]
+hm_col <- c("white", rev(viridis::viridis(10)))
+top_hm <- Heatmap(
+    top_mt, name = "motif hits", col = hm_col,
+    border = TRUE,
+    rect_gp = gpar(col = "white", lwd = 0.1),
+    show_column_dend = FALSE, show_row_dend = FALSE,
+    cluster_columns = FALSE, cluster_rows = FALSE,
+    column_names_gp = gpar(fontsize = 5),
+    row_names_gp = gpar(fontsize = 5)
+)
+pdf(
+    file.path(fig_dir, sprintf("imp_scores_mot_score_grn_heatmap_%s.pdf", sct)),
+    width = 8, height = 1.2
+)
+print(top_hm)
+dev.off()
+```
+
+Quantify
+
+```{r}
+md <- rbindlist(lapply(colnames(top_mt), function(x) {
+  data.table(code=paste0(top_mt[,x], collapse = ""))[, peak := x]
+}))
+md[,occur := .N, code]
+md_top <- md[occur > 1][order(-occur)]
+top_pks <- md[order(-occur)]$peak
+tot <- length(unique(md$peak))
+
+# plot normalized importance scores for top peaks
+require(ggseqlogo)
+pdf(
+    file.path(fig_dir, sprintf("gkm_explain_score_top_%s.pdf", x)),
+    width = 14, height = 2
+)
+for (i in top_pks) {
+    imp <- imp_dt[peak == i][, peak := NULL]
+    sco <- sum(apply(imp, 1, sum))
+    occ <- md[peak==i]$occur[1]
+    pwm <- t(as.matrix(imp))
+    rownames(pwm) <- c("A", "C", "G", "T")
+
+    gg_pwm <- ggseqlogo(pwm, method = "custom", seq_type = "dna") +
+        theme(
+            axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 5)
+        ) +
+        labs(title = sprintf(
+            "peak idx %s (score: %.4f, occurrences: %s/%s, %.2f%%)", i, sco, occ, tot, occ/tot*100
+        ))
+    print(gg_pwm)
+
+}
+dev.off()
+
+# get motifs for each peak
+md_str <- md_top$code[1]
+md_spl <- strsplit(md_str, "")[[1]]
+md_arc <- rownames(top_mt)[which(md_spl>0)]
+md_rep <- md_spl[md_spl>0]
+md_mot <- unname(unlist(sapply(seq_along(md_arc), function(i) rep(md_arc[i], md_rep[i]))))
+```
+
+```{r}
+# exp_fns <- list.files(res_dir, pattern = "explain.hyp.txt")
+# names(exp_fns) <- str_remove(exp_fns, ".explain.hyp.txt")
+#
+# exp_1 <- fread(
+#     file.path(res_dir, exp_fns[x]),
+#     header = FALSE, sep = "\t", select = 1:2
+# )
+# setnames(exp_1, c("region id", "score"))
+# exp_2 <- fread(
+#     file.path(res_dir, exp_fns[x]),
+#     header = FALSE, sep = ";", fill = TRUE
+# )
+# exp_2 <- unique(exp_2)
+# exp_2[, peak := str_extract(V1, "((adult|gastrula)_)peak\\d+")]
+# exp_2[, V1 := str_remove(V1, "((adult|gastrula)_)peak\\d+\\t")]
+# exp_2[, score := str_extract(V1, "\\d+\\.\\d+")]
+# exp_2[, score := as.numeric(score)]
+# exp_2[, V1 := str_remove(V1, "\\d+\\.\\d+\\t")]
+# setcolorder(exp_2, c("peak", "score"))
+# setorder(exp_2, -score)
+#
+# require(ggseqlogo)
+#
+# lapply(
+#     seq_len(nrow(exp_2)),
+#     function(i) {
+#         pk <- exp_2[i, ]$peak
+#         mt_dt <- melt.data.table(exp_2[i, -c(1, 2)], measure.vars = colnames(exp_2)[-c(1:2)])[, variable := NULL]
+#         mt_dt <- tidyr::separate(mt_dt, col = "value", into = c("A", "C", "G", "T"), sep = ",")
+#         setDT(mt_dt)
+#         mt_dt <- mt_dt[, lapply(.SD, as.numeric), ,.SDcols = colnames(mt_dt)]
+        
+#         #normalize the hyp scores such that, at each position, hypothetical importance
+#         # scores that have the same sign as the original importance score all sum
+#         # up to the original importance score value.
+
+#         pwm <- t(as.matrix(mt_dt))
+#         rownames(pwm) <- c("A", "C", "G", "T")
+
+#         # plot
+#         gg_pwm <- ggseqlogo(pwm, method = "prob") +
+#             theme(
+#                 axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)
+#             )
+#         ggsave(
+#             file.path(fig_dir, "gkm_explain_hyp_score.pdf"),
+#             gg_pwm, width = 28, height = 3
+#         )
+
+#         # # save matrix
+#         # write_matrix(t(pwm))
+#     }
+# )
+
+```
+
+
+## Compare predictions with models built using different peaksets
+
+Compare models built using different iterations of filtering cell type specific peaks
+
+```{r}
+itrs <- c("00", "01", "02", "03", "04")
+roc_dt_all <- rbindlist(sapply(itrs, function(itr) {
+    
+    message(itr)
+
+    # load data
+    itr_dir <- file.path(res_dir, out_id, itr)
+    roc_dt <- fread(
+        file.path(itr_dir, "models.roc.tsv.gz"),
+        sep = "\t"
+    )
+    roc_dt
+    
+}, USE.NAMES = TRUE, simplify = FALSE), idcol = "itr", use.names = TRUE, fill = TRUE)
+
+roc_dt <- unique(roc_dt_all[, .(itr, model, testset, auc, test_peaks_pos, test_peaks_neg, test_cell_type, stage)])
+roc_dt[, filt := filts[itr]]
+roc_dt[, filt := factor(filt, levels = filts)]
+roc_dt[, stage := factor(stage, levels = c("adult", "gastrula"))]
+roc_dt[, test_cell_type := factor(test_cell_type, levels = unique(names(ct_cols), names(bct_cols)))]
+roc_dt[, model := factor(model, levels = unique(roc_dt[order(test_cell_type)]$model))]
+setorder(roc_dt, itr, model)
+
+# plor AUC for CVs
+gp_auc <- ggplot(
+        unique(roc_dt[, .(model, test_cell_type, filt, auc)]),
+        aes(
+            model, auc, shape = filt, fill = test_cell_type, color = test_cell_type
+        )
+    ) +
+    ggbeeswarm::geom_beeswarm() +
+    scale_y_continuous(limits = c(0.5, 1)) +
+    scale_shape_manual(values = structure(
+        rep(21:25, 2)[seq_along(itrs)],
+        names = filts[itrs]
+    )) +
+    scale_fill_manual(values = c(ct_cols, bct_cols)) +
+    scale_color_manual(values = structure(
+        colorspace::darken(c(ct_cols, bct_cols), 0.5),
+        names = c(names(ct_cols), names(bct_cols))
+    )) +
+    theme(
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+        panel.grid.major = element_line(linewidth = 0.2, color = "grey")
+    ) +
+    guides(
+        shape = guide_legend(override.aes = list(size = 5, fill = "grey")),
+        fill = "none", color = "none"
+    ) +
+    labs(x = "", y = "test AUC") 
+
+# plot number of peaks
+gp_pks <- ggplot(
+        unique(roc_dt[, .(filt, model, testset, test_cell_type, test_peaks_pos)][model == testset]),
+        aes(
+            model, test_peaks_pos, shape = filt,
+            fill = test_cell_type, color = test_cell_type
+        )
+    ) +
+    ggbeeswarm::geom_beeswarm(size = 3) +
+    scale_shape_manual(values = structure(
+        rep(21:25, 2)[seq_along(itrs)],
+        names = filts[itrs]
+    )) +
+    scale_y_continuous(limits = c(0, NA)) +
+    scale_fill_manual(values = c(ct_cols, bct_cols)) +
+    scale_color_manual(values = structure(
+        colorspace::darken(c(ct_cols, bct_cols), 0.5),
+        names = c(names(ct_cols), names(bct_cols))
+    )) +
+    theme(
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        panel.grid.major = element_line(linewidth = 0.2, color = "grey")
+    ) +
+    guides(
+        shape = guide_legend(override.aes = list(size = 5, fill = "grey")),
+        fill = "none", color = "none"
+    ) +
+    labs(x = "", y = "test peaks")
+
+gp_gkm_auc <- gp_pks / gp_auc + plot_layout(guides = "collect")
+ggsave(
+    file.path(dirname(fig_dir), "LS-GKM-test-roc.pdf"),
+    gp_gkm_auc, height = 8, width = 10
+)
+
+# plot together
+gp_gkm_auc_wrap <- ggplot(
+  unique(roc_dt[, .(filt, model, test_cell_type, auc, test_peaks_pos)]),
+  aes(test_peaks_pos, auc, shape = filt, fill = test_cell_type, color = test_cell_type)
+  ) +
+  geom_point(position = position_jitter(width = 0.1, height = 0), size = 4) +
+  scale_shape_manual(values = structure(
+      rep(21:25, 2)[seq_along(itrs)],
+      names = filts[itrs]
+  )) +
+  scale_fill_manual(values = c(ct_cols, bct_cols)) +
+  scale_color_manual(values = structure(
+      colorspace::darken(c(ct_cols, bct_cols), 0.5),
+      names = c(names(ct_cols), names(bct_cols))
+  )) +
+  guides(
+      shape = guide_legend(override.aes = list(size = 5, fill = "grey")),
+      fill = "none", color = "none"
+  ) +
+  facet_wrap("model") +
+  theme(
+      panel.grid.major = element_line(linewidth = 0.2, color = "grey")
+  ) +
+  labs(x = "test peaks", y = "test AUC")
+ggsave(
+    file.path(dirname(fig_dir), "LS-GKM-test-roc-wrap.pdf"),
+    gp_gkm_auc_wrap, height = 14, width = 24
+)
+```
+
+## Cross species
+
+Use Nematostella cell type models for predictions across species
+
+Mouse, cell type level
+
+```{bash eval=FALSE, include=FALSE}
+for modelprefix in cnidocyte digestive_filaments_1 digestive_filaments_2 digestive_filaments_3 epidermis_1 epidermis_2 gastro_circular_muscle_1 gastro_circular_muscle_2 gastro_parietal_muscle gastro_unknown_1 gastro_unknown_2 gland muscle_1 muscle_2 neuron_GATA_Islet_1 neuron_GATA_Islet_2 neuron_GATA_Islet_3 neuron_Pou4_FoxL2_1 neuron_Pou4_FoxL2_2 precursors_1 precursors_2 precursors_3
+do
+    qsub -N Peaks_${modelprefix} -q long-sl7 -l virtual_free=60G,h_vmem=60G,h_rt=96:00:00 -M anamaria.elek@crg.eu -m abe -o log/Peaks_${modelprefix}.out -e log/Peaks_${modelprefix}.err 07_gkmSVM_ant_predict_mmus_Peaks_cell_type.sh ${modelprefix}
+done
+```
+
+```{bash}
+mkdir -p logs_cell_type
+for modelprefix in cnidocyte muscle_1 epidermis_1 neuron_GATA_Islet_1 neuron_Pou4_FoxL2_1 gland precursors_1
+do
+    # other outprefix: Unknown Immature_B_cells Activated_B_cells Regulatory_T_cells Type_II_pneumocytes Cerebellar_granule_cells Collisions Distal_convoluted_tubule Loop_of_henle Collecting_duct DCT_CD Hematopoietic_progenitors Proximal_tubule Proximal_tubule_S3 Podocytes Purkinje_cells SOM_Interneurons Endothelial_I_glomerular
+    for outprefix in Ex_neurons_CThPN Ex_neurons_CPN Ex_neurons_SCPN Inhibitory_neurons Enterocytes Hepatocytes Cardiomyocytes Erythroblasts Sperm T_cells B_cells NK_cells Macrophages Alveolar_macrophages Monocytes Microglia Dendritic_cells Astrocytes Oligodendrocytes Type_I_pneumocytes Endothelial_I_cells Endothelial_II_cells
+    do
+        nohup bash 03_gkmSVM_predict_mmus_Peaks_cell_type.sh ${modelprefix} ${outprefix} > logs_cell_type/03_gkmSVM_predict_mmus_Peaks_cell_type_bg_${modelprefix}_${outprefix}.out 2>&1 &
+        nohup bash 03_gkmSVM_predict_mmus_PeakDifferential_cell_type.sh ${modelprefix} ${outprefix} > logs_cell_type/03_gkmSVM_predict_mmus_PeakDifferential_cell_type_bg_${modelprefix}_${outprefix}.out 2>&1 &
+    done
+done
+```
+
+Mouse, broad cell type level
+
+```{bash}
+mkdir -p logs_broad_cell_type
+for modelprefix in cnidocyte muscle gastro_circular_muscle gastro_parietal_muscle gastro_unknown digestive_filaments epidermis precursors neuron_GATA_Islet neuron_Pou4_FoxL2 gland
+do
+    for outprefix in T_cells Hepatocytes B_cells Activated_B_cells Ex_neurons_CThPN Ex_neurons_CPN Ex_neurons_SCPN Inhibitory_neurons Enterocytes Cardiomyocytes Cerebellar_granule_cells Endothelial_II_cells Hematopoietic_progenitors Proximal_tubule Proximal_tubule_S3 NK_cells Regulatory_T_cells Erythroblasts Sperm SOM_Interneurons Macrophages Microglia Dendritic_cells Alveolar_macrophages Collisions Distal_convoluted_tubule Loop_of_henle Collecting_duct DCT_CD Astrocytes Type_I_pneumocytes Oligodendrocytes Endothelial_I_cells Endothelial_I_glomerular Monocytes Podocytes Purkinje_cells Immature_B_cells Type_II_pneumocytes Unknown
+    do
+        nohup bash 07_gkmSVM_predict_mmus_Peaks_broad_cell_type.sh ${modelprefix} ${outprefix} > logs_broad_cell_type/07_gkmSVM_predict_mmus_Peaks_broad_cell_type_${modelprefix}_${outprefix}.out 2>&1 &
+        nohup bash 07_gkmSVM_predict_mmus_PeakDifferential_broad_cell_type.sh ${modelprefix} ${outprefix} > logs_broad_cell_type/07_gkmSVM_predict_mmus_PeakDifferential_broad_cell_type_${modelprefix}_${outprefix}.out 2>&1 &
+    done
+done
+```
+
+Drosophila, cell type level
+
+```{bash}
+mkdir -p logs_cell_type
+for modelprefix in cnidocyte muscle_1 epidermis_1 neuron_GATA_Islet_1 neuron_Pou4_FoxL2_1 gland precursors_1
+do
+    for outprefix in Neural Somatic_muscle Pharnyx Epidermis Head_ectoderm Ventral_nerve_cord Malpighian_tubule Midgut Yolk
+    do
+        nohup bash 04_gkmSVM_predict_dmel_Peaks_cell_type.sh ${modelprefix} ${outprefix} > logs_cell_type/04_gkmSVM_predict_dmel_Peaks_cell_type_bg_${modelprefix}_${outprefix}.out 2>&1 &
+        nohup bash 04_gkmSVM_predict_dmel_PeakDifferential_cell_type.sh ${modelprefix} ${outprefix} > logs_cell_type/04_gkmSVM_predict_dmel_PeakDifferential_cell_type_bg_${modelprefix}_${outprefix}.out 2>&1 &
+    done
+done
+```
+
+Params
+
+```{r}
+sp <- "mmus"
+sps_dir <- file.path(res_dir, sp, "specific_peaks", "250bp", out_id)
+# test cell types
+if (sp == "mmus") {
+    sps_nm <- c(
+        "T_cells", "Hepatocytes", "B_cells", "Activated_B_cells",
+        "Ex_neurons_CThPN", "Ex_neurons_CPN", "Ex_neurons_SCPN",
+        "Inhibitory_neurons", "Enterocytes", "Cardiomyocytes",
+        "Cerebellar_granule_cells", "Endothelial_II_cells",
+        "Hematopoietic_progenitors", "Proximal_tubule", "Proximal_tubule_S3",
+        "NK_cells", "Regulatory_T_cells", "Erythroblasts", "Sperm",
+        "SOM_Interneurons", "Macrophages", "Microglia", "Dendritic_cells",
+        "Alveolar_macrophages", "Collisions", "Distal_convoluted_tubule",
+        "Loop_of_henle", "Collecting_duct", "DCT_CD", "Astrocytes",
+        "Type_I_pneumocytes", "Oligodendrocytes", "Endothelial_I_cells",
+        "Endothelial_I_glomerular", "Monocytes", "Podocytes", "Purkinje_cells",
+        "Immature_B_cells", "Type_II_pneumocytes", "Unknown"
+    )
+} else if (sp == "dmel") {
+     sps_nm <- c(
+        "Neural", "Somatic_muscle", "Pharnyx", "Epidermis", "Head_ectoderm",
+        "Ventral_nerve_cord", "Malpighian_tubule", "Midgut", "Yolk"
+    )
+}
+```
+
+Inspect cross-species prediction results
+
+```{r}
+# load model predictions
+test_dt <- rbindlist(sapply(pk_nm, function(model_nm) {
+    message(sprintf("\nLoading %s predictions:", model_nm))
+    test_dt <- rbindlist(sapply(sps_nm, function(nm) {
+        message(nm)
+        tryCatch({
+            fread(file.path(
+                sps_dir, sprintf("%s.%s.gkmpredict.txt", model_nm, nm)
+            ))
+        }, error = function(e) NULL)
+    }, USE.NAMES = TRUE, simplify = FALSE), idcol = "testset")
+}, USE.NAMES = TRUE, simplify = FALSE), idcol = "model")
+setnames(test_dt, c("model", "testset", "peak", "score"))
+test_dt[, score := as.numeric(score)]
+test_dt <- unique(test_dt)
+
+# save
+fwrite(
+    test_dt,
+    file.path(sps_dir, "models.test.scores.tsv.gz"),
+    sep = "\t"
+)
+
+# sample data for plotting
+set.seed(1950)
+test_dt_plot <- test_dt[
+    , .SD[sample(seq_len(nrow(.SD)), pmin(1e2, nrow(.SD)))],
+    .(testset, model)
+]
+test_dt_plot[, testset_median := median(score), .(testset, model)]
+setorder(test_dt_plot, -testset_median)
+# plots
+mods <- unique(c(names(ct_cols), names(bc_cols))[
+    c(names(ct_cols), names(bc_cols)) %in% unique(test_dt_plot$model)
+])
+gp_t_list <- lapply(mods, function(m) {
+    test_dt_plot_m <- test_dt_plot[model == m]
+    test_dt_plot_m[, testset := factor(
+        testset, levels = unique(test_dt_plot_m$testset)
+    )]
+    gp_t <- ggplot(
+            test_dt_plot_m,
+            aes(testset, score, fill = model)
+        ) +
+        geom_boxplot() +
+        #facet_wrap(vars(model), scales = "free_y") +
+        scale_fill_manual(values = c(ct_cols, bc_cols)) +
+        labs(title = m) +
+        theme(
+            axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+            legend.position = "none"
+        )
+    gp_t
+})
+pdf(
+    file.path(fig_dir, sprintf("models.%s.%s.test.scores.pdf", sp, out_id)),
+    width = 18, height = 6
+)
+print(gp_t_list)
+dev.off()
+```
+
+Inspect cross-species prediction results for specific or non-specific peaks
+
+```{r}
+# specificity scores
+data_dir <- switch(
+    sp,
+    "mmus" = "../../cross_species/mmus/adult/",
+    "dmel" = "../../cross_species/dmel/data"
+)
+spks_dt <- fread(
+    file.path(data_dir, "peak_specificity_scores.tsv"),
+    sep = "\t"
+)
+setnames(spks_dt, c("peak", "testset", "specificity_score"))
+tdt <- merge.data.table(
+    test_dt, spks_dt, by = c("peak", "testset"),
+    all = FALSE, sort = FALSE
+)
+# label specific peaks
+tdt[, specificity_score_thr := quantile(specificity_score, 0.9), testset]
+tdt[, differential_peak := ifelse(
+    specificity_score > specificity_score_thr, TRUE, FALSE
+)]
+tdt[, differential_peak := factor(differential_peak, levels = c(TRUE, FALSE))]
+tdt[, model_alpha := paste0(
+    model,
+    ifelse(differential_peak == TRUE, "", "_alpha")
+)]
+# colors
+all_cols <- c(
+    bc_cols, ct_cols,
+    structure(
+        alpha(bc_cols, 0.3),
+        names = paste0(names(bc_cols), "_alpha")
+    ),
+    structure(
+        alpha(ct_cols, 0.3),
+        names = paste0(names(ct_cols), "_alpha")
+    ),
+    "TRUE" = "#000000", "FALSE" = alpha("#000000", 0.3)
+)
+# order
+tdt[, testset_median := median(score), .(testset, model_alpha)]
+setorder(tdt, model_alpha, -testset_median)
+# plots
+mods <- unique(c(names(ct_cols), names(bc_cols))[
+    c(names(ct_cols), names(bc_cols)) %in% unique(tdt$model)
+])
+gp_t_list <- lapply(mods, function(m) {
+    tdt_m <- tdt[model == m]
+    tdt_m[, testset := factor(
+        testset, levels = unique(tdt_m$testset)
+    )]
+    gp_t <- ggplot(
+            tdt[model == m],
+            aes(testset, score, fill = model_alpha, color = differential_peak)
+        ) +
+        geom_boxplot(
+            aes(color = model_alpha), outlier.colour = NULL
+        ) +
+        geom_boxplot(
+            aes(fill = model_alpha, color = differential_peak),
+            outlier.colour = NA
+        ) +
+        #facet_wrap(vars(model), scales = "free_y") +
+        theme(
+            axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+            legend.position = "none"
+        ) +
+        labs(title = m) +
+        scale_fill_manual(values = all_cols) +
+        scale_color_manual(values = all_cols) +
+        guides(fill = "none")
+    gp_t
+})
+
+pdf(file.path(
+    fig_dir, sprintf("models.%s.%s.test.scores.groups.pdf", sp, out_id)
+    ), width = 8, height = 6
+)
+print(gp_t_list)
+dev.off()
+```
+
+```{r}
+# specificity scores
+data_dir <- switch(
+    sp,
+    "mmus" = "../../cross_species/mmus/adult/",
+    "dmel" = "../../cross_species/dmel/data"
+)
+spks_dt <- fread(
+    file.path(data_dir, "peak_specificity_scores.tsv")
+)
+
+setnames(spks_dt, c("peak", "testset", "specificity_score"))
+test_dt <- fread(
+    file.path(sps_dir, "models.test.scores.tsv.gz")
+)
+tssp_dt <- merge.data.table(
+    test_dt, spks_dt, by = c("peak", "testset"),
+    all = FALSE, sort = FALSE
+)
+
+score_dt <- copy(tssp_dt)
+score_dt[, specificity_score_thr := quantile(specificity_score, 0.99), testset]
+score_dt <- score_dt[specificity_score > specificity_score_thr]
+score_dt[model=="cnidocyte"][, .N, .(testset)]
+gp_t_dens <- ggplot(score_dt, aes(specificity_score, score, color = model)) +
+    #geom_point() +
+    #geom_hex(bins = 100) +
+    #scale_color_continuous(type = "viridis") +
+    geom_hline(yintercept = 0) +
+    stat_density_2d() +
+    facet_grid(model ~ testset) +
+    scale_x_log10() +
+    scale_color_manual(values = ct_cols) +
+    theme(
+        legend.position = "none",
+        text = element_text(size = 12),
+        strip.text = element_text(size = 10)
+  )
+
+pdf(file.path(
+    fig_dir, sprintf("models.%s.%s.test.scores.density.top1.pdf", sp, out_id)
+    ), width = 15, height = 10
+)
+print(gp_t_dens)
+dev.off()
+```
+
+## Motifs
+
+```{r}
+mot_fn <- list.files(
+    file.path(res_dir, out_id),
+    pattern = "*meme", full.names = TRUE
+)
+names(mot_fn) <- str_remove(basename(mot_fn), ".pwm_models.meme")
+mot_ls <- sapply(names(mot_fn), function(x) {
+    ms <- universalmotif::read_meme(mot_fn[x])
+    names(ms) <- paste0("GKM_", x, "_motif_", seq_along(ms))
+    sapply(names(ms), function(y) {
+        m <- ms[[y]]
+        m@name <- y
+        m
+    }, simplify = FALSE, USE.NAMES = FALSE)
+}, simplify = FALSE, USE.NAMES = TRUE)
+
+saveRDS(mot_ls, file.path(res_dir, out_id, "pwm_models.RDS"))
+```
