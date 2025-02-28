@@ -7581,11 +7581,6 @@ fwrite(
 
 enr_top <- enr_dt[padj<0.001 & fc>2]
 
-# load PWMs for experimental motifs and motif archetypes
-mta_dir <- "results/Motifs"
-arc_dir <- "results/Archetypes"
-arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
-q <- 0.98
 
 # motif logos
 mta_pwm <- readRDS(
@@ -7680,16 +7675,20 @@ pdf(
 view_motifs(enr_pwms[rownames(sim_mat)])
 dev.off()
 
-# save motif logos
-x <- grep("ARCH1653", rownames(sim_mat), value=TRUE)
-pdf(
-  file.path(fig_dir, sprintf("fig4_muscle_motif_enrichment_logo_%s.pdf", str_replace_all(x, "/", "_"))),
-  width = 4, height = 2
-)
-view_motifs(reverseComplement(enr_pwms[[x]]@motif))
-dev.off()
+# save motif logo
+#x <- grep("ARCH1653", rownames(sim_mat), value=TRUE)
+#pdf(
+#  file.path(fig_dir, sprintf("fig4_muscle_motif_enrichment_logo_%s.pdf", str_replace_all(x, "/", "_"))),
+#  width = 4, height = 2
+#)
+#view_motifs(reverseComplement(enr_pwms[[x]]@motif))
+#dev.off()
+```
 
-# find peaks with those motifs
+Find candidate peaks to show in Fig.4:
+
+```{r}
+# find peaks with enriched motifs
 dt <- rbindlist(sapply(names(ct_comparas), function(ct) {
 
   cts <- switch(
@@ -7755,52 +7754,6 @@ p_mht <- as.data.table(
 )
 p_mht[order(start)][,.N,name]
 p_mht[order(start)][,.N,name][name %in% enr_top$motif]
-
-
-# for peaks we show n figure, save moif annots
-fav_peaks_genes <- c(
-  "peak11756" = "Nvec_vc1.1_XM_001629401.3",
-  "peak11756" = "Nvec_vc1.1_XM_001629401.3",
-  "peak6011" = "Nvec_vc1.1_XM_032385636.2",
-  "peak6014" = "Nvec_vc1.1_XM_032385636.2",
-  "peak77382" = "Nvec_vc1.1_XM_032367288.2",
-  "peak77395" = "Nvec_vc1.1_XM_032367288.2",
-  "peak77398" = "Nvec_vc1.1_XM_032367288.2"
-)
-fav_peaks <- names(fav_peaks_genes)
-blacklist_arch <- c("ARCH1315_M05248_2.00")
-motif_2_gene <- unique(mta_dt[,.(gene,gene_name,og,pfam,motif)])
-peaks_figure_dt <- rbindlist(lapply(fav_peaks, function(p) {
-
-  print(p)
-  
-  # first get motifs from scanning
-  pm <- as.data.table(
-    arc_gr[unique(queryHits(findOverlaps(arc_gr, makeGRangesFromDataFrame(peaks[peak==p]))))]
-  )
-  setnames(pm, "name", "motif")
-  pm[, peak := p]
-  pm <- merge.data.table(pm, motif_2_gene, by = "motif")
-  pm <- unique(pm[order(start)][,.(peak,motif,start,end,gene,gene_name,og,pfam)])
-  pm[, method := "scan"]
-  
-  # now also check if we have motif from in silico chip
-  if (nrow(pm) > 0) {
-    pt <- unique(mta_dt[peak==p][in_silico_chip_score>0.1][,.(peak,motif,gene)])
-    if (nrow(pt) > 0) {
-      pm <- merge.data.table(pm, pt, by = c("peak", "motif", "gene"))
-      pm[, method := "insilico_chip"]
-    }
-  }
-
-  if (!is.null(pm)) {
-    pm <- pm[!motif %in% blacklist_arch][, peak_gene := fav_peaks_genes[p]]
-    setcolorder(pm, c("peak_gene", "peak"))
-  }  
-  pm
-}), use.names=TRUE, fill=TRUE)
-peaks_figure_dt <- unique(peaks_figure_dt)
-fwrite(peaks_figure_dt, file.path(fig_dir, "fig4_peaks_figure_motifs.tsv"), sep = "\t")
 ```
 
 Pseudobulk coverage tracks for selected genes.
@@ -7853,6 +7806,134 @@ do
     plot=${fig_dir}/fig4_pyGenomeTracks_${gene}.svg
     pyGenomeTracks --tracks ${tracks} --region ${cord} --title ${gene} -o ${plot}
 done
+```
+
+Save metadata for selected genes and peaks
+
+```{r}
+# we will load enichment of experimental motifs and motif archetypes with q0.98 threshold
+# we will also load more permissive q0.95 enrichments because we used it in in silico ChIP filtering
+mta_dir <- "results/Motifs"
+arc_dir <- "results/Archetypes"
+arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
+gr_list <- lapply(c(0.95, 0.98), function(q) {
+  # motif scores in peaks
+  mta_scores_mona <- readRDS(
+    file.path(mta_dir, sprintf("motif-scores-mona-q%s.rds", q))
+  )
+  mta_gr <- mta_scores_mona$gw_scan
+  names(mcols(mta_gr))[1] <- str_replace(names(mcols(mta_gr))[1], "motif", "name")
+
+  # archetype scores in peaks
+  arc_scores_mona <- readRDS(
+    file.path(arc_dir, sprintf("motif-scores-archetypes-%s-mona-q%s.rds", arc_id, q))
+  )
+  arc_gr <- arc_scores_mona$gw_scan
+  names(mcols(arc_gr))[1] <- str_replace(names(mcols(arc_gr))[1], "motif", "name")
+
+  c(arc_gr, mta_gr)
+})
+names(gr_list) <- c("q0.95", "q0.98")
+
+# insilico ChIP score filtered motif hits
+chp_dir <- "insilicoChIP"
+mta_fn <- file.path(res_dir, chp_dir, "insilico_chip_binding_score.tsv.gz")
+mta_dt <- fread(mta_fn)[in_silico_chip_score > 0.1]
+
+# now we will save moif annots for peaks we show in figure
+fav_peaks_genes <- c(
+  "peak11753" = "Nvec_vc1.1_XM_001629401.3",
+  "peak11756" = "Nvec_vc1.1_XM_001629401.3",
+  "peak6011" = "Nvec_vc1.1_XM_032385636.2",
+  "peak6014" = "Nvec_vc1.1_XM_032385636.2",
+  "peak77382" = "Nvec_vc1.1_XM_032367288.2",
+  "peak77395" = "Nvec_vc1.1_XM_032367288.2",
+  "peak77398" = "Nvec_vc1.1_XM_032367288.2"
+)
+fav_peaks <- names(fav_peaks_genes)
+
+# motif to gene assignments (to add to motif scores)
+motif_2_gene <- unique(mta_dt[,.(gene,gene_name,common_name,og,pfam,motif)])
+peaks_figure_dt <- rbindlist(lapply(fav_peaks, function(p) {
+
+  print(p)
+  
+  # first check if we have motif from in silico chip
+  pt <- unique(mta_dt[peak==p][in_silico_chip_score>0.1][,.(peak,motif,gene)])
+  
+  # now get motifs from scanning
+  if (nrow(pt) > 0) {
+    grs <- gr_list[["q0.95"]]
+  } else {
+    grs <- gr_list[["q0.98"]]
+  }
+
+  # overlap motif hits with target peak
+  pm <- as.data.table(
+    grs[unique(queryHits(findOverlaps(
+      grs,
+      makeGRangesFromDataFrame(peaks[peak==p])
+    )))]
+  )
+  setnames(pm, c("seqnames","name"), c("chr","motif"))
+  pm[, peak := p]
+
+  if (nrow(pt) > 0) {
+
+    # if we have both insilico chip and motif scanning, merge them
+    pm <- merge.data.table(pt, pm, by = c("peak", "motif"), all.x = TRUE, sort = FALSE)
+    pm <- merge.data.table(pm, motif_2_gene, by = c("gene", "motif"), sort = FALSE)
+    pm[, method := "insilico_chip"]
+    setorder(pm, start, end)
+
+  } else {
+
+    # otherwise add gene annotations to motifs
+    pm <- merge.data.table(pm, motif_2_gene, by = "motif", sort = FALSE)
+    pm <- unique(pm[order(start)])
+    pm[, method := "scan"]
+
+  }
+
+  # partition non-overlapping motif hits into connected components
+  gr <- makeGRangesFromDataFrame(pm, seqnames.field="peak", keep.extra.columns=TRUE)
+  ol <- findOverlaps(gr, minoverlap = 1)
+  ol <- ol[queryHits(ol) != subjectHits(ol)]
+  if (length(ol) > 0) {
+    g <- graph_from_data_frame(ol, directed = FALSE)
+    cc <- components(g)$membership
+    singl <- setdiff(seq_len(length(gr)), as.integer(names(cc)))
+    if (length(singl) > 0) {
+      cc <- c(
+        cc,
+        structure(max(cc) + seq_along(singl), names = as.character(singl))
+      )
+      cc <- cc[as.character(sort(as.integer(names(cc))))]
+    }
+    gr$motif_cluster <- cc
+    dt <- as.data.frame(gr)
+    setDT(dt)
+    setnames(dt, "seqnames", "peak")
+    cols <- c(colnames(pm)[1:2], "motif_cluster", colnames(pm)[3:ncol(pm)])
+    pm <- dt[, ..cols]
+  } else {
+    pm[, motif_cluster := 1]
+    setcolorder(pm, "peak", "motif", "motif_cluster")
+  }
+
+  # return
+  if (!is.null(pm)) {
+    pm[, peak_gene := fav_peaks_genes[p]]
+    pm[, strand := NULL]
+    setcolorder(pm, c("peak_gene", "peak", "method", "motif", "chr", "start", "end", "width", "motif_cluster", "motif_score", "gene", "gene_name", "common_name", "og", "pfam"))
+  }
+
+  pm
+}), use.names=TRUE, fill=TRUE)
+
+peaks_figure_dt <- unique(peaks_figure_dt)
+
+fwrite(peaks_figure_dt, file.path(fig_dir, "fig4_peaks_figure_motifs.tsv"), sep = "\t")
 ```
 
 # Group files
