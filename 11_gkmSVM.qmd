@@ -191,9 +191,8 @@ bct_maps <- setDT(cbind.data.frame(
 ))
 ```
 
-# gkmSVM
 
-## Prepare data
+# Prepare data
 
 Upon inspection of different filtering thresholds, we settled for itr `03`, i.e. relaxed filtering of peaks with Log2FC > 1 and Pval = 0.1 - this is because we want to train classifer on all accessible peaks in cell type (and not just specifically, differentially accessible peaks).
 
@@ -359,7 +358,7 @@ for (nm in pk_nm) {
 }
 ```
 
-## Train models
+# Train models
 
 Train gkm-SVM using libSVM (https://github.com/kundajelab/lsgkm). Fast but cannot be used to score all possible kmers to find enriched motifs.
 
@@ -390,18 +389,13 @@ do
 done
 ```
 
-## Inspect models
+# Inspect models
 
 CV scores distribution
 
 ```{r}
-out_id <- "PeakDifferential_cell_type"
-itr <- "03"
-res_dir <- file.path(res_dir, out_id, itr)
-fig_dir <- file.path(fig_dir, out_id, itr)
-
 nm <- "neuronal"
-cvp_fn <- file.path(res_dir, sprintf("%s.cvpred.txt", nm))
+cvp_fn <- file.path(res_dir, "output", sprintf("%s.cvpred.txt", nm))
 cvp <- fread(cvp_fn)
 setnames(cvp, c("region", "score", "label", "cvfold"))
 
@@ -418,18 +412,13 @@ gp_cvs <- ggplot(cvp, aes(score, group = cvfold)) +
 ggsave(
     file.path(fig_dir, sprintf("LS-GKM-cv-scores-%s.pdf", out_id)),
     gp_all + gp_cvs,
-    height = 5, width = 4
+    height = 5, width = 5
 )
 ```
 
 ROC for models CV
 
 ```{r}
-out_id <- "PeakDifferential_cell_type"
-itr <- "03"
-res_dir <- file.path(res_dir, out_id, itr)
-fig_dir <- file.path(fig_dir, out_id, itr)
-
 # for LS-GKM models (CL)
 pdf(
     file.path(fig_dir, sprintf("LS-GKM-cv-roc-%s.pdf", out_id)),
@@ -449,7 +438,7 @@ for (nm in pk_nm) {
 
         # number of regions used in training
         nr <- nrow(fread(file.path(
-            res_dir, sprintf("%s.fg.bed", nm)
+            res_dir, "input", sprintf("%s.fg.bed", nm)
         )))
 
         # cross validation iterations
@@ -517,39 +506,30 @@ for (nm in pk_nm) {
 dev.off()
 
 # order
-roc_dt_all[, stage := str_extract(model, "(adult|gastrula)")]
+roc_dt_all[, stage := ifelse(model %in% adult_cell_types, "adult", "gastrula")]
 roc_dt_all[, stage := factor(stage, levels = c("adult", "gastrula"))]
-roc_dt_all[, cell_type := str_remove(model, "(adult|gastrula)_")]
+setnames(roc_dt_all, "model", "cell_type")
 roc_dt_all[, cell_type := factor(cell_type, levels = unique(names(ct_cols), names(bct_cols)))]
-roc_dt_all[, model := factor(model, levels = unique(roc_dt_all[order(cell_type, stage)]$model))]
-setorder(roc_dt_all, model)
+setorder(roc_dt_all, cell_type)
 
 # save
 fwrite(
     roc_dt_all,
-    file.path(res_dir, sprintf("%s_cv_roc.tsv.gz", out_id)),
+    file.path(res_dir, sprintf("cv_roc.tsv.gz")),
     sep = "\t"
 )
 
 # AUC dist
 gp_auc <- ggplot(
-        unique(roc_dt_all[, .(model, auc, training_peaks)]),
-        aes(model, auc, fill = str_remove(model, "(adult|gastrula)_"))
+        unique(roc_dt_all[, .(cell_type, auc, training_peaks)]),
+        aes(cell_type, auc, fill = cell_type)
     ) +
     #geom_boxplot() +
     ggbeeswarm::geom_beeswarm(shape = 21) +
-    # geom_text(
-    #     data = unique(roc_dt_all[, .(model, training_peaks)]),
-    #     aes(
-    #         x = model, y = 0.95,
-    #         label = format(training_peaks, nsmall = 1, big.mark = ",")
-    #     ),
-    #     angle = 90, size = 4
-    # ) +
     guides(x.sec = ggh4x::guide_axis_manual(
-        breaks = unique(roc_dt_all[, .(model, training_peaks)])$model,
+        breaks = unique(roc_dt_all[, .(cell_type, training_peaks)])$cell_type,
         labels = format(
-            unique(roc_dt_all[, .(model, training_peaks)])$training_peaks,
+            unique(roc_dt_all[, .(cell_type, training_peaks)])$training_peaks,
             nsmall = 1, big.mark = ","
         )
     )) +
@@ -558,18 +538,18 @@ gp_auc <- ggplot(
         panel.grid.major = element_line(linewidth = 0.2, color = "grey"),
         legend.position = "none"
     ) +
-    labs(y = "AUC") +
+    labs(y = "AUC", title = "CV AUC") +
     scale_y_continuous(limits = c(0.5, 1)) +
     scale_fill_manual(values = c(ct_cols, bct_cols)) +
     scale_color_manual(values = c(ct_cols, bct_cols))
 
 ggsave(
-    file.path(fig_dir, sprintf("LS-GKM-cv-auc-dist-%s.pdf", out_id)),
-    gp_auc, width = 6, height = 6
+    file.path(fig_dir, sprintf("LS-GKM-cv-auc.pdf")),
+    gp_auc, width = 7, height = 6
 )
 ```
 
-## Predict
+# Predict
 
 Prepare test fastq file with test peakset from all cell type models.
 
@@ -601,7 +581,7 @@ do
 done
 ```
 
-## Inspect test results
+# Inspect test results
 
 Get all model scores in test peaks from all cell types, while keeping the metadata for peaks 
 (i.e. in which cell types they were selected).
@@ -685,98 +665,137 @@ fwrite(
 
 ```
 
-Plot ROC and AUC
+Plot ROC and precision-recall AUC.
 
 ```{r}
-# test results
+library(data.table)
+library(ggplot2)
+library(pROC)
+library(PRROC)
+library(ggbeeswarm)
+library(ggrepel)
+library(colorspace)
+
+# Load test results
 test_dt <- fread(file.path(res_dir, "models.test.scores.tsv.gz"))
 
-# test cell types
-cts <- as.character(unique(test_dt$testset))
+# Test cell types and models
+cts <- unique(test_dt$testset)
+mds <- unique(test_dt$model)
 
-# models
-mds <- as.character(unique(test_dt$model))
-
-# ROC per model and per cell type
-pdf(
-    file.path(fig_dir, sprintf("LS-GKM-test-roc.pdf")),
-    height = 6, width = 5
-)
-roc_dt <- rbindlist(sapply(mds, function(nm) {
-
+# Compute ROC and PR per model and cell type
+roc_list <- list()
+pr_list <- list()
+for (nm in mds) {
     message(nm)
     cvp <- test_dt[model == nm]
 
-    # ROC
-    roc_dt <- rbindlist(sapply(cts, function(x) {
+    # Compute curves for each cell type
+    for (x in cts) {
         cfg <- cvp[testset == x]
         cbg <- cvp[!peak %in% cfg$peak]
-        vpo <- cfg$score
-        vne <- cbg$score
+        
+        vpo <- cfg$score  # Positive scores
+        vne <- cbg$score  # Negative scores
+
         pnr <- length(unique(cfg$peak))
         nnr <- length(unique(cbg$peak))
-        roc <- pROC::roc(
-            controls = vpo,
-            cases = vne,
-            direction = ">",
-            ci = TRUE
-        )
-        data.table(
-            specificities = roc$specificities,
-            sensitivities = roc$sensitivities
-        )[, auc := roc$auc][, ":="(test_peaks_pos = pnr, test_peaks_neg = nnr)]
-    }, simplify = FALSE, USE.NAMES = TRUE), idcol = "testset", use.names = TRUE, fill = TRUE)
 
-    # plot
-    gp_roc <- ggplot(
-            roc_dt, aes(
-                x = specificities, y = sensitivities, 
-                group = testset,
-                color = str_remove(testset, "(adult|gastrula)_"),
-                label = sprintf("%s (AUC=%.2f)", testset, auc)
-            )
-        ) +
+        # ROC computation
+        roc <- pROC::roc(controls = vpo, cases = vne, direction = ">", ci = TRUE)
+        roc_dt <- data.table(
+            specificities = roc$specificities,
+            sensitivities = roc$sensitivities,
+            auc_roc = roc$auc,
+            test_peaks_pos = pnr,
+            test_peaks_neg = nnr
+        )
+
+        # PR Curve computation
+        pr <- PRROC::pr.curve(scores.class0 = vpo, scores.class1 = vne, curve = TRUE)
+        pr_dt <- data.table(
+            recall = pr$curve[, 1],
+            precision = pr$curve[, 2],
+            auc_pr = pr$auc.integral
+        )
+
+        # Combine both
+        cbind(roc_dt[1,], pr_dt[1,], testset = x)
+        roc_list[[nm]][[x]] <- roc_dt
+        pr_list[[nm]][[x]] <- pr_dt
+    }
+}
+
+# Plot ROC curve
+pdf(file.path(fig_dir, "LS-GKM-test-roc-.pdf"), height = 6, width = 5)
+for (nm in names(roc_list)) {
+    roc_dt <- rbindlist(roc_list[[nm]], idcol = "testset")
+    gp_roc <- ggplot(roc_dt, aes(x = specificities, y = sensitivities, color = testset)) +
         geom_line(size = 0.5, alpha = 0.5) +
-        scale_y_continuous(expand = c(0, 0)) +
-        scale_x_continuous(expand = expansion(mult = c(0, 0.45))) +
-        scale_color_manual(values = c(ct_cols, bct_cols)) +
+        geom_abline(slope = -1, intercept = 1, linetype = 2) +
         geom_text_repel(
-            data = roc_dt[order(-auc, -specificities * sensitivities)][, .SD[1], testset][1:4],
+            data = roc_dt[order(-auc_roc, -specificities * sensitivities)][, .SD[1], testset][1:4],
+            aes(label = sprintf("%s (AUC=%.2f)", testset, auc_roc)),
             nudge_x = 0.1, direction = "y", hjust = "left"
         ) +
+        scale_color_manual(values = ct_cols) +
         coord_fixed() +
-        geom_abline(slope = -1, intercept = 1, linetype = 2) +
-        labs(
-            x = "TNR", y = "TPR",
-            title = sprintf("%s\ntest ROC", nm)
-        ) +
-        theme(legend.position = "none")
+        labs(x = "TNR", y = "TPR", title = sprintf("%s\ntest ROC", nm)) +
+        theme(
+            axis.ticks.x = element_blank(),
+            panel.grid.major = element_blank(),
+            legend.position = "none"
+        )
     print(gp_roc)
-    
-    roc_dt
-
-}, USE.NAMES = TRUE, simplify = FALSE), idcol = "model", use.names = TRUE, fill = TRUE)
+}
 dev.off()
 
+# Plot PR curve
+pdf(file.path(fig_dir, "LS-GKM-test-pr-.pdf"), height = 6, width = 5)
+for (nm in names(pr_list)) {
+    pr_dt <- rbindlist(pr_list[[nm]], idcol = "testset")
+    gp_pr <- ggplot(pr_dt, aes(x = recall, y = precision, color = testset)) +
+        geom_line(size = 0.5, alpha = 0.5) +
+        geom_abline(slope = -1, intercept = 1, linetype = 2) +
+        geom_text_repel(
+            data = pr_dt[order(-auc_pr, -recall * precision)][, .SD[1], testset][1:4],
+            aes(label = sprintf("%s (AUCPR=%.2f)", testset, auc_pr)),
+            nudge_x = 0.1, direction = "y", hjust = "left"
+        ) +
+        scale_color_manual(values = ct_cols) +
+        coord_fixed() +
+        labs(x = "Recall", y = "Precision", title = sprintf("%s\ntest PR", nm)) +
+        theme(
+            axis.ticks.x = element_blank(),
+            panel.grid.major = element_line(linewidth = 0.2, color = "grey"),
+            legend.position = "none"
+        )
+    print(gp_pr)
+}
+dev.off()
+
+# Save results
+roc_dt <- rbindlist(sapply(roc_list, rbindlist, idcol = "testset", simplify = FALSE, USE.NAMES = TRUE), idcol = "model")
 roc_dt[, testset := factor(testset, levels = cell_types)]
 roc_dt[, model := factor(model, levels = cell_types)]
 setorder(roc_dt, model, testset)
 
-# save
-fwrite(
-    roc_dt,
-    file.path(res_dir, "models.roc.tsv.gz"),
-    sep = "\t", compress = "gzip"
-)
+pr_dt <- rbindlist(sapply(pr_list, rbindlist, idcol = "testset", simplify = FALSE, USE.NAMES = TRUE), idcol = "model")
+pr_dt[, testset := factor(testset, levels = cell_types)]
+pr_dt[, model := factor(model, levels = cell_types)]
+setorder(pr_dt, model, testset)
 
-# plor AUC for models
+fwrite(roc_dt, file.path(res_dir, "models.roc.tsv.gz"), sep = "\t", compress = "gzip")
+fwrite(pr_dt, file.path(res_dir, "models.pr.tsv.gz"), sep = "\t", compress = "gzip")
+
+# Plot AUC for models
 gp_auc <- ggplot(
-        unique(roc_dt[, .(model, testset, auc)]),
+        unique(roc_dt[, .(model, testset, auc_roc)]),
         aes(
-            model, auc, fill = testset, color = testset
+            model, auc_roc, fill = testset, color = testset
         )
     ) +
-    ggbeeswarm::geom_beeswarm(shape = 21, size = 3) +
+    ggbeeswarm::geom_beeswarm(shape = 21) +
     scale_y_continuous(limits = c(0.5, 1)) +
     scale_fill_manual(values = c(ct_cols, bct_cols)) +
     scale_color_manual(values = structure(
@@ -791,118 +810,42 @@ gp_auc <- ggplot(
         shape = guide_legend(override.aes = list(size = 5, fill = "grey")),
         fill = "none", color = "none"
     ) +
-    labs(x = "", y = "AUC") 
+    labs(x = "", y = "AUC ROC", title = "test AUC ROC") 
 
-# plot number of peaks
-gp_pks <- ggplot(
-        unique(roc_dt[, .(model, testset, test_peaks_pos)]),
+# Plot PR for models
+gp_pr <- ggplot(
+        unique(pr_dt[, .(model, testset, auc_pr)]),
         aes(
-            model, test_peaks_pos,
-            fill = testset, color = testset
+            model, auc_pr, fill = testset, color = testset
         )
     ) +
-    geom_jitter(shape = 21, size = 3) +
-    scale_y_continuous(limits = c(0, NA), expand = expansion(c(0, 0.1))) +
+    ggbeeswarm::geom_beeswarm(shape = 21) +
+    scale_y_continuous(limits = c(0, NA)) +
     scale_fill_manual(values = c(ct_cols, bct_cols)) +
     scale_color_manual(values = structure(
-        colorspace::darken(c(ct_cols, bct_cols), 0.5),
+      colorspace::darken(c(ct_cols, bct_cols), 0.5),
         names = c(names(ct_cols), names(bct_cols))
     )) +
     theme(
-        axis.text.x = element_blank(),
-        axis.ticks.x = element_blank(),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
         panel.grid.major = element_line(linewidth = 0.2, color = "grey")
     ) +
     guides(
         shape = guide_legend(override.aes = list(size = 5, fill = "grey")),
         fill = "none", color = "none"
     ) +
-    labs(x = "", y = "test peaks")
+    labs(x = "", y = "AUC PR", title = "test AUC PR") 
 
-gp_gkm_auc <- gp_pks / gp_auc + plot_layout(guides = "collect")
+gp_auc_pr <- gp_auc / gp_pr + plot_layout(guides = "collect")
 ggsave(
-    file.path(fig_dir, "LS-GKM-test-auc.pdf"),
-    gp_gkm_auc, height = 8, width = 10
+    file.path(fig_dir, "LS-GKM-test-auc-pr.pdf"),
+    gp_auc_pr, width = 7, height = 12
 )
 ```
 
-Cell type similarities based on AUC
+Cell type similarities based on AUC and tree with bootstrap in `90_Figures.qmd`.
 
-```{r}
-roc_dt <- fread(file.path(res_dir, "models.roc.tsv.gz"))
-auc_dt <- unique(roc_dt[, .(model, testset, auc)])
-auc_dt[, model := factor(model, levels = cell_types)]
-auc_dt[, testset := factor(testset, levels = cell_types)]
-setorder(auc_dt, model, testset)
-auc_dc <- dcast.data.table(auc_dt, model ~ testset, value.var = "auc")
-auc_mt <- as.matrix(auc_dc[, -1])
-rownames(auc_mt) <- auc_dc[[1]]
-auc_mt <- auc_mt[rownames(auc_mt), rownames(auc_mt)]
-all.equal(rownames(auc_mt), colnames(auc_mt))
-```
-
-Cell type tree based on AUC
-
-```{r}
-# NJ clustering
-require(ape)
-require(ggtree)
-tree <- nj(dist(auc_mt))
-tree_nm <- sprintf("LS-GKM-test-auc-NJ-adult-gastrula-tree")
-tree_fn <- file.path(res_dir, paste0(tree_nm, ".txt"))
-
-# tree visuals
-gt <- ggtree(tree, aes(color = label), ladderize = FALSE) +
-  scale_color_manual(values = ct_cols) +
-  theme_tree2() +
-  geom_tiplab() +
-  scale_x_continuous(expand = expansion(mult = c(0, 1))) +
-  theme(legend.position = "none")
-ggsave(file.path(
-    fig_dir,
-    paste0(tree_nm, ".pdf")
-), gt, height = 6, width = 7)
-```
-
-Tree with bootstrap in `90_Figures.qmd`.
-
-Order AUC matrix by tree.
-
-```{r}
-tips <- tree$tip.label
-hc_mt <- auc_mt[tips, tips]
-diag(hc_mt) <- NA
-
-row_ann <- HeatmapAnnotation(
-  which = "row", 
-  "cell type" = rownames(hc_mt), 
-  col = list("cell type" = c(ct_cols, bct_cols))
-)
-col_ann <- HeatmapAnnotation(
-  which = "column",
-  "cell type" = colnames(hc_mt), 
-  col = list("cell type" = c(ct_cols, bct_cols)), show_legend = FALSE
-)
-col_vec <- viridis::plasma(10)
-col_fun <- circlize::colorRamp2(seq(0, 1, length.out = length(col_vec)), col_vec)
-hm_cor <- Heatmap(
-  hc_mt, name = "AUC",
-  col = col_vec,
-  border = TRUE, use_raster = TRUE,
-  cluster_rows = FALSE, cluster_columns = FALSE, 
-  show_row_dend = FALSE, show_column_dend = FALSE,
-  show_row_names = TRUE, show_column_names = FALSE, 
-  top_annotation = col_ann, left_annotation = row_ann
-)
-pdf(file.path(
-    fig_dir,
-    sprintf("LS-GKM-test-auc-heatmap_%s.pdf", out_id)
-), width = 10.5, height = 6)
-print(hm_cor)
-dev.off()
-```
-
-## Explain
+# Explain
 
 Top scoring sequences for each model
 
@@ -1508,425 +1451,3 @@ md_mot <- unname(unlist(sapply(seq_along(md_arc), function(i) rep(md_arc[i], md_
 
 ```
 
-
-## Compare predictions with models built using different peaksets
-
-Compare models built using different iterations of filtering cell type specific peaks
-
-```{r}
-itrs <- c("00", "01", "02", "03", "04")
-roc_dt_all <- rbindlist(sapply(itrs, function(itr) {
-    
-    message(itr)
-
-    # load data
-    itr_dir <- file.path(res_dir, out_id, itr)
-    roc_dt <- fread(
-        file.path(itr_dir, "models.roc.tsv.gz"),
-        sep = "\t"
-    )
-    roc_dt
-    
-}, USE.NAMES = TRUE, simplify = FALSE), idcol = "itr", use.names = TRUE, fill = TRUE)
-
-roc_dt <- unique(roc_dt_all[, .(itr, model, testset, auc, test_peaks_pos, test_peaks_neg, test_cell_type, stage)])
-roc_dt[, filt := filts[itr]]
-roc_dt[, filt := factor(filt, levels = filts)]
-roc_dt[, stage := factor(stage, levels = c("adult", "gastrula"))]
-roc_dt[, test_cell_type := factor(test_cell_type, levels = unique(names(ct_cols), names(bct_cols)))]
-roc_dt[, model := factor(model, levels = unique(roc_dt[order(test_cell_type)]$model))]
-setorder(roc_dt, itr, model)
-
-# plor AUC for CVs
-gp_auc <- ggplot(
-        unique(roc_dt[, .(model, test_cell_type, filt, auc)]),
-        aes(
-            model, auc, shape = filt, fill = test_cell_type, color = test_cell_type
-        )
-    ) +
-    ggbeeswarm::geom_beeswarm() +
-    scale_y_continuous(limits = c(0.5, 1)) +
-    scale_shape_manual(values = structure(
-        rep(21:25, 2)[seq_along(itrs)],
-        names = filts[itrs]
-    )) +
-    scale_fill_manual(values = c(ct_cols, bct_cols)) +
-    scale_color_manual(values = structure(
-        colorspace::darken(c(ct_cols, bct_cols), 0.5),
-        names = c(names(ct_cols), names(bct_cols))
-    )) +
-    theme(
-        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
-        panel.grid.major = element_line(linewidth = 0.2, color = "grey")
-    ) +
-    guides(
-        shape = guide_legend(override.aes = list(size = 5, fill = "grey")),
-        fill = "none", color = "none"
-    ) +
-    labs(x = "", y = "test AUC") 
-
-# plot number of peaks
-gp_pks <- ggplot(
-        unique(roc_dt[, .(filt, model, testset, test_cell_type, test_peaks_pos)][model == testset]),
-        aes(
-            model, test_peaks_pos, shape = filt,
-            fill = test_cell_type, color = test_cell_type
-        )
-    ) +
-    ggbeeswarm::geom_beeswarm(size = 3) +
-    scale_shape_manual(values = structure(
-        rep(21:25, 2)[seq_along(itrs)],
-        names = filts[itrs]
-    )) +
-    scale_y_continuous(limits = c(0, NA)) +
-    scale_fill_manual(values = c(ct_cols, bct_cols)) +
-    scale_color_manual(values = structure(
-        colorspace::darken(c(ct_cols, bct_cols), 0.5),
-        names = c(names(ct_cols), names(bct_cols))
-    )) +
-    theme(
-        axis.text.x = element_blank(),
-        axis.ticks.x = element_blank(),
-        panel.grid.major = element_line(linewidth = 0.2, color = "grey")
-    ) +
-    guides(
-        shape = guide_legend(override.aes = list(size = 5, fill = "grey")),
-        fill = "none", color = "none"
-    ) +
-    labs(x = "", y = "test peaks")
-
-gp_gkm_auc <- gp_pks / gp_auc + plot_layout(guides = "collect")
-ggsave(
-    file.path(dirname(fig_dir), "LS-GKM-test-roc.pdf"),
-    gp_gkm_auc, height = 8, width = 10
-)
-
-# plot together
-gp_gkm_auc_wrap <- ggplot(
-  unique(roc_dt[, .(filt, model, test_cell_type, auc, test_peaks_pos)]),
-  aes(test_peaks_pos, auc, shape = filt, fill = test_cell_type, color = test_cell_type)
-  ) +
-  geom_point(position = position_jitter(width = 0.1, height = 0), size = 4) +
-  scale_shape_manual(values = structure(
-      rep(21:25, 2)[seq_along(itrs)],
-      names = filts[itrs]
-  )) +
-  scale_fill_manual(values = c(ct_cols, bct_cols)) +
-  scale_color_manual(values = structure(
-      colorspace::darken(c(ct_cols, bct_cols), 0.5),
-      names = c(names(ct_cols), names(bct_cols))
-  )) +
-  guides(
-      shape = guide_legend(override.aes = list(size = 5, fill = "grey")),
-      fill = "none", color = "none"
-  ) +
-  facet_wrap("model") +
-  theme(
-      panel.grid.major = element_line(linewidth = 0.2, color = "grey")
-  ) +
-  labs(x = "test peaks", y = "test AUC")
-ggsave(
-    file.path(dirname(fig_dir), "LS-GKM-test-roc-wrap.pdf"),
-    gp_gkm_auc_wrap, height = 14, width = 24
-)
-```
-
-## Cross species
-
-Use Nematostella cell type models for predictions across species
-
-Mouse, cell type level
-
-```{bash eval=FALSE, include=FALSE}
-for modelprefix in cnidocyte digestive_filaments_1 digestive_filaments_2 digestive_filaments_3 epidermis_1 epidermis_2 gastro_circular_muscle_1 gastro_circular_muscle_2 gastro_parietal_muscle gastro_unknown_1 gastro_unknown_2 gland muscle_1 muscle_2 neuron_GATA_Islet_1 neuron_GATA_Islet_2 neuron_GATA_Islet_3 neuron_Pou4_FoxL2_1 neuron_Pou4_FoxL2_2 precursors_1 precursors_2 precursors_3
-do
-    qsub -N Peaks_${modelprefix} -q long-sl7 -l virtual_free=60G,h_vmem=60G,h_rt=96:00:00 -M anamaria.elek@crg.eu -m abe -o log/Peaks_${modelprefix}.out -e log/Peaks_${modelprefix}.err 07_gkmSVM_ant_predict_mmus_Peaks_cell_type.sh ${modelprefix}
-done
-```
-
-```{bash}
-mkdir -p logs_cell_type
-for modelprefix in cnidocyte muscle_1 epidermis_1 neuron_GATA_Islet_1 neuron_Pou4_FoxL2_1 gland precursors_1
-do
-    # other outprefix: Unknown Immature_B_cells Activated_B_cells Regulatory_T_cells Type_II_pneumocytes Cerebellar_granule_cells Collisions Distal_convoluted_tubule Loop_of_henle Collecting_duct DCT_CD Hematopoietic_progenitors Proximal_tubule Proximal_tubule_S3 Podocytes Purkinje_cells SOM_Interneurons Endothelial_I_glomerular
-    for outprefix in Ex_neurons_CThPN Ex_neurons_CPN Ex_neurons_SCPN Inhibitory_neurons Enterocytes Hepatocytes Cardiomyocytes Erythroblasts Sperm T_cells B_cells NK_cells Macrophages Alveolar_macrophages Monocytes Microglia Dendritic_cells Astrocytes Oligodendrocytes Type_I_pneumocytes Endothelial_I_cells Endothelial_II_cells
-    do
-        nohup bash 03_gkmSVM_predict_mmus_Peaks_cell_type.sh ${modelprefix} ${outprefix} > logs_cell_type/03_gkmSVM_predict_mmus_Peaks_cell_type_bg_${modelprefix}_${outprefix}.out 2>&1 &
-        nohup bash 03_gkmSVM_predict_mmus_PeakDifferential_cell_type.sh ${modelprefix} ${outprefix} > logs_cell_type/03_gkmSVM_predict_mmus_PeakDifferential_cell_type_bg_${modelprefix}_${outprefix}.out 2>&1 &
-    done
-done
-```
-
-Mouse, broad cell type level
-
-```{bash}
-mkdir -p logs_broad_cell_type
-for modelprefix in cnidocyte muscle gastro_circular_muscle gastro_parietal_muscle gastro_unknown digestive_filaments epidermis precursors neuron_GATA_Islet neuron_Pou4_FoxL2 gland
-do
-    for outprefix in T_cells Hepatocytes B_cells Activated_B_cells Ex_neurons_CThPN Ex_neurons_CPN Ex_neurons_SCPN Inhibitory_neurons Enterocytes Cardiomyocytes Cerebellar_granule_cells Endothelial_II_cells Hematopoietic_progenitors Proximal_tubule Proximal_tubule_S3 NK_cells Regulatory_T_cells Erythroblasts Sperm SOM_Interneurons Macrophages Microglia Dendritic_cells Alveolar_macrophages Collisions Distal_convoluted_tubule Loop_of_henle Collecting_duct DCT_CD Astrocytes Type_I_pneumocytes Oligodendrocytes Endothelial_I_cells Endothelial_I_glomerular Monocytes Podocytes Purkinje_cells Immature_B_cells Type_II_pneumocytes Unknown
-    do
-        nohup bash 07_gkmSVM_predict_mmus_Peaks_broad_cell_type.sh ${modelprefix} ${outprefix} > logs_broad_cell_type/07_gkmSVM_predict_mmus_Peaks_broad_cell_type_${modelprefix}_${outprefix}.out 2>&1 &
-        nohup bash 07_gkmSVM_predict_mmus_PeakDifferential_broad_cell_type.sh ${modelprefix} ${outprefix} > logs_broad_cell_type/07_gkmSVM_predict_mmus_PeakDifferential_broad_cell_type_${modelprefix}_${outprefix}.out 2>&1 &
-    done
-done
-```
-
-Drosophila, cell type level
-
-```{bash}
-mkdir -p logs_cell_type
-for modelprefix in cnidocyte muscle_1 epidermis_1 neuron_GATA_Islet_1 neuron_Pou4_FoxL2_1 gland precursors_1
-do
-    for outprefix in Neural Somatic_muscle Pharnyx Epidermis Head_ectoderm Ventral_nerve_cord Malpighian_tubule Midgut Yolk
-    do
-        nohup bash 04_gkmSVM_predict_dmel_Peaks_cell_type.sh ${modelprefix} ${outprefix} > logs_cell_type/04_gkmSVM_predict_dmel_Peaks_cell_type_bg_${modelprefix}_${outprefix}.out 2>&1 &
-        nohup bash 04_gkmSVM_predict_dmel_PeakDifferential_cell_type.sh ${modelprefix} ${outprefix} > logs_cell_type/04_gkmSVM_predict_dmel_PeakDifferential_cell_type_bg_${modelprefix}_${outprefix}.out 2>&1 &
-    done
-done
-```
-
-Params
-
-```{r}
-sp <- "mmus"
-sps_dir <- file.path(res_dir, sp, "specific_peaks", "250bp", out_id)
-# test cell types
-if (sp == "mmus") {
-    sps_nm <- c(
-        "T_cells", "Hepatocytes", "B_cells", "Activated_B_cells",
-        "Ex_neurons_CThPN", "Ex_neurons_CPN", "Ex_neurons_SCPN",
-        "Inhibitory_neurons", "Enterocytes", "Cardiomyocytes",
-        "Cerebellar_granule_cells", "Endothelial_II_cells",
-        "Hematopoietic_progenitors", "Proximal_tubule", "Proximal_tubule_S3",
-        "NK_cells", "Regulatory_T_cells", "Erythroblasts", "Sperm",
-        "SOM_Interneurons", "Macrophages", "Microglia", "Dendritic_cells",
-        "Alveolar_macrophages", "Collisions", "Distal_convoluted_tubule",
-        "Loop_of_henle", "Collecting_duct", "DCT_CD", "Astrocytes",
-        "Type_I_pneumocytes", "Oligodendrocytes", "Endothelial_I_cells",
-        "Endothelial_I_glomerular", "Monocytes", "Podocytes", "Purkinje_cells",
-        "Immature_B_cells", "Type_II_pneumocytes", "Unknown"
-    )
-} else if (sp == "dmel") {
-     sps_nm <- c(
-        "Neural", "Somatic_muscle", "Pharnyx", "Epidermis", "Head_ectoderm",
-        "Ventral_nerve_cord", "Malpighian_tubule", "Midgut", "Yolk"
-    )
-}
-```
-
-Inspect cross-species prediction results
-
-```{r}
-# load model predictions
-test_dt <- rbindlist(sapply(pk_nm, function(model_nm) {
-    message(sprintf("\nLoading %s predictions:", model_nm))
-    test_dt <- rbindlist(sapply(sps_nm, function(nm) {
-        message(nm)
-        tryCatch({
-            fread(file.path(
-                sps_dir, sprintf("%s.%s.gkmpredict.txt", model_nm, nm)
-            ))
-        }, error = function(e) NULL)
-    }, USE.NAMES = TRUE, simplify = FALSE), idcol = "testset")
-}, USE.NAMES = TRUE, simplify = FALSE), idcol = "model")
-setnames(test_dt, c("model", "testset", "peak", "score"))
-test_dt[, score := as.numeric(score)]
-test_dt <- unique(test_dt)
-
-# save
-fwrite(
-    test_dt,
-    file.path(sps_dir, "models.test.scores.tsv.gz"),
-    sep = "\t"
-)
-
-# sample data for plotting
-set.seed(1950)
-test_dt_plot <- test_dt[
-    , .SD[sample(seq_len(nrow(.SD)), pmin(1e2, nrow(.SD)))],
-    .(testset, model)
-]
-test_dt_plot[, testset_median := median(score), .(testset, model)]
-setorder(test_dt_plot, -testset_median)
-# plots
-mods <- unique(c(names(ct_cols), names(bc_cols))[
-    c(names(ct_cols), names(bc_cols)) %in% unique(test_dt_plot$model)
-])
-gp_t_list <- lapply(mods, function(m) {
-    test_dt_plot_m <- test_dt_plot[model == m]
-    test_dt_plot_m[, testset := factor(
-        testset, levels = unique(test_dt_plot_m$testset)
-    )]
-    gp_t <- ggplot(
-            test_dt_plot_m,
-            aes(testset, score, fill = model)
-        ) +
-        geom_boxplot() +
-        #facet_wrap(vars(model), scales = "free_y") +
-        scale_fill_manual(values = c(ct_cols, bc_cols)) +
-        labs(title = m) +
-        theme(
-            axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
-            legend.position = "none"
-        )
-    gp_t
-})
-pdf(
-    file.path(fig_dir, sprintf("models.%s.%s.test.scores.pdf", sp, out_id)),
-    width = 18, height = 6
-)
-print(gp_t_list)
-dev.off()
-```
-
-Inspect cross-species prediction results for specific or non-specific peaks
-
-```{r}
-# specificity scores
-data_dir <- switch(
-    sp,
-    "mmus" = "../../cross_species/mmus/adult/",
-    "dmel" = "../../cross_species/dmel/data"
-)
-spks_dt <- fread(
-    file.path(data_dir, "peak_specificity_scores.tsv"),
-    sep = "\t"
-)
-setnames(spks_dt, c("peak", "testset", "specificity_score"))
-tdt <- merge.data.table(
-    test_dt, spks_dt, by = c("peak", "testset"),
-    all = FALSE, sort = FALSE
-)
-# label specific peaks
-tdt[, specificity_score_thr := quantile(specificity_score, 0.9), testset]
-tdt[, differential_peak := ifelse(
-    specificity_score > specificity_score_thr, TRUE, FALSE
-)]
-tdt[, differential_peak := factor(differential_peak, levels = c(TRUE, FALSE))]
-tdt[, model_alpha := paste0(
-    model,
-    ifelse(differential_peak == TRUE, "", "_alpha")
-)]
-# colors
-all_cols <- c(
-    bc_cols, ct_cols,
-    structure(
-        alpha(bc_cols, 0.3),
-        names = paste0(names(bc_cols), "_alpha")
-    ),
-    structure(
-        alpha(ct_cols, 0.3),
-        names = paste0(names(ct_cols), "_alpha")
-    ),
-    "TRUE" = "#000000", "FALSE" = alpha("#000000", 0.3)
-)
-# order
-tdt[, testset_median := median(score), .(testset, model_alpha)]
-setorder(tdt, model_alpha, -testset_median)
-# plots
-mods <- unique(c(names(ct_cols), names(bc_cols))[
-    c(names(ct_cols), names(bc_cols)) %in% unique(tdt$model)
-])
-gp_t_list <- lapply(mods, function(m) {
-    tdt_m <- tdt[model == m]
-    tdt_m[, testset := factor(
-        testset, levels = unique(tdt_m$testset)
-    )]
-    gp_t <- ggplot(
-            tdt[model == m],
-            aes(testset, score, fill = model_alpha, color = differential_peak)
-        ) +
-        geom_boxplot(
-            aes(color = model_alpha), outlier.colour = NULL
-        ) +
-        geom_boxplot(
-            aes(fill = model_alpha, color = differential_peak),
-            outlier.colour = NA
-        ) +
-        #facet_wrap(vars(model), scales = "free_y") +
-        theme(
-            axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
-            legend.position = "none"
-        ) +
-        labs(title = m) +
-        scale_fill_manual(values = all_cols) +
-        scale_color_manual(values = all_cols) +
-        guides(fill = "none")
-    gp_t
-})
-
-pdf(file.path(
-    fig_dir, sprintf("models.%s.%s.test.scores.groups.pdf", sp, out_id)
-    ), width = 8, height = 6
-)
-print(gp_t_list)
-dev.off()
-```
-
-```{r}
-# specificity scores
-data_dir <- switch(
-    sp,
-    "mmus" = "../../cross_species/mmus/adult/",
-    "dmel" = "../../cross_species/dmel/data"
-)
-spks_dt <- fread(
-    file.path(data_dir, "peak_specificity_scores.tsv")
-)
-
-setnames(spks_dt, c("peak", "testset", "specificity_score"))
-test_dt <- fread(
-    file.path(sps_dir, "models.test.scores.tsv.gz")
-)
-tssp_dt <- merge.data.table(
-    test_dt, spks_dt, by = c("peak", "testset"),
-    all = FALSE, sort = FALSE
-)
-
-score_dt <- copy(tssp_dt)
-score_dt[, specificity_score_thr := quantile(specificity_score, 0.99), testset]
-score_dt <- score_dt[specificity_score > specificity_score_thr]
-score_dt[model=="cnidocyte"][, .N, .(testset)]
-gp_t_dens <- ggplot(score_dt, aes(specificity_score, score, color = model)) +
-    #geom_point() +
-    #geom_hex(bins = 100) +
-    #scale_color_continuous(type = "viridis") +
-    geom_hline(yintercept = 0) +
-    stat_density_2d() +
-    facet_grid(model ~ testset) +
-    scale_x_log10() +
-    scale_color_manual(values = ct_cols) +
-    theme(
-        legend.position = "none",
-        text = element_text(size = 12),
-        strip.text = element_text(size = 10)
-  )
-
-pdf(file.path(
-    fig_dir, sprintf("models.%s.%s.test.scores.density.top1.pdf", sp, out_id)
-    ), width = 15, height = 10
-)
-print(gp_t_dens)
-dev.off()
-```
-
-## Motifs
-
-```{r}
-mot_fn <- list.files(
-    file.path(res_dir, out_id),
-    pattern = "*meme", full.names = TRUE
-)
-names(mot_fn) <- str_remove(basename(mot_fn), ".pwm_models.meme")
-mot_ls <- sapply(names(mot_fn), function(x) {
-    ms <- universalmotif::read_meme(mot_fn[x])
-    names(ms) <- paste0("GKM_", x, "_motif_", seq_along(ms))
-    sapply(names(ms), function(y) {
-        m <- ms[[y]]
-        m@name <- y
-        m
-    }, simplify = FALSE, USE.NAMES = FALSE)
-}, simplify = FALSE, USE.NAMES = TRUE)
-
-saveRDS(mot_ls, file.path(res_dir, out_id, "pwm_models.RDS"))
-```
