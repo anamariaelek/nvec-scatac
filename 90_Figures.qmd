@@ -200,6 +200,13 @@ cell_type_rename <- c(
 
 ```
 
+Load ArchR projects for adult and gastrula.
+
+```{r}
+proj_adult <- ArchR::loadArchRProject(adult_dir)
+proj_gastr <- ArchR::loadArchRProject(gastr_dir)
+```
+
 Load gene expression data for adult and gastrula.
 
 ```{r}
@@ -887,6 +894,8 @@ Using the files above, I will manually assemble the final ini file for the figur
 Tracks for Figure 1.
 
 ```{bash}
+conda activate pygenometracks
+
 declare -A marker_regions
 marker_regions["GATA"]="NC_064043.1:5890694-5915400"
 marker_regions["Elav"]="NC_064034.1:3163000-3178000"
@@ -906,7 +915,6 @@ marker_genes["Fgfa1"]="Nvec_vc1.1_XM_032367336.2"
 marker_genes["GABRA"]="Nvec_vc1.1_XM_048723418.1"
 marker_genes["NVHD033-ANTP"]="Nvec_vc1.1_XM_032379688.2"
 marker_genes["HMGbox_SOX1_2_3_15"]="Nvec_vc1.1_XM_001632947.3"
-
 
 fig_dir="/home/anamaria/cluster/aelek/proj/scATAC_nvec_v2/Nematostella_scATAC/plots/Figures"
 
@@ -940,7 +948,7 @@ ap_dir <- switch(
 
 # map between abult and gastrula
 pks_map <- fread(
-  file.path(adult_dir, "Peaks", "Peaks_cell_type_mapped.tsv")
+  file.path(res_dir, "Peaks", "Peaks_cell_type_mapped.tsv.gz")
 )
 
 # colors
@@ -1030,9 +1038,9 @@ if (is.null(ap_dir)) {
   all_peaks <- rbindlist(list(
     adult = as.data.table(proj_adult@peakSet)[, peak := paste0("adult_", peak)],
     gastrula = as.data.table(proj_gastr@peakSet)[, peak := paste0("gastrula_", peak)]
-  ))
-  res_list_filtered_adult <- fread(file.path(adult_pks_dir, "annotaton_peaks.tsv"))
-  res_list_filtered_gastr <- fread(file.path(adult_pks_dir, "annotaton_peaks.tsv"))
+  ), fill=TRUE, use.names = TRUE)
+  res_list_filtered_adult <- fread(file.path(adult_pks_dir, "annotaton_peaks.tsv.gz"))
+  res_list_filtered_gastr <- fread(file.path(adult_pks_dir, "annotaton_peaks.tsv.gz"))
   peaks_annotation <- rbindlist(list(
     res_list_filtered_adult[, peak := paste0("adult_", peak)],
     res_list_filtered_gastr[, peak := paste0("gastrula_", peak)]
@@ -1058,6 +1066,21 @@ length(unique(all_peaks[!peak %in% peaks_annotation$peak]$peak))
 peaks_annotation <- rbindlist(list(
   peaks_annotation, ms
 ), use.names = TRUE)
+
+# counts
+unique(peaks_annotation[,.(peak,promoter)])[,.N,promoter]
+
+
+pks_map_dt <- merge.data.table(
+  pks_map, 
+  unique(peaks_annotation[grep("adult", peak), .(peak_adult = peak, promoter_adult = promoter)])[, peak_adult := str_remove(peak_adult, "adult_")], 
+  by = "peak_adult", all.x = TRUE, sort = FALSE)
+pks_map_dt <- merge.data.table(
+  pks_map_dt, 
+  unique(peaks_annotation[grep("gastrula", peak), .(peak_gastrula = peak, promoter_gastrula =  promoter)])[, peak_gastrula := str_remove(peak_gastrula, "gastrula_")], 
+  by = "peak_gastrula", all.x = TRUE, sort = FALSE)
+pks_map_dt[, .N, promoter_adult]
+
 
 
 # promoters vs non-promoters
@@ -5878,7 +5901,7 @@ fp_clusters <- readRDS(
 )
 
 # features for clustering
-fc_thrs <- 2.5
+fc_thrs <- 3.5
 thrs <- sprintf("FC%s_qnorm", fc_thrs)
 feats <- names(which(apply(
     fp_clusters, 1, function(x) {
@@ -5891,11 +5914,18 @@ mean(rownames(fp_clusters) %in% feats)
 # selected features
 feats_select <- intersect(feats, rownames(fp_clusters))
 
+
 # make trees with different data processing
 gt_list <- list()
+
 set.seed(123)
-for (trim in c(TRUE, FALSE)) {
-  for (scale in c(TRUE, FALSE)) {
+
+trim <- FALSE
+scale <- FALSE
+
+#for (trim in c(TRUE, FALSE)) {
+#  for (scale in c(TRUE, FALSE)) {
+
     proc <- sprintf(
       "%s %s",
       ifelse(trim, "trim", ""),
@@ -5933,6 +5963,8 @@ for (trim in c(TRUE, FALSE)) {
     bptree <- boot.tree(tmatrix, B = 100, tree = "nj")
     bp <- sum(as.integer(bptree$node.label), na.rm=TRUE)/bptree$Nnode
 
+    bptree <- phytools::midpoint.root(bptree)
+
     # save tree
     tree_fn <- paste0(tree_nm, ".txt")
     ape::write.tree(bptree, file.path(tree_dir, tree_fn))
@@ -5953,8 +5985,9 @@ for (trim in c(TRUE, FALSE)) {
       ) +
       labs(caption = tree_cp)
     gt_list[[proc]] <- gt
-  }
-}
+
+#  }
+#}
 
 # save all trees plots
 tree_nm <- sprintf("NJ_gene_scores_adult_gastrula_tree_%s_bootstrap", thrs)
@@ -5962,9 +5995,39 @@ pdf(file.path(
     fig_dir,
     paste0("fig4_", tree_nm, ".pdf")
 ), height = 6, width = 5)
-print(gt_list)
+print(gt)
 dev.off()
 
+```
+
+```{r}
+# load re-rooted tree
+thrs <- 2.5
+tree_nm <- sprintf("NJ_gene_scores_adult_gastrula_tree_FC%s_qnorm_bootstrap_rerooted", thrs)
+tree_fn <- file.path(tree_dir, paste0(tree_nm, ".nexus"))
+tree <- ape::read.nexus(tree_fn)
+
+# plot tree
+require(ggtree)
+gt <- ggtree(tree, ladderize = FALSE, branch.length = "none") +
+  theme_tree2() +
+  geom_tiplab(aes(color = label)) +
+  geom_nodelab(aes(label = label), size = 2, hjust = -0.2) +
+  scale_x_continuous(expand = expansion(mult = c(0, 2))) +
+  scale_color_manual(values = ct_cols) +
+  theme(
+    legend.position = "none",
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
+  )
+  
+pdf(file.path(
+    fig_dir,
+    paste0("fig4_", tree_nm, ".pdf")
+), height = 6, width = 5)
+plot(tree)
+dev.off()
 ```
 
 Separate for adult and gastrula
@@ -6107,7 +6170,7 @@ Matrix of shared peaks in adult and gastrula
 fp_clusters <- readRDS(
   file.path(tree_dir, "data", "peaks.rds")
 )
-fc_thrs <- 1.5
+fc_thrs <- 2
 thrs <- sprintf("FC%s_qnorm", fc_thrs)
 feats_select <- rownames(fp_clusters)[!apply(fp_clusters, 1, max) < fc_thrs]
 table_fp <- fp_clusters[feats_select, ]
@@ -6133,10 +6196,9 @@ jacc_ovl <- function(data, thrs) {
       jacc_mt[ct_1, ct_2] <- jac
     }
   }
-  jacc_mt
+  1-jacc_mt
 }
 
-jacc_mt <- jacc_ovl(t(table_fp), fc_thrs)
 
 ```
 
@@ -6145,10 +6207,16 @@ Peaks based tree
 ```{r}
 # data
 require(ape)
-tmatrix <- t(table_fp)
+
+# single tree
+jacc_mt <- jacc_ovl(t(table_fp), fc_thrs)
+tree <- nj(as.dist(jacc_mt))
 
 # bootstrap tree
-bptree <- boot.tree(tmatrix, B = 100, tree = "nj") # func = jacc_ovl, thrs = fc_thrs
+tmatrix <- t(table_fp)
+bptree <- boot.tree(tmatrix, B = 100, tree = "nj", func = jacc_ovl, thrs = fc_thrs)
+
+bptree <- phytools::midpoint.root(bptree)
 
 # save tree
 tree_nm <- sprintf("NJ_peaks_ovl_adult_gastrula_tree_%s_bootstrap", thrs)
@@ -6170,6 +6238,8 @@ gt <- ggtree(bptree, ladderize = FALSE, branch.length = "none") +
     axis.ticks.x = element_blank()
   ) +
   labs(caption = sprintf("%s peaks", length(feats_select)))
+
+
 ggsave(file.path(
     fig_dir,
     paste0("fig4_", tree_nm, ".pdf")
@@ -6922,10 +6992,49 @@ compute_auc_matrix <- function(test_dt, mds, tst) {
     return(auc_mat)
 }
 
-# bootstrap parameters
-n_bootstrap <- 100
+# compute AUC matrix
 testsets <- unique(test_dt$testset)
 models <- unique(test_dt$model)
+auc_mat <- compute_auc_matrix(test_dt, models, testsets)
+
+# load pre computed AUC matrix
+auc_mat_prec <- readRDS(file.path(tree_dir, "data", "gksvm_03.rds"))
+
+# make single tree
+tree <- nj(dist(auc_mat))
+
+# make single tree
+tree <- nj(dist(auc_mat_prec))
+tree$tip.label[tree$tip.label=="gastrula_cnidocyte"] <- "gastrula_cnidocyte_gastrula"
+tree$tip.label[tree$tip.label=="gastrula_gland"] <- "gastrula_gland_mucin"
+tree$tip.label <- str_remove(tree$tip.label, "(adult|gastrula)_")
+tree$tip.label <- str_replace_all(tree$tip.label, cell_type_rename)
+tree <- phytools::midpoint.root(tree)
+
+# save
+tree_fn <- file.path(tree_dir, "NJ_gkmSVM_auc_adult_gastrula_tree.txt")
+ape::write.tree(tree, tree_fn)
+
+# plot single tree
+require(ggtree)
+gt <- ggtree(tree, ladderize = FALSE, branch.length = "none") +
+  theme_tree2() +
+  geom_tiplab(aes(color = label)) +
+  scale_color_manual(values = ct_cols) +
+  scale_x_continuous(expand = expansion(mult = c(0, 2))) +
+  theme(
+    legend.position = "none",
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
+  )
+ggsave(
+  file.path(fig_dir, "fig4_NJ_gkmSVM_auc_adult_gastrula_tree.pdf"),
+  gt, height = 6, width = 4
+)
+
+# bootstrap parameters
+n_bootstrap <- 100
 
 # store bootstrap trees
 bootstrap_trees <- vector("list", n_bootstrap)
@@ -7363,133 +7472,9 @@ print(p2)
 dev.off()
 ```
 
-Select example genes to show in the figure.
+### Peaks overlap between retractor muscles
 
-```{r}
-gns <- gene_acc_dt[cell_type == "both"]$gene
-pks <- peak_access_dt[category_gene=="both"][category %in% c("other","both")]$peak
-cnd_dt <- peak_dt[cell_type %in% cts & peak %in% pks & gene %in% gns]
-cnd_dt[,min_gene_score_in_selected_cell_types:=min(gene_score),gene]
-cnd_dt <- cnd_dt[min_gene_score_in_selected_cell_types>1.2]
-fwrite(cnd_dt, file.path(fig_dir, "example_muscle_genes.csv"))
-```
-
-Inspect model contributions for these genes and select the ones we want to show.
-
-Pseudobulk coverage tracks for selected genes.
-
-```{bash}
-conda activate pygenometracks
-
-declare -A marker_regions
-# TR
-marker_regions["Nem64"]="NC_064035.1:3242699-3248228"
-# MR
-marker_regions["Nem24"]="NC_064035.1:3192906-3202424"
-marker_regions["Nem7"]="NC_064035.1:3192906-3202424"
-marker_genes["Hhex"]="NC_064039.1:9242947-9249695"
-marker_regions["Wfdc8"]="NC_064036.1:8530516-8541040"
-marker_regions["XM_048725710"]="NC_064036.1:5757725-5768710"
-# TR vs MR
-marker_regions["7tm_1"]="NC_064042.1:2347421-2352227"
-# MR vs TR
-marker_regions["XM_032382310.2"]="NC_064047.1:923511-927950"
-# muscle genes
-marker_regions["SRPX2"]="NC_064034.1:7873522-7881774"
-marker_regions["Cdh1"]="NC_064046.1:7119772-7130455"
-marker_regions["MuscleLIM1.1"]="NC_064039.1:14134398-14149362"
-marker_regions["MyHC-st"]="NC_064045.1:3401194-3435023"
-#marker_regions[""]=""
-
-declare -A marker_genes
-# TR
-marker_genes["Nem64"]="Nvec_vc1.1_XM_001634938.2"
-# MR
-marker_genes["Nem24"]="Nvec_vc1.1_XM_032385184.2"
-marker_genes["Nem7"]="Nvec_vc1.1_XM_032385185.2"
-marker_genes["Hhex"]="Nvec_vc1.1_XM_032364784.2"
-marker_genes["Wfdc8"]="Nvec_vc1.1_XM_048725349.1"
-marker_genes["XM_048725710"]="Nvec_vc1.1_XM_048725710.1"
-# TR vs MR
-marker_genes["7tm_1"]="Nvec_vc1.1_XM_032381004.2"
-# MR vs TR
-marker_genes["XM_032382310.2"]="Nvec_vc1.1_XM_032382310.2"
-# muscle genes
-marker_genes["SRPX2"]="Nvec_vc1.1_XM_032365556.2" # Sushi repeat-containing protein SRPX2
-marker_genes["Cdh1"]="Nvec_vc1.1_XM_032380092.2"
-marker_genes["MuscleLIM1.1"]="Nvec_vc1.1_XM_032375152.2"
-marker_genes["MyHC-st"]="Nvec_vc1.1_XM_001636908.3"
-#marker_genes[""]=""
-
-fig_dir="/home/anamaria/cluster/aelek/proj/scATAC_nvec_v2/Nematostella_scATAC/plots/Figures"
-
-tracks=${fig_dir}"/fig4_tracks.ini"
-
-# loop over two arrays and make plots
-for i in ${!marker_genes[@]}
-do
-    gene=$i
-    cord=${marker_regions[$gene]}
-    echo
-    echo '# # # # # # # # # '$gene : $cord'# # # # # # # # # '
-    echo
-    plot=${fig_dir}/fig4_pyGenomeTracks_${gene}.svg
-    pyGenomeTracks --tracks ${tracks} --region ${cord} --title ${gene} -o ${plot}
-done
-```
-
-Which motifs are binding to those peaks?
-
-```{r}
-example_genes <- c(
-  "Nvec_vc1.1_XM_001634938.2",
-  "Nvec_vc1.1_XM_032385184.2",
-  "Nvec_vc1.1_XM_032385185.2",
-  "Nvec_vc1.1_XM_032365556.2",
-  "Nvec_vc1.1_XM_032380092.2",
-  "Nvec_vc1.1_XM_032375152.2",
-  "Nvec_vc1.1_XM_001636908.3",
-  "Nvec_vc1.1_XM_048725349.1"
-)
-
-# load motifs scores
-chp_dir <- "insilicoChIP"
-mta_fn <- file.path(res_dir, chp_dir, "insilico_chip_binding_score.tsv.gz")
-mta_dt <- fread(mta_fn) #[in_silico_chip_score > 0.1]
-
-ptd_dt <- rbindlist(sapply(example_genes, function(g) {
-
-  print(g)
-  
-  # select peaks associated to genes in selected cell types
-  g_dt <- unique(peak_dt[cell_type %in% cts][gene == g])
-
-  # motifs
-  p_dt <- mta_dt[peak %in% g_dt$peak][order(peak)]
-  
-  m_dt <- unique(p_dt[, .(peak, motif, gene, gene_name, common_name, pfam, og, in_silico_chip_score)])
-  
-  # rename gene columns
-  setnames(
-    m_dt,
-    c("gene", "gene_name", "common_name", "pfam", "og"),
-    c("motif_gene", "motif_gene_name", "motif_common_name", "motif_pfam", "motif_og")
-  )
-
-  # filter by insilico chip score
-  m_dt[in_silico_chip_score > 0.1]
-
-
-}, simplify = FALSE, USE.NAMES = TRUE), idcol = "gene")
-
-# add example gene annotataion
-ptd_dt <- merge.data.table(
-  ptd_dt, gnan[, .(gene, gene_name, common_name, pfam, og)], 
-  by = "gene", sort = FALSE
-)
-```
-
-Calculate classic motif enrichment in retractor muscles peaks that are:
+Calculate motif enrichment in retractor muscles peaks that are:
 1) specific for TR vs MR
 2) specific for MR vs TR
 3) common to both
@@ -7533,7 +7518,68 @@ peaks <- fread(file.path(pks_dir, "Peaks_cell_type_mapped.bed"))
 setnames(peaks, c("seqnames", "start", "end", "peak", "score", "strand"))
 peaks <- unique(peaks)
 peaks_gr <- makeGRangesFromDataFrame(peaks, keep.extra.columns = TRUE)
+```
 
+- homer motif enrichment
+
+```{r}
+# inputs for homer
+peaks_dir <- file.path("results", "Motifs", "Homer", "muscle")
+dir.create(peaks_dir, showWarnings = FALSE)
+fwrite(
+  peaks[peak %in% pks_both],
+  file.path(peaks_dir, "peaks_both.bed"),
+  sep = "\t", col.names = FALSE, quote = FALSE
+)
+fwrite(
+  peaks[!peak %in% pks_both],
+  file.path(peaks_dir, "peaks_both_bg.bed"),
+  sep = "\t", col.names = FALSE, quote = FALSE
+)
+fwrite(
+  peaks[peak %in% pks_tr],
+  file.path(peaks_dir, "peaks_muscle_TR.bed"),
+  sep = "\t", col.names = FALSE, quote = FALSE
+)
+fwrite(
+  peaks[!peak %in% pks_tr],
+  file.path(peaks_dir, "peaks_muscle_TR_bg.bed"),
+  sep = "\t", col.names = FALSE, quote = FALSE
+)
+fwrite(
+  peaks[peak %in% pks_mr],
+  file.path(peaks_dir, "peaks_muscle_MR.bed"),
+  sep = "\t", col.names = FALSE, quote = FALSE
+)
+fwrite(
+  peaks[!peak %in% pks_mr],
+  file.path(peaks_dir, "peaks_muscle_MR_bg.bed"),
+  sep = "\t", col.names = FALSE, quote = FALSE
+)
+```
+
+```
+cd scripts
+bash homer.sh > logs/homer.out 2>&1 &
+```
+
+- streme motif enrichment
+
+```
+cd scripts
+
+genome="/users/asebe/aelek/proj/scATAC_nvec_v2/Nematostella_scATAC/genome/Nvec_vc1.1_gDNA.fasta"
+beddir="/users/asebe/aelek/proj/scATAC_nvec_v2/Nematostella_scATAC/results/Motifs/streme/muscle/"
+
+for name in muscle_MR muscle_TR both
+do
+  sbatch streme.sh $beddir peaks_${name} $genome
+done
+```
+
+- motif scores enrichment
+
+```{r}
 # enrichment per cell type
 enr_list <- vector("list", length = length(ct_comparas))
 names(enr_list) <- names(ct_comparas)
@@ -7684,6 +7730,8 @@ dev.off()
 #view_motifs(reverseComplement(enr_pwms[[x]]@motif))
 #dev.off()
 ```
+
+#### Posterboys
 
 Find candidate peaks to show in Fig.4:
 
@@ -7934,6 +7982,609 @@ peaks_figure_dt <- rbindlist(lapply(fav_peaks, function(p) {
 peaks_figure_dt <- unique(peaks_figure_dt)
 
 fwrite(peaks_figure_dt, file.path(fig_dir, "fig4_peaks_figure_motifs.tsv"), sep = "\t")
+```
+
+Make pseudobulk coverage tracks for selected genes.
+
+```{bash}
+conda activate pygenometracks
+
+declare -A marker_regions
+# TR
+marker_regions["Nem64"]="NC_064035.1:3242699-3248228"
+# MR
+marker_regions["Nem24"]="NC_064035.1:3192906-3202424"
+marker_regions["Nem7"]="NC_064035.1:3192906-3202424"
+marker_genes["Hhex"]="NC_064039.1:9242947-9249695"
+marker_regions["Wfdc8"]="NC_064036.1:8530516-8541040"
+marker_regions["XM_048725710"]="NC_064036.1:5757725-5768710"
+# TR vs MR
+marker_regions["7tm_1"]="NC_064042.1:2347421-2352227"
+# MR vs TR
+marker_regions["XM_032382310.2"]="NC_064047.1:923511-927950"
+# muscle genes
+marker_regions["SRPX2"]="NC_064034.1:7873522-7881774"
+marker_regions["Cdh1"]="NC_064046.1:7119772-7130455"
+marker_regions["MuscleLIM1.1"]="NC_064039.1:14134398-14149362"
+marker_regions["MyHC-st"]="NC_064045.1:3401194-3435023"
+#marker_regions[""]=""
+
+declare -A marker_genes
+# TR
+marker_genes["Nem64"]="Nvec_vc1.1_XM_001634938.2"
+# MR
+marker_genes["Nem24"]="Nvec_vc1.1_XM_032385184.2"
+marker_genes["Nem7"]="Nvec_vc1.1_XM_032385185.2"
+marker_genes["Hhex"]="Nvec_vc1.1_XM_032364784.2"
+marker_genes["Wfdc8"]="Nvec_vc1.1_XM_048725349.1"
+marker_genes["XM_048725710"]="Nvec_vc1.1_XM_048725710.1"
+# TR vs MR
+marker_genes["7tm_1"]="Nvec_vc1.1_XM_032381004.2"
+# MR vs TR
+marker_genes["XM_032382310.2"]="Nvec_vc1.1_XM_032382310.2"
+# muscle genes
+marker_genes["SRPX2"]="Nvec_vc1.1_XM_032365556.2" # Sushi repeat-containing protein SRPX2
+marker_genes["Cdh1"]="Nvec_vc1.1_XM_032380092.2"
+marker_genes["MuscleLIM1.1"]="Nvec_vc1.1_XM_032375152.2"
+marker_genes["MyHC-st"]="Nvec_vc1.1_XM_001636908.3"
+#marker_genes[""]=""
+
+fig_dir="/home/anamaria/cluster/aelek/proj/scATAC_nvec_v2/Nematostella_scATAC/plots/Figures"
+
+tracks=${fig_dir}"/fig4_tracks.ini"
+
+# loop over two arrays and make plots
+for i in ${!marker_genes[@]}
+do
+    gene=$i
+    cord=${marker_regions[$gene]}
+    echo
+    echo '# # # # # # # # # '$gene : $cord'# # # # # # # # # '
+    echo
+    plot=${fig_dir}/fig4_pyGenomeTracks_${gene}.svg
+    pyGenomeTracks --tracks ${tracks} --region ${cord} --title ${gene} -o ${plot}
+done
+```
+
+Which motifs are binding to muscle specific and shared peaks?
+
+```{r}
+example_genes <- c(
+  "Nvec_vc1.1_XM_001634938.2",
+  "Nvec_vc1.1_XM_032385184.2",
+  "Nvec_vc1.1_XM_032385185.2",
+  "Nvec_vc1.1_XM_032365556.2",
+  "Nvec_vc1.1_XM_032380092.2",
+  "Nvec_vc1.1_XM_032375152.2",
+  "Nvec_vc1.1_XM_001636908.3",
+  "Nvec_vc1.1_XM_048725349.1"
+)
+
+# load motifs scores
+chp_dir <- "insilicoChIP"
+mta_fn <- file.path(res_dir, chp_dir, "insilico_chip_binding_score.tsv.gz")
+mta_dt <- fread(mta_fn) #[in_silico_chip_score > 0.1]
+
+ptd_dt <- rbindlist(sapply(example_genes, function(g) {
+
+  print(g)
+  
+  # select peaks associated to genes in selected cell types
+  g_dt <- unique(peak_dt[cell_type %in% cts][gene == g])
+
+  # motifs
+  p_dt <- mta_dt[peak %in% g_dt$peak][order(peak)]
+  
+  m_dt <- unique(p_dt[, .(peak, motif, gene, gene_name, common_name, pfam, og, in_silico_chip_score)])
+  
+  # rename gene columns
+  setnames(
+    m_dt,
+    c("gene", "gene_name", "common_name", "pfam", "og"),
+    c("motif_gene", "motif_gene_name", "motif_common_name", "motif_pfam", "motif_og")
+  )
+
+  # filter by insilico chip score
+  m_dt[in_silico_chip_score > 0.1]
+
+
+}, simplify = FALSE, USE.NAMES = TRUE), idcol = "gene")
+
+# add example gene annotataion
+ptd_dt <- merge.data.table(
+  ptd_dt, gnan[, .(gene, gene_name, common_name, pfam, og)], 
+  by = "gene", sort = FALSE
+)
+```
+
+
+### Peaks overlap between retractor muscles and related cell types
+
+Overlap of muscle peaks with other related cell types
+
+```{r}
+# where to save selected peaks
+pks_ovl_lst <- list()
+
+# loop over muscle types
+groups_fg <- c("muscle_tentacle_retractor", "muscle_mesentery_retractor")
+for (group_fg in groups_fg) {
+
+  print(group_fg)
+
+  group_bg <- switch(group_fg, 
+    "muscle_tentacle_retractor" = c(
+      "precursors_NPC", "epidermis_1", "epidermis_2", "NPC_1", "NPC_2", 
+      "ectoderm", "ecto_aboral", "neuron_Pou4_FoxL2_1", "neuron_Pou4_FoxL2_2", "neuron_Pou4_FoxL2_3", "cnidocyte", "cnidocyte_gastrula"
+    ),
+    "muscle_mesentery_retractor" = c(
+      "EMS", "gastro_somatic_gonad", "gastro_IRF1_2", "gastro_circular_muscle_1", "gastro_circular_muscle_2", "gastro_parietal_muscle", "digestive_filaments_1", "digestive_filaments_2", "digestive_filaments_3"
+    )
+  )
+  
+  pdf(
+    file.path(fig_dir, sprintf("peaks_access_%s_ovl_ct.pdf", group_fg)),
+    width = 16, height = 8
+  )
+
+  for (peak_access_thrs in c(2, 4, 6, 8)) {
+
+    # subset peaks of interest
+    group_pks <- peak_access_dt[category != "other"]$peak
+    group_dts <- copy(peak_acc_dt)[, gene := NULL][peak %in% group_pks]
+    # select only accessible peaks
+    group_dts[, peak_access := ifelse(peak_access > peak_access_thrs, 1, 0)]
+    group_dts <- group_dts[peak_access > 0]
+    # select cell types to compare
+    group_dts <- group_dts[cell_type %in% c(groups_fg, group_bg)]
+    group_dts <- unique(group_dts)
+    # return
+    pks_ovl_lst[[group_fg]][[sprintf("access_%s", peak_access_thrs)]] <- group_dts
+    
+  }
+  
+  dev.off()
+
+}
+
+```
+
+Group related cell types for peaks overlaps
+
+```{r}
+# all peaks
+peaks <- fread(file.path("results", "Peaks", "Peaks_cell_type_mapped.bed"))
+setnames(peaks, c("seqnames", "start", "end", "peak", "score", "strand"))
+
+# where to save selected peaks
+peaks_dir <- file.path("results", "Motifs", "streme", "muscle_novl")
+dir.create(peaks_dir, showWarnings = FALSE)
+
+# groups
+groups_lst <- list(
+  "muscle_tentacle_retractor" = list(
+    "muscle_TR" = "muscle_tentacle_retractor",
+    "precursor" = c("precursors_NPC", "NPC_1", "NPC_2"),
+    "epidermis" = c("epidermis_1", "epidermis_2"),
+    "ecto" = c("ectoderm", "ecto_aboral"),
+    "neuro" = c("neuron_Pou4_FoxL2_1", "neuron_Pou4_FoxL2_2", "neuron_Pou4_FoxL2_3", "cnidocyte", "cnidocyte_gastrula")
+  ),
+  "muscle_mesentery_retractor" = list(
+    "muscle_MR" = "muscle_mesentery_retractor",
+    "EMS" = c("EMS"),
+    "gastro" = c("gastro_circular_muscle_1", "gastro_circular_muscle_2", "gastro_parietal_muscle", "gastro_somatic_gonad", "gastro_IRF1_2"), 
+    "digestive" = c("digestive_filaments_1", "digestive_filaments_2", "digestive_filaments_3")
+  )
+)
+
+# subset peaks
+peaks_fg_list <- list()
+peaks_bg_list <- list()
+peaks_all_list <- list()
+
+for (group_fg in groups_fg) {
+    
+  peak_access_thrs <- 4
+  group_dts <- pks_ovl_lst[[group_fg]][[sprintf("access_%s", peak_access_thrs)]][peak_access > 0]
+
+  for (i in seq_along(names(groups_lst[[group_fg]]))) {
+
+    group_nm <- names(groups_lst[[group_fg]])[i]
+    cts_subset <- groups_lst[[group_fg]][[group_nm]]
+
+    # all peaks including overlaps between groups
+    pks_subset_fg <- unique(intersect(
+      group_dts[cell_type %in% group_fg]$peak,
+      group_dts[cell_type %in% c(cts_subset)]$peak
+    ))
+    
+    # peaks only overlapping with muscle and group of interest
+    cts_subset_bg <- setdiff(unlist(groups_lst[[group_fg]]), c(cts_subset, group_fg))
+    pks_subset_bg <- unique(group_dts[cell_type %in% cts_subset_bg]$peak)
+    pks_subset <- setdiff(pks_subset_fg, pks_subset_bg)
+
+    print(sprintf(
+      "%s peaks in %s & %s (%s)",
+      length(unique(pks_subset)), 
+      group_fg,
+      group_nm,
+      paste(cts_subset, collapse = " | ")
+    ))
+
+    # for plotting
+    peaks_all <- peaks[peak %in% pks_subset_fg]
+    peaks_all_list[[group_fg]][[group_nm]] <- peaks_all
+
+    # inputs for homer
+    peaks_fg <- peaks[peak %in% pks_subset]
+    peaks_fg_list[[group_fg]][[group_nm]] <- peaks_fg
+    fwrite(
+      peaks_fg,
+      file.path(peaks_dir, sprintf("peaks_%s_%s.bed", group_fg, group_nm)),
+      sep = "\t", col.names = FALSE, quote = FALSE
+    )
+    peaks_bg <- peaks[!peak %in% pks_subset]
+    peaks_bg_list[[group_fg]][[group_nm]] <- peaks_bg
+    fwrite(
+      peaks_bg,
+      file.path(peaks_dir, sprintf("peaks_%s_%s_bg.bed", group_fg, group_nm)),
+      sep = "\t", col.names = FALSE, quote = FALSE
+    )
+  }
+
+}
+```
+
+Euler and upset diagram of overlapping peaks
+
+```{r}
+
+for (group_fg in groups_fg) {
+
+  fdt <- rbindlist(peaks_all_list[[group_fg]])
+  cts <- names(peaks_all_list[[group_fg]])
+
+  pks_ovl_dt <- data.table(peak = unique(fdt$peak))
+  for (i in cts) {
+    pks_ovl_dt[, I(i) := .SD$peak %in% peaks_all_list[[group_fg]][[i]]$peak, by = .I]
+  }
+
+  require(eulerr)
+  fit <- euler(pks_ovl_dt[, -1])
+  p_ovl <- plot(
+    fit,
+    quantities = TRUE,
+    labels = list(font = 4)
+  )
+
+  pdf(
+    file.path(fig_dir, sprintf("peaks_access_%s_ovl.pdf", group_fg)),
+    width = 8, height = 4
+  )
+  print(p_ovl)
+  dev.off()
+
+  require(ComplexUpset)
+  require(ggplot2)
+  
+  ups <- upset(pks_ovl_dt, colnames(pks_ovl_dt)[-1], width_ratio=0.25, min_size=1, wrap=TRUE) +
+      labs(title = sprintf("Peaks specific to %s\n", group_fg))
+  pdf(
+    file.path(fig_dir, sprintf("peaks_access_%s_ups.pdf", group_fg)),
+    width = 8, height = 6
+  )  
+  print(ups)
+  dev.off()
+
+}
+
+```
+
+- homer motif enrichment
+
+```
+cd scripts
+
+for name in muscle_mesentery_retractor_muscle_MR muscle_mesentery_retractor_digestive muscle_mesentery_retractor_EMS muscle_mesentery_retractor_gastro muscle_tentacle_retractor_muscle_TR muscle_tentacle_retractor_ecto muscle_tentacle_retractor_epidermis muscle_tentacle_retractor_neuro muscle_tentacle_retractor_precursor
+do
+  bash homer.findMotifsGenome.sh ${name} > logs/homer.${name}.out 2>&1 &
+done
+
+```
+
+- streme motif enrichment
+
+```
+cd scripts
+
+genome="/users/asebe/aelek/proj/scATAC_nvec_v2/Nematostella_scATAC/genome/Nvec_vc1.1_gDNA.fasta"
+beddir="/users/asebe/aelek/proj/scATAC_nvec_v2/Nematostella_scATAC/results/Motifs/streme/muscle_ovl/"
+
+for name in muscle_mesentery_retractor_muscle_MR muscle_mesentery_retractor_digestive muscle_mesentery_retractor_EMS muscle_mesentery_retractor_gastro muscle_tentacle_retractor_muscle_TR muscle_tentacle_retractor_ecto muscle_tentacle_retractor_epidermis muscle_tentacle_retractor_neuro muscle_tentacle_retractor_precursor
+do
+  sbatch streme.sh $beddir peaks_${name} $genome
+done
+```
+
+- motif scores enrichment
+
+```{r}
+enr_list <- list()
+enr_list_ <- list()
+
+# loop over muscle types
+groups_fg <- c("muscle_tentacle_retractor", "muscle_mesentery_retractor")
+for (group_fg in groups_fg) {
+
+  # enrichment per groups of cell type  
+  ct_comparas <- groups_lst[[group_fg]]
+  for (ct in names(ct_comparas)) {
+
+    message(sprintf("\nCalculating enrichment for %s: %s", group_fg, ct))
+
+    # foreground peaks
+    pks_fg <- peaks_fg_list[[group_fg]][[ct]]
+    pks_fg <- makeGRangesFromDataFrame(pks_fg)
+
+    # background peaks
+    pks_bg <- peaks_bg_list[[group_fg]][[ct]]
+    pks_bg <- makeGRangesFromDataFrame(pks_bg)
+
+    # enrichment archetypes
+    enr_dt <- mta_motif_enrichment_test(
+      sites_object = c(mta_gr, arc_gr),
+      fg_object = pks_fg,
+      bg_object = pks_bg,
+      thresholds_vector = NULL,
+      label = ct,
+      nthreads = 1,
+      pval_adjust = "fdr"
+    )
+
+    # all enrichment results
+    enr_list[[group_fg]][[ct]] <- as.data.table(enr_dt, keep.rownames = "motif")
+
+  }
+
+  enr_list_[[group_fg]] <- rbindlist(enr_list[[group_fg]])[, group := group_fg]
+
+}
+
+# combine results from all cell types
+enr_dt <- rbindlist(enr_list_)
+
+# save results archetypes
+fwrite(
+  enr_dt,
+  file.path(mta_dir, sprintf("motif-enrichment-muscle-ovl-cell-types.tsv.gz")),
+  sep = "\t"
+)
+
+# fltering
+enr_top <- enr_dt[padj<0.001 & fc>1]
+enr_top[, group := paste(group, label, sep = "_"), by = .I]
+enr_top[group == "muscle_tentacle_retractor_muscle_TR", group := "muscle_tentacle_retractor"]
+enr_top[group == "muscle_mesentery_retractor_muscle_MR", group := "muscle_mesentery_retractor"]
+
+# motif logos
+mta_pwm <- readRDS(
+  file.path(mta_dir, "motifs.rds")
+)
+
+# archetype logos
+arc_pwm <- readRDS(
+  file.path(arc_dir, sprintf("motif-archetypes-%s-pwms.rds", arc_id))
+)
+
+# all logos
+pwms <- c(mta_pwm, arc_pwm[!names(arc_pwm) %in% names(mta_pwm)])
+stopifnot(all(enr_top$motif %in% names(pwms)))
+enr_pwms <- pwms[unique(enr_top$motif)]
+
+# cluster enriched motifs by similarity
+similarity <- "PPM"
+method <- "PCC"
+hclust_method <- "complete"
+dist_method <- "euclidean"
+
+sim_mat <- compare_motifs(
+  motifs = enr_pwms,
+  use.type = similarity,
+  method = method,
+  normalise.scores = FALSE,
+  min.position.ic = 0,
+  min.mean.ic = 0,
+  nthreads = 0
+)
+ord <- rownames(sim_mat)
+hc <- hclust(tgs_dist(1-sim_mat), method = hclust_method)
+ord <- hc$labels[hc$order]
+sim_mat <- sim_mat[ord, ord]
+
+saveRDS(
+  sim_mat, 
+  file.path(arc_dir, sprintf(
+    "muscle-ovl-motifs-similarity-%s-%s.rds", similarity, method
+  ))
+)
+
+for (g in unique(enr_top$group)) {
+
+  message(g)
+
+  motifs_groups <- enr_top[group == g]$motif
+  sim_mat_group <- sim_mat[
+    rownames(sim_mat) %in% motifs_groups,
+    colnames(sim_mat) %in% motifs_groups
+  ]
+
+  # motif enrichment annotation
+  enr_top_ann <- unique(enr_top[, .(motif, group)][motif %in% motifs_groups])
+  enr_top_lab <- enr_top_ann[, setNames(group, motif)][rownames(sim_mat_group)]
+  hm_dt <- data.table(
+    motif_name = rownames(sim_mat_group),
+    group = enr_top_lab
+  )
+  stopifnot(nrow(hm_dt[,.N,motif_name][N>1])==0)
+
+  #group_cols <- structure(
+  #  colorspace::rainbow_hcl(
+  #    length(unique(hm_dt$group)), c = 100, l = 65
+  #  ),
+  #  names = sort(unique(hm_dt$group))
+  #)
+  #
+  #row_ha <- HeatmapAnnotation(df = hm_dt[, .(group)], which = "row", col = list(
+  #  "group" = group_cols
+  #), show_legend = TRUE)
+
+  # similarity heatmap
+  col_vals <- c(0,0.5,1)  
+  col <- colorRamp2(col_vals, c("#67a9cf", "#f7f7f7", "#ef8a62"))
+  hm <- ComplexHeatmap::Heatmap(
+    sim_mat_group, name = "motif\nsimilarity",
+    col = col,
+    cluster_rows = FALSE, 
+    cluster_columns = FALSE,
+    border = TRUE,
+    #right_annotation = row_ha,
+    column_title = sprintf("%s motifs in %s", nrow(sim_mat_group), g),
+    column_title_gp = gpar(fontsize = 32),
+    row_names_max_width = max_text_width(
+        rownames(sim_mat_group), 
+        gp = gpar(fontsize = 12)
+    ),
+    column_names_max_height = max_text_width(
+        colnames(sim_mat_group), 
+        gp = gpar(fontsize = 12)
+    )
+  )
+
+  # save heatmap
+  hm_height <- dim(sim_mat_group)[1]/6
+  pdf(
+    file.path(fig_dir, sprintf("muscle_ovl_%s_motif_similarity_heatmap.pdf", g)),
+    width = hm_height, height = hm_height
+  )
+  draw(hm)
+  dev.off()
+
+}
+
+# save motif logos
+pdf(
+  file.path(fig_dir, "muscle_ovl_motif_enrichment_logos.pdf"),
+  width = 4, height = nrow(sim_mat) * 0.8
+)
+view_motifs(enr_pwms[rownames(sim_mat)])
+dev.off()
+
+# save motif logo
+#x <- grep("ARCH1653", rownames(sim_mat), value=TRUE)
+#pdf(
+#  file.path(fig_dir, sprintf("fig4_muscle_motif_enrichment_logo_%s.pdf", str_replace_all(x, "/", "_"))),
+#  width = 4, height = 2
+#)
+#view_motifs(reverseComplement(enr_pwms[[x]]@motif))
+#dev.off()
+```
+
+Compare to cell-type enriched motifs
+
+```{r}
+# cell type enrichments
+arc_dir <- "results/Archetypes"
+arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
+enr_fn <- file.path(arc_dir, sprintf("motif-enrichment-cell-type-archetypes-%s-mona-q0.98.tsv.gz", arc_id))
+enr_dt <- fread(enr_fn)
+enr_dt[, log2fc := log2(fc)]
+setorder(enr_dt, motif, -log2fc)
+enr_dt_sign <- enr_dt[padj < 0.05 & log2fc > 1]
+enr_dt_nsgn <- enr_dt[!motif %in% enr_dt_sign$motif][log2fc > 1]
+enr_dts <- rbindlist(list(enr_dt_sign, enr_dt_nsgn))
+
+# muscle enrichments
+mta_dir <- "results/Motifs"
+sub <- "ovl"
+msc_dir <- file.path(mta_dir, "streme", paste0("muscle_", sub))
+msc_dirs <- list.dirs(msc_dir, recursive=FALSE)
+msc_dt <- rbindlist(sapply(msc_dirs, function(dir) {
+  fn <- file.path(dir, "tomtom", "tomtom.tsv")
+  tryCatch({
+    dt <- read.table(fn, header = TRUE, comment.char = "#", sep = "\t", stringsAsFactors = FALSE)
+    setDT(dt)
+    #dt <- data.table::fread(fn, blank.lines.skip=TRUE, , comment.char="#")
+    dt[, group := str_remove(dir, paste0(msc_dir, "/"))]
+    dt
+  }, error = function(e) {
+    warning(e)
+    NULL
+  })
+}, simplify = FALSE, USE.NAMES = TRUE))
+setnames(msc_dt, "Query_ID", "query")
+setnames(msc_dt, "Target_ID", "motif")
+setnames(msc_dt, "q.value", "qval")
+
+msc_enr_dt <- merge.data.table(
+  msc_dt[, .(motif, query, group, qval)],
+  enr_dt[,.(motif, cell_type, log2fc, padj)],
+  by = "motif", all.x = TRUE, sort = FALSE
+)
+
+fwrite(
+  msc_enr_dt,
+  file.path(msc_dir, sprintf("motif-enrichment-muscle-vs-cell-type-%s.tsv.gz", sub)),
+  sep = "\t", compress = "gzip"
+)
+
+msc_enr_dt[cell_type=="neuronal_gastrula", cell_type:="neuronal"]
+stopifnot(all(msc_enr_dt$cell_type %in% cell_types))
+msc_enr_dt[, cell_type := factor(cell_type, levels = cell_types)]
+
+msc_enr_dt[, group := str_remove(group, "peaks_")]
+msc_enr_dt[, group := str_replace_all(group, c(
+  "muscle_mesentery_retractor" = "MR",
+  "muscle_tentacle_retractor" = "TR"
+))]
+msc_enr_dt[group == "TR_muscle_TR", group := "TR only"]
+msc_enr_dt[group == "MR_muscle_MR", group := "MR only"]
+msc_enr_dt[, group := str_replace(group, "_", " & ")]
+msc_enr_dt <- msc_enr_dt[!group %in% c("TR only", "MR only")]
+
+msc_enr_dt_hgl <- unique(msc_enr_dt[log2fc > 1.2 & padj < 0.05, .(motif, cell_type, log2fc, group)])
+msc_enr_dt_hgl[, rank := frank(-log2fc, ties.method = "first"), by = .(group, cell_type)]
+msc_enr_dt_hgl[,n := length(unique(.SD$motif)), .(group, cell_type)]
+setorder(msc_enr_dt_hgl, group, cell_type, rank)
+msc_enr_dt_hgl <- msc_enr_dt_hgl[, .SD[rank < pmin(n, 7)], .(group, cell_type)]
+
+msc_enr_gp <- ggplot(msc_enr_dt, aes(cell_type, log2fc, fill = cell_type)) +
+  geom_boxplot(alpha = 0.2) +
+  geom_point(data = msc_enr_dt_hgl, size = 3, shape = 21, alpha = 1) +
+  geom_text_repel(
+    data = msc_enr_dt_hgl,
+    aes(label = motif),
+    size = 2,
+    max.overlaps = Inf,
+    force_pull = 0,
+    nudge_y = 0.05,
+    direction = "x",
+    angle = 90,
+    hjust = -1,
+    segment.size = 0.2,
+    segment.color = "grey50",
+    segment.alpha = 0.5
+  ) +
+  scale_y_continuous(expand = expansion(mult = c(0, 2))) +
+  scale_fill_manual(values = ct_cols) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  facet_wrap(~ group, scales = "free_y", ncol = 1) +
+  theme(legend.position = "none")
+
+ggsave(
+  file.path(fig_dir, sprintf("peaks_motif_enrichment_muscle_vs_cell_type_-%s.pdf", sub)),
+  msc_enr_gp,
+  width = 12, height = 16
+)
 ```
 
 # Group files

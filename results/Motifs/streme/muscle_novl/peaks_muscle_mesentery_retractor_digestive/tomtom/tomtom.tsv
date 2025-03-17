@@ -1,0 +1,11 @@
+Query_ID	Target_ID	Optimal_offset	p-value	E-value	q-value	Overlap	Query_consensus	Target_consensus	Orientation
+1-CTAAGAATAAC	ARCH1046_Mef2c/Mef2b/Mef2a/...	2	1.93149e-05	0.0333569	0.0667138	11	CTAAGAATAAC	CTCTAAAAATAACTCT	+
+3-AAAATCGCGACTY	ARCH894_SAMD4A	-1	0.000119221	0.205895	0.41179	12	AAAATCGCGACTT	AAAGCGGGACTT	-
+5-AAWGCACTGMGGWTAW	ARCH173_ISL2	-3	8.07678e-05	0.139486	0.278972	10	AATGCACTGAGGTTAT	GCACTTAGGT	+
+7-CAGGTAGCCCAGGV	ARCH526_ZNF165	0	2.94938e-05	0.0509359	0.101872	14	CAGGTAGCCCAGGC	AAGGTGGCGCAGGC	+
+7-CAGGTAGCCCAGGV	ARCH1377_Tag	-1	6.3725e-05	0.110053	0.110053	12	CAGGTAGCCCAGGC	AGGTAGTCCAAG	+
+7-CAGGTAGCCCAGGV	ARCH676_Zelda	0	0.000234349	0.404721	0.269814	7	CAGGTAGCCCAGGC	CAGGTAG	-
+
+# Tomtom (Motif Comparison Tool): Version 5.5.7 compiled on Nov 13 2024 at 15:49:57
+# The format of this file is described at https://meme-suite.org/meme/doc/tomtom-output-format.html.
+# tomtom -o /users/asebe/aelek/proj/scATAC_nvec_v2/Nematostella_scATAC/results/Motifs/streme/muscle_novl//peaks_muscle_mesentery_retractor_digestive/tomtom -no-ssc -verbosity 1 -min-overlap 5 -dist pearson -evalue -thresh 0.5 /users/asebe/aelek/proj/scATAC_nvec_v2/Nematostella_scATAC/results/Motifs/streme/muscle_novl//peaks_muscle_mesentery_retractor_digestive/streme/streme.xml /users/asebe/aelek/proj/scATAC_nvec_v2/Nematostella_scATAC/results/Archetypes/motif-archetypes-PPM-PCC-0.8-IC0.5-5bp-pwms.meme

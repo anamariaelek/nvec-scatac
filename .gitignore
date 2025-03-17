@@ -41,11 +41,15 @@ results/Metacells/metacell/gene_expression_*.rds
 results/Metacells/metacell/gene_scores_*.rds
 results/Metacells/metacell/peak_accessibility_genes_*.rds
 results/Metacells/metacell/peak_footprint_genes_*.rds
+results/Metacells/metacell/Matrix-Gene-Expression-SEACell-FC.rds
 results/Modules/gene-FC*-correlations.rds
 results/Modules/gmod.wgcna.softPower*.gene_correlations.rds
 results/Modules/gmod.wgcna.softPower*.wgcna.rds
 results/Modules/GO/ics-hclust/results
 results/Modules/PFAM/ics-hclust/results
+results/Motifs/homer/
+results/Motifs/streme/*/*fasta
+results/Motifs/streme/*/*/*log
 results/Peaks/annotaton_promoters_adult.rds
 results/Peaks/annotaton_promoters_gastrula.rds
 results/Peaks/deeptools/

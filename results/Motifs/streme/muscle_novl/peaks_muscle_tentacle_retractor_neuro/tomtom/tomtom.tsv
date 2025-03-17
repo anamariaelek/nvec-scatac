@@ -1,0 +1,17 @@
+Query_ID	Target_ID	Optimal_offset	p-value	E-value	q-value	Overlap	Query_consensus	Target_consensus	Orientation
+1-ACCCCCCG	ARCH355_PB0025.1_Glis2_1	2	1.20033e-05	0.0207297	0.0414506	8	ACCCCCCG	GGACCCCCCGGA	+
+1-ACCCCCCG	ARCH353_M06062_2.00__M06468...	1	3.68944e-05	0.0637167	0.0637031	8	ACCCCCCG	GACCCCCCGCTGCG	+
+1-ACCCCCCG	ARCH356_NHP10	1	0.000185819	0.32091	0.161501	8	ACCCCCCG	TACTCCCCGCCG	+
+1-ACCCCCCG	ARCH7_PB0097.1_Zfp281_1__VEZF1	-1	0.000209221	0.361324	0.161501	6	ACCCCCCG	CCCCCC	-
+1-ACCCCCCG	ARCH369_SUT1__RDS2	-1	0.000233839	0.403839	0.161501	7	ACCCCCCG	CCCCGCG	+
+3-CMGATAA	ARCH1474_AtGRF6	5	9.93224e-05	0.17153	0.246126	7	CAGATAA	CTTGTCAGATAA	-
+3-CMGATAA	ARCH1353_Gata3/Gata1/Gata2	0	0.000142879	0.246752	0.246126	7	CAGATAA	CAGATAA	+
+6-GCCTGGGGCGAGCGCRC	ARCH539_PL0004.1_hlh-27	-3	8.32974e-07	0.00143855	0.00287709	12	GCCTGGGGCGAGCGCGC	TGGGACGAGCGC	+
+6-GCCTGGGGCGAGCGCRC	ARCH11_/E2f4_E2f6_E2f8/E2f7	-4	5.9357e-05	0.10251	0.10251	11	GCCTGGGGCGAGCGCGC	GGGGCGCGCGC	+
+7-CACTGTTATCGA	ARCH137_/Sox4/Sox11_Sox13/S...	2	5.10714e-05	0.0882004	0.176401	12	CACTGTTATCGA	ATCAATGTTATTGAT	+
+7-CACTGTTATCGA	ARCH1147_/Sox4/Sox11_Sox13/...	0	0.000250979	0.433441	0.433441	12	CACTGTTATCGA	CAATGTTATTGT	-
+8-TACGACGCGAT	ARCH853_UPC2	0	0.000165375	0.285602	0.571204	8	TACGACGCGAT	TACGACTC	-
+
+# Tomtom (Motif Comparison Tool): Version 5.5.7 compiled on Nov 13 2024 at 15:49:57
+# The format of this file is described at https://meme-suite.org/meme/doc/tomtom-output-format.html.
+# tomtom -o /users/asebe/aelek/proj/scATAC_nvec_v2/Nematostella_scATAC/results/Motifs/streme/muscle_novl//peaks_muscle_tentacle_retractor_neuro/tomtom -no-ssc -verbosity 1 -min-overlap 5 -dist pearson -evalue -thresh 0.5 /users/asebe/aelek/proj/scATAC_nvec_v2/Nematostella_scATAC/results/Motifs/streme/muscle_novl//peaks_muscle_tentacle_retractor_neuro/streme/streme.xml /users/asebe/aelek/proj/scATAC_nvec_v2/Nematostella_scATAC/results/Archetypes/motif-archetypes-PPM-PCC-0.8-IC0.5-5bp-pwms.meme

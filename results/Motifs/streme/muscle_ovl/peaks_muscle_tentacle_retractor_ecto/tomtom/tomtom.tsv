@@ -1,0 +1,16 @@
+Query_ID	Target_ID	Optimal_offset	p-value	E-value	q-value	Overlap	Query_consensus	Target_consensus	Orientation
+1-CACAGGDAGC	ARCH574_Elf3/Ehf/Elf5_Erg/F...	-1	0.000172009	0.297059	0.254021	9	CACAGGAAGC	ACAGGAAAT	+
+1-CACAGGDAGC	ARCH570_Elf3/Ehf/Elf5_Erg/F...	-2	0.000227981	0.393723	0.254021	7	CACAGGAAGC	CAGGAAG	+
+1-CACAGGDAGC	ARCH449_POL009.1_DCE_S_II__...	-1	0.000248766	0.429619	0.254021	9	CACAGGAAGC	ACAGGAAGCCC	+
+3-CAAGCAACCATTGC	ARCH681_AT5G25475	0	3.29298e-05	0.0568698	0.11374	6	CAAGCAACCATTGC	CAAGCA	+
+5-GCGGAAATAAAAAAA	ARCH972_Sox5	-2	0.000225063	0.388683	0.478483	12	GCGGAAATAAAAAAA	GGAAACAATAAA	-
+6-TCAASATGGCGGCCA	ARCH419_Yy1	-1	4.45008e-07	0.000768529	0.000872144	14	TCAACATGGCGGCCA	CAAGATGGCGGCCGC	-
+6-TCAASATGGCGGCCA	ARCH1256_Yy1	-1	5.05112e-07	0.000872329	0.000872144	12	TCAACATGGCGGCCA	CAAAATGGCGGC	-
+6-TCAASATGGCGGCCA	ARCH1253_Yy1	-1	3.20329e-06	0.00553208	0.00368727	10	TCAACATGGCGGCCA	CAAGATGGCG	-
+6-TCAASATGGCGGCCA	ARCH524_M09439_2.00	8	2.69102e-05	0.0464738	0.023232	13	TCAACATGGCGGCCA	GCCCGCAGCCAAGATGGCGGC	+
+6-TCAASATGGCGGCCA	ARCH898_ERF13	-5	0.000203902	0.352138	0.140825	9	TCAACATGGCGGCCA	ATGGCGGCT	-
+8-CGTCCGATAAGA	ARCH1444_Gata3/Gata1/Gata2	-5	9.24211e-05	0.159611	0.319223	6	CGTCCGATAAGA	GATAAG	+
+
+# Tomtom (Motif Comparison Tool): Version 5.5.7 compiled on Nov 13 2024 at 15:49:57
+# The format of this file is described at https://meme-suite.org/meme/doc/tomtom-output-format.html.
+# tomtom -o /users/asebe/aelek/proj/scATAC_nvec_v2/Nematostella_scATAC/results/Motifs/streme/muscle_ovl//peaks_muscle_tentacle_retractor_ecto/tomtom -no-ssc -verbosity 1 -min-overlap 5 -dist pearson -evalue -thresh 0.5 /users/asebe/aelek/proj/scATAC_nvec_v2/Nematostella_scATAC/results/Motifs/streme/muscle_ovl//peaks_muscle_tentacle_retractor_ecto/streme/streme.xml /users/asebe/aelek/proj/scATAC_nvec_v2/Nematostella_scATAC/results/Archetypes/motif-archetypes-PPM-PCC-0.8-IC0.5-5bp-pwms.meme

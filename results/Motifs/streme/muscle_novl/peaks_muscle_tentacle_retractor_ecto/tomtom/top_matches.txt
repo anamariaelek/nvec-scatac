@@ -1,0 +1,5 @@
+Query_ID	Target_ID	Optimal_offset	p-value	E-value	q-value	Overlap	Query_consensus	Target_consensus	Orientation
+6-ATCTCCCSW	ARCH799_Srebf2/Srebf1	0	0.000180381	0.311519	0.562748	9	ATCTCCCCA	ATCACCCCAC	+
+9-CCAAAACAGCACACAGGA	ARCH852_byn	-2	0.000249352	0.430631	0.683971	10	CCAAAACAGCACACAGGA	AAAATAGCAC	-
+
+# Tomtom (Motif Comparison Tool): Version 5.5.7 compiled on Nov 13 2024 at 15:49:57
