@@ -336,7 +336,7 @@ fwrite(
 )
 ```
 
-Load PWMs for CisBP motifs
+Save PWMs for CisBP motifs
 
 ```{r}
 # load CisBP motifs assignments
@@ -370,6 +370,30 @@ fwrite(
 saveRDS(
   mt_cisbp,
   file.path(cisbp_dir, "cisbp_nvec_motifs.rds"),
+)
+```
+
+Save PWMs for ortholog-assigned CisBP motifs
+
+```{r}
+# orthology based assignment
+mort <- fread(file.path("data", "Nvec_predicted_motifs.tsv"))
+mort <- unique(mort$Predicted_motif)
+
+# paths to all CisBP motifs PWMs
+fn_cisbp <- list.files(file.path(
+  cisbp_dir, "pwms"
+), full.names = TRUE)
+names(fn_cisbp) <- str_remove(basename(fn_cisbp), ".txt")
+
+# load Nematostella ones only
+mt_ort <- lapply(
+  mort,
+  function(x) mta_read_cisbp_mod(fn_cisbp[x])
+)
+saveRDS(
+  mt_ort,
+  file.path(cisbp_dir, "cisbp_nvec_orthology_motifs.rds"),
 )
 ```
 
@@ -1132,33 +1156,10 @@ saveRDS(
 
 ## Motif scores in peaks
 
-Score archetype motifs in consensus set of peaks.
+Prepare peaks
 
 ```{r}
 #| label: motif_scores
-
-require(universalmotif)
-require(monaLisa)
-
-# archetypes
-arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
-arch_fn <- file.path(arc_dir, sprintf("motif-archetypes-%s-pwms.rds", arc_id))
-mots_arc_lst <- readRDS(arch_fn)
-mona_arc_lst <- mta_convert_umot_to_monalisa(mots_arc_lst)
-maxs_arc <- sapply(
-  names(mots_arc_lst),
-  function(x) maxScore(convert_type(mots_arc_lst[[x]], "PWM")@motif),
-  USE.NAMES = TRUE, simplify = TRUE
-)
-
-# motifs
-mots_mta_lst <- readRDS(file.path(arc_dir, "input-pwms-unique.rds"))
-mona_mta_lst <- mta_convert_umot_to_monalisa(mots_mta_lst)
-maxs_mta <- sapply(
-  names(mots_mta_lst),
-  function(x) maxScore(convert_type(mots_mta_lst[[x]], "PWM")@motif),
-  USE.NAMES = TRUE, simplify = TRUE
-)
 
 # load peaks
 peaks <- fread(file.path(pks_dir, "Peaks_cell_type_mapped.bed"))
@@ -1176,6 +1177,24 @@ seqlvl <- seqdt[[1]]
 
 # trim out-of-range peaks
 peaks_gr <- mta_trim_granges(peaks_gr, seqdt)
+```
+
+Score archetype motifs in consensus set of peaks.
+
+```{r}
+require(universalmotif)
+require(monaLisa)
+
+# archetypes
+arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
+arch_fn <- file.path(arc_dir, sprintf("motif-archetypes-%s-pwms.rds", arc_id))
+mots_arc_lst <- readRDS(arch_fn)
+mona_arc_lst <- mta_convert_umot_to_monalisa(mots_arc_lst)
+maxs_arc <- sapply(
+  names(mots_arc_lst),
+  function(x) maxScore(convert_type(mots_arc_lst[[x]], "PWM")@motif),
+  USE.NAMES = TRUE, simplify = TRUE
+)
 
 # scanning archetypes
 q <- 0.98
@@ -1194,24 +1213,6 @@ arc_scores_mona <- mta_gw_motif_score_monalisa(
 saveRDS(
   arc_scores_mona,
   str_replace_all(arch_fn, c("motif" = "motif-scores", "pwms.rds" = sprintf("mona-q%s.rds", q)))
-)
-
-# scanning motifs
-mta_scores_mona <- mta_gw_motif_score_monalisa(
-  motifs = mona_mta_lst,
-  genome_object = genome,
-  index_object = seqdt,
-  bin_width = 250,
-  subsample_fraction = 0.10,
-  score_quantiles = c(0, 0.25, 0.5, 0.75, 0.95, 0.98, 0.99, 0.995, 0.999, 1.0),
-  score_quantile_thr = q,
-  do_gw_scan = TRUE,
-  given_gr = peaks_gr,
-  nthreads = 16
-)
-saveRDS(
-  mta_scores_mona,
-  file.path(arc_dir, sprintf("motif-scores-input-motifs-mona-q%s.rds", q))
 )
 
 # map archetypes back to peaks
@@ -1239,6 +1240,37 @@ fwrite(
   str_replace_all(arch_fn, c("motif" = "motif-scores", "pwms.rds" = sprintf("mona-q%s.tsv.gz", q))),
   sep = "\t"
 )
+```
+
+Score input motifs for archetypes in consensus set of peaks.
+
+```{r}
+# motifs
+mots_mta_lst <- readRDS(file.path(arc_dir, "input-pwms-unique.rds"))
+mona_mta_lst <- mta_convert_umot_to_monalisa(mots_mta_lst)
+maxs_mta <- sapply(
+  names(mots_mta_lst),
+  function(x) maxScore(convert_type(mots_mta_lst[[x]], "PWM")@motif),
+  USE.NAMES = TRUE, simplify = TRUE
+)
+
+# scanning motifs
+mta_scores_mona <- mta_gw_motif_score_monalisa(
+  motifs = mona_mta_lst,
+  genome_object = genome,
+  index_object = seqdt,
+  bin_width = 250,
+  subsample_fraction = 0.10,
+  score_quantiles = c(0, 0.25, 0.5, 0.75, 0.95, 0.98, 0.99, 0.995, 0.999, 1.0),
+  score_quantile_thr = q,
+  do_gw_scan = TRUE,
+  given_gr = peaks_gr,
+  nthreads = 16
+)
+saveRDS(
+  mta_scores_mona,
+  file.path(arc_dir, sprintf("motif-scores-input-motifs-mona-q%s.rds", q))
+)
 
 # map motifs back to peaks
 mta_hits <- mta_scores_mona$gw_scan
@@ -1257,6 +1289,56 @@ mta_data[, max_motif_score := pmax(.SD$max_motif_score, .SD$motif_score), motif]
 fwrite(
   mta_data,
   file.path(arc_dir, sprintf("motif-scores-input-motifs-mona-q%s.tsv.gz", q)),
+  sep = "\t"
+)
+```
+
+Score orthology-assigned motifs in consensus set of peaks.
+
+```{r}
+require(universalmotif)
+require(monaLisa)
+
+# motifs
+mots_mta_lst <- readRDS(file.path(cisbp_dir, "cisbp_nvec_orthology_motifs.rds"))
+mona_mta_lst <- mta_convert_umot_to_monalisa(mots_mta_lst)
+maxs_mta <- sapply(
+  names(mots_mta_lst),
+  function(x) maxScore(convert_type(mots_mta_lst[[x]], "PWM")@motif),
+  USE.NAMES = TRUE, simplify = TRUE
+)
+
+# scanning motifs
+mta_scores_mona <- mta_gw_motif_score_monalisa(
+  motifs = mona_mta_lst,
+  genome_object = genome,
+  index_object = seqdt,
+  bin_width = 250,
+  subsample_fraction = 0.10,
+  score_quantiles = c(0, 0.25, 0.5, 0.75, 0.95, 0.98, 0.99, 0.995, 0.999, 1.0),
+  score_quantile_thr = q,
+  do_gw_scan = TRUE,
+  given_gr = peaks_gr,
+  nthreads = 16
+)
+saveRDS(
+  mta_scores_mona,
+  file.path(arc_dir, sprintf("motif-scores-orthology-motifs-mona-q%s.rds", q))
+)
+
+# map motifs back to peaks
+mta_hits <- mta_scores_mona$gw_scan
+mta_cent <- narrow(mta_hits, start = width(mta_hits) / 2, width = 1)
+mta_ovls <- findOverlaps(query = mta_hits, subject = peaks_gr)
+mta_scor <- mta_hits[queryHits(mta_ovls)]
+pmt_scor <- peaks_gr[subjectHits(mta_ovls)]
+mcols(mta_scor) <- cbind(mcols(mta_scor), mcols(pmt_scor))
+mta_data <- as.data.table(mta_scor)
+
+# save
+fwrite(
+  mta_data,
+  file.path(arc_dir, sprintf("motif-scores-orthology-motifs-mona-q%s.tsv.gz", q)),
   sep = "\t"
 )
 ```
@@ -1387,9 +1469,17 @@ ggsave(
 
 ## Motif enrichment in cell type peaks
 
-Calculate motif enrichment in cell type specific peaks.
+Calculate archetype motif enrichment in cell type specific peaks.
 
 ```{r}
+#| label: motif_enrichment
+
+# all peaks
+peaks <- fread(file.path(pks_dir, "Peaks_cell_type_mapped.bed"), select = 1:3)
+setnames(peaks, c("seqnames", "start", "end"))
+peaks <- unique(peaks)
+peaks_gr <- makeGRangesFromDataFrame(peaks)
+
 # archetypes to use
 arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
 
@@ -1407,19 +1497,6 @@ dict <- fread(file.path(
   sprintf("motif-archetypes-%s.dict", arc_id)
 ))
 
-# motif scores
-mta_scores_mona <- readRDS(
-  file.path(arc_dir, sprintf("motif-scores-input-motifs-mona-q%s.rds", q))
-)
-mta_gr <- mta_scores_mona$gw_scan
-names(mcols(mta_gr))[1] <- str_replace(names(mcols(mta_gr))[1], "motif", "name")
-
-# all peaks
-peaks <- fread(file.path(pks_dir, "Peaks_cell_type_mapped.bed"), select = 1:3)
-setnames(peaks, c("seqnames", "start", "end"))
-peaks <- unique(peaks)
-peaks_gr <- makeGRangesFromDataFrame(peaks)
-  
 # enrichment per cell type
 enr_list <- vector("list", length = length(cell_types))
 names(enr_list) <- cell_types
@@ -1453,22 +1530,8 @@ for (ct in cell_types) {
     pval_adjust = "fdr"
   )
 
-  # # enrichment motifs
-  # mta_dt <- mta_motif_enrichment_test(
-  #   sites_object = mta_gr,
-  #   fg_object = pks_gr,
-  #   bg_object = pks_bg,
-  #   thresholds_vector = NULL,
-  #   label = ct,
-  #   nthreads = 2,
-  #   pval_adjust = "fdr"
-  # )
-
   # all enrichment results
-  enr_list[[ct]] <- rbindlist(list(
-    "archetype" = arc_dt
-    # "motif" = mta_dt
-  ), idcol = "group")
+  enr_list[[ct]] <- arc_dt
 
 }
 
@@ -1488,6 +1551,65 @@ fwrite(
   file.path(arc_dir, sprintf("motif-enrichment-cell-type-input-motifs-mona-q%s.tsv.gz", q)),
   sep = "\t"
 )
+```
+
+Calculate motif enrichment in cell type specific peaks.
+
+```{r}
+# motif scores
+mta_scores_mona <- readRDS(
+  file.path(arc_dir, sprintf("motif-scores-orthology-motifs-mona-q%s.rds", q))
+)
+mta_gr <- mta_scores_mona$gw_scan
+names(mcols(mta_gr))[1] <- str_replace(names(mcols(mta_gr))[1], "motif", "name")
+
+# enrichment per cell type
+enr_list <- vector("list", length = length(cell_types))
+names(enr_list) <- cell_types
+for (ct in cell_types) {
+
+  message(sprintf("\nCalculating enrichment for %s", ct))
+  
+  # cell type peaks
+  stg_dir <- ifelse(ct %in% adult_cell_types, adult_dir, gastr_dir)
+  pks_fn <- file.path(
+    stg_dir, "ArchRProj", "PeakDifferential", "cell_type_filtered",
+    sprintf("Peaks-%s-vs-others.tsv", ct)
+  )
+  pks_dt <- fread(pks_fn, select = 1:3)
+  setnames(pks_dt, c("seqnames", "start", "end"))
+  pks_gr <- makeGRangesFromDataFrame(pks_dt)
+
+  # background peaks
+  pks_ovl <- findOverlaps(peaks_gr, pks_gr)
+  pks_nov <- setdiff(seq_len(length(peaks_gr)), queryHits(pks_ovl))
+  pks_bg <- peaks_gr[pks_nov]
+
+  # enrichment motifs
+  mta_dt <- mta_motif_enrichment_test(
+    sites_object = mta_gr,
+    fg_object = pks_gr,
+    bg_object = pks_bg,
+    thresholds_vector = NULL,
+    label = ct,
+    nthreads = 2,
+    pval_adjust = "fdr"
+  )
+
+  # all enrichment results
+  enr_list[[ct]] <- mta_dt
+}
+
+# combine results from all cell types
+enr_dt <- rbindlist(enr_list, idcol = "cell_type")
+
+# save results archetypes
+fwrite(
+  enr_dt,
+  file.path(arc_dir, sprintf("motif-enrichment-cell-type-orthology-%s-mona-q%s.tsv.gz", arc_id, q)),
+  sep = "\t"
+)
+
 ```
 
 ```{r}
@@ -1729,6 +1851,8 @@ First we prepare the inputs:
   - matrix of counts in peaks, and  
   - binary matrix of motif hits in peaks.
 
+Peak counts
+
 ```{r}
 source("scripts/chromvar_utils.R")
 
@@ -1745,23 +1869,20 @@ peaks_mat_seacells <- as(peaks_mat_seacells, "dgCMatrix")
 
 # use only peaks that have some accessibility
 peaks_mat_seacells <- peaks_mat_seacells[rowSums(peaks_mat_seacells) > 0, ]
+```
 
-# create binary matrix of motif hits in peaks
+Binary matrix of archetype motif hits.
+
+```{r}
+# create binary matrix of motif hits in peaks for archetypes
 arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
+q <- 0.98
 arc_hits <- unique(fread(
-  file.path(arc_dir, sprintf("motif-scores-archetypes-%s-mona-q0.98.tsv.gz", arc_id))
+  file.path(arc_dir, sprintf("motif-scores-archetypes-%s-mona-q%s.tsv.gz", arc_id, q))
 )[, .(motif, peak, motif_score)])
 setorder(arc_hits, -motif_score)
 arc_hits <- arc_hits[, .SD[1], .(motif, peak)]
 arc_data <- dcast.data.table(arc_hits, peak ~ motif, value.var = "motif_score")
-
-# include in binary matrix peaks that have no motif hits
-# pks_miss <- setdiff(rownames(peaks_mat_seacells), arc_data[[1]])
-# pks_miss <- data.table("peak" = cbind(pks_miss))
-# setnames(pks_miss, "peak")
-# arc_data <- rbindlist(list(
-#   arc_data, pks_miss
-# ), fill = TRUE, use.names = TRUE)
 
 # convert to matrix
 arc_matx <- data.matrix(arc_data[, -1])
@@ -1772,11 +1893,49 @@ arc_matx <- as(arc_matx, "dgCMatrix")
 
 # include only peaks present in both matrices
 pks <- intersect(rownames(peaks_mat_seacells), rownames(arc_matx))
-peaks_mat_seacells <- peaks_mat_seacells[pks, ]
+pks_matx <- peaks_mat_seacells[pks, ]
 arc_matx <- arc_matx[pks, ]
 
 # sanity check
-all.equal(rownames(arc_matx), as.character(rownames(peaks_mat_seacells)))
+all.equal(rownames(arc_matx), as.character(rownames(pks_matx)))
+```
+
+Binary matrix of orthology assigned motifs hits.
+
+```{r}
+# create binary matrix of motif hits in peaks for orthology motifs
+q <- 0.98
+mta_hits <- unique(fread(
+  file.path(arc_dir, sprintf("motif-scores-orthology-motifs-mona-q%s.tsv.gz", q))
+)[, .(motif, peak, motif_score)])
+setorder(mta_hits, -motif_score)
+mta_hits <- mta_hits[, .SD[1], .(motif, peak)]
+mta_data <- dcast.data.table(mta_hits, peak ~ motif, value.var = "motif_score")
+
+# convert to matrix
+mta_matx <- data.matrix(mta_data[, -1])
+mta_matx[!is.na(mta_matx)] <- 1
+mta_matx[is.na(mta_matx)] <- 0
+rownames(mta_matx) <- mta_data[[1]]
+mta_matx <- as(mta_matx, "dgCMatrix")
+
+# only motifs assigned to expressed  genes
+mort <- fread(file.path("data", "Nvec_predicted_motifs.tsv"))
+setnames(mort, "Query", "gene")
+ctfp_mat <- readRDS(file.path(
+  "results", "Metacells", "metacell", 
+  "gene_expression_fc_genes_exp_FC2_acc_FC4_spearman.rds"
+))
+mts <- mort[gene %in% rownames(ctfp_mat)]$Predicted_motif
+mta_matx <- mta_matx[, colnames(mta_matx) %in% mts]
+
+# include only peaks present in both matrices
+pks <- intersect(rownames(peaks_mat_seacells), rownames(mta_matx))
+pks_matx <- peaks_mat_seacells[pks, ]
+mta_matx <- mta_matx[pks, ]
+
+# sanity check
+all.equal(rownames(mta_matx), as.character(rownames(pks_matx)))
 ```
 
 Then we select background sets of peaks to be used for deviation
@@ -1784,7 +1943,7 @@ calculations, matched for total accessibility and GC-content.
 
 ```{r}
 # we used mapped peaks
-peaks <- fread(file.path(pks_dir, "Peaks_cell_type_mapped.tsv"))
+peaks <- fread(file.path(pks_dir, "Peaks_cell_type_mapped.tsv.gz"))
 
 # background peaks are selected from adult and gastrula ArchR projects
 proj_adult <- loadArchRProject("../clustering/SEACells/Results/ArchRProj_Nvec_TSS4_frag200/ArchRProj/")
@@ -1798,45 +1957,53 @@ bkgd_gastr <- getBgdPeaks(proj_gastr, method="ArchR")
 bkgd_adult_pks <- apply(assay(bkgd_adult), 2, function(x) {
   peaks_adult <- proj_adult@peakSet$peak[x]
   peaks_mappd <- peaks[match(peaks_adult, peak_adult), ]$peak
-  match(peaks_mappd, rownames(peaks_mat_seacells))
+  match(peaks_mappd, rownames(pks_matx))
 })
 complete_rows <- apply(bkgd_adult_pks,1,function(x) !any(is.na(x)))
 bkgd_adult_pks <- bkgd_adult_pks[complete_rows, ]
 bkgd_gastr_pks <- apply(assay(bkgd_gastr), 2, function(x) {
   peaks_gastr <- proj_gastr@peakSet$peak[x]
   peaks_mappd <- peaks[match(peaks_gastr, peak_gastrula), ]$peak
-  match(peaks_mappd, rownames(peaks_mat_seacells))
+  match(peaks_mappd, rownames(pks_matx))
 })
 complete_rows <- apply(bkgd_gastr_pks,1,function(x) !any(is.na(x)))
 bkgd_gastr_pks <- bkgd_gastr_pks[complete_rows, ]
 
 # combine and sample to the number of foreground peaks
 bgd_peaks <- rbind(bkgd_adult_pks, bkgd_gastr_pks)
-sample_replace <- ifelse(nrow(bgd_peaks) < nrow(peaks_mat_seacells), TRUE, FALSE)
+sample_replace <- ifelse(nrow(bgd_peaks) < nrow(pks_matx), TRUE, FALSE)
 bgd_peaks <- bgd_peaks[sample(
-  seq_len(nrow(bgd_peaks)), nrow(peaks_mat_seacells), 
+  seq_len(nrow(bgd_peaks)), nrow(pks_matx), 
   replace = sample_replace
 ), ]
 
-# save background peaks
-saveRDS(
-  bgd_peaks,
-  file.path(pks_dir, "Adult_Gastrula_Background_Peaks_SEACell.rds")
-)
+## save background peaks
+#saveRDS(
+#  bgd_peaks,
+#  file.path(pks_dir, "Adult_Gastrula_Background_Peaks_SEACell.rds")
+#)
 ```
 
-ChromVAR calculation
+ChromVAR calculation for archetypes.
 
 ```{r}
 # load background peaks
 bgd_peaks <- readRDS(file.path(pks_dir, "Adult_Gastrula_Background_Peaks_SEACell.rds"))
 
+# combine and sample to the number of foreground peaks
+bgd_peaks <- rbind(bkgd_adult_pks, bkgd_gastr_pks)
+sample_replace <- ifelse(nrow(bgd_peaks) < nrow(pks_matx), TRUE, FALSE)
+bgd_peaks <- bgd_peaks[sample(
+  seq_len(nrow(bgd_peaks)), nrow(pks_matx), 
+  replace = sample_replace
+), ]
+
 # calculate chromVAR deviations (this takes a while)
 chromvar_deviations <- .customDeviations(
-  countsMatrix = peaks_mat_seacells,
+  countsMatrix = pks_matx,
   annotationsMatrix = arc_matx,
   backgroudPeaks = bgd_peaks,
-  expectation = rowSums(peaks_mat_seacells) / sum(rowSums(peaks_mat_seacells)),
+  expectation = rowSums(pks_matx) / sum(rowSums(pks_matx)),
   prefix = "SEACells",
   out = c("deviations", "z"),
   threads = 1,
@@ -1861,6 +2028,45 @@ writeLines(colnames(chromvar_mat), file.path(mat_dir, "cells"))
 writeLines(rownames(chromvar_mat), file.path(mat_dir, "motifs"))
 
 saveRDS(chromvar_mat, file.path(mat_dir, "Matrix-Archetypes-SEACells.rds"))
+saveRDS(chromvar_deviations, file.path(mat_dir, "chromvar_deviations.rds"))
+```
+
+ChromVAR calculation for orthology assigned motifs.
+
+```{r}
+## load background peaks
+#bgd_peaks <- readRDS(file.path(pks_dir, "Adult_Gastrula_Background_Peaks_SEACell.rds"))
+
+# calculate chromVAR deviations (this takes a while)
+chromvar_deviations <- .customDeviations(
+  countsMatrix = pks_matx,
+  annotationsMatrix = mta_matx,
+  backgroudPeaks = bgd_peaks,
+  expectation = rowSums(pks_matx) / sum(rowSums(pks_matx)),
+  prefix = "SEACells",
+  out = c("deviations", "z"),
+  threads = 1,
+  verbose = TRUE
+)
+
+# save matrix
+mat_dir <- file.path(
+  "results", "Motifs",
+  "ChromVAR-orthology-motifs",
+  "MotifsSEACellsMatrix"
+)
+dir.create(mat_dir, showWarnings = FALSE, recursive = TRUE)
+chromvar_mat <- chromvar_deviations@assays@data$z
+chromvar_mat[is.na(chromvar_mat)] <- 0
+chromvar_mat <- as(chromvar_mat, "dgCMatrix")
+Matrix::writeMM(
+  chromvar_mat,
+  file.path(mat_dir, "matrix.mtx")
+)
+writeLines(colnames(chromvar_mat), file.path(mat_dir, "cells"))
+writeLines(rownames(chromvar_mat), file.path(mat_dir, "motifs"))
+
+saveRDS(chromvar_mat, file.path(mat_dir, "Matrix-Motifs-SEACells.rds"))
 saveRDS(chromvar_deviations, file.path(mat_dir, "chromvar_deviations.rds"))
 ```
 
@@ -2012,30 +2218,100 @@ p_scores <- for (sg in select_genes) {
 }
 ```
 
-```{r}
-# I don't understand why this is now different
+Calculate correlation of gene scores and gene expression with motif deviation Z scores:
 
+- archetypes
+
+```{r}
 # motif chromVAR deviation scores
 chromvar_mat <- readRDS(file.path(
-  "results", sprintf("ChromVAR-%s", arc_id), "ArchetypesSEACellsMatrix_", 
-  "Matrix-Archetypes-SEACells.rds"
+  arc_dir, "ChromVAR-PPM-PCC-0.8-IC0.5-5bp", "ArchetypesSEACellsMatrix", "Matrix-Archetypes-SEACells.rds"
 ))
 
-# seacell to cell type annotation
-annot_dt <- fread(file.path(
-  "results", "Clustering", "Annotation_Adult_Gastrula_SEACell.tsv"
+# gene scores matrix aggregated per seacells
+gene_score_mat <- readRDS(file.path(
+    "results", "GeneScoreMatrix",
+    "Matrix-Gene-Scores-SEACell-FC.rds"
 ))
-annot_dt <- unique(annot_dt[, .(SEACell, cell_type)])
 
-# add annotations to seacells matrix
-chromvar_dt <- as.data.table(chromvar_mat, keep.rownames = "archetype_name")
-chromvar_dt <- melt.data.table(chromvar_dt, id.vars = "archetype_name", variable.name = "SEACell", value.name = "score")
-chromvar_dt <- merge.data.table(chromvar_dt, annot_dt, by = "SEACell", all.x = TRUE, sort = FALSE)
-chromvar_dt[, stage := "adult"]
-chromvar_dt[grep("seacell",SEACell,ignore.case=TRUE), stage := "gastrula"]
-chromvar_dt[archetype_name=="ARCH530_Snai2"][,.(value=mean(score)),.(archetype_name,cell_type,stage)][order(-value)][1:8]
- 
+# gene expression matrix aggregated per SEACell
+ctfp_mat <- readRDS(
+  file.path(
+    "results", "Metacells", "metacell", 
+    "gene_expression_fc_genes_exp_FC2_acc_FC4_spearman.rds"
+  )
+)
+ctfp_mat <- ctfp_mat[, colnames(chromvar_mat)]
+
+# calculate gene score correlations
+all.equal(colnames(gene_score_mat), colnames(chromvar_mat))
+mot_gen_cor <- cor(t(gene_score_mat), t(chromvar_mat))
+saveRDS(
+  mot_gen_cor,
+  file.path(
+    arc_dir, "ChromVAR-PPM-PCC-0.8-IC0.5-5bp",
+    "correlation-seacells-motif-score-gene-score.rds"
+  )
+)
+
+# calculate expression correlations
+all.equal(colnames(ctfp_mat), colnames(chromvar_mat))
+mot_exp_cor <- cor(t(ctfp_mat), t(chromvar_mat))
+saveRDS(
+  mot_exp_cor,
+  file.path(
+    arc_dir, "ChromVAR-PPM-PCC-0.8-IC0.5-5bp",
+    "correlation-seacells-motif-score-gene-expression-metacell.rds"
+  )
+)
 ```
+
+- orthology based motifs
+
+```{r}
+# motif chromVAR deviation scores
+chromvar_mat <- readRDS(file.path(
+  mta_dir, "ChromVAR-orthology-motifs", "MotifsSEACellsMatrix", "Matrix-Motifs-SEACells.rds"
+))
+
+# gene scores matrix aggregated per seacells
+gene_score_mat <- readRDS(file.path(
+    "results", "GeneScoreMatrix",
+    "Matrix-Gene-Scores-SEACell-FC.rds"
+))
+
+# gene expression matrix aggregated per SEACell
+ctfp_mat <- readRDS(
+  file.path(
+    "results", "Metacells", "metacell", 
+    "gene_expression_fc_genes_exp_FC2_acc_FC4_spearman.rds"
+  )
+)
+ctfp_mat <- ctfp_mat[, colnames(chromvar_mat)]
+
+# calculate gene score correlations
+all.equal(colnames(gene_score_mat), colnames(chromvar_mat))
+mot_gen_cor <- cor(t(gene_score_mat), t(chromvar_mat))
+saveRDS(
+  mot_gen_cor,
+  file.path(
+    mta_dir, "ChromVAR-orthology-motifs",
+    "correlation-seacells-motif-score-gene-score.rds"
+  )
+)
+
+# calculate expression correlations
+all.equal(colnames(ctfp_mat), colnames(chromvar_mat))
+mot_exp_cor <- cor(t(ctfp_mat), t(chromvar_mat))
+saveRDS(
+  mot_exp_cor,
+  file.path(
+    mta_dir, "ChromVAR-orthology-motifs",
+    "correlation-seacells-motif-score-gene-expression-metacell.rds"
+  )
+)
+```
+
 
 ## Session info
 

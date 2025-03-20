@@ -7520,11 +7520,11 @@ peaks <- unique(peaks)
 peaks_gr <- makeGRangesFromDataFrame(peaks, keep.extra.columns = TRUE)
 ```
 
-- homer motif enrichment
+Prepare input files for muscle vs all other peaks comparison
 
 ```{r}
 # inputs for homer
-peaks_dir <- file.path("results", "Motifs", "Homer", "muscle")
+peaks_dir <- file.path("results", "Motifs", "streme", "muscle")
 dir.create(peaks_dir, showWarnings = FALSE)
 fwrite(
   peaks[peak %in% pks_both],
@@ -7558,6 +7558,45 @@ fwrite(
 )
 ```
 
+Prepare input files for muscle vs other muscle peaks comparison
+
+```{r}
+peaks_dir <- file.path("results", "Motifs", "streme", "muscle_vs_muscle")
+dir.create(peaks_dir, showWarnings = FALSE)
+fwrite(
+  peaks[peak %in% pks_both],
+  file.path(peaks_dir, "peaks_both.bed"),
+  sep = "\t", col.names = FALSE, quote = FALSE
+)
+fwrite(
+  peaks[peak %in% c(pks_tr, pks_mr)][!peak %in% pks_both],
+  file.path(peaks_dir, "peaks_both_bg.bed"),
+  sep = "\t", col.names = FALSE, quote = FALSE
+)
+fwrite(
+  peaks[peak %in% pks_tr],
+  file.path(peaks_dir, "peaks_muscle_TR.bed"),
+  sep = "\t", col.names = FALSE, quote = FALSE
+)
+fwrite(
+  peaks[peak %in% c(pks_both, pks_mr)][!peak %in% pks_tr],
+  file.path(peaks_dir, "peaks_muscle_TR_bg.bed"),
+  sep = "\t", col.names = FALSE, quote = FALSE
+)
+fwrite(
+  peaks[peak %in% pks_mr],
+  file.path(peaks_dir, "peaks_muscle_MR.bed"),
+  sep = "\t", col.names = FALSE, quote = FALSE
+)
+fwrite(
+  peaks[peak %in% c(pks_both, pks_tr)][!peak %in% pks_mr],
+  file.path(peaks_dir, "peaks_muscle_MR_bg.bed"),
+  sep = "\t", col.names = FALSE, quote = FALSE
+)
+```
+
+- homer motif enrichment
+
 ```
 cd scripts
 bash homer.sh > logs/homer.out 2>&1 &
@@ -7569,7 +7608,7 @@ bash homer.sh > logs/homer.out 2>&1 &
 cd scripts
 
 genome="/users/asebe/aelek/proj/scATAC_nvec_v2/Nematostella_scATAC/genome/Nvec_vc1.1_gDNA.fasta"
-beddir="/users/asebe/aelek/proj/scATAC_nvec_v2/Nematostella_scATAC/results/Motifs/streme/muscle/"
+beddir="/users/asebe/aelek/proj/scATAC_nvec_v2/Nematostella_scATAC/results/Motifs/streme/muscle_vs_muscle/"
 
 for name in muscle_MR muscle_TR both
 do

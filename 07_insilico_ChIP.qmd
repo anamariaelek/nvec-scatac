@@ -154,7 +154,7 @@ ct_cols <- c(
   "neuron_Pou4_FoxL2_1"        = "#101cde",
   "neuron_Pou4_FoxL2_2"        = "#0b16bf",
   "neuron_Pou4_FoxL2_3"        = "#2e39dd",
-  "neuronal_gastrula"          = "#063cb9",
+  "neuronal"                   = "#063cb9",
   "gland"                      = "#ff6f08",
   "gland_mucin"                = "#ff8f12"
 )
@@ -264,13 +264,12 @@ ggsave(file.path(
 
 ## In silico ChIP binding score
 
-We will calculate in silico ChIP binding scores for TFs that have motifs 
-assigned.
+We will calculate in silico ChIP binding scores for TFs that have motifs assigned.
 
 ```{r}
 # load motif to gene assignments
 mot2gene <- fread(file.path(
-    mta_dir, "motif-assignment-archetypes-PPM-PCC-0.8-IC0.5-5bp.tsv.gz"
+    mta_dir, "motif-assignment-selected.tsv.gz"
 ))
 mot2gene[, motif := archetype_name]
 ```
@@ -322,7 +321,10 @@ mta_data <- rbindlist(lapply(c(
   file.path(arc_dir, "motif-scores-archetypes-PPM-PCC-0.8-IC0.5-5bp-mona-q0.95.tsv.gz"),
   # experimental motifs
   file.path(mta_dir, "motif-scores-mona-q0.95.tsv.gz")
-), fread))
+), fread), fill=TRUE)
+if ("max_motif_score" %in% colnames(mta_data)) {
+    mta_data[, max_motif_score := NULL]
+}
 stopifnot(all(mot2gene$motif %in% mta_data$motif))
 mta_data <- merge.data.table(
     mta_data,
@@ -330,14 +332,12 @@ mta_data <- merge.data.table(
     by = "motif",
     allow.cartesian = TRUE
 )
-stopifnot(!is.na(mta_data$max_motif_score))
+mta_data[, max_motif_score := max(motif_score), .(motif)]
 mta_data[, score := motif_score / max_motif_score]
 
 # subset for peaks and TFs for which we calculated correlation
 mta_data <- unique(mta_data[peak %in% pks & gene %in% tfs])
 mta_data <- unique(mta_data)
-mta_data[, .N, .(peak,gene,motif)]
-table(mta_data[, .N, .(peak,gene,motif)]$N)
 
 # select highest motif score per peak
 mta_dt <- unique(mta_data[, .(peak, gene, motif, score)])
@@ -400,10 +400,12 @@ correlation_score_dt <- melt.data.table(as.data.table(
 motif_score_dt <- melt.data.table(as.data.table(
     motif_score, keep.rownames = "peak"
 ), id.vars = "peak", variable.name = "id", value.name = "score")
-all.equal(res_dt$peak, correlation_score_dt$peak)
-all.equal(res_dt$id, correlation_score_dt$id)
-all.equal(res_dt$peak, motif_score_dt$peak)
-all.equal(res_dt$id, motif_score_dt$id)
+
+stopifnot(all.equal(res_dt$peak, correlation_score_dt$peak))
+stopifnot(all.equal(res_dt$id, correlation_score_dt$id))
+stopifnot(all.equal(res_dt$peak, motif_score_dt$peak))
+stopifnot(all.equal(res_dt$id, motif_score_dt$id))
+
 res_dt[, gene := str_remove(id, "__.+")]
 res_dt[, motif := str_remove(id, sprintf("%s__", gene))]
 res_dt[, peak_tf_correlation_score := correlation_score_dt$score]
@@ -791,7 +793,7 @@ Combine chromVAR scores with gene expression
 exp <- "fc"
 lvl <- "metacell"
 exp_mt <- readRDS(file.path(
-    map_dir, sprintf("gene_expression_%s_%s.rds", lvl, exp)
+    map_dir, lvl, sprintf("gene_expression_%s_%s.rds", lvl, exp)
 ))
 exp_dt <- melt.data.table(
     as.data.table(exp_mt, keep.rownames = "gene"),
@@ -807,8 +809,11 @@ map_dt <- rbindlist(sapply(c(
         map_dir, lvl, sprintf("mapping_%s_%s_gastrula.tsv", lvl, id)
     )
 ), fread, simplify = FALSE, USE.NAMES = TRUE), idcol = "stage")
-setnames(map_dt, "SEACell_cell_type", "cell_type")
+map_dt[, cell_type := str_replace_all(SEACell_cell_type, "\\.", "_")]
+map_dt[cell_type=="neuronal_gastrula", cell_type := "neuronal"]
+stopifnot(all(map_dt$cell_type %in% cell_types))
 if (lvl == "metacell") {
+  map_dt[, SEACell_cell_type := NULL]
   map_dt[, metacell_cell_type := NULL]
   map_dt[, metacell := paste(stage, metacell, sep = "_")]
 }
@@ -867,7 +872,10 @@ exp_chromvar_dt <- fread(file.path(
     chp_dir,
     sprintf("gene_expression_%s_chromVAR.tsv.gz", exp)
 ))
-setnames(exp_chromvar_dt, "archetype_name", "motif")
+if ("archetype_name" %in% colnames(exp_chromvar_dt)) {
+    setnames(exp_chromvar_dt, "archetype_name", "motif")
+}
+setnames(exp_chromvar_dt, "zscore", "motif_deviation")
 
 # aggregate per cell type
 exp_chromvar_dt[, motif_deviation := mean(motif_deviation), .(gene, motif, cell_type, insilico_ChIP_threshold)]
@@ -917,7 +925,7 @@ for (gn in names(genes)) {
       gp_cor_chrom <- ggplot(
               plot_dt,
               aes(
-                  expression, zscore,
+                  expression, motif_deviation,
                   label = cell_type, fill = cell_type, color = cell_type,
                   shape = stage, group = 1
               )
@@ -1071,7 +1079,7 @@ Plot per-TF scatterplots of expression vs activity (deviation Z score):
 # gene motif assignments
 arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
 assign_dt <- fread(file.path(
-  "results", "Motifs", sprintf("motif-assignment-archetypes-%s.tsv.gz", arc_id)
+  "results", "Motifs", "motif-assignment-selected.tsv.gz"
 ))
 
 # archetypes pwms
@@ -1277,6 +1285,7 @@ dev.off()
 # plot markers on one page
 ma_vc <- structure(tfan[match(marks, gene)]$common_name, names = marks)
 ma_vc <- ma_vc[ma_vc != "NR12"]
+ma_vc <- ma_vc[ma_vc != "Nem64"]
 
 require(patchwork)
 
@@ -1359,7 +1368,8 @@ pdf(
   )), 
   width = 8.3, height = 11.7
 )
-wrap_plots(patch_list, axis_titles = "collect") +   plot_annotation(title = "TF expression vs activity")
+wrap_plots(patch_list, axis_titles = "collect") + 
+  plot_layout(ncol = 8)
 dev.off()
 ```
 
@@ -1405,16 +1415,17 @@ gp_dotmap <- ggplot(
   aes(cell_type, gene)
   ) +
   geom_point(
-    aes(size = motif_deviation_scaled, fill = expression_scaled),
-    shape = 21
+    aes(size = motif_deviation_scaled, color = expression_scaled)
   ) +
   scale_y_discrete(
     breaks = gen_plt_dt$gene,
     labels = gen_plt_dt$gene_label,
     expand = expansion(mult = c(0.005, 0.005))
   ) +
-  scale_x_discrete(expand = expansion(mult = c(0.02, 0.02))) +
-  scale_fill_gradientn(
+  scale_x_discrete(
+    expand = expansion(mult = c(0.02, 0.02))
+  ) +
+  scale_color_gradientn(
     name = "TF expression\nfold change",
     breaks = c(0, 2, 4, 6, 8),
     colours = c(
@@ -1428,7 +1439,7 @@ gp_dotmap <- ggplot(
   theme(
     axis.text.x = element_blank(),
     axis.text.y = element_blank(),
-    panel.grid.major = element_line(linewidth = 0.25),
+    panel.grid.major = element_blank(),
     axis.title = element_blank(),
     plot.margin = margin(0, 0, 0, 0)
   )
@@ -1437,7 +1448,12 @@ gp_dotmap <- ggplot(
 # plot annotation rectangle below the plot
 gen_plt_ct <- gen_plt_dt[
   order(gene, -motif_deviation)
-][, .SD[1, .(cell_type, gene_label)], gene]
+][, .SD[1, .(cell_type, common_name, gene_label)], gene]
+
+# genes to highlight
+genes_highlight <- unique(
+  gen_plt_ct[common_name != "", .(gene, gene_label)]
+)[, setNames(gene, gene_label)]
 
 gp_ctbar_v <- ggplot(
         gen_plt_ct,
@@ -1446,8 +1462,8 @@ gp_ctbar_v <- ggplot(
     geom_bar(position = "stack", width = 1) +
     coord_flip() +
     scale_x_discrete(
-      breaks = gen_plt_ct$gene,
-      labels = gen_plt_ct$gene_label,
+      breaks = genes_highlight,
+      labels = names(genes_highlight),
       expand = expansion(mult = c(0.005, 0.005))
     ) +
     scale_y_continuous(expand = c(0, 0)) +
@@ -1456,7 +1472,7 @@ gp_ctbar_v <- ggplot(
     theme(
         legend.position = "none",
         axis.text.x = element_blank(),
-        axis.text.y = element_text(size = 6, vjust = 0.5, hjust = 1),
+        axis.text.y = element_text(size = 9, vjust = 0.5, hjust = 1),
         plot.margin = unit(c(0, 0, 0, 0), "cm")
     )
 

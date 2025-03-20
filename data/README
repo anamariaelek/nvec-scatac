@@ -1,3 +1,6 @@
+# phylogeny based motif assignments
+Nvec_predicted_motifs.tsv
+
 # 5' scRNA-seq
 5prime_peaks.rds
 
