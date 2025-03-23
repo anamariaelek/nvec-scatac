@@ -2869,10 +2869,10 @@ arc_plt_dt[, fc_scaled := pmin(fc, 6)]
 arc_plt_dt[, minuslog10padj_scaled := pmin(minuslog10padj, 30)]
 arc_plt_dt[, gene_label := ""]
 arc_plt_dt[gene_label == "" & gene != "" & common_name != "", gene_label := common_name]
-arc_plt_dt[gene_label == "" & gene != "" & common_name == "" & gene_name != "", gene_label := gene_name]
-arc_plt_dt[gene_label == "" & gene != "" & common_name == "" & og != "", gene_label := ifelse(nchar(og)>80, paste0(substr(og, 1, 77), "..."), og)]
-arc_plt_dt[gene_label == "" & gene != "" & common_name == "" & og == "" & pfam != "", gene_label := ifelse(nchar(pfam)>25, paste0(substr(pfam, 1, 22), "..."), pfam)]
-arc_plt_dt[gene_label == "" & gene != "", gene_label := str_remove(gene, "Nvec_(vc1.1_)*")]
+#arc_plt_dt[gene_label == "" & gene != "" & common_name == "" & gene_name != "", gene_label := gene_name]
+#arc_plt_dt[gene_label == "" & gene != "" & common_name == "" & og != "", gene_label := stringr::str_trunc(og, 25)]
+#arc_plt_dt[gene_label == "" & gene != "" & common_name == "" & og == "" & pfam != "", gene_label := stringr::str_trunc(pfam, 25)]
+#arc_plt_dt[gene_label == "" & gene != "", gene_label := str_remove(gene, "Nvec_(vc1.1_)*")]
 arc_plt_dt[, gene_label := ifelse(
   any(.SD$common_name != ""), 
   paste(sort(unique(.SD[gene_label != "" & common_name != ""]$common_name)), collapse = ", "),
@@ -3008,19 +3008,39 @@ arc_plt_dt <- fread(file.path(
 
 # order
 arc_plt_dt[, archetype_name := factor(archetype_name, levels = unique(arc_plt_dt$archetype_name))]
+arc_plt_dt[, row_id := as.integer(factor(archetype_name, levels = unique(archetype_name)))]
 arc_plt_dt[, cell_type := factor(cell_type, levels = cell_types)]
 
-# plot motif enrichment dotmap
+# positions for labels
+label_positions <- seq(1, max(arc_plt_dt$row_id), length.out = length(unique(arc_plt_dt[gene_label != ""]$gene_label)))
+label_data <- unique(
+  arc_plt_dt[gene_label != "", .(archetype_name, gene_label, row_id)]
+)
+label_data[, y_label := label_positions]
+label_data[, x_label := min(as.integer(factor(arc_plt_dt$cell_type))) - 0.7]
+
+# plot
 hm_gp <- ggplot(
     arc_plt_dt, 
-    aes(cell_type, archetype_name)
+    aes(cell_type, row_id)
   ) +
   geom_point(
     aes(size = minuslog10padj_scaled, color = fc_scaled)
   ) +
-  scale_y_discrete(
-    breaks = arc_plt_dt$archetype_name[arc_plt_dt$gene_label != ""],
-    labels = arc_plt_dt$gene_label[arc_plt_dt$gene_label != ""]
+  # Add repelled labels outside the plot
+  geom_text_repel(
+    data = label_data,
+    aes(x = x_label, y = row_id, label = gene_label),
+    inherit.aes = FALSE,
+    nudge_x = -0.5,
+    direction = "y",
+    segment.size = 0.3,
+    segment.color = "black",
+    hjust = 1,
+    min.segment.length = 0,
+    size = 3,
+    box.padding = 0.2,
+    max.overlaps = Inf
   ) +
   scale_color_gradientn(
     name = "motif enrichment\nfold change",
@@ -3033,21 +3053,27 @@ hm_gp <- ggplot(
     name = "-log10(padj)",
     range = c(0, 4)
   ) +
+  scale_x_discrete(
+    expand = expansion(mult = c(0.5, 0.02))
+  ) +
+  scale_y_continuous(
+    expand = c(0.02, 0.02)
+  ) +
+  coord_cartesian(clip = "off") +
   theme(
     axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 8),
-    axis.text.y = element_text(size = 6),
-    panel.grid.major = element_line(linewidth = 0.25),
+    axis.text.y = element_blank(),
     axis.title = element_blank(),
-    plot.margin = margin(5.5, 40, 5.5, 40)
+    plot.margin = margin(5.5, 50, 5.5, 50)
   )
 
 # save
 ggsave(
   file.path(fig_dir, sprintf("motif-enrichment-mona-q%s-FC-%s-padj-%s-figure.pdf", q, fc_thr, pa_thr)),
   hm_gp,
-  height = 14, width = 12, limitsize = FALSE
+  height = 16, width = 10, limitsize = FALSE
 )
-  
+
 ```
 
 ## Combine motif metrics with gene metrics

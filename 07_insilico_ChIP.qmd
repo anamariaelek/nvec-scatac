@@ -863,7 +863,7 @@ fwrite(
 )
 ```
 
-Plot correlations of chromVAR score and gene expression aggregated per cell type.
+Correlations of chromVAR score and gene expression aggregated per cell type.
 
 ```{r}
 # correlation data
@@ -906,6 +906,19 @@ saveRDS(
         sprintf("gene_expression_%s_chromVAR_cell_type_aggregated.rds", exp)
     )
 )
+```
+
+Plot correlations of chromVAR score and gene expression aggregated per cell type.
+
+```{r}
+# load data
+exp_chromvar_dt <- fread(
+  file.path(
+      chp_dir,
+      sprintf("gene_expression_%s_chromVAR_cell_type_aggregated.tsv.gz", exp)
+  )
+)
+
 # genes
 genes <- unique(exp_chromvar_dt$gene)
 genes <- gold[gene %in% genes][, setNames(gene, common_name)]
@@ -1039,11 +1052,6 @@ ggsave(
     )
 ), gp_thrs + gp_thrs_top, width = 8, height = 5)
 
-```
-
-Aggregate chromVAR scores per cell type for plotting.
-
-```{r}
 # combined data
 chr_exp_ct <- fread(file.path(
   chp_dir,
@@ -1062,6 +1070,18 @@ fwrite(
     ),
     sep = "\t"
 )
+```
+
+## Plots
+
+Aggregate chromVAR scores per cell type for plotting.
+
+```{r}
+# load metacell level data
+chr_exp_ct <- fread(file.path(
+  chp_dir,
+  sprintf("gene_expression_%s_chromVAR.tsv.gz", exp)
+))
 
 # aggregate per cell type
 chr_exp_ct <- chr_exp_ct[, .(
@@ -1404,10 +1424,24 @@ gen_plt_dt <- chr_exp_ct[gene %in% c(gen_sig, gen_mks)]
 gen_plt_dt[, expression_scaled := pmin(expression, 8)]
 gen_plt_dt[, motif_deviation_scaled := pmax(pmin(motif_deviation, 20), 0)]
 gen_plt_dt[, gene_label := ""]
-gen_plt_dt[, gene_label := str_remove(gene, "Nvec_(vc1.1_)*")]
+#gen_plt_dt[, gene_label := str_remove(gene, "Nvec_(vc1.1_)*")]
 gen_plt_dt[common_name != "", gene_label := common_name]
-gen_plt_dt[common_name == "" & og != "", gene_label := ifelse(nchar(og)>40, paste0(substr(og, 1, 37), "..."), og)]
-gen_plt_dt[gene != "" & common_name == "" & og == "" & pfam != "", gene_label := ifelse(nchar(pfam)>40, paste0(substr(pfam, 1, 37), "..."), pfam)]
+# gen_plt_dt[common_name == "" & og != "", gene_label := str_trunc(og, 40)]
+# gen_plt_dt[gene != "" & common_name == "" & og == "" & pfam != "", gene_label := str_trunc(pfam, 40)]
+gen_plt_dt[gene_label == "SoxB2/Sox3" & gene_name != "", gene_label := gene_name]
+
+# order
+gen_plt_dt[, row_id := as.integer(factor(gene, levels = unique(gene)))]
+gen_plt_dt[, cell_type := factor(cell_type, levels = cell_types)]
+
+# positions for labels
+label_positions <- seq(1, max(gen_plt_dt$row_id), length.out = length(unique(gen_plt_dt[gene_label != ""]$gene_label)))
+label_data <- unique(
+  gen_plt_dt[gene_label != "", .(gene, gene_label, row_id)]
+)
+label_data[, y_label := label_positions]
+label_data[, x_label := min(as.integer(factor(gen_plt_dt$cell_type))) - 0.7]
+
 
 # motif enrichment dotmap
 gp_dotmap <- ggplot(
@@ -1417,14 +1451,28 @@ gp_dotmap <- ggplot(
   geom_point(
     aes(size = motif_deviation_scaled, color = expression_scaled)
   ) +
-  scale_y_discrete(
-    breaks = gen_plt_dt$gene,
-    labels = gen_plt_dt$gene_label,
-    expand = expansion(mult = c(0.005, 0.005))
+  # Add repelled labels outside the plot
+  geom_text_repel(
+    data = label_data,
+    aes(x = x_label, y = row_id, label = gene_label),
+    inherit.aes = FALSE,
+    nudge_x = -1.5,
+    direction = "y",
+    segment.size = 0.3,
+    segment.color = "black",
+    hjust = 1,
+    min.segment.length = 0,
+    size = 3,
+    box.padding = 0.2,
+    max.overlaps = Inf
   ) +
   scale_x_discrete(
-    expand = expansion(mult = c(0.02, 0.02))
+    expand = expansion(mult = c(0.5, 0.02))
   ) +
+  scale_y_discrete(
+    expand = c(0.02, 0.02)
+  ) +
+  coord_cartesian(clip = "off") +
   scale_color_gradientn(
     name = "TF expression\nfold change",
     breaks = c(0, 2, 4, 6, 8),
@@ -1500,7 +1548,7 @@ design <- "ABBBBBBBB
            ABBBBBBBB
            ABBBBBBBB
            ABBBBBBBB
-           #CCCCCCCC"
+         #CCCCCCCC"
 
 gen_plt_gp <- gp_ctbar_v + gp_dotmap + gp_ctbar_h +
   plot_layout(design = design, widths = c(1, 10), heights = c(30, 1), guides = "collect")
@@ -1510,6 +1558,6 @@ gen_plt_gp <- gp_ctbar_v + gp_dotmap + gp_ctbar_h +
 ggsave(
   file.path(fig_dir, sprintf("motif-activity-gene-expression-FC-%s-zscore-%s.pdf", fc_thr, zs_thr)),
   gen_plt_gp,
-  height = 16, width = 8, limitsize = FALSE
+  height = 16, width = 10, limitsize = FALSE
 )
 ```

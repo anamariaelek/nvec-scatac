@@ -154,7 +154,7 @@ ct_cols <- c(
   "neuron_Pou4_FoxL2_1"        = "#101cde",
   "neuron_Pou4_FoxL2_2"        = "#0b16bf",
   "neuron_Pou4_FoxL2_3"        = "#2e39dd",
-  "neuronal_gastrula"          = "#063cb9",
+  "neuronal"                   = "#063cb9",
   "gland"                      = "#ff6f08",
   "gland_mucin"                = "#ff8f12"
 )
@@ -337,8 +337,6 @@ tfs_target_gene <- unique(dt_tg_tfs[gene == target_gene]$gene)
 dt_tg_tfs[, target_TF := gene %in% tfs_target_gene]
 dt_tg_tfs <- dt_tg_tfs[, .N, .(target_gene, target_TF)]
 dt_tg_tfs[, median(N), target_TF]
-#  TRUE     2
-# FALSE     3
 
 # plot
 gp_tg_tfs <- ggplot(
@@ -394,7 +392,7 @@ gp_tg_tfs <- ggplot(dt_tg_tfs, aes(Nchr)) +
 gp_grn <- gp_tf_gen + gp_tg_tfs + 
   plot_layout(guides = "collect", width = c(2, 3))
 ggsave(
-  file.path(fig_dir, "GRN-global-num-tfs-targets.pdf"),
+  file.path(fig_dir, "grn-global-num-tfs-targets.pdf"),
   gp_grn, height = 4, width = 7   
 )
 ```
@@ -599,6 +597,7 @@ acc_dt <- merge.data.table(
     acc_dt, peaks_dt, by = "peak",
     all.x = TRUE, sort = FALSE, allow.cartesian = TRUE
 )
+acc_dt[cell_type == "neuronal_gastrula", cell_type := "neuronal"]
 stopifnot(all(acc_dt$cell_type %in% cell_types))
 acc_dt[, stage := ifelse(cell_type %in% adult_cell_types, "adult", "gastrula")]
 
@@ -613,6 +612,9 @@ exp_umi <- melt.data.table(
     variable.name = "cell_type",
     value.name = "expression_umifrac"
 )
+exp_umi[cell_type == "neuronal_gastrula", cell_type := "neuronal"]
+stopifnot(all(exp_umi$cell_type %in% cell_types))
+
 
 # gene expression fold change with mapped metacells
 exp_fc_mt <- readRDS(file.path(
@@ -625,6 +627,9 @@ exp_fc <- melt.data.table(
     variable.name = "cell_type",
     value.name = "expression_fc"
 )
+exp_fc[cell_type == "neuronal_gastrula", cell_type := "neuronal"]
+stopifnot(all(exp_fc$cell_type %in% cell_types))
+
 
 # combine expression fc and umifrac
 stopifnot(all(exp_fc$gene %in% exp_umi$gene))
@@ -650,6 +655,8 @@ gsc_dt <- melt.data.table(
     variable.name = "cell_type",
     value.name = "gene_score"
 )
+gsc_dt[cell_type == "neuronal_gastrula", cell_type := "neuronal"]
+stopifnot(all(gsc_dt$cell_type %in% cell_types))
 gsc_dt[, stage := ifelse(cell_type %in% adult_cell_types, "adult", "gastrula")]
 
 # combine gene scores with expression
@@ -765,6 +772,7 @@ data_thrs <- merge.data.table(
 )
 
 # save
+stopifnot(all(data_thrs$cell_type %in% cell_types))
 fwrite(data_thrs, file.path(
     grn_dir, sprintf(
         "qthreshold_expression_%s_accessibility_%s.tsv",
@@ -877,7 +885,7 @@ thr_q_exp <- 0.4
 thr_q_acc <- 0.4
 
 # chromvar threshold for TF motif activity
-chr_thrs <- 4
+chr_thrs <- 5
 
 # this is a global expression threshold for all cell types;
 # if not NULL, it overrides expression quantification and quantile threshold!
@@ -919,6 +927,7 @@ Load gene developmental stage data
 devel_dt <- fread(file.path(
     grn_dir, "development_data_for_grn.tsv"
 ))
+devel_dt[cell_type == "neuronal_gastrula", cell_type := "neuronal"]
 stopifnot(all(devel_dt$cell_type %in% cell_types))
 devel_dt[, cell_type := factor(cell_type, levels = cell_types)]
 ```
@@ -969,7 +978,7 @@ gns_exp_acc_act_dt <- merge.data.table(
 )
 setcolorder(gns_exp_acc_act_dt, c(
   colnames(gns_exp_acc_dt)[1 : grep("target", colnames(gns_exp_acc_dt))[1]-1],
-  "zscore"
+  "motif", "zscore"
 ))
 ```
 
@@ -1228,30 +1237,27 @@ thr_q_exp <- 0.4
 thr_q_acc <- 0.4
 
 # chromvar threshold for TF motif activity
-chr_thrs <- 4
+chr_thrs <- 5
 
 # this is a global expression threshold for all cell types;
 # if not NULL, it overrides expression quantification and quantile threshold!
-thr_fc_exp <- NULL
-if (!is.null(thr_fc_exp)) exp <- "fc"
+thr_fc_exp <- 1.4
 
 # file name
-if (is.null(thr_fc_exp)) {
-  fn <- sprintf(
-    "expression_%s_%s_accessibility_%s_%s_chromvar_%s", 
-    exp, thr_q_exp, acc, thr_q_acc, chr_thrs
-  )
-} else {
-  fn <- sprintf(
-    "expression_%s_%s_accessibility_%s_%s_chromvar_%s", 
-    exp, thr_fc_exp, acc, thr_q_acc, chr_thrs
-  )
-}
+fn <- sprintf(
+  "expression_%s_%s_accessibility_%s_%s_chromvar_%s", 
+  exp, thr_q_exp, acc, thr_q_acc, chr_thrs
+)
 
 # load network
 grn_ct_dt <- fread(file.path(
   grn_dir, "networks", sprintf("grn_genes_%s.tsv.gz", fn)
 ))
+
+if (!is.null(thr_fc_exp)) {
+  grn_ct_dt <- grn_ct_dt[expression_fc > thr_fc_exp]
+}
+
 stopifnot(all(grn_ct_dt$cell_type %in% cell_types))
 grn_ct_dt[, cell_type := factor(cell_type, levels = cell_types)]
 ```
@@ -1383,21 +1389,191 @@ gp_grn_ct <- gp_grn_ct +
 
 # save
 ggsave(
-  file.path(fig_dir, sprintf("GRN-cell-type-num-tfs-targets-%s.pdf", fn)), 
+  file.path(fig_dir, sprintf("grn-cell-type-num-tfs-targets-%s.pdf", fn)), 
   gp_grn_ct, 
   height = 8, width = 8
 )
 ```
 
-Cartography
+Network cartography
 
 ```{r}
 source("motif-analysis/mta_grn_functions.R")
 
-cart_list <- lapply(cell_types, function(ct) {
+cart_list <- lapply(cell_types[1], function(ct) {
   message("Cartography for ", ct, " GRN")
-  grn_ct <- grn_ct_dt[cell_type == ct][, .(gene, target_gene, in_silico_chip_score)]
-  mta_network_scores(coef_dt = grn_ct)[, cell_type_stage := ct]
+  grn_ct <- unique(grn_ct_dt[cell_type == ct][, .(gene, target_gene, in_silico_chip_score)])
+  mta_network_scores(coef_dt = grn_ct)[, cell_type := ct]
 })
+cart_dt <- rbindlist(cart_list)
 
+# save
+fwrite(cart_dt, file.path(
+  grn_dir, "networks", sprintf(
+    "cartography_%s_%s_%s_%s_chromvar_%s.tsv",
+    exp, thr_q_exp, acc, thr_q_acc, chr_thrs
+   )
+), sep = "\t")
+```
+
+Add annotation for TF nodes
+
+```{r}
+# add annots
+grn_ct_dt[, N := length(unique(.SD$gene)) + length(unique(.SD$target_gene)), cell_type]
+nodes_ann <- merge.data.table(
+  cart_dt,
+  unique(grn_ct_dt[, .(
+    cell_type, gene_name, common_name, gene, og, pfam,
+    expression_fc, zscore, target_self, N
+  )])[, active_TF := TRUE],
+  by = c("gene", "cell_type"), all = FALSE, sort = FALSE
+)
+nodes_ann[is.na(active_TF), active_TF := FALSE]
+nodes_ann[common_name != "", label := common_name][label == "", label := gene_name][label == "", label := stringr::str_trunc(og, 12)]
+nodes_ann[nchar(label) > 30,  label := stringr::str_trunc(label, 12)]
+nodes_ann[is.na(label), label := ""]
+
+nodes_ann[, tot_betweenness_centrality := (N-1)*(N-2)/2]
+nodes_ann[, betweenness_centrality := betweenness_centrality / tot_betweenness_centrality]
+```
+
+Plot cartography
+
+```{r}
+# plot network scores
+cart_cols <- c(
+  "Peripheral" = "#b6b6b6ff",
+  "Connector" = "#ec7c6fff",
+  "Kinless" = "#83bbd7ff",
+  "Peripheral Hub" = "#878787ff",
+  "Connector Hub" = "#b42536ff",
+  "Kinless Hub" = "#2a70b8ff"
+)
+
+# category boundaries
+minx <- min(nodes_ann$participation, na.rm = TRUE)
+maxx <- max(nodes_ann$participation, na.rm = TRUE) 
+miny <- min(nodes_ann$connectivity, na.rm = TRUE)
+maxy <- max(nodes_ann$connectivity, na.rm = TRUE) 
+seg_df <- data.frame(
+  x1 = c(0.05, 0.62, minx, 0.75, 0.80),
+  x2 = c(0.05, 0.62, 1.00, 0.75, 0.80),
+  y1 = c(2.50, miny, 2.50, 2.50, miny),
+  y2 = c(maxy, 2.50, 2.50, maxy, 2.50)
+)
+
+# plot
+gp_cart <- ggplot(nodes_ann[active_TF==TRUE], aes(
+    participation, connectivity,
+    fill = role, label = label
+  )) +
+  geom_segment(
+    data = seg_df, aes(x = x1, y = y1, xend = x2, yend = y2),
+    inherit.aes = FALSE, linetype = 2
+  ) +
+  geom_point(size = 5, color = "black", shape = 21) +
+  ggrepel::geom_text_repel(max.overlaps = Inf) +
+  scale_fill_manual(values = cart_cols) +
+  scale_y_continuous(expand = c(0,0)) + #expansion(mult = c(0.1, 0.1))
+  scale_x_continuous(limits = c(0,1), expand = c(0,0)) +
+  facet_wrap("cell_type") +
+  labs(
+    x = "Participation coefficient P",
+    y = "Within-module degree, z",
+    title = sprintf(
+      "Cartography (expression %s %s %s chromVAR %s)",
+      thr_q_exp, acc, thr_q_acc, chr_thrs
+    )
+  ) +
+  guides(
+    fill = guide_legend(override.aes = list(shape = 21, size = 5)),
+  ) +
+  theme(legend.position = "bottom")
+
+# save plot
+ggsave(file.path(
+  fig_dir, sprintf(
+    "cartography-TFs-%s-%s-%s-%s-chromvar-%s.pdf",
+    exp, thr_q_exp, acc, thr_q_acc, chr_thrs
+  )
+), gp_cart, height = 8, width = 12)
+
+```
+
+Plot top genes per GRN
+
+```{r}
+pdf(file.path(
+  fig_dir, sprintf(
+    "top-genes-metrics-%s-%s-%s-%s-chromvar-%s.pdf",
+    exp, thr_q_exp, acc, thr_q_acc, chr_thrs
+  )
+), height = 6, width = 30)
+
+for (ct in unique(nodes_ann$cell_type)) {
+
+  message(ct)
+  plot_list <- lapply(c(
+    "degree_centrality_all",
+    "betweenness_centrality",
+    "eigenvector_centrality",
+    "connectivity",
+    "participation"
+  ), function(i) {
+    nodes_dt <- copy(nodes_ann[cell_type == ct])
+    setnames(nodes_dt, i, "y")
+    setorder(nodes_dt, -y)
+    nodes_dt <- nodes_dt[active_TF == TRUE]
+    nodes_dt[label == "", label := substr(og, 1, 25)]
+    nodes_dt <- nodes_dt[1:pmin(.N, 30)]
+    setorder(nodes_dt, y)
+    nodes_dt[, gene := factor(gene, levels = unique(nodes_dt$gene))]
+    # plot values
+    nodes_dt[, zscore_scaled := pmin(zscore, 25)]
+    nodes_dt[, expression_fc_scaled := pmin(expression_fc, 6)]
+    # plot
+    ggplot(
+        nodes_dt,
+        aes(
+          gene, y,
+          shape = active_TF,
+          fill = expression_fc_scaled,
+          size = zscore_scaled
+        )
+      ) +
+      geom_segment(aes(x = gene, xend = gene, y = 0, yend = y), inherit.aes = FALSE) +
+      geom_point(shape = 21) +
+      scale_fill_gradientn(
+        name = "expression\nfold change",
+        breaks = c(0, 2, 4, 6, 8),
+        colours = c(
+          "gray99", "#ffd195", "orange", "orangered2",
+          "#a71414", "#68093d", "#470447"
+        )
+      ) +
+      scale_size_continuous(
+        name = "TF activity",
+        breaks = c(10, 15, 20, 25, 30),
+        range = c(2, 5)
+      ) +
+      scale_x_discrete(
+        breaks = nodes_dt$gene,
+        labels = nodes_dt$label
+      ) +
+      scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
+      theme(
+        legend.position = "bottom",
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)
+      ) +
+      labs(x = "", y = str_replace_all(str_remove(i, "_all"), "_", "\n")) +
+      coord_flip()
+  })
+  gp_met <- patchwork::wrap_plots(plot_list, nrow = 1) +
+    plot_layout(guides = "collect") +
+    plot_annotation(title = ct) & theme(legend.position = "bottom")
+  print(gp_met)
+
+}
+dev.off()
 ```
