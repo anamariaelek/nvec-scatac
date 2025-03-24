@@ -1082,12 +1082,18 @@ chr_exp_ct <- fread(file.path(
   chp_dir,
   sprintf("gene_expression_%s_chromVAR.tsv.gz", exp)
 ))
+if ("archetype_name" %in% colnames(chr_exp_ct)) {
+    setnames(chr_exp_ct, "archetype_name", "motif")
+}
+if ("zscore" %in% colnames(chr_exp_ct)) {
+    setnames(chr_exp_ct, "zscore", "motif_deviation")
+}
 
 # aggregate per cell type
 chr_exp_ct <- chr_exp_ct[, .(
   expression = mean(expression),
   motif_deviation = mean(motif_deviation)
-), .(gene, gene_name, common_name, pfam, og, archetype_name, cell_type, stage)]
+), .(gene, gene_name, common_name, pfam, og, motif, cell_type, stage)]
 
 ```
 
@@ -1108,6 +1114,9 @@ names(mots_arc_lst) <- sapply(mots_arc_lst, function(m) m@name)
 
 # loop over TFs-motifs pairs
 genes <- unique(chr_exp_ct$gene)
+if ("motif" %in% colnames(chr_exp_ct) | !"archetype_name" %in% colnames(chr_exp_ct)) {
+  setnames(chr_exp_ct, "motif", "archetype_name")
+}
 marks <- genes[genes %in% tfan[common_name!=""]$gene]
 iters <- c(marks, setdiff(genes, marks))
 
@@ -1520,7 +1529,7 @@ gp_ctbar_v <- ggplot(
     theme(
         legend.position = "none",
         axis.text.x = element_blank(),
-        axis.text.y = element_text(size = 9, vjust = 0.5, hjust = 1),
+        axis.text.y = element_blank(),
         plot.margin = unit(c(0, 0, 0, 0), "cm")
     )
 

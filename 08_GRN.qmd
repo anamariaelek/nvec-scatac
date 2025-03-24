@@ -949,8 +949,8 @@ stopifnot(all(exp_chromvar_dt$cell_type %in% cell_types))
 exp_chromvar_dt[, cell_type := factor(cell_type, levels = cell_types)]
 
 # aggregate zscores per cell type
-setnames(exp_chromvar_dt, "archetype_name", "motif")
-setnames(exp_chromvar_dt, "motif_deviation", "zscore")
+if ("archetype_name" %in% colnames(exp_chromvar_dt)) setnames(exp_chromvar_dt, "archetype_name", "motif")
+if ("motif_deviation" %in% colnames(exp_chromvar_dt)) setnames(exp_chromvar_dt, "motif_deviation", "zscore")
 exp_chromvar_dt[, zscore := mean(zscore), .(gene, motif, cell_type)]
 exp_chromvar_dt[, expression := mean(expression), .(gene, motif, cell_type)]
 exp_chromvar_dt[, c("metacell", "expression", "insilico_ChIP_threshold") := NULL]
@@ -980,6 +980,37 @@ setcolorder(gns_exp_acc_act_dt, c(
   colnames(gns_exp_acc_dt)[1 : grep("target", colnames(gns_exp_acc_dt))[1]-1],
   "motif", "zscore"
 ))
+
+# save unfiltered GRNs per cell type
+require(openxlsx)
+#wb_peaks <- createWorkbook()
+wb_genes <- createWorkbook()
+for (ct in cell_types) {
+  sheetName <- substr(ct, 1, 30)
+  # global network in selected cell type
+  grn_ct <- gns_exp_acc_act_dt[cell_type == ct]
+  #addWorksheet(wb_peaks, sheetName = sheetName)
+  #writeData(wb_peaks, sheet = sheetName, grn_ct)
+  # summarize per gene
+  grn_ct[, c("target_peak", "seqnames", "start", "end") := NULL]
+  grn_ct[, target_accessibility := max(target_accessibility), .(gene, target_gene, cell_type, stage)]
+  grn_ct[, peak_tf_correlation_score := max(peak_tf_correlation_score), .(gene, target_gene, cell_type, stage)]
+  grn_ct[, in_silico_chip_score := max(in_silico_chip_score), .(gene, target_gene, cell_type, stage)]
+  grn_ct <- unique(grn_ct)
+  # add to file
+  addWorksheet(wb_genes, sheetName = sheetName)
+  writeData(wb_genes, sheet = sheetName, grn_ct)
+}
+#saveWorkbook(
+#  wb_peaks,
+#  file.path(grn_dir, "networks", sprintf("grn_global_peaks_%s.xlsx", fn)),
+#  overwrite = TRUE
+#)
+saveWorkbook(
+  wb_genes,
+  file.path(grn_dir, "networks", sprintf("grn_global_genes_%s.xlsx", fn)),
+  overwrite = TRUE
+)
 ```
 
 Load per cell type thresholds of expression and accessibility, and combine with 
@@ -1237,7 +1268,7 @@ thr_q_exp <- 0.4
 thr_q_acc <- 0.4
 
 # chromvar threshold for TF motif activity
-chr_thrs <- 5
+chr_thrs <- 4
 
 # this is a global expression threshold for all cell types;
 # if not NULL, it overrides expression quantification and quantile threshold!
@@ -1400,18 +1431,22 @@ Network cartography
 ```{r}
 source("motif-analysis/mta_grn_functions.R")
 
-cart_list <- lapply(cell_types[1], function(ct) {
+cart_list <- lapply(cell_types, function(ct) {
   message("Cartography for ", ct, " GRN")
   grn_ct <- unique(grn_ct_dt[cell_type == ct][, .(gene, target_gene, in_silico_chip_score)])
-  mta_network_scores(coef_dt = grn_ct)[, cell_type := ct]
+  tryCatch({
+    mta_network_scores(coef_dt = grn_ct)[, cell_type := ct]
+  }, error = function(e) {
+    message("Error in ", ct, ": ", e)
+    NULL
+  })
 })
-cart_dt <- rbindlist(cart_list)
+cart_dt <- rbindlist(cart_list, use.names = TRUE, fill = TRUE)
 
 # save
 fwrite(cart_dt, file.path(
   grn_dir, "networks", sprintf(
-    "cartography_%s_%s_%s_%s_chromvar_%s.tsv",
-    exp, thr_q_exp, acc, thr_q_acc, chr_thrs
+    "cartography_%s.tsv", fn
    )
 ), sep = "\t")
 ```
@@ -1419,6 +1454,13 @@ fwrite(cart_dt, file.path(
 Add annotation for TF nodes
 
 ```{r}
+# load cartography
+cart_dt <- fread(file.path(
+  grn_dir, "networks", sprintf(
+    "cartography_%s.tsv", fn
+  )
+))
+
 # add annots
 grn_ct_dt[, N := length(unique(.SD$gene)) + length(unique(.SD$target_gene)), cell_type]
 nodes_ann <- merge.data.table(
@@ -1438,78 +1480,14 @@ nodes_ann[, tot_betweenness_centrality := (N-1)*(N-2)/2]
 nodes_ann[, betweenness_centrality := betweenness_centrality / tot_betweenness_centrality]
 ```
 
-Plot cartography
-
-```{r}
-# plot network scores
-cart_cols <- c(
-  "Peripheral" = "#b6b6b6ff",
-  "Connector" = "#ec7c6fff",
-  "Kinless" = "#83bbd7ff",
-  "Peripheral Hub" = "#878787ff",
-  "Connector Hub" = "#b42536ff",
-  "Kinless Hub" = "#2a70b8ff"
-)
-
-# category boundaries
-minx <- min(nodes_ann$participation, na.rm = TRUE)
-maxx <- max(nodes_ann$participation, na.rm = TRUE) 
-miny <- min(nodes_ann$connectivity, na.rm = TRUE)
-maxy <- max(nodes_ann$connectivity, na.rm = TRUE) 
-seg_df <- data.frame(
-  x1 = c(0.05, 0.62, minx, 0.75, 0.80),
-  x2 = c(0.05, 0.62, 1.00, 0.75, 0.80),
-  y1 = c(2.50, miny, 2.50, 2.50, miny),
-  y2 = c(maxy, 2.50, 2.50, maxy, 2.50)
-)
-
-# plot
-gp_cart <- ggplot(nodes_ann[active_TF==TRUE], aes(
-    participation, connectivity,
-    fill = role, label = label
-  )) +
-  geom_segment(
-    data = seg_df, aes(x = x1, y = y1, xend = x2, yend = y2),
-    inherit.aes = FALSE, linetype = 2
-  ) +
-  geom_point(size = 5, color = "black", shape = 21) +
-  ggrepel::geom_text_repel(max.overlaps = Inf) +
-  scale_fill_manual(values = cart_cols) +
-  scale_y_continuous(expand = c(0,0)) + #expansion(mult = c(0.1, 0.1))
-  scale_x_continuous(limits = c(0,1), expand = c(0,0)) +
-  facet_wrap("cell_type") +
-  labs(
-    x = "Participation coefficient P",
-    y = "Within-module degree, z",
-    title = sprintf(
-      "Cartography (expression %s %s %s chromVAR %s)",
-      thr_q_exp, acc, thr_q_acc, chr_thrs
-    )
-  ) +
-  guides(
-    fill = guide_legend(override.aes = list(shape = 21, size = 5)),
-  ) +
-  theme(legend.position = "bottom")
-
-# save plot
-ggsave(file.path(
-  fig_dir, sprintf(
-    "cartography-TFs-%s-%s-%s-%s-chromvar-%s.pdf",
-    exp, thr_q_exp, acc, thr_q_acc, chr_thrs
-  )
-), gp_cart, height = 8, width = 12)
-
-```
-
 Plot top genes per GRN
 
 ```{r}
 pdf(file.path(
   fig_dir, sprintf(
-    "top-genes-metrics-%s-%s-%s-%s-chromvar-%s.pdf",
-    exp, thr_q_exp, acc, thr_q_acc, chr_thrs
+    "top-genes-metrics-%s.pdf", fn
   )
-), height = 6, width = 30)
+), height = 10, width = 30)
 
 for (ct in unique(nodes_ann$cell_type)) {
 
@@ -1548,14 +1526,14 @@ for (ct in unique(nodes_ann$cell_type)) {
         name = "expression\nfold change",
         breaks = c(0, 2, 4, 6, 8),
         colours = c(
-          "gray99", "#ffd195", "orange", "orangered2",
+          "#ffd195", "orange", "orangered2",
           "#a71414", "#68093d", "#470447"
         )
       ) +
       scale_size_continuous(
         name = "TF activity",
         breaks = c(10, 15, 20, 25, 30),
-        range = c(2, 5)
+        range = c(4, 8)
       ) +
       scale_x_discrete(
         breaks = nodes_dt$gene,

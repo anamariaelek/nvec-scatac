@@ -1656,7 +1656,7 @@ saveRDS(
 ```{r}
 #| label: exp_motifs
 dapseq_dt <- fread(file.path(dap_dir, "dapseq-results-summary-v5.tsv.gz"))
-dapseq_dt <- dapseq_dt[success == "success"]
+dapseq_dt <- dapseq_dt[success == "success"][common_name != "NvSox2"]
 dapseq_dt[common_name != "", gene_name := common_name]
 dapseq_dt[gene_name == "", gene_name := paste(gene, og, sep = "_"), by = .I]
 dapseq_dt[, tf_family := str_remove(og, "\\..+")]
@@ -1736,6 +1736,7 @@ fwrite(
   file.path(mta_dir, "dapseq-motifs.tsv.gz"),
   sep = "\t", quote = FALSE
 )
+
 ```
 
 ### Calculate motif enrichment activity scores, and correlations
@@ -2394,6 +2395,19 @@ Now we update the motif assignments.
 ```{r}
 # update existing motif assignments
 genes_dt <- dr_dt[motif_assignment!="archetype"][gene %in% rownames(arc_exp_cor)]
+
+# exclude experimental/orthology motifs for some genes
+blck_gns <- c(
+  "Nvec_vc1.1_XM_001639701.3",
+  "Nvec_vc1.1_XM_048728976.1",
+  "Nvec_vc1.1_XM_032376930.1",
+  "Nvec_vc1.1_XM_032381562.2",
+  "Nvec_vc1.1_XM_032381586.2",
+  "Nvec_vc1.1_XM_001639307"
+)
+if (any(blck_gns %in% genes_dt$gene)) {
+  genes_dt <- genes_dt[!gene %in% blck_gns]
+}
 genes <- unique(genes_dt$gene)
 
 genes_assigned <- intersect(genes, mta_gen_dt$gene)
@@ -2489,7 +2503,7 @@ if (length(genes_assigned) > 0) {
 print(sprintf("Updated %s gene assignments", counter))
 ```
 
-Updated 113 gene assignments.
+Updated 108 gene assignments.
 
 Now add add motifs for TFs with no assignments among archetypes.
 
@@ -2592,6 +2606,13 @@ Summarize different assignment methods for all TFs.
 # load updated assignments
 mta_gen_dt <- fread(file.path(mta_dir, "motif-assignment-selected.tsv.gz"))
 
+# load original archetype assignments
+arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
+arc_gen_dt <- fread(file.path(
+  "results", "Archetypes",
+  sprintf("motif-assignment-archetypes-%s.tsv.gz", arc_id)
+))
+
 # counts
 mta_gen_cnt <- mta_gen_dt[, .N, class][order(-N)]
 mta_gen_cnt[, class := factor(class, levels = unique(mta_gen_cnt$class))]
@@ -2616,7 +2637,7 @@ ggsave(file.path(fig_dir, "motif-assignment-piechart.pdf"), mta_gen_pie, width =
 
 ```
 
-Save motif pwms
+Save motif PWMs logos.
 
 ```{r}
 # load archetypes
@@ -2653,6 +2674,74 @@ for (x in seq_along(genes)) {
     )
 }
 dev.off()
+```
+
+Plot motifs PWMs logos, grouped by class.
+
+```{r}
+# chromvar scores
+chromvar_mta <- readRDS(file.path(mta_dir, "ChromVAR", "MotifsSEACellsMatrix", "Matrix-Motifs-SEACells.rds"))
+chromvar_mta_max <- apply(as.matrix(chromvar_mta), 1, max)
+chromvar_arc <- readRDS(file.path(arc_dir, sprintf("ChromVAR-%s", arc_id), "ArchetypesSEACellsMatrix", "Matrix-Archetypes-SEACells.rds"))
+chromvar_arc_max <- apply(as.matrix(chromvar_arc), 1, max)
+
+# plot logos
+for (cl in mta_gen_dt[,.N,class][order(-N)]$class) {
+  
+  mta_cls_dt <- unique(mta_gen_dt[class==cl])[order(archetype_family)]
+  
+  # get motifs
+  mta_cl_pwm <- sapply(mta_cls_dt$gene, function(g) {
+    # assigned motif
+    n <- mta_cls_dt[gene == g]$archetype_name
+    m <- mta_pwm[[n]]
+    # gene name
+    gn <- mta_cls_dt[gene == g]$gene_name
+    if (length(gn) == 0 | gn == "") gn <- str_trunc(mta_cls_dt[gene == g]$og, 35)
+    # archetype family
+    f <- mta_cls_dt[gene == g]$archetype_family
+    # assigned motif correlations
+    sc <- mta_gen_dt[gene==g]$gene_score_correlation
+    ec <- mta_gen_dt[gene==g]$gene_expression_correlation
+    zs <- chromvar_mta_max[n]
+    if (is.na(zs)) zs <- chromvar_arc_max[n]
+    cs <- sprintf("gene score cor: %.2f; expression cor: %.2f; max zscore: %.2f", sc, ec, zs)
+    # original archetype assignment
+    a <- arc_gen_dt[gene==g]$archetype_name
+    so <- arc_gen_dt[gene==g]$gene_score_correlation
+    eo <- arc_gen_dt[gene==g]$gene_expression_correlation
+    zo <- chromvar_arc_max[a]
+    if (a != n & (so > sc | eo > ec | zo > zs)) {
+      co <- sprintf("%s; gene score cor: %.2f; expression cor: %.2f; max zscore: %.2f", a, so, eo, zo)
+    } else {
+      co <- ""
+    }
+    # update moif name
+    m@name <- sprintf("%s: %s\n%s\n%s\n%s\n%s", f, n, g, gn, cs, co)
+    m
+  })
+  
+  # plot
+  if (cl == "archetype") {
+    pdf(
+      file.path(fig_dir, sprintf("motifs-genes-logos-%s.pdf", cl)),
+      width = 10, height = 4
+    )
+    for (m in mta_cl_pwm) {
+      print(view_motifs(list(m)) + labs(title = m@name))
+    }
+    dev.off()
+  } else {
+    pdf(
+      file.path(fig_dir, sprintf("motifs-genes-logos-%s.pdf", cl)),
+      width = 10, height = pmax(length(unique(mta_cls_dt$gene)) * 1.8, 5)
+    )
+    print(view_motifs(mta_cl_pwm))
+    dev.off()
+  }
+
+}
+
 ```
 
 We have many redundant motifs, we will calculate similarity between all pairs.
@@ -2888,114 +2977,6 @@ fwrite(
   file.path(mta_dir, sprintf("motif-enrichment-mona-q%s-FC-%s-padj-%s.tsv.gz", q, fc_thr, pa_thr)),
   sep = "\t"
 )
-```
-
-Plot a heatmap with TF family annotation (not used)
-
-```{r}
-# load data for plotting
-arc_plt_dt <- fread(file.path(
-  mta_dir, sprintf("motif-enrichment-mona-q%s-FC-%s-padj-%s.tsv.gz", q, fc_thr, pa_thr)
-))
-
-# order
-arc_plt_dt[, archetype_name := factor(archetype_name, levels = unique(arc_plt_dt$archetype_name))]
-arc_plt_dt[, cell_type := factor(cell_type, levels = cell_types)]
-
-# plot motif enrichment dotmap
-hm_gp <- ggplot(
-    arc_plt_dt, 
-    aes(cell_type, archetype_name)
-  ) +
-  geom_point(
-    aes(size = minuslog10padj_scaled, color = fc_scaled)
-  ) +
-  geom_text(
-    data = unique(arc_plt_dt[,.(archetype_name, archetype_family, gene_label)]),
-    aes(y = archetype_name, label = archetype_family),
-    x = length(unique(arc_plt_dt$cell_type)) + 1, 
-    hjust = 0, 
-    size = 2,
-    inherit.aes = FALSE
-  ) +
-  scale_y_discrete(
-    breaks = arc_plt_dt$archetype_name[arc_plt_dt$gene_label != ""],
-    labels = arc_plt_dt$gene_label[arc_plt_dt$gene_label != ""]
-  ) +
-  scale_x_discrete(
-    expand = expansion(mult = c(0.02, 0.42))
-  ) +
-  scale_color_gradientn(
-    name = "motif enrichment\nfold change",
-    breaks = c(0, 2, 4, 6, 8),
-    colours = c(
-      "white", "#fee5d9", "#fcae91", "#fb6a4a", "#de2d26", "#a50f15", "#7a0105"
-    )
-  ) +
-  scale_size_continuous(
-    name = "-log10(padj)",
-    range = c(0, 4)
-  ) +
-  theme(
-    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 8),
-    axis.text.y = element_text(size = 6),
-    panel.grid.major = element_line(linewidth = 0.25),
-    axis.title = element_blank(),
-    plot.margin = margin(5.5, 40, 5.5, 40)
-  )
-
-# plot tf family annotation bar
-tfam_dt <- unique(arc_plt_dt[, .(archetype_name, archetype_family)])
-tfam_dt[archetype_family == "bHLH", archetype_family := "HLH"]
-tfam_top <- tfam_dt[,.N,archetype_family][order(-N)][N>10]$archetype_family
-tfam_cols <- structure(
-  RColorBrewer::brewer.pal(length(tfam_top), "Set1"),
-  names = tfam_top
-)
-tfam_cols[match("", tfam_top)] <- "white"
-fm_gp <- ggplot(tfam_dt, aes(
-    x = "family", 
-    y = archetype_name, 
-    fill = archetype_family
-  )) +
-  scale_fill_manual(values = tfam_cols, na.value = "white") +
-  geom_tile(stat = "identity", color = "white") +
-  theme(
-    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
-    axis.text.y = element_blank(),
-    axis.ticks.y = element_blank(),
-    axis.title.x = element_blank(),
-    axis.title.y = element_blank()
-  )
-
-# combine plots
-require(patchwork)
-layout <- "
-BBBBBBBBBBBBC
-BBBBBBBBBBBBC
-BBBBBBBBBBBBC
-BBBBBBBBBBBBC
-BBBBBBBBBBBBC
-BBBBBBBBBBBBC
-BBBBBBBBBBBBC
-BBBBBBBBBBBBC
-BBBBBBBBBBBBC
-BBBBBBBBBBBBC
-BBBBBBBBBBBBC
-BBBBBBBBBBBBC
-BBBBBBBBBBBBC
-BBBBBBBBBBBBC
-"
-arc_ann_gp <- hm_gp + fm_gp + 
-  plot_layout(design = layout, guides = "collect")
-
-# save
-ggsave(
-  file.path(fig_dir, sprintf("motif-enrichment-mona-q%s-FC-%s-padj-%s.pdf", q, fc_thr, pa_thr)),
-  arc_ann_gp,
-  height = 19, width = 16, limitsize = FALSE
-)
-  
 ```
 
 Plot a heatmap
