@@ -194,7 +194,7 @@ cell_type_rename <- c(
   "neuron_GATA_Islet_3" = "neuron_Pou4_FoxL2_3",
   "NPC$" = "NPC_1",
   "precursors_1" = "precursors_PGC",
-  "precursors_2" = "precursors_endoNPC",
+  "precursors_2" = "precursors_ ",
   "precursors_3" = "precursors_NPC"
 )
 
@@ -280,7 +280,7 @@ gp_umap <- ggplot(umap_sc_dt, aes(UMAP1, UMAP2)) +
     ) +
     theme_blank()
 ggsave(
-    file.path(fig_dir, "UMAP_adult.pdf"),
+    file.path(fig_dir, "fig1_UMAP_adult.pdf"),
     width = 12, height = 6
 )
 ```
@@ -290,32 +290,29 @@ Gastrula
 ```{r}
 # single cells
 umap_sc_dt <- fread(
-    file.path(dirname(gastr_dir), "X_umap.cells.csv"),
+    file.path(gastr_dir, "X_umap.cells.csv"),
     header = TRUE
 )
 setnames(umap_sc_dt, c("Cell", "UMAP1", "UMAP2"))
 
 # metacells
 umap_mc_dt <- fread(
-    file.path(dirname(gastr_dir), "X_umap.seacells.csv"),
+    file.path(gastr_dir, "X_umap.seacells.csv"),
     select = 2:4, header = TRUE
 )
 setnames(umap_mc_dt, c("SEACell", "UMAP1", "UMAP2"))
 
-# mapping single cell to metacells
-maps <- as.data.table(proj_gastr@cellColData)[, .(Cell, SEACell)]
-umap_sc_dt <- merge.data.table(
-  umap_sc_dt, maps, by = "Cell", sort = FALSE, all.x = TRUE
-)
-
-# mapping metacells to cell types
-ann_mc <- unique(as.data.table(proj_gastr@cellColData)[, .(SEACell, cell_type, color)])
+# mapping to cell types
+ann_mc <- fread(file.path(
+    gastr_dir, "cellColData.tsv"
+))[, .(Cell, SEACell, cell_type)]
 ann_mc[, cell_type := str_replace_all(cell_type, "\\.", "_")]
 ann_mc[, cell_type := str_replace_all(cell_type, cell_type_rename)]
-umap_sc_dt <- merge.data.table(umap_sc_dt, ann_mc, by = "SEACell", sort = FALSE, all.x = TRUE)
+ann_mc[,.N,cell_type]
+
+# UMAP with annotation
+umap_sc_dt <- merge.data.table(umap_sc_dt, ann_mc, by = "Cell", sort = FALSE, all.x = TRUE)
 umap_mc_dt <- merge.data.table(umap_mc_dt, ann_mc, by = "SEACell", sort = FALSE, all.x = TRUE)
-umap_sc_dt[, cell_type := str_replace_all(cell_type, cell_type_rename)]
-umap_mc_dt[, cell_type := str_replace_all(cell_type, cell_type_rename)]
 
 # overlay plot
 umap_sc_dt[, cell_type_sc := paste0(cell_type, "_sc")]
@@ -346,10 +343,9 @@ gp_umap <- ggplot(umap_sc_dt, aes(UMAP1, UMAP2)) +
     guides(
       color = "none",
       fill = guide_legend(override.aes = list(size = 5)),
-    ) +
-    theme_blank()
+    )
 ggsave(
-    file.path(fig_dir, "UMAP_gastrula.pdf"),
+    file.path(fig_dir, "fig1_umap_gastrula.pdf"),
     width = 8, height = 6
 )
 ```

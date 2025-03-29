@@ -95,7 +95,7 @@ map_dir <- "results/Metacells"
 chp_dir <- "results/insilicoChIP"
 grn_dir <- "results/GRN"
 dir.create(grn_dir, showWarnings = FALSE)
-dir.create(file.path(grn_dir, "networks"), showWarnings = FALSE)
+dir.create(file.path(grn_res_dir), showWarnings = FALSE)
 fig_dir <- "plots/GRN"
 dir.create(fig_dir, showWarnings = FALSE)
 ann_dir <- "annotation"
@@ -205,6 +205,12 @@ bct_maps <- setDT(cbind.data.frame(
   cell_type = cell_types,
   broad_cell_type = str_extract(cell_types, paste(names(bct_cols), collapse = "|"))
 ))
+# keep this separately
+bct_maps[cell_type == "cnidocyte_gastrula", broad_cell_type := "cnidocyte_gastrula"]
+bct_maps[cell_type == "neuron_Pou4_FoxL2_3", broad_cell_type := "neuron_Pou4_FoxL2_3"]
+bct_maps[cell_type == "gland_mucin", broad_cell_type := "gland_mucin"]
+bct_cols <- c(bct_cols, ct_cols)[unique(bct_maps$broad_cell_type)]
+broad_cell_types <- names(bct_cols)
 ```
 
 ## Global GRN
@@ -371,7 +377,7 @@ gp_tg_tfs <- ggplot(
     ) +
     labs(y = "TFs per\ntarget gene")
 
-# all target genes together
+# group all target genes by number of TF inputs
 dt_tg_tfs[, Nchr := as.character(pmin(N, 11))]
 dt_tg_tfs[Nchr=="11", Nchr := ">10"]
 dt_tg_tfs[, Nchr := factor(Nchr, levels = c(as.character(0:10), ">10"))]
@@ -388,12 +394,66 @@ gp_tg_tfs <- ggplot(dt_tg_tfs, aes(Nchr)) +
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
     labs(x = "TFs per target gene", y = "target genes")
 
+# number of peaks per TF target gene
+dt_tg_tfs_pks <- unique(
+  grn_dt[, .(gene, peak, target_gene)]
+)
+tfs_target_gene <- unique(dt_tg_tfs_pks[gene == target_gene]$gene)
+dt_tg_tfs_pks[, target_TF := gene %in% tfs_target_gene]
+dt_tg_tfs_pks[, n_tf_peaks := length(unique(.SD$peak)), .(gene, target_gene, target_TF)]
+dt_tg_tfs_pks[, n_peaks := length(unique(.SD$peak)), .(target_gene, target_TF)]
+dt_tg_tfs_pks[, n_tfs := length(unique(.SD$gene)), .(target_gene, target_TF)]
+dt_tg_tfs_pks[, peak := NULL]
+dt_tg_tfs_pks <- unique(dt_tg_tfs_pks)
+
+gp_tg_tfs_pks <- ggplot(
+    dt_tg_tfs_pks[, .N, .(n_peaks, n_tf_peaks)], 
+    aes(n_peaks, n_tf_peaks)
+  ) +
+  geom_point(aes(size = N), color = "grey", alpha = 0.5) +
+  geom_text(aes(label = N)) +
+  scale_x_continuous(
+    breaks = seq(1, 30)
+  ) +
+  scale_y_continuous(
+    breaks = seq(1, 30)
+  ) +
+  coord_fixed() +
+  scale_size_continuous(range = c(5, 30))
+ggsave(
+  file.path(fig_dir, "grn-global-num-tfs-targets-pks.pdf"),
+  gp_tg_tfs_pks, height = 14, width = 14
+)
+    
+
+# group all target genes by number of TF inputs
+dt_tg_tfs_pks[, Nchr := as.character(pmin(n_tf_peaks, 11))]
+dt_tg_tfs_pks[Nchr=="11", Nchr := ">10"]
+dt_tg_tfs_pks[, Nchr := factor(Nchr, levels = c(as.character(0:10), ">10"))]
+
+# plot
+gp_tg_tfs_pks <- ggplot(dt_tg_tfs_pks, aes(Nchr)) +
+    geom_bar(fill = "#3d3d3d") +
+    geom_text(
+      data = dt_tg_tfs_pks[,.(md=median(n_peaks))],
+      aes(x = "6", y = 5e3, label = sprintf("median:\n%s", md)),
+      size = 5
+    ) +
+    scale_y_continuous(
+      trans = "log10",
+      expand = expansion(mult = c(0, 0.05))
+    ) +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+    labs(y = "target genes", x = "peaks per\nTF-target gene")
+
+
+
 # save plot
-gp_grn <- gp_tf_gen + gp_tg_tfs + 
-  plot_layout(guides = "collect", width = c(2, 3))
+gp_grn <- gp_tf_gen + gp_tg_tfs + gp_tg_tfs_pks +
+  plot_layout(nrow = 1, ncol = 3, guides = "collect", width = c(2, 3, 3))
 ggsave(
   file.path(fig_dir, "grn-global-num-tfs-targets.pdf"),
-  gp_grn, height = 4, width = 7   
+  gp_grn, height = 4, width = 10
 )
 ```
 
@@ -573,6 +633,7 @@ Combine peak accessibility, gene accessibility and expression.
 
 ```{r}
 id <- "genes_exp_FC2_acc_FC4_spearman"
+lvl <- "broad_cell_type"
 
 # peak accessibility data with mapped metacells
 acc_mt <- readRDS(file.path(
@@ -586,8 +647,18 @@ acc_dt <- melt.data.table(
     variable.name = "cell_type",
     value.name = "accessibility"
 )
+acc_dt[cell_type == "neuronal_gastrula", cell_type := "neuronal"]
+
+if (lvl == "broad_cell_type") {
+  stopifnot(all(acc_dt$cell_type %in% bct_maps$cell_type))
+  acc_dt <- merge.data.table(
+      acc_dt, bct_maps, by = "cell_type",
+      all.x = TRUE, sort = FALSE
+  )
+  acc_dt[, cell_type := broad_cell_type]
+  acc_dt[, broad_cell_type := NULL]
+}
 acc_dt <- acc_dt[, .(accessibility = mean(accessibility)), .(peak, cell_type)]
-acc_dt[[2]] <- as.character(acc_dt[[2]])
 
 # add peak to gene assignment
 peaks_dt <- fread(file.path(
@@ -597,9 +668,12 @@ acc_dt <- merge.data.table(
     acc_dt, peaks_dt, by = "peak",
     all.x = TRUE, sort = FALSE, allow.cartesian = TRUE
 )
-acc_dt[cell_type == "neuronal_gastrula", cell_type := "neuronal"]
-stopifnot(all(acc_dt$cell_type %in% cell_types))
-acc_dt[, stage := ifelse(cell_type %in% adult_cell_types, "adult", "gastrula")]
+if (lvl == "cell_type") {
+  stopifnot(all(acc_dt$cell_type %in% cell_types))
+  acc_dt[, stage := ifelse(cell_type %in% adult_cell_types, "adult", "gastrula")]
+} else if (lvl == "broad_cell_type") {
+  stopifnot(all(acc_dt$cell_type %in% broad_cell_types))
+}
 
 # gene expression umifrac with mapped metacells
 exp_umi_mt <- readRDS(file.path(
@@ -614,7 +688,16 @@ exp_umi <- melt.data.table(
 )
 exp_umi[cell_type == "neuronal_gastrula", cell_type := "neuronal"]
 stopifnot(all(exp_umi$cell_type %in% cell_types))
-
+if (lvl == "broad_cell_type") {
+  stopifnot(all(exp_umi$cell_type %in% bct_maps$cell_type))
+  exp_umi <- merge.data.table(
+      exp_umi, bct_maps, by = "cell_type",
+      all.x = TRUE, sort = FALSE
+  )
+  exp_umi[, cell_type := broad_cell_type]
+  exp_umi[, broad_cell_type := NULL]
+  exp_umi <- exp_umi[, .(expression_umifrac = mean(expression_umifrac)), .(gene, cell_type)]
+}
 
 # gene expression fold change with mapped metacells
 exp_fc_mt <- readRDS(file.path(
@@ -629,7 +712,16 @@ exp_fc <- melt.data.table(
 )
 exp_fc[cell_type == "neuronal_gastrula", cell_type := "neuronal"]
 stopifnot(all(exp_fc$cell_type %in% cell_types))
-
+if (lvl == "broad_cell_type") {
+  stopifnot(all(exp_fc$cell_type %in% bct_maps$cell_type))
+  exp_fc <- merge.data.table(
+      exp_fc, bct_maps, by = "cell_type",
+      all.x = TRUE, sort = FALSE
+  )
+  exp_fc[, cell_type := broad_cell_type]
+  exp_fc[, broad_cell_type := NULL]
+  exp_fc <- exp_fc[, .(expression_fc = mean(expression_fc)), .(gene, cell_type)]
+}
 
 # combine expression fc and umifrac
 stopifnot(all(exp_fc$gene %in% exp_umi$gene))
@@ -640,7 +732,7 @@ exp_dt <- merge.data.table(
     sort = FALSE, all = TRUE
 )
 exp_dt <- exp_dt[!grepl("orphan", gene)]
-exp_dt[, stage := ifelse(cell_type %in% adult_cell_types, "adult", "gastrula")]
+if (lvl == "cell_type") exp_dt[, stage := ifelse(cell_type %in% adult_cell_types, "adult", "gastrula")]
 
 # gene scores with mapped metacells
 gsc_mt <- readRDS(
@@ -657,23 +749,33 @@ gsc_dt <- melt.data.table(
 )
 gsc_dt[cell_type == "neuronal_gastrula", cell_type := "neuronal"]
 stopifnot(all(gsc_dt$cell_type %in% cell_types))
-gsc_dt[, stage := ifelse(cell_type %in% adult_cell_types, "adult", "gastrula")]
+if (lvl == "broad_cell_type") {
+  stopifnot(all(gsc_dt$cell_type %in% bct_maps$cell_type))
+  gsc_dt <- merge.data.table(
+      gsc_dt, bct_maps, by = "cell_type",
+      all.x = TRUE, sort = FALSE
+  )
+  gsc_dt[, cell_type := broad_cell_type]
+  gsc_dt[, broad_cell_type := NULL]
+  gsc_dt <- gsc_dt[, .(gene_score = mean(gene_score)), .(gene, cell_type)]
+}
+if (lvl == "cell_type") gsc_dt[, stage := ifelse(cell_type %in% adult_cell_types, "adult", "gastrula")]
 
 # combine gene scores with expression
 dist_dt <- merge.data.table(
-    exp_dt, gsc_dt, by = c("gene", "cell_type", "stage"), 
+    exp_dt, gsc_dt, by = c("gene", "cell_type"), 
     sort = FALSE
 )
 
 # combine peak accessibility with expression and gene scores
 dist_dt <- merge.data.table(
-    dist_dt, acc_dt, by = c("gene", "cell_type", "stage"),
+    dist_dt, acc_dt, by = c("gene", "cell_type"),
     all.x = TRUE, sort = FALSE
 )
 
 # save
 fwrite(dist_dt, file.path(
-    map_dir, "cell_type", sprintf(
+    map_dir, lvl, sprintf(
         "data_expression_accessibility_%s.tsv.gz", id
     )
 ), sep = "\t")
@@ -682,8 +784,9 @@ fwrite(dist_dt, file.path(
 Determine quantile thresholds per cell type.
 
 ```{r}
+lvl <- "broad_cell_type"
 dist_dt <- fread(file.path(
-    map_dir, "cell_type", sprintf(
+    map_dir, lvl, sprintf(
         "data_expression_accessibility_%s.tsv.gz", id
     )
 ))
@@ -775,8 +878,8 @@ data_thrs <- merge.data.table(
 stopifnot(all(data_thrs$cell_type %in% cell_types))
 fwrite(data_thrs, file.path(
     grn_dir, sprintf(
-        "qthreshold_expression_%s_accessibility_%s.tsv",
-        thr_q_exp, thr_q_acc
+        "qthreshold_%s_expression_%s_accessibility_%s.tsv",
+        lvl, thr_q_exp, thr_q_acc
     )
 ), sep = "\t")
 
@@ -793,7 +896,7 @@ grn_dt <- readRDS(file.path(
 # expression and accessibility data for all genes
 id <- "genes_exp_FC2_acc_FC4_spearman"
 dist_dt <- fread(file.path(
-    map_dir, "cell_type", sprintf(
+    map_dir, lvl, sprintf(
         "data_expression_accessibility_%s.tsv.gz", id
     )
 ))
@@ -810,7 +913,7 @@ gns_exp_acc_list <- sapply(unname(genes), function(g) {
     gns_exp <- merge.data.table(
         gns_dt,
         unique(dist_dt[gene == g, .(
-            gene, cell_type, stage, expression_umifrac, expression_fc, gene_score
+            gene, cell_type, expression_umifrac, expression_fc, gene_score
         )]),
         by = c("gene"),
         allow.cartesian = TRUE, sort = FALSE
@@ -819,7 +922,7 @@ gns_exp_acc_list <- sapply(unname(genes), function(g) {
     # target gene expression and gene score
     tgs_dt <- unique(copy(dist_dt)[
         gene %in% gns_exp$target_gene,
-        .(gene, cell_type, stage, expression_umifrac, expression_fc, gene_score, 
+        .(gene, cell_type, expression_umifrac, expression_fc, gene_score, 
           peak, accessibility)
     ])
     setnames(
@@ -831,7 +934,7 @@ gns_exp_acc_list <- sapply(unname(genes), function(g) {
     )
     gns_ext <- merge.data.table(
         gns_exp, tgs_dt,
-        by = c("target_gene", "peak", "cell_type", "stage"),
+        by = c("target_gene", "peak", "cell_type"),
         sort = FALSE, all = FALSE, allow.cartesian = TRUE
     )
     setnames(
@@ -843,7 +946,7 @@ gns_exp_acc_list <- sapply(unname(genes), function(g) {
     # order
     setcolorder(
         gns_ext, c(
-            "cell_type", "stage", 
+            "cell_type", 
             "gene", "gene_name", "common_name", "og", "pfam",
             "expression_fc", "expression_umifrac", "gene_score",
             "target_gene", "target_gene_name", "target_common_name", 
@@ -863,7 +966,7 @@ gns_exp_acc_list <- sapply(unname(genes), function(g) {
 saveRDS(
     gns_exp_acc_list,
     file.path(
-        grn_dir, "grn_tf_targets_expression_accessibility.rds"
+        grn_dir, sprintf("grn_%s_tf_targets_expression_accessibility.rds", lvl)
     )
 )
 ```
@@ -871,6 +974,10 @@ saveRDS(
 ### Filter GRN per cell type
 
 ```{r}
+# level
+lvl <- "broad_cell_type"
+cell_type_lvl <- switch(lvl, "broad_cell_type" = broad_cell_types, "cell_type" = cell_types)
+
 # in silico ChIP threshold
 thrs <- 0.1
 
@@ -885,7 +992,7 @@ thr_q_exp <- 0.4
 thr_q_acc <- 0.4
 
 # chromvar threshold for TF motif activity
-chr_thrs <- 5
+chr_thrs <- 4
 
 # this is a global expression threshold for all cell types;
 # if not NULL, it overrides expression quantification and quantile threshold!
@@ -895,15 +1002,18 @@ if (!is.null(thr_fc_exp)) exp <- "fc"
 # file name
 if (is.null(thr_fc_exp)) {
   fn <- sprintf(
-    "expression_%s_%s_accessibility_%s_%s_chromvar_%s", 
-    exp, thr_q_exp, acc, thr_q_acc, chr_thrs
+    "%s_expression_%s_%s_accessibility_%s_%s_chromvar_%s", 
+    lvl, exp, thr_q_exp, acc, thr_q_acc, chr_thrs
   )
 } else {
   fn <- sprintf(
-    "expression_%s_%s_accessibility_%s_%s_chromvar_%s", 
-    exp, thr_fc_exp, acc, thr_q_acc, chr_thrs
+    "%s_expression_%s_%s_accessibility_%s_%s_chromvar_%s", 
+    lvl, exp, thr_fc_exp, acc, thr_q_acc, chr_thrs
   )
 }
+
+# results dir
+grn_res_dir <- file.path(grn_dir, "networks", lvl)
 
 ```
 
@@ -930,6 +1040,16 @@ devel_dt <- fread(file.path(
 devel_dt[cell_type == "neuronal_gastrula", cell_type := "neuronal"]
 stopifnot(all(devel_dt$cell_type %in% cell_types))
 devel_dt[, cell_type := factor(cell_type, levels = cell_types)]
+
+if (lvl == "broad_cell_type") {
+  stopifnot(all(devel_dt$cell_type %in% bct_maps$cell_type))
+  devel_dt <- merge.data.table(
+      devel_dt, bct_maps, by = "cell_type",
+      all.x = TRUE, sort = FALSE
+  )
+  devel_dt[, cell_type := broad_cell_type]
+  devel_dt[, broad_cell_type := NULL]
+}
 ```
 
 Load chromVAR gene scores per metacell and aggregate them per cell type.
@@ -946,7 +1066,15 @@ exp_chromvar_dt <- fread(
     )
 )
 stopifnot(all(exp_chromvar_dt$cell_type %in% cell_types))
-exp_chromvar_dt[, cell_type := factor(cell_type, levels = cell_types)]
+if (lvl == "broad_cell_type") {
+  stopifnot(all(exp_chromvar_dt$cell_type %in% bct_maps$cell_type))
+  exp_chromvar_dt <- merge.data.table(
+      exp_chromvar_dt, bct_maps, by = "cell_type",
+      all.x = TRUE, sort = FALSE
+  )
+  exp_chromvar_dt[, cell_type := broad_cell_type]
+  exp_chromvar_dt[, broad_cell_type := NULL]
+}
 
 # aggregate zscores per cell type
 if ("archetype_name" %in% colnames(exp_chromvar_dt)) setnames(exp_chromvar_dt, "archetype_name", "motif")
@@ -955,6 +1083,14 @@ exp_chromvar_dt[, zscore := mean(zscore), .(gene, motif, cell_type)]
 exp_chromvar_dt[, expression := mean(expression), .(gene, motif, cell_type)]
 exp_chromvar_dt[, c("metacell", "expression", "insilico_ChIP_threshold") := NULL]
 exp_chromvar_dt <- unique(exp_chromvar_dt)
+
+if (lvl == "cell_type") {
+  stopifnot(all(exp_chromvar_dt$cell_type %in% cell_types))
+  exp_chromvar_dt[, cell_type := factor(cell_type, levels = cell_types)]
+} else if (lvl == "broad_cell_type") {
+  stopifnot(all(exp_chromvar_dt$cell_type %in% broad_cell_types))
+  exp_chromvar_dt[, cell_type := factor(cell_type, levels = broad_cell_types)]
+}
 ```
 
 Load expression and accessibility data for base network, and combine with 
@@ -965,7 +1101,7 @@ chromVAR scores (i.e TF activity).
 gns_exp_acc_list <- readRDS(
     file.path(
         grn_dir,
-        "grn_tf_targets_expression_accessibility.rds"
+        sprintf("grn_%s_tf_targets_expression_accessibility.rds", lvl)
     )
 )
 gns_exp_acc_dt <- rbindlist(gns_exp_acc_list)
@@ -980,12 +1116,24 @@ setcolorder(gns_exp_acc_act_dt, c(
   colnames(gns_exp_acc_dt)[1 : grep("target", colnames(gns_exp_acc_dt))[1]-1],
   "motif", "zscore"
 ))
+if ("stage" %in% colnames(gns_exp_acc_act_dt)) gns_exp_acc_act_dt[, stage := NULL]
+if (lvl == "cell_type") {
+  stopifnot(all(gns_exp_acc_act_dt$cell_type %in% cell_types))
+  gns_exp_acc_act_dt[, cell_type := factor(cell_type, levels = cell_types)]
+} else if (lvl == "broad_cell_type") {
+  stopifnot(all(gns_exp_acc_act_dt$cell_type %in% broad_cell_types))
+  gns_exp_acc_act_dt[, cell_type := factor(cell_type, levels = broad_cell_types)]
+}
+setorder(gns_exp_acc_act_dt, cell_type, gene, target_gene)
+```
 
-# save unfiltered GRNs per cell type
+ Save unfiltered GRNs per cell type
+
+```{r}
 require(openxlsx)
 #wb_peaks <- createWorkbook()
 wb_genes <- createWorkbook()
-for (ct in cell_types) {
+for (ct in cell_type_lvl) {
   sheetName <- substr(ct, 1, 30)
   # global network in selected cell type
   grn_ct <- gns_exp_acc_act_dt[cell_type == ct]
@@ -993,9 +1141,9 @@ for (ct in cell_types) {
   #writeData(wb_peaks, sheet = sheetName, grn_ct)
   # summarize per gene
   grn_ct[, c("target_peak", "seqnames", "start", "end") := NULL]
-  grn_ct[, target_accessibility := max(target_accessibility), .(gene, target_gene, cell_type, stage)]
-  grn_ct[, peak_tf_correlation_score := max(peak_tf_correlation_score), .(gene, target_gene, cell_type, stage)]
-  grn_ct[, in_silico_chip_score := max(in_silico_chip_score), .(gene, target_gene, cell_type, stage)]
+  grn_ct[, target_accessibility := max(target_accessibility), .(gene, target_gene, cell_type)]
+  grn_ct[, peak_tf_correlation_score := max(peak_tf_correlation_score), .(gene, target_gene, cell_type)]
+  grn_ct[, in_silico_chip_score := max(in_silico_chip_score), .(gene, target_gene, cell_type)]
   grn_ct <- unique(grn_ct)
   # add to file
   addWorksheet(wb_genes, sheetName = sheetName)
@@ -1003,12 +1151,12 @@ for (ct in cell_types) {
 }
 #saveWorkbook(
 #  wb_peaks,
-#  file.path(grn_dir, "networks", sprintf("grn_global_peaks_%s.xlsx", fn)),
+#  file.path(grn_res_dir, sprintf("grn_global_peaks.xlsx")),
 #  overwrite = TRUE
 #)
 saveWorkbook(
   wb_genes,
-  file.path(grn_dir, "networks", sprintf("grn_global_genes_%s.xlsx", fn)),
+  file.path(grn_res_dir, sprintf("grn_global_genes.xlsx")),
   overwrite = TRUE
 )
 ```
@@ -1020,14 +1168,13 @@ base GRN gene data.
 # per cell type thresholds of expression and accessibility
 data_thrs <- fread(file.path(
     grn_dir, sprintf(
-        "qthreshold_expression_%s_accessibility_%s.tsv",
-        thr_q_exp, thr_q_acc
+        "qthreshold_%s_expression_%s_accessibility_%s.tsv",
+        lvl, thr_q_exp, thr_q_acc
     )
 ))
-data_thrs[cell_type %in% adult_cell_types, stage := "adult"]
-data_thrs[cell_type %in% gastr_cell_types, stage := "gastrula"]
-stopifnot(all(data_thrs$cell_type %in% cell_types))
-data_thrs[, cell_type := factor(cell_type, levels = cell_types)]
+stopifnot(all(data_thrs$cell_type %in% cell_type_lvl))
+data_thrs[, cell_type := factor(cell_type, levels = cell_type_lvl)]
+
 if (exp == "umifrac") {
     data_thrs[, exp_thrs := thr_exp_umifrac]
 } else if (exp == "fc") {
@@ -1044,8 +1191,8 @@ if (acc == "score") {
 
 # combine
 grn_base_dt <- merge.data.table(
-  gns_exp_acc_act_dt, data_thrs[, .(cell_type, stage, exp_thrs, acc_thrs)], 
-  by = c("cell_type", "stage")
+  gns_exp_acc_act_dt, data_thrs[, .(cell_type, exp_thrs, acc_thrs)], 
+  by = c("cell_type")
 )
 ```
 
@@ -1099,7 +1246,7 @@ Save TF info tables per cell type.
 ```{r}
 # TF info table
 tfs_info_dt <- unique(grn_filt_dt[, .(
-  cell_type, stage, gene, gene_name, common_name, og, pfam, 
+  cell_type, gene, gene_name, common_name, og, pfam, 
   expression_fc, expression_umifrac, gene_score, zscore, motif, id, target_self
 )])
 stopifnot(nrow(tfs_info_dt[,.N,.(cell_type,gene)][N>1])==0)
@@ -1108,13 +1255,13 @@ stopifnot(nrow(tfs_info_dt[,.N,.(cell_type,gene)][N>1])==0)
 fwrite(
   tfs_info_dt,
   file.path(
-    grn_dir, "networks", sprintf("grn_tfs_info_%s.tsv.gz", fn)
+    grn_res_dir, sprintf("grn_tfs_info_%s.tsv.gz", fn)
   ),
   sep = "\t"
 )
 require(openxlsx)
 wb <- createWorkbook()
-for (ct in cell_types) {
+for (ct in cell_type_lvl) {
   sheetName <- substr(ct, 1, 30)
   grn_ct <- tfs_info_dt[cell_type == ct]
   addWorksheet(wb, sheetName = sheetName)
@@ -1122,7 +1269,7 @@ for (ct in cell_types) {
 }
 saveWorkbook(
   wb,
-  file.path(grn_dir, "networks", sprintf("grn_tfs_info_%s.xlsx", fn)),
+  file.path(grn_res_dir, sprintf("grn_tfs_info_%s.xlsx", fn)),
   overwrite = TRUE
 )
 ```
@@ -1132,34 +1279,33 @@ because no targets pass the filtering.
 
 ```{r}
 # any TFs that have no target genes
-tfs_info_dt[, stage_cell_type_gene := paste(stage, cell_type, gene)]
-grn_filt_dt[, stage_cell_type_gene := paste(stage, cell_type, gene)]
+tfs_info_dt[, cell_type_gene := paste(cell_type, gene)]
+grn_filt_dt[, cell_type_gene := paste(cell_type, gene)]
 grn_fill_dt <- rbindlist(list(
   grn_filt_dt,
-  tfs_info_dt[! stage_cell_type_gene %in% grn_filt_dt$stage_cell_type_gene]
+  tfs_info_dt[! cell_type_gene %in% grn_filt_dt$cell_type_gene]
 ), use.names = TRUE, fill = TRUE)
-grn_fill_dt[, exp_thrs := .SD[!is.na(exp_thrs)]$exp_thrs[1], .(cell_type, stage)]
-grn_fill_dt[, acc_thrs := .SD[!is.na(acc_thrs)]$acc_thrs[1], .(cell_type, stage)]
-grn_fill_dt[, cell_type := factor(cell_type, levels = cell_types)]
-grn_fill_dt[, stage_cell_type_gene := NULL]
-tfs_info_dt[, stage_cell_type_gene := NULL]
-setorder(grn_fill_dt, cell_type, stage)
+grn_fill_dt[, exp_thrs := .SD[!is.na(exp_thrs)]$exp_thrs[1], .(cell_type)]
+grn_fill_dt[, acc_thrs := .SD[!is.na(acc_thrs)]$acc_thrs[1], .(cell_type)]
+grn_fill_dt[, cell_type_gene := NULL]
+tfs_info_dt[, cell_type_gene := NULL]
+setorder(grn_fill_dt, cell_type)
 
 # target TF annotations
 grn_fill_dt[, target_TF := target_gene %in% tfan$gene]
-grn_fill_dt[, target_active_TF := target_gene %in% .SD$gene, .(cell_type, stage)]
+grn_fill_dt[, target_active_TF := target_gene %in% .SD$gene, .(cell_type)]
 
 # save
 fwrite(
   grn_fill_dt,
   file.path(
-    grn_dir, "networks", sprintf("grn_peaks_%s.tsv.gz", fn)
+    grn_res_dir, sprintf("grn_peaks_%s.tsv.gz", fn)
   ),
   sep = "\t"
 )
 require(openxlsx)
 wb <- createWorkbook()
-for (ct in cell_types) {
+for (ct in cell_type_lvl) {
   sheetName <- substr(ct, 1, 30)
   grn_ct <- grn_fill_dt[cell_type == ct]
   addWorksheet(wb, sheetName = sheetName)
@@ -1167,7 +1313,7 @@ for (ct in cell_types) {
 }
 saveWorkbook(
   wb,
-  file.path(grn_dir, "networks", sprintf("grn_peaks_%s.xlsx", fn)),
+  file.path(grn_res_dir, sprintf("grn_peaks_%s.xlsx", fn)),
   overwrite = TRUE
 )
 ```
@@ -1178,22 +1324,22 @@ Save TF-gene network.
 # aggregate peaks per gene
 grn_gene_dt <- copy(grn_fill_dt)
 grn_gene_dt[, c("target_peak", "seqnames", "start", "end") := NULL]
-grn_gene_dt[, target_accessibility := max(target_accessibility), .(gene, target_gene, cell_type, stage)]
-grn_gene_dt[, peak_tf_correlation_score := max(peak_tf_correlation_score), .(gene, target_gene, cell_type, stage)]
-grn_gene_dt[, in_silico_chip_score := max(in_silico_chip_score), .(gene, target_gene, cell_type, stage)]
+grn_gene_dt[, target_accessibility := max(target_accessibility), .(gene, target_gene, cell_type)]
+grn_gene_dt[, peak_tf_correlation_score := max(peak_tf_correlation_score), .(gene, target_gene, cell_type)]
+grn_gene_dt[, in_silico_chip_score := max(in_silico_chip_score), .(gene, target_gene, cell_type)]
 grn_gene_dt <- unique(grn_gene_dt)
 
 # save
 fwrite(
   grn_gene_dt,
   file.path(
-    grn_dir, "networks", sprintf("grn_genes_%s.tsv.gz", fn)
+    grn_res_dir, sprintf("grn_genes_%s.tsv.gz", fn)
   ),
   sep = "\t"
 )
 require(openxlsx)
 wb <- createWorkbook()
-for (ct in cell_types) {
+for (ct in cell_type_lvl) {
   sheetName <- substr(ct, 1, 30)
   grn_ct <- grn_gene_dt[cell_type == ct]
   addWorksheet(wb, sheetName = sheetName)
@@ -1201,7 +1347,7 @@ for (ct in cell_types) {
 }
 saveWorkbook(
   wb,
-  file.path(grn_dir, "networks", sprintf("grn_genes_%s.xlsx", fn)),
+  file.path(grn_res_dir, sprintf("grn_genes_%s.xlsx", fn)),
   overwrite = TRUE
 )
 ```
@@ -1213,30 +1359,29 @@ grn_tfs_dt <- copy(grn_gene_dt)
 grn_tfs_dt <- grn_tfs_dt[target_TF == TRUE]
 
 # any TFs that have no target genes
-tfs_info_dt[, stage_cell_type_gene := paste(stage, cell_type, gene)]
-grn_tfs_dt[, stage_cell_type_gene := paste(stage, cell_type, gene)]
+tfs_info_dt[, cell_type_gene := paste(cell_type, gene)]
+grn_tfs_dt[, cell_type_gene := paste(cell_type, gene)]
 grn_tfs_dt <- rbindlist(list(
   grn_tfs_dt,
-  tfs_info_dt[! stage_cell_type_gene %in% grn_tfs_dt$stage_cell_type_gene]
+  tfs_info_dt[! cell_type_gene %in% grn_tfs_dt$cell_type_gene]
 ), use.names = TRUE, fill = TRUE)
-grn_tfs_dt[, exp_thrs := .SD[!is.na(exp_thrs)]$exp_thrs[1], .(cell_type, stage)]
-grn_tfs_dt[, acc_thrs := .SD[!is.na(acc_thrs)]$acc_thrs[1], .(cell_type, stage)]
-grn_tfs_dt[, cell_type := factor(cell_type, levels = cell_types)]
-grn_tfs_dt[, stage_cell_type_gene := NULL]
-tfs_info_dt[, stage_cell_type_gene := NULL]
-setorder(grn_tfs_dt, cell_type, stage)
+grn_tfs_dt[, exp_thrs := .SD[!is.na(exp_thrs)]$exp_thrs[1], .(cell_type)]
+grn_tfs_dt[, acc_thrs := .SD[!is.na(acc_thrs)]$acc_thrs[1], .(cell_type)]
+grn_tfs_dt[, cell_type_gene := NULL]
+tfs_info_dt[, cell_type_gene := NULL]
+setorder(grn_tfs_dt, cell_type)
 
 # save
 fwrite(
   grn_tfs_dt,
   file.path(
-    grn_dir, "networks", sprintf("grn_tfs_%s.tsv.gz", fn)
+    grn_res_dir, sprintf("grn_tfs_%s.tsv.gz", fn)
   ),
   sep = "\t"
 )
 require(openxlsx)
 wb <- createWorkbook()
-for (ct in cell_types) {
+for (ct in cell_type_lvl) {
   sheetName <- substr(ct, 1, 30)
   grn_ct <- grn_tfs_dt[cell_type == ct]
   addWorksheet(wb, sheetName = sheetName)
@@ -1244,7 +1389,7 @@ for (ct in cell_types) {
 }
 saveWorkbook(
   wb,
-  file.path(grn_dir, "networks", sprintf("grn_tfs_%s.xlsx", fn)),
+  file.path(grn_res_dir, sprintf("grn_tfs_%s.xlsx", fn)),
   overwrite = TRUE
 )
 ```
@@ -1254,6 +1399,10 @@ saveWorkbook(
 Inspect networks, plot stats and diagnostic plots.
 
 ```{r}
+# level
+lvl <- "broad_cell_type"
+cell_type_lvl <- switch(lvl, "broad_cell_type" = broad_cell_types, "cell_type" = cell_types)
+
 # in silico ChIP threshold
 thrs <- 0.1
 
@@ -1270,27 +1419,22 @@ thr_q_acc <- 0.4
 # chromvar threshold for TF motif activity
 chr_thrs <- 4
 
-# this is a global expression threshold for all cell types;
-# if not NULL, it overrides expression quantification and quantile threshold!
-thr_fc_exp <- 1.4
-
 # file name
 fn <- sprintf(
-  "expression_%s_%s_accessibility_%s_%s_chromvar_%s", 
-  exp, thr_q_exp, acc, thr_q_acc, chr_thrs
+  "%s_expression_%s_%s_accessibility_%s_%s_chromvar_%s", 
+  lvl, exp, thr_q_exp, acc, thr_q_acc, chr_thrs
 )
+
+# results dir
+grn_res_dir <- file.path(grn_dir, "networks", lvl)
 
 # load network
 grn_ct_dt <- fread(file.path(
-  grn_dir, "networks", sprintf("grn_genes_%s.tsv.gz", fn)
+  grn_res_dir, sprintf("grn_genes_%s.tsv.gz", fn)
 ))
 
-if (!is.null(thr_fc_exp)) {
-  grn_ct_dt <- grn_ct_dt[expression_fc > thr_fc_exp]
-}
-
-stopifnot(all(grn_ct_dt$cell_type %in% cell_types))
-grn_ct_dt[, cell_type := factor(cell_type, levels = cell_types)]
+stopifnot(all(grn_ct_dt$cell_type %in% cell_type_lvl))
+grn_ct_dt[, cell_type := factor(cell_type, levels = cell_type_lvl)]
 ```
 
 Per cell type
@@ -1305,6 +1449,11 @@ lvl_cols <- structure(
   c("#66FF66", "#FFCC00", "#CC9900", "#FF0000", "#CC0099","#6600CC", "#0011CC", "#030B61", "#08153b", "#040a1c"),
   names = 1:10
 )
+cts_cols <- switch(lvl, "broad_cell_type" = bct_cols, "cell_type" = ct_cols)
+
+# gene with a bad motif
+bckl <- "Nvec_vc1.1_XM_032362607.2"
+grn_ct_dt <- grn_ct_dt[! gene %in% bckl]
 
 # number of TFs per cell type
 cp_tf_num <- ggplot(
@@ -1313,10 +1462,10 @@ cp_tf_num <- ggplot(
     ) +
     geom_bar() +
     scale_x_discrete(drop = TRUE) +
-    scale_fill_manual(values = ct_cols, drop = TRUE) +
+    scale_fill_manual(values = cts_cols, drop = TRUE) +
     scale_color_manual(values = structure(
-      colorspace::darken(ct_cols, 0.5),
-      names = names(ct_cols)
+      colorspace::darken(cts_cols, 0.5),
+      names = names(cts_cols)
     )) +
     scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
     theme(
@@ -1327,6 +1476,39 @@ cp_tf_num <- ggplot(
         axis.title.x = element_blank()
     ) +
     labs(y = "TFs")
+
+# number of targets per TF
+ct_tf_tgs <- grn_ct_dt[, n_targets := .N, .(gene, cell_type)]
+ct_tf_tgs[, cell_type_box := paste0(cell_type, "_box")]
+ct_tf_tgs[,ntfs:=length(unique(.SD$gene)),cell_type]
+cp_tf_tgs <- ggplot(
+        ct_tf_tgs, aes(
+          cell_type, n_targets,
+          color = cell_type
+        )
+    ) +
+    geom_boxplot(
+      aes(fill = cell_type_box),
+      alpha = 1
+    ) +
+    scale_x_discrete(drop = TRUE) +
+    scale_fill_manual(values = c(
+      cts_cols, structure(
+        cts_cols,
+        names = paste0(names(cts_cols), "_box")
+    )), guide = "none") +
+    scale_color_manual(values = structure(
+      colorspace::darken(cts_cols, 0.5),
+      names = names(cts_cols)
+    ), guide = "none") +
+    guides(shape = guide_legend(override.aes = list(size = 5))) +
+    theme(
+      axis.text.x = element_blank(),
+      axis.ticks.x = element_blank(),
+      axis.title.x = element_blank(),
+      panel.grid.major.y = element_line(color = "grey", size = 0.5),
+    ) +
+    labs(y = "target genes\nper TF")
 
 # overlap of targets per TF per cell type
 ct_tg_tfs <- unique(
@@ -1353,43 +1535,42 @@ ct_tf_ovl <- rbindlist(sapply(
     }))                                                                                                               
   }, simplify = FALSE, USE.NAMES = TRUE
 ), idcol = "cell_type")
-ct_tf_ovl[, cell_type := factor(cell_type, levels = cell_types)]
+ct_tf_ovl[, cell_type := factor(cell_type, levels = cell_type_lvl)]
 ct_tf_ovl[, cell_type_box := paste0(cell_type, "_box")]
 ct_tf_ovl[, mean(target_overlap), cell_type]
+ct_tf_ovl[,n:=nrow(.SD[target_overlap>0]),cell_type]
 cp_tg_ovl <- ggplot(
         ct_tf_ovl, aes(
           cell_type, target_overlap,
           color = cell_type
         )
     ) +
-    #ggrastr::rasterise(ggbeeswarm::geom_quasirandom(
-    #  aes(color = cell_type),
-    #  size = 0.5, alpha = 0.5
-    #)) +
-    #geom_boxplot(
-    #  aes(fill = cell_type_box),
-    #  outlier.shape = 21, alpha = 1
-    #) +
     geom_violin(
       aes(fill = cell_type_box),
       alpha = 1,
       width = 1.2,
       draw_quantiles = c(0.5)
     ) +
+    geom_jitter(
+      data = ct_tf_ovl[n < 3],
+      aes(fill = cell_type_box),
+      width = 0.2,
+      shape = 21,
+      size = 2
+    ) +
     scale_x_discrete(drop = TRUE) +
     scale_fill_manual(values = c(
-      ct_cols, structure(
-      ct_cols,
-      names = paste0(names(ct_cols), "_box")
+      cts_cols, structure(
+        cts_cols,
+        names = paste0(names(cts_cols), "_box")
     )), guide = "none") +
     scale_color_manual(values = structure(
-      colorspace::darken(ct_cols, 0.5),
-      names = names(ct_cols)
+      colorspace::darken(cts_cols, 0.5),
+      names = names(cts_cols)
     ), guide = "none") +
     scale_y_continuous(
       expand = expansion(mult = c(0.1, 0.1)),
       trans = "log2",
-      #breaks = scales::pretty_breaks(n = 3)
       breaks = c(0.001, 0.01, 0.1, 1),
       labels = scales::label_scientific()
     ) +
@@ -1397,32 +1578,24 @@ cp_tg_ovl <- ggplot(
     theme(
       axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
       panel.grid.major.y = element_line(color = "grey", size = 0.5),
-      #axis.ticks.x = element_blank(),
-      #axis.title.x = element_blank()
     ) +
     labs(y = "target gene overlap\nper pair of TFs")
 
 
 
 # plot
-gp_grn_ct <- cp_tf_num / cp_tg_ovl
+gp_grn_ct <- cp_tf_num / cp_tf_tgs / cp_tg_ovl
 gp_grn_ct <- gp_grn_ct +
   plot_annotation(title = sprintf(
       "Expression %s %s & chromVAR Z %s",
-      exp, 
-      ifelse(
-        is.null(thr_fc_exp), 
-        sprintf("quantile %s", thr_q_exp), 
-        thr_fc_exp
-      ),
-      chr_thrs
+      exp, sprintf("quantile %s", thr_q_exp), chr_thrs
   ))
 
 # save
 ggsave(
-  file.path(fig_dir, sprintf("grn-cell-type-num-tfs-targets-%s.pdf", fn)), 
+  file.path(fig_dir, sprintf("grn_num_tfs_targets_%s.pdf", fn)), 
   gp_grn_ct, 
-  height = 8, width = 8
+  height = 10, width = 6
 )
 ```
 
@@ -1431,7 +1604,20 @@ Network cartography
 ```{r}
 source("motif-analysis/mta_grn_functions.R")
 
-cart_list <- lapply(cell_types, function(ct) {
+# this is a global expression threshold used for plotting the networks
+# it overrides expression quantification and quantile threshold
+thr_fc_exp <- 1.2
+
+if (!is.null(thr_fc_exp)) {
+  grn_ct_dt <- grn_ct_dt[expression_fc > thr_fc_exp]
+  fn <- sprintf(
+    "%s_expression_%s_%s_accessibility_%s_%s_chromvar_%s", 
+    lvl, exp, thr_fc_exp, acc, thr_q_acc, chr_thrs
+  )
+}
+
+# calculate network metrics
+cart_list <- lapply(cell_type_lvl, function(ct) {
   message("Cartography for ", ct, " GRN")
   grn_ct <- unique(grn_ct_dt[cell_type == ct][, .(gene, target_gene, in_silico_chip_score)])
   tryCatch({
@@ -1442,10 +1628,12 @@ cart_list <- lapply(cell_types, function(ct) {
   })
 })
 cart_dt <- rbindlist(cart_list, use.names = TRUE, fill = TRUE)
+stopifnot(all(cart_dt$cell_type %in% cell_type_lvl))
+cart_dt[, cell_type := factor(cell_type, levels = cell_type_lvl)]
 
 # save
 fwrite(cart_dt, file.path(
-  grn_dir, "networks", sprintf(
+  grn_res_dir, sprintf(
     "cartography_%s.tsv", fn
    )
 ), sep = "\t")
@@ -1456,7 +1644,7 @@ Add annotation for TF nodes
 ```{r}
 # load cartography
 cart_dt <- fread(file.path(
-  grn_dir, "networks", sprintf(
+  grn_res_dir, sprintf(
     "cartography_%s.tsv", fn
   )
 ))
@@ -1472,9 +1660,12 @@ nodes_ann <- merge.data.table(
   by = c("gene", "cell_type"), all = FALSE, sort = FALSE
 )
 nodes_ann[is.na(active_TF), active_TF := FALSE]
-nodes_ann[common_name != "", label := common_name][label == "", label := gene_name][label == "", label := stringr::str_trunc(og, 12)]
-nodes_ann[nchar(label) > 30,  label := stringr::str_trunc(label, 12)]
-nodes_ann[is.na(label), label := ""]
+nodes_ann <- nodes_ann[active_TF == TRUE]
+nodes_ann[, label := ""]
+nodes_ann[common_name != "", label := common_name]
+nodes_ann[label == "", label := gene_name]
+nodes_ann[label == "", label := stringr::str_trunc(og, 15)]
+nodes_ann[nchar(label) > 30,  label := stringr::str_trunc(label, 15)]
 
 nodes_ann[, tot_betweenness_centrality := (N-1)*(N-2)/2]
 nodes_ann[, betweenness_centrality := betweenness_centrality / tot_betweenness_centrality]
@@ -1485,11 +1676,13 @@ Plot top genes per GRN
 ```{r}
 pdf(file.path(
   fig_dir, sprintf(
-    "top-genes-metrics-%s.pdf", fn
+    "top_genes_metrics_%s.pdf", fn
   )
 ), height = 10, width = 30)
 
-for (ct in unique(nodes_ann$cell_type)) {
+classes <- unique(nodes_ann$cell_type)
+classes <- c("cnidocyte", "neuron_GATA_Islet", "neuron_Pou4_FoxL2", "gland")
+for (ct in classes) {
 
   message(ct)
   plot_list <- lapply(c(
@@ -1502,8 +1695,6 @@ for (ct in unique(nodes_ann$cell_type)) {
     nodes_dt <- copy(nodes_ann[cell_type == ct])
     setnames(nodes_dt, i, "y")
     setorder(nodes_dt, -y)
-    nodes_dt <- nodes_dt[active_TF == TRUE]
-    nodes_dt[label == "", label := substr(og, 1, 25)]
     nodes_dt <- nodes_dt[1:pmin(.N, 30)]
     setorder(nodes_dt, y)
     nodes_dt[, gene := factor(gene, levels = unique(nodes_dt$gene))]
@@ -1524,10 +1715,11 @@ for (ct in unique(nodes_ann$cell_type)) {
       geom_point(shape = 21) +
       scale_fill_gradientn(
         name = "expression\nfold change",
-        breaks = c(0, 2, 4, 6, 8),
+        limits = c(0, 6),
+        breaks = c(0, 1, 2, 3, 4, 5, 6),
         colours = c(
-          "#ffd195", "orange", "orangered2",
-          "#a71414", "#68093d", "#470447"
+          "#ffd195", "#ffd39c", "#ffa400", "#e33a04",
+          "#a61414", "#62083f", "#490446"
         )
       ) +
       scale_size_continuous(
@@ -1554,4 +1746,44 @@ for (ct in unique(nodes_ann$cell_type)) {
 
 }
 dev.off()
+```
+
+Compare metrics across cell types
+
+```{r}
+nodes_ann_cts <- unique(nodes_ann[, .(
+  gene, cell_type,
+    degree_centrality_all,
+    betweenness_centrality,
+    eigenvector_centrality,
+    connectivity,
+    participation
+)])
+nodes_ann_cts[, gene := NULL]
+nodes_ann_cts <- melt.data.table(nodes_ann_cts, id.vars = c("cell_type"))
+nodes_ann_cts[, cell_type_box := paste0(cell_type, "_box")]
+
+gp_nodes_ann_cts <- ggplot(nodes_ann_cts, aes(cell_type, value, fill = cell_type)) +
+  geom_boxplot() +
+  facet_wrap(~ variable, scales = "free_y", ncol = 1) +
+  scale_fill_manual(values = c(
+    cts_cols, structure(
+      cts_cols,
+      names = paste0(names(cts_cols), "_box")
+  )), guide = "none") +
+  scale_color_manual(values = structure(
+    colorspace::darken(cts_cols, 0.5),
+    names = names(cts_cols)
+  ), guide = "none") +
+  guides(shape = guide_legend(override.aes = list(size = 5))) +
+  theme(
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+    panel.grid.major.y = element_line(color = "grey", size = 0.5),
+  ) 
+ggsave(
+  file.path(fig_dir, sprintf("top_genes_metrics_compara_%s.pdf", fn)), 
+  gp_nodes_ann_cts, 
+  height = 12, width = 8
+)
+
 ```
