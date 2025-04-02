@@ -1,4 +1,4 @@
-Ptx1 	Nvec_vc1.1_XM_032366098.2	progenitors
+Myc1 	Nvec_vc1.1_XM_032366098.2	progenitors
 Myc2	Nvec_vc1.1_XM_001640809.3	progenitors
 Hes2	Nvec_vc1.1_XM_032384889.2	progenitors
 Nanos1	Nvec_vc1.1_XM_001637125.3	progenitors
@@ -18,10 +18,10 @@ Zic-C	Nvec_vc1.1_XM_048728976.1	neurons
 Shak1 ion channel	Nvec_vc1.1_XM_048728569.1	neurons
 Shak4 ion channel	Nvec_vc1.1_XM_032377132.2	neurons
 Nav2.5 ion channel	Nvec_vc1.1_XM_032375468.2	neurons
-GABA transporter	Nvec_vc1.1_XM_001641617.3	neurons
-GATA	Nvec_vc1.1_XM_032367288.2	neurons
-ZNF845	Nvec_vc1.1_XM_001641129.3	cnidocytes
-NR12	Nvec_vc1.1_XM_001634328.3	cnidocytes
+Gaba transporter	Nvec_vc1.1_XM_001641617.3	neurons
+Gata	Nvec_vc1.1_XM_032367288.2	neurons
+Znf845	Nvec_vc1.1_XM_001641129.3	cnidocytes
+Nr12	Nvec_vc1.1_XM_001634328.3	cnidocytes
 PaxA	Nvec_vc1.1_XM_001631763.3	cnidocytes
 Nematogalectin-like	Nvec_vc1.1_XM_048721133.1	cnidocytes
 Calmodulin 	Nvec_vc1.1_XM_048730215.1	cnidocytes
@@ -32,8 +32,8 @@ Minicollagen-3/Ncol-3	Nvec_vc1.1_XM_032363026.2	cnidocytes
 Cnido-Fos1	Nvec_vc1.1_XM_048730161.1	cnidocytes
 Cnido-Jun	Nvec_vc1.1_XM_032385896.2	cnidocytes
 Klf13	Nvec_v1g19278	cnidocytes
-BHMG1	Nvec_vc1.1_XM_001633819.3	cnidocytes
-XBP1	Nvec_vc1.1_XM_001629694.3	cnidocytes
+Bhmg1	Nvec_vc1.1_XM_001633819.3	cnidocytes
+Xbp1	Nvec_vc1.1_XM_001629694.3	cnidocytes
 trypsinA 	Nvec_vc1.1_XM_001629096.2	secretory
 trypsinB 	Nvec_vc1.1_XM_048725793.1	secretory
 trypsinC 	Nvec_vc1.1_XM_048725380.1	secretory
@@ -63,7 +63,7 @@ Nem7	Nvec_vc1.1_XM_032385185.2	muscle
 MyHC-st	Nvec_vc1.1_XM_001636908.3	muscle
 BarH-Like3	Nvec_vc1.1_XM_032384965.2	muscle
 VAx-EMX-Like	Nvec_vc1.1_XM_032377358.2	muscle
-TBX20	Nvec_vc1.1_XM_001629218.3	muscle
+Tbx20	Nvec_vc1.1_XM_001629218.3	muscle
 EP2A	Nvec_vc1.1_XM_048725105.1	ectoderm
 SoxB2/Sox3	Nvec_NVE23841	ectoderm
 Anthox1/Ax1  	Nvec_vc1.1_XM_032366733.2	patterning
@@ -79,7 +79,7 @@ Wnt1	Nvec_vc1.1_XM_001641444.3	ecto_pharynx
 Wnt4	Nvec_vc1.1_XM_001623050.3	ecto_pharynx
 Wnt2	Nvec_vc1.1_XM_032383075.2	boundaries gastrula
 Sp6-9	Nvec_vc1.1_XM_032384420.2	boundaries gastrula
-FGFa1	Nvec_vc1.1_XM_032367336.2	aboral_ectoderm
+Fgfa1	Nvec_vc1.1_XM_032367336.2	aboral_ectoderm
 Six3/6	Nvec_vc1.1_XM_001625109.3	aboral_ectoderm
 Grainyhead	Nvec_vc1.1_XM_032386243.2	ectoderm
 FoxQ2a	Nvec_vc1.1_XM_032386947.2	aboral_ectoderm
@@ -89,31 +89,30 @@ Tbx20-1	Nvec_vc1.1_XM_032377450.2	EMS
 OtxB	Nvec_vc1.1_XM_032375635.2	EMS
 OtxC	Nvec_vc1.1_XM_001647471.3	EMS
 Lbx	Nvec_vc1.1_XM_001634715.3	EMS
-NVHD033-ANTP	Nvec_vc1.1_XM_032379688.2	EMS
+Nvhd033-ANTP	Nvec_vc1.1_XM_032379688.2	EMS
 SnailA	Nvec_vc1.1_XM_032387186.2	EMS
 Hh1	Nvec_vc1.1_XM_048724087.1	EMS_ecto_boundary
 Six4/5	Nvec_vc1.1_XM_001623084.3	EMS
-FoxA/D	Nvec_vc1.1_XM_032387167.2	other FoxA
-TEAD	Nvec_vc1.1_XM_032364331.2	
-NvSox1	Nvec_vc1.1_XM_001624716.3	
-NvSox2	Nvec_vc1.1_XM_001639701.3	``
-NvSoxC	Nvec_vc1.1_XM_032372264.2	neurons
-NvSoxB1	Nvec_vc1.1_XM_001632947.3	
-NvSoxB(2)	Nvec_vc1.1_XM_001632568.3	progenitors
-NvSoxA	Nvec_vc1.1_XM_032380374.2	neurons
-NvSoxE1	Nvec_vc1.1_XM_001629987.3	
-NvSoxF1	Nvec_vc1.1_XM_001636155.3	
-NOTO	Nvec_vc1.1_XM_032364773.2	gland
-CREB3	Nvec_vc1.1_XM_032378881.2	gland
-PAX3/7	Nvec_vc1.1_XM_001628635.3	epidermis
-ETV6/7	Nvec_vc1.1_XM_032384221.2	epidermis
+Tead	Nvec_vc1.1_XM_032364331.2	
+Sox1	Nvec_vc1.1_XM_001624716.3	
+Sox2	Nvec_vc1.1_XM_001639701.3	``
+SoxC	Nvec_vc1.1_XM_032372264.2	neurons
+SoxB1	Nvec_vc1.1_XM_001632947.3	
+SoxB(2)	Nvec_vc1.1_XM_001632568.3	progenitors
+SoxA	Nvec_vc1.1_XM_032380374.2	neurons
+SoxE1	Nvec_vc1.1_XM_001629987.3	
+SoxF1	Nvec_vc1.1_XM_001636155.3	
+Noto	Nvec_vc1.1_XM_032364773.2	gland
+Creb3	Nvec_vc1.1_XM_032378881.2	gland
+Pax3/7	Nvec_vc1.1_XM_001628635.3	epidermis
+Etv6/7	Nvec_vc1.1_XM_032384221.2	epidermis
 Hhex	Nvec_vc1.1_XM_032364784.2	
-IRF1-2c	Nvec_vc1.1_XM_001622271.3	
-HSF-like	Nvec_vc1.1_XM_001633014.3	
+Irf1-2c	Nvec_vc1.1_XM_001622271.3	
+Hsf-like	Nvec_vc1.1_XM_001633014.3	
 Prdm9-like	Nvec_vc1.1_XM_032379044.2	
-TUDOR/STK31	Nvec_vc1.1_XM_032376059.2	
-PTF1a	Nvec_vc1.1_XM_032385496.2	
+Tudor/Stk31	Nvec_vc1.1_XM_032376059.2	
+Ptf1a	Nvec_vc1.1_XM_032385496.2	
 Rfx4	Nvec_vc1.1_XM_032375228.2	
-RFX1/2/3	Nvec_vc1.1_XM_032385647.2	
-HSF-like	Nvec_vc1.1_XM_001633014.3	PGCs cole et al 2024
+Rfx1/2/3	Nvec_vc1.1_XM_032385647.2	
+Hsf-like	Nvec_vc1.1_XM_001633014.3	PGCs cole et al 2024
 Prdm9-like	Nvec_vc1.1_XM_032379044.2	PGCs cole et al 2024

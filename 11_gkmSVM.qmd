@@ -838,9 +838,64 @@ gp_pr <- ggplot(
 
 gp_auc_pr <- gp_auc / gp_pr + plot_layout(guides = "collect")
 ggsave(
+    file.path(fig_dir, "LS-GKM-test-auc-pr-all.pdf"),
+    gp_auc_pr, width = 7, height = 12
+)
+
+# Plot AUC for same cell type as triaining
+gp_auc <- ggplot(
+        unique(roc_dt[model==testset][, .(model, testset, auc_roc)]),
+        aes(
+            model, auc_roc, fill = testset, color = testset
+        )
+    ) +
+    geom_point(size = 3, shape = 21) +
+    #scale_y_continuous(limits = c(0.5, 1)) +
+    scale_fill_manual(values = c(ct_cols, bct_cols)) +
+    scale_color_manual(values = structure(
+      colorspace::darken(c(ct_cols, bct_cols), 0.5),
+        names = c(names(ct_cols), names(bct_cols))
+    )) +
+    theme(
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+        panel.grid.major = element_line(linewidth = 0.2, color = "grey")
+    ) +
+    guides(
+        shape = guide_legend(override.aes = list(size = 5, fill = "grey")),
+        fill = "none", color = "none"
+    ) +
+    labs(x = "", y = "AUC ROC", title = "test AUC ROC") 
+
+# Plot PR for models
+gp_pr <- ggplot(
+        unique(pr_dt[model==testset][, .(model, testset, auc_pr)]),
+        aes(
+            model, auc_pr, fill = testset, color = testset
+        )
+    ) +
+    geom_point(size = 3, shape = 21) +
+    #scale_y_continuous(limits = c(0, NA)) +
+    scale_fill_manual(values = c(ct_cols, bct_cols)) +
+    scale_color_manual(values = structure(
+      colorspace::darken(c(ct_cols, bct_cols), 0.5),
+        names = c(names(ct_cols), names(bct_cols))
+    )) +
+    theme(
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+        panel.grid.major = element_line(linewidth = 0.2, color = "grey")
+    ) +
+    guides(
+        shape = guide_legend(override.aes = list(size = 5, fill = "grey")),
+        fill = "none", color = "none"
+    ) +
+    labs(x = "", y = "AUC PR", title = "test AUC PR") 
+
+gp_auc_pr <- gp_auc / gp_pr + plot_layout(guides = "collect")
+ggsave(
     file.path(fig_dir, "LS-GKM-test-auc-pr.pdf"),
     gp_auc_pr, width = 7, height = 12
 )
+
 ```
 
 Cell type similarities based on AUC and tree with bootstrap in `90_Figures.qmd`.

@@ -1663,10 +1663,10 @@ gl_gp_2 <- ggplot(gl_dt_2, aes(genelist_full, num_non_prom)) +
     expand = expansion(c(0.05, 0.1))
   ) +
   #geom_hline(yintercept = mean(gl_dt_2$num_non_prom), linetype = 2) +
-  #stat_compare_means(comparisons = list(c("chromatin", "metabolism")), label = "p.signif", method = "t.test") +
+  #stat_compare_means(comparisons = list(c("chromatin", "metabolism")), label = "p.signif", method = "wilcox.test") +
   stat_compare_means(
     label = "p.signif", hide.ns = TRUE,
-    method = "t.test", method.args = list(alternative = "greater"),
+    method = "wilcox.test", method.args = list(alternative = "greater"),
     ref.group = ".all."
   ) +
   labs(y = "enhancers\nper gene") +
@@ -1726,10 +1726,10 @@ gl_gp_2 <- ggplot(gl_dt_2, aes(cell_type, num_non_prom)) +
     expand = expansion(c(0.05, 0.1))
   ) +
   #geom_hline(yintercept = mean(gl_dt_2$num_non_prom), linetype = 2) +
-  #stat_compare_means(comparisons = list(c("chromatin", "metabolism")), label = "p.signif", method = "t.test") +
+  #stat_compare_means(comparisons = list(c("chromatin", "metabolism")), label = "p.signif", method = "wilcox.test") +
   stat_compare_means(
     label = "p.signif", hide.ns = TRUE,
-    method = "t.test", method.args = list(alternative = "greater"),
+    method = "wilcox.test", method.args = list(alternative = "greater"),
     ref.group = ".all."
   ) +
   labs(y = "enhancers\nper gene") +
@@ -2511,7 +2511,7 @@ gp_fc <- ggplot(dtools_exptop, aes(category_short, mcfp, fill = category, color 
   geom_boxplot(outlier.shape = 21) +
   ggpubr::stat_compare_means(
     label = "p.signif", hide.ns = FALSE,
-    method = "t.test", #method.args = list(alternative = "greater"),
+    method = "wilcox.test", #method.args = list(alternative = "greater"),
     #ref.group = "o",
     comparisons = list(c("o", "g"), c("o", "a"))
   ) +

@@ -236,16 +236,16 @@ res_dt <- fread(file.path(
     "insilico_chip_binding_score.tsv.gz"
 ))
 
-# filter only motif hits in peaks with in silico chip score above threshold
-thrs <- 0.1
-res_dt <- res_dt[in_silico_chip_score > thrs]
-
 # GRN: link TFs (motifs) with target genes (assigned to peaks)
-grn_dt <- merge.data.table(
+grn_all_dt <- merge.data.table(
     res_dt, peaks_dt,
     by = c("seqnames", "start", "end", "peak"),
     all.x = TRUE, allow.cartesian = TRUE
 )
+
+# filter only motif hits in peaks with in silico chip score above threshold
+thrs <- 0.1
+grn_dt <- grn_all_dt[in_silico_chip_score > thrs]
 
 # add target gene annotation
 target_gnan <- copy(gnan)
@@ -255,10 +255,10 @@ grn_dt <- merge.data.table(
     grn_dt, target_gnan, by = "target_gene",
     all.x = TRUE, sort = FALSE
 )
-grn_dt[is.na(target_gene_name), target_gene_name := ""]
-grn_dt[is.na(target_common_name), target_common_name := ""]
-grn_dt[is.na(target_og), target_og := ""]
-grn_dt[is.na(target_pfam), target_pfam := ""]
+grn_filt_dt[is.na(target_gene_name), target_gene_name := ""]
+grn_filt_dt[is.na(target_common_name), target_common_name := ""]
+grn_filt_dt[is.na(target_og), target_og := ""]
+grn_filt_dt[is.na(target_pfam), target_pfam := ""]
 
 setcolorder(grn_dt, c(
     "seqnames", "start", "end", "peak", "motif", "id", 
@@ -396,7 +396,7 @@ gp_tg_tfs <- ggplot(dt_tg_tfs, aes(Nchr)) +
 
 # number of peaks per TF target gene
 dt_tg_tfs_pks <- unique(
-  grn_dt[, .(gene, peak, target_gene)]
+  grn_dt[!motif %in% "ARCH895_Foxn4/Foxn1"][, .(gene, peak, target_gene)]
 )
 tfs_target_gene <- unique(dt_tg_tfs_pks[gene == target_gene]$gene)
 dt_tg_tfs_pks[, target_TF := gene %in% tfs_target_gene]
@@ -406,20 +406,56 @@ dt_tg_tfs_pks[, n_tfs := length(unique(.SD$gene)), .(target_gene, target_TF)]
 dt_tg_tfs_pks[, peak := NULL]
 dt_tg_tfs_pks <- unique(dt_tg_tfs_pks)
 
+# annotation for plot
+dt_tf_tfs_ann <- merge.data.table(
+  unique(dt_tg_tfs_pks[, n_tfs:=.N, .(n_peaks, n_tf_peaks)][n_tfs < 3]), 
+  unique(
+    grn_dt[, .(gene, gene_name, common_name, og, pfam, target_gene, target_gene_name, target_common_name, target_og, target_pfam)]
+  ),
+  by = c("gene", "target_gene"), all.x = TRUE, sort = FALSE
+)
+dt_tf_tfs_ann[common_name != "", gene_name := common_name]
+dt_tf_tfs_ann[target_common_name != "", target_gene_name := target_common_name]
+dt_tf_tfs_ann[gene_name == "", gene_name := stringr::str_trunc(og, 25)]
+dt_tf_tfs_ann[target_gene_name == "", target_gene_name := stringr::str_trunc(target_og, 25)]
+dt_tf_tfs_ann[, label := sprintf("%s -> %s", gene_name, target_gene_name)]
+
+# plot
 gp_tg_tfs_pks <- ggplot(
     dt_tg_tfs_pks[, .N, .(n_peaks, n_tf_peaks)], 
     aes(n_peaks, n_tf_peaks)
   ) +
+  geom_text_repel(
+    data = dt_tf_tfs_ann[n_peaks > 12],
+    aes(label = label),
+    nudge_x = Inf,
+    nudge_y = 0.5,
+    min.segment.length = 0.5,
+    size = 3
+  ) +
+  geom_text_repel(
+    data = dt_tf_tfs_ann[!n_peaks > 12],
+    aes(label = label),
+    nudge_x = -Inf,
+    nudge_y = 0.5,
+    min.segment.length = 0.5,
+    segment.size = 0.5,
+    segment.color = "grey",
+    size = 3
+  ) +
   geom_point(aes(size = N), color = "grey", alpha = 0.5) +
   geom_text(aes(label = N)) +
   scale_x_continuous(
+    expand = expansion(mult = c(0.1, 0.1)),
     breaks = seq(1, 30)
   ) +
   scale_y_continuous(
+    expand = expansion(mult = c(0.2, 0.2)),
     breaks = seq(1, 30)
   ) +
   coord_fixed() +
   scale_size_continuous(range = c(5, 30))
+
 ggsave(
   file.path(fig_dir, "grn-global-num-tfs-targets-pks.pdf"),
   gp_tg_tfs_pks, height = 14, width = 14
@@ -454,6 +490,89 @@ gp_grn <- gp_tf_gen + gp_tg_tfs + gp_tg_tfs_pks +
 ggsave(
   file.path(fig_dir, "grn-global-num-tfs-targets.pdf"),
   gp_grn, height = 4, width = 10
+)
+```
+
+Inspect overlap of predicted targets with ChIP data.
+
+```{r}
+# load brachiury peaks
+bra_ls <- lapply(1:2, function(x) {
+
+  bra_dt <- fread(sprintf("data/Bra_%s_macs_narrow_peaks.narrowPeak", x))
+  setnames(bra_dt, c("seqnames", "start", "end", "peak", "score", "strand", "signalValue", "pValue", "qValue", "summit"))
+
+  # reduce overlapping peaks
+  bra_gr <- makeGRangesFromDataFrame(bra_dt, keep.extra.columns = TRUE)
+  bra_gr <- reduce(bra_gr)
+  bra_gr
+
+})
+
+# overlap brachiury peaks in two samples
+ovl <- GenomicRanges::findOverlaps(query = bra_ls[[1]], subject = bra_ls[[2]], type = "any", minoverlap = 10, ignore.strand = TRUE)
+bra_gr_1 <- bra_ls[[1]][queryHits(ovl)]
+bra_gr_2 <- bra_ls[[2]][subjectHits(ovl)]
+bra_gr <- sort(c(bra_gr_1, bra_gr_2))
+bra_gr <- reduce(bra_gr)
+bra_gr$peak <- paste0("Bra_", seq_along(bra_gr))
+
+# get brachiury targets from global GRN
+out_list <- list()
+thrs <- seq(0, 0.1, 0.01)
+for (i in seq_along(thrs)) {
+
+  insilico_chip_thrs <- thrs[i]
+  bra_tg <- unique(grn_all_dt[common_name == "Brachyury"][in_silico_chip_score > insilico_chip_thrs])
+  bra_tg <- makeGRangesFromDataFrame(bra_tg, keep.extra.columns = TRUE)
+
+  # overlap
+  ovl <- GenomicRanges::findOverlaps(query = bra_gr, subject = bra_tg, type = "any", minoverlap = 10, ignore.strand = TRUE)
+  bra_gr_ovl <- bra_gr[queryHits(ovl)]
+  bra_tg_ovl <- bra_tg[subjectHits(ovl)]
+
+  # euler
+  require(eulerr)
+  ovl_list <- list(
+    ChIP = unique(c(
+      # ChIP peaks ovrlapping GRN targets
+      bra_tg_ovl$peak,
+      # ChIP peaks not overlapping GRN targets
+      setdiff(bra_gr$peak, bra_gr_ovl$peak))),
+    # all targets
+    GRN = unique(bra_tg$peak)
+  )
+  eul <- euler(ovl_list)
+  gp_eul <- plot(eul, quantities = TRUE)
+  #ggsave(
+  #  file.path(fig_dir, sprintf("grn-global-brachyury-targets-%s-euler.pdf", insilico_chip_thrs)),
+  #  gp_eul, height = 5, width = 5
+  #)
+
+  # save
+  out_list[[i]] <- data.table(
+    insilico_chip_threshold = insilico_chip_thrs,
+    chip_pekas = length(ovl_list$ChIP),
+    grn_targets = length(ovl_list$GRN),
+    grn_in_chip = length(unique(bra_tg_ovl$peak))
+  )
+}
+
+ovl_dt <- rbindlist(out_list)
+ovl_dt[, fraction_grn_in_chip := grn_in_chip / grn_targets]
+ovl_dt[, fraction_chip_in_grn := grn_in_chip / chip_pekas]
+
+# transform for plotting 
+ovl_dt <- melt.data.table(ovl_dt, id.vars = "insilico_chip_threshold")
+
+gp_ovl <- ggplot(ovl_dt[variable != "chip_pekas"], aes(insilico_chip_threshold, value)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~variable, scales = "free_y", ncol = 1) +
+  theme(panel.grid.major = element_line())
+
+ggsave(
+  file.path(fig_dir, "grn-global-brachyury-targets-overlap.pdf"),
+  gp_ovl, height = 10, width = 6
 )
 ```
 
@@ -1599,7 +1718,7 @@ ggsave(
 )
 ```
 
-Network cartography
+Network metrics and cartography
 
 ```{r}
 source("motif-analysis/mta_grn_functions.R")
@@ -1609,17 +1728,19 @@ source("motif-analysis/mta_grn_functions.R")
 thr_fc_exp <- 1.2
 
 if (!is.null(thr_fc_exp)) {
-  grn_ct_dt <- grn_ct_dt[expression_fc > thr_fc_exp]
+  grn_net_dt <- grn_ct_dt[expression_fc > thr_fc_exp]
   fn <- sprintf(
     "%s_expression_%s_%s_accessibility_%s_%s_chromvar_%s", 
     lvl, exp, thr_fc_exp, acc, thr_q_acc, chr_thrs
   )
+} else {
+  grn_net_dt <- copy(grn_ct_dt)
 }
 
 # calculate network metrics
 cart_list <- lapply(cell_type_lvl, function(ct) {
   message("Cartography for ", ct, " GRN")
-  grn_ct <- unique(grn_ct_dt[cell_type == ct][, .(gene, target_gene, in_silico_chip_score)])
+  grn_ct <- unique(grn_net_dt[cell_type == ct][, .(gene, target_gene, in_silico_chip_score)])
   tryCatch({
     mta_network_scores(coef_dt = grn_ct)[, cell_type := ct]
   }, error = function(e) {
@@ -1748,7 +1869,7 @@ for (ct in classes) {
 dev.off()
 ```
 
-Compare metrics across cell types
+Compare network metrics across cell types
 
 ```{r}
 nodes_ann_cts <- unique(nodes_ann[, .(
@@ -1786,4 +1907,181 @@ ggsave(
   height = 12, width = 8
 )
 
+```
+
+For all TF, calculate an "overlapping index" (N cell-specific targets / total targets)
+
+```{r}
+# in how many cell types a TF is in GRN
+grn_ntg <- unique(
+  unique(grn_ct_dt[, .(cell_type, gene, target_gene)])
+)
+grn_ntg[, n_cell_types := length(unique(.SD$cell_type)), .(gene)]
+grn_ntg[, target_genes := length(unique(.SD$target_gene)), .(gene, cell_type)]
+grn_ntg[, target_n_cell_types := length(unique(.SD$cell_type)), .(gene, target_gene)]
+
+# # # # # # # # # #
+# overlap index   #
+# # # # # # # # # #
+
+# global union: target_genes_union
+grn_uni <- grn_ntg[, .(target_genes_union = length(unique(.SD$target_gene))), gene]
+# global intersect: target_genes_intersect
+grn_int <- grn_ntg[, .(target_genes_intersect = length(unique(.SD[target_n_cell_types == n_cell_types]$target_gene))), gene]
+
+# overlap index
+grn_ovl <- merge.data.table(grn_uni, grn_int, by = "gene", all = TRUE)
+grn_ovl[, overlap_index := target_genes_intersect / target_genes_union]
+
+# add metadata
+tfs_target_self <- unique(grn_ct_dt[target_self == TRUE]$gene)
+grn_ovl[, target_self := gene %in% tfs_target_self]
+grn_ovl <- merge.data.table(grn_ovl, unique(grn_ntg[, .(gene, n_cell_types)]), by = "gene")
+
+# # # # # # # # # #
+# diversity index #
+# # # # # # # # # #
+
+# target genes per cell type
+grn_tct <- grn_ntg[, .(cell_type_genes = length(unique(.SD$target_gene))), .(gene, cell_type)][order(gene)]
+
+# target genes per TF
+grn_ttf <- grn_ntg[, .(target_genes = length(unique(.SD$target_gene))), .(gene)][order(gene)]
+
+# diversity index
+grn_div <- merge.data.table(grn_tct, grn_ttf, by = "gene", all = TRUE)
+grn_div[, diversity_index := sum((cell_type_genes / target_genes)^2), gene]
+
+# add metadata
+tfs_target_self <- grn_ct_dt[target_self == TRUE]$gene
+grn_div[, target_self := gene %in% tfs_target_self]
+grn_div <- merge.data.table(grn_div, unique(grn_ntg[, .(gene, n_cell_types)]), by = "gene")
+```
+
+Plot diversity index vs overlap index
+
+```{r}
+grn_comp <- unique(merge.data.table(
+  grn_ovl[, .(gene, overlap_index, target_self, n_cell_types)],
+  grn_div[, .(gene, diversity_index, target_genes)]
+))
+grn_comp[, gene := factor(
+  gene, levels = unique(grn_comp[order(target_genes)]$gene)
+)]
+setorder(grn_comp, gene)
+
+gp_ind <- ggplot(grn_comp, aes(
+    overlap_index, diversity_index,
+    shape = target_self, size = target_genes, fill = n_cell_types,
+    label = str_remove(gene, "Nvec_(vc1.1_)*")
+  )) + 
+  geom_point() +
+  scale_fill_gradientn(colours = c("#d9d9d9", "#bdbdbd", "#969696", "#737373", "#525252", "#252525")) +
+  scale_shape_manual(values = c("TRUE" = 25, "FALSE" = 21)) +
+  guides(shape = guide_legend(override.aes = list(size = 5)))
+
+ind_fn <- file.path(fig_dir, sprintf("GRN_ovl_vs_div_index_%s.pdf", fn))
+ggsave(
+  str_replace(ind_fn, ".pdf", "_minimal.pdf"),
+  gp_ind,
+  height = 6, width = 8
+)
+ggsave(
+  ind_fn,
+  gp_ind + geom_text_repel(),
+  height = 18, width = 20
+)
+```
+
+Overlap index vs N of cell types
+
+```{r}
+grn_comp <- merge.data.table(grn_comp, gold, by = "gene", all.x = TRUE, sort = FALSE)
+grn_comp[, n_cell_types := factor(n_cell_types, levels = 1:max(grn_comp$n_cell_types))]
+
+ovl_n_gp <- ggplot(grn_comp) +
+  geom_violin(
+    aes(n_cell_types, overlap_index),
+    scale = "width"
+  ) +
+  ggbeeswarm::geom_quasirandom(
+    data = grn_comp[!is.na(common_name)],
+    aes(n_cell_types, overlap_index, size = target_genes),
+    shape = 21, alpha = 1, fill = "#8a8a8a", color = "#3d3d3d"
+  ) +
+  labs(x = "number of cell types", y = "overlap index")
+
+ggsave(
+  str_replace(ind_fn, ".pdf", "_num_cell_types.pdf"),
+  ovl_n_gp,
+  width = 8, height = 4
+)
+
+fwrite(
+  grn_comp,
+  file.path(
+    grn_res_dir, sprintf("GRN_ovl_vs_div_index_%s.tsv", fn)
+  ),
+  sep = "\t"
+)
+
+```
+
+Show examples of target genes euler diagram for broad cell types (maybe GOs/pfam enrichments?)
+
+```{r}
+require(eulerr)
+
+# get links data
+ic_dt <- unique(grn_ct_dt[, .(cell_type, gene, target_gene, in_silico_chip_score)])
+dt <- dcast.data.table(ic_dt,
+  gene + target_gene ~ cell_type, value.var = "in_silico_chip_score"
+)
+dt[is.na(dt)] <- 0
+cts <- colnames(dt)[-c(1:2)]
+
+# save plots to fil
+pdf(file.path(
+  fig_dir,
+  sprintf("GRN_ovl_vs_div_index_%s_eulers.pdf", fn)
+), height = 5, width = 10)
+
+# select TF
+#for (g in unique(grn_comp[gene %in% dt$gene][order(diversity_index)]$gene)) {
+for (g in grn_comp[gene %in% dt$gene][order(diversity_index)][gene %in% gold$gene]$gene) {
+
+  if (g %in% gold$gene) {
+    gnm <- gold[gene == g]$common_name
+  } else {
+    gnm <- rev(tfan[gene == g]$og)[1]
+    if (nchar(gnm) > 45) gnm <- paste0(substr(gnm, 1, 42), "...")
+  }
+  dtg <- dt[gene == g]
+  if (nrow(dtg) > 1) {
+
+    ovl <- grn_comp[gene == g]$overlap_index[1]
+    div <- grn_comp[gene == g]$diversity_index[1]
+    message(gnm)
+    mat <- sapply(cts, function(ct) {
+      abs(dtg[[ct]]) > 0
+    })
+    mat <- mat[, apply(mat, 2, sum) > 0, drop = FALSE]
+
+    # euler diagram
+    top_cts <- sort(apply(mat, 2, sum), decreasing = TRUE)
+    fit <- euler(mat[, names(top_cts), drop = FALSE])
+    p1 <- plot(
+      fit,
+      quantities = TRUE,
+      labels = list(font = 4),
+      fill = bct_cols[names(top_cts)],
+      main = sprintf(
+        "%s (%s) ovl %.2f; div %.2f",
+        gnm, str_remove(g, "Nvec_vc1.1_"), ovl, div
+      )
+    )
+    print(p1)
+  }
+}
+dev.off()
 ```
