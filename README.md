@@ -1,2 +1,5 @@
-Code for downstream analysis of Nemtostella scATAC-seq data, including clustering and annotation (ArchR, SEACells), motif analysis (ChromVAR), gene regulatory networks (in silico ChIP), sequence models (gkm-SVM, CREsted).
+# Cnidarian chromatin accessibility and gene regulation 
+
+This repository contains code for downstream analysis of _Nemtostella vectensis_ scATAC-seq data, including clustering and annotation, motif analysis, gene regulatory networks and sequence models.
  
+![image](img/header.png)

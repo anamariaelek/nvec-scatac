@@ -1,4 +1,6 @@
 *.nb.html
+90_DAPseq_primers.qmd
+99*
 annotation/DAPseq-*
 apps/*/data/
 apps/*/rsconnect/
