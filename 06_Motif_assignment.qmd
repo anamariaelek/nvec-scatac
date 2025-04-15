@@ -96,6 +96,7 @@ fig_dir <- "plots/Motifs"
 # load annotation
 gnan <- fread(file.path(ann_dir, "Nematostella_DToL_FINAL.tsv"))
 tfan <- fread(file.path(ann_dir, "Nematostella_DToL_TFs_FINAL.tsv"))
+gold <- fread(file.path(ann_dir, "golden-marks-231124.tsv"), header = FALSE, col.names = c("common_name", "gene"), select = 1:2)
 ```
 
 Project-specific variables:
@@ -2245,98 +2246,331 @@ stopifnot(all(motifs %in% names(mta_pwm)))
 saveRDS(mta_pwm, file.path(mta_dir, "motif-assignment-combined-pwms.rds"))
 ```
 
+Compare motifs assigned with different methods:
+
+```{r}
+mta_pwm <- readRDS(file.path(mta_dir, "motif-assignment-combined-pwms.rds"))
+mta_acc_exp_dt <- fread(file.path(
+  mta_dir, "motif-assignment-combined-activity-cell-type.tsv.gz"
+))
+mta_gen_sum <- unique(
+  mta_acc_exp_dt[,.(gene,motif_name,motif_assignment)]
+)[,motif_assingnments:=paste(sort(unique(.SD$motif_assignment)),collapse="+"),gene]
+unique(mta_gen_sum[,.(gene,motif_assingnments)])[,.N,motif_assingnments][order(-N)]
+
+method_col <- c("archetype" = "#5ea3d3ff", "orthology" = "#fb5e4cff", "cisbp" = "#ffff6eff", "dapseq" = "#4cfb62ff")
+
+assgn <- "archetype+cisbp+dapseq+orthology"
+genes <- mta_gen_sum[motif_assingnments==asgn, gene]
+motfs <- mta_gen_sum[motif_assingnments==asgn, motif_name]
+
+```
+
+* plot motif similarities.
+
+```{r}
+require(ComplexHeatmap)
+
+sim_list <- list()
+
+for (assgn in c(
+  "archetype+cisbp+dapseq+orthology",
+  "archetype+dapseq+orthology",
+  "archetype+cisbp+orthology"
+)) {
+  
+  genes <- unique(mta_gen_sum[motif_assingnments==assgn, gene])
+  motfs <- unique(mta_gen_sum[motif_assingnments==assgn, motif_name])
+  cat(sprintf("%s: %s genes", assgn, length(genes)))
+  
+  # where to save the plot
+  pdf(
+    file.path(fig_dir, sprintf("tf-motfis-similarity-%s.pdf", assgn)), 
+    height = 10, width = 12
+  )
+  
+  plot_genes <- unique(c(
+    gold[gene %in% genes]$gene,
+    genes[!genes %in% gold$gene]
+  ))
+  
+  sim_mat_list <- list()
+  
+  for (gn in plot_genes) {
+    
+    # gene annotation
+    pf <- tfan[gene==gn]$pfam
+    og <- tfan[gene==gn]$og
+    cn <- tfan[gene==gn]$common_name
+    tf <- ifelse(cn!="", sprintf("%s (%s)", gn, cn), gn)
+    tl <- sprintf("%s\nOG: %s\nPFAM: %s", tf, og, pf)
+    cat("\n", tl, "\n")
+  
+    # data to plot
+    tf_dt <- mta_acc_exp_dt[gene == gn]
+    pt_dt <- tf_dt[,.N,.(motif_name, motif_assignment)]
+    pt_dt[, motif_assignment := factor(motif_assignment, levels = c("archetype", "orthology", "cisbp", "dapseq"))]
+    setorder(pt_dt, motif_assignment)
+  
+    # similarity heatmap
+    similarity <- "PPM"
+    method <- "PCC"
+    sim_mat <- compare_motifs(
+      motifs = mta_pwm[unique(pt_dt$motif_name)],
+      use.type = similarity,
+      method = method,
+      normalise.scores = FALSE,
+      min.position.ic = 0,
+      min.mean.ic = 0,
+      nthreads = 0
+    )
+    
+    # ordering
+    hclust_method <- "complete"
+    ord <- rownames(sim_mat)
+    hc <- hclust(dist(sim_mat), method = hclust_method)
+    ord <- hc$labels[hc$order]
+    sim_mat <- sim_mat[ord, ord]
+    
+    # annotation
+    ha_col = HeatmapAnnotation(
+      method = pt_dt[match(rownames(sim_mat), motif_name)]$motif_assignment,
+      col = list(method = method_col),
+      which = "column"
+    )
+    ha_row = HeatmapAnnotation(
+      method = pt_dt[match(rownames(sim_mat), motif_name)]$motif_assignment,
+      col = list(method =method_col),
+      which = "row", show_legend = FALSE, show_annotation_name = FALSE
+    )
+    
+    # motif logos
+    # dir.create(file.path(fig_dir, "tmp"), showWarnings = FALSE)
+    # motif_imgs <- c()
+    #for (mm in rownames(sim_mat)) {
+    #  mot <- ggseqlogo::ggseqlogo(mta_pwm[[mm]]@motif) + theme_void()
+    #  mot_fn <- file.path(fig_dir, "tmp", paste0(mm, ".png"))
+    #  mot_fn <- str_replace_all(mot_fn, "\\/", "_")
+    #  ggsave(mot_fn, height = 3, width = 5)
+    #  motif_imgs <- c(motif_imgs, mot_fn)
+    #}
+    #ha_mot = HeatmapAnnotation(
+    #  motif = anno_image(motif_imgs),
+    #  which = "row", 
+    #  show_legend = FALSE, show_annotation_name = FALSE, 
+    #  border = FALSE, 
+    #  width = unit(1, "in")
+    #)
+    mlogs <- view_motifs(mta_pwm[rownames(sim_mat)])
+    print(mlogs)
+    
+    # short names
+    sim_mat_copy <- sim_mat
+    dap_ids <- grep("homer|streme|dimont", rownames(sim_mat_copy))
+    dap_nms <- str_extract(rownames(sim_mat_copy)[dap_ids], "\\d+_(homer|streme|dimont)")
+    rownames(sim_mat_copy)[dap_ids] <- dap_nms
+    colnames(sim_mat_copy)[dap_ids] <- dap_nms
+    
+    # plot
+    col_fun = colorRamp2(c(0, 0.25, 0.5, 0.75, 1), c("#4d4d4d", "#999999", "#e0e0e0", "#f4a582", "#b2182b"))
+    hm <- Heatmap(
+      sim_mat_copy,
+      name = sprintf("%s\nmotif similarity", method),
+      col = col_fun,
+      show_row_names = TRUE,
+      show_column_names = TRUE,
+      row_names_side = "left",
+      column_names_side = "top",
+      row_title = "",
+      column_title = tl,
+      row_title_gp = gpar(fontsize = 0),
+      column_title_gp = gpar(fontsize = 16),
+      top_annotation = ha_col,
+      left_annotation = ha_row,
+      #right_annotation = ha_mot,
+      cluster_rows = FALSE,
+      cluster_columns = FALSE,
+      border = FALSE,
+      width = unit(5, "in"), #ncol(mat)*unit(5, "mm"), 
+      height = unit(5, "in") #nrow(mat)*unit(5, "mm")),
+    )
+    draw(hm)
+    sim_mat_list[[gn]] <- sim_mat
+  
+  }
+  
+  dev.off()
+  
+  # keep results in a list
+  motif_sims <- rbindlist(lapply(
+    names(sim_mat_list), function(gn) {
+      x <- sim_mat_list[[gn]]
+      dt <- melt.data.table(
+        as.data.table(x, keep.rownames = "motif1"),
+        id.vars = "motif1",
+        variable.name = "motif2",
+        value.name = "motif_similarity"
+      )
+      dt <- merge.data.table(
+        dt,
+        unique(mta_gen_sum[, .(motif1 = motif_name, motif1_assignment = motif_assignment)]),
+        all.x = TRUE,
+        by = "motif1",
+        sort = FALSE
+      )
+      dt <- merge.data.table(
+        dt,
+        unique(mta_gen_sum[, .(motif2 = motif_name, motif2_assignment = motif_assignment)]),
+        all.x = TRUE,
+        by = "motif2",
+        sort = FALSE
+      )
+      dt[, gene := gn]
+    }
+  ))[, method := assgn]
+  
+  sim_list[[assgn]] <- motif_sims
+
+}
+
+# pull together
+sim_dt <- rbindlist(sim_list)
+setcolorder(sim_dt, c("motif1", "motif1_assignment", "motif2", "motif2_assignment"))
+sim_dt <- sim_dt[motif1 != motif2]
+sim_dt[, motif_pair := paste0(sort(c(.SD$motif1, .SD$motif2)), collapse = "+"), .I]
+sim_dt[, motif_assignment_pair := paste0(sort(c(.SD$motif1_assignment, .SD$motif2_assignment)), collapse = "+"), .I]
+sim_dt <- unique(sim_dt[, .(gene, motif_pair, motif_assignment_pair, motif_similarity)])
+
+# order
+cats <- sim_dt[, median(motif_similarity), motif_assignment_pair][order(-V1)]$motif_assignment_pair
+sim_dt[, motif_assignment_pair := factor(motif_assignment_pair, levels = cats)]
+
+# plot distribution of similarity values
+gp_sim_dens <- ggplot(sim_dt, aes(motif_similarity, motif_assignment_pair)) +
+  geom_boxplot(fill = "#bababa")
+gp_sim_nums <- ggplot(sim_dt, aes(motif_assignment_pair)) +
+  geom_bar(fill = "#bababa", color = "#000000") +
+  coord_flip() +
+  theme(axis.text.y = element_blank(), axis.ticks.y = element_blank(), axis.title.y = element_blank())
+require(patchwork)
+gp_sim <- gp_sim_dens + gp_sim_nums + plot_layout(ncol = 2)
+ggsave(
+  file.path(fig_dir, "tf-motfis-similarity-box.pdf"),
+  gp_sim,
+  width = 14, height = 6
+)
+```
+
 Then we plot pairs of expression-activity scaterplots for each gene and it's direct and assigned motif.
 
 ```{r}
 # where to save the plot
-pdf(
-  file.path(fig_dir, "tf-expression-activity-scatter-plots-direct-vs-assigned.pdf"), 
-  height = 20, width = 16
-)
+# assgn <- "direct-vs-assigned"
 
-plot_genes <- c(
-  gold[gene %in% genes]$gene,
-  genes[!genes %in% gold$gene]
-)
-
-for (gn in plot_genes) {
+for (assgn in c(
+  "archetype+cisbp+dapseq+orthology",
+  "archetype+dapseq+orthology",
+  "archetype+cisbp+orthology"
+)) {
   
-  # gene annotation
-  pf <- tfan[gene==gn]$pfam
-  og <- tfan[gene==gn]$og
-  cn <- tfan[gene==gn]$common_name
-  tf <- ifelse(cn!="", sprintf("%s (%s)", gn, cn), gn)
-  tl <- sprintf("%s\nOG: %s\nPFAM: %s", tf, og, pf)
-  print(tl)
-
-  # data to plot
-  tf_dt <- mta_acc_exp_dt[gene == gn]
-  pt_dt <- tf_dt[,.N,.(motif_name, motif_assignment)]
-  pt_dt[, motif_assignment := factor(motif_assignment, levels = c("archetype", "orthology", "cisbp", "dapseq"))]
-  setorder(pt_dt, motif_assignment)
-  nplots <- nrow(pt_dt)
-  nspace <- 9 - nplots
-
-  # motifs
-  mt_list <- lapply(seq_len(nplots), function(i) {
+  genes <- unique(mta_gen_sum[motif_assingnments==assgn, gene])
+  motfs <- unique(mta_gen_sum[motif_assingnments==assgn, motif_name])
+  cat(sprintf("%s: %s genes \n", assgn, length(genes)))
+  
+  pdf(
+    file.path(fig_dir, sprintf("tf-expression-activity-scatter-plots-%s.pdf", assgn)), 
+    height = 20, width = 16
+  )
+  
+  plot_genes <- unique(c(
+    gold[gene %in% genes]$gene,
+    genes[!genes %in% gold$gene]
+  ))
+  
+  for (gn in plot_genes) {
     
-    mm <- pt_dt$motif_name[i]
-    mt_mod <- pt_dt$motif_assignment[i]
-
-    # motif logo
-    logo_ttl <- paste(mt_mod, mm, sep = ": ")
-    mt_gp <- ggseqlogo::ggseqlogo(mta_pwm[[mm]]@motif) + 
-      theme_void() +
-      labs(title = stringr::str_trunc(logo_ttl, 50))
-
-    # assemble scatter plot
-    tf_gp <- ggplot(tf_dt[motif_name == mm & motif_assignment == mt_mod], aes(
-            expression, motif_deviation, 
-            label = cell_type,
-            fill = cell_type, 
-            color = cell_type,
-            shape = stage
-        )
-      ) +
-      geom_point(size = 4) +
-      ggrepel::geom_text_repel(size = 4, alpha = 0.6) +
-      scale_fill_manual(values = ct_cols) +
-      scale_color_manual(
-        values = c(
-          structure(
-            colorspace::darken(ct_cols, 0.5),
-            names = names(ct_cols)
-          ),
-          structure(
-            colorspace::lighten(ct_cols, 0.5),
-            names = paste0(names(ct_cols), "_sc")
+    # gene annotation
+    pf <- tfan[gene==gn]$pfam
+    og <- tfan[gene==gn]$og
+    cn <- tfan[gene==gn]$common_name
+    tf <- ifelse(cn!="", sprintf("%s (%s)", gn, cn), gn)
+    tl <- sprintf("%s\nOG: %s\nPFAM: %s", tf, og, pf)
+    cat(tl, "\n")
+  
+    # data to plot
+    tf_dt <- mta_acc_exp_dt[gene == gn]
+    pt_dt <- tf_dt[,.N,.(motif_name, motif_assignment)]
+    pt_dt[, motif_assignment := factor(motif_assignment, levels = c("archetype", "orthology", "cisbp", "dapseq"))]
+    setorder(pt_dt, motif_assignment)
+    nplots <- nrow(pt_dt)
+    nspace <- 9 - nplots
+  
+    # motifs
+    mt_list <- lapply(seq_len(nplots), function(i) {
+      
+      mm <- pt_dt$motif_name[i]
+      mt_mod <- pt_dt$motif_assignment[i]
+  
+      # motif logo
+      logo_ttl <- paste(
+        mt_mod, 
+        ifelse(grepl("homer|streme|dimont", mm), str_extract(mm, "homer|streme|dimont"), mm),
+        sep = ": "
+      )
+      mt_gp <- ggseqlogo::ggseqlogo(mta_pwm[[mm]]@motif) + 
+        theme_void() +
+        labs(title = stringr::str_trunc(logo_ttl, 50))
+  
+      # assemble scatter plot
+      tf_gp <- ggplot(tf_dt[motif_name == mm & motif_assignment == mt_mod], aes(
+              expression, motif_deviation, 
+              label = cell_type,
+              fill = cell_type, 
+              color = cell_type,
+              shape = stage
           )
-        )
-      ) +
-      # scale_x_continuous(limits = c(0, NA)) +
-      scale_shape_manual(
-          values = c("adult" = 21, "gastrula" = 24)
-      ) +
-      labs(
-          x = "TF expression",
-          y = "TF activity"
-      ) +
-      theme(legend.position = "none")
-    
-    mt_gp + tf_gp + plot_layout(ncol = 1, heights = c(1, 5))
-
-  })
-  mt_list <- c(mt_list, rep(list(patchwork::plot_spacer()), nspace))
+        ) +
+        geom_point(size = 4) +
+        ggrepel::geom_text_repel(size = 4, alpha = 0.6) +
+        scale_fill_manual(values = ct_cols) +
+        scale_color_manual(
+          values = c(
+            structure(
+              colorspace::darken(ct_cols, 0.5),
+              names = names(ct_cols)
+            ),
+            structure(
+              colorspace::lighten(ct_cols, 0.5),
+              names = paste0(names(ct_cols), "_sc")
+            )
+          )
+        ) +
+        # scale_x_continuous(limits = c(0, NA)) +
+        scale_shape_manual(
+            values = c("adult" = 21, "gastrula" = 24)
+        ) +
+        labs(
+            x = "TF expression",
+            y = "TF activity"
+        ) +
+        theme(legend.position = "none")
+      
+      mt_gp + tf_gp + plot_layout(ncol = 1, heights = c(1, 5))
   
-  # patchwork
-  patch <- wrap_plots(mt_list) + 
-    plot_layout(ncol = 3) +
-    plot_annotation(title = tl)
-  print(patch)
-
+    })
+    mt_list <- c(mt_list, rep(list(patchwork::plot_spacer()), nspace))
+    
+    # patchwork
+    patch <- wrap_plots(mt_list) + 
+      plot_layout(ncol = 3) +
+      plot_annotation(title = tl)
+    print(patch)
+  
+  }
+  dev.off()
 }
-dev.off()
 ```
+
 
 ## Update motif assignment
 
