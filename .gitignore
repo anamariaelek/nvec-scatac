@@ -1,5 +1,5 @@
 *.nb.html
-90_DAPseq_primers.qmd
+98_DAPseq_primers.qmd
 99*
 annotation/DAPseq-*
 apps/*/data/

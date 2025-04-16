@@ -2002,7 +2002,8 @@ saveRDS(
 We next compare cell type TF activity for:
 - motifs assigned by orthology
 - motifs assigned by correlations
-- motifs determined experimentally
+- motifs determined experimentally (CisBP, DAPseq)
+- motifs infered by similarity regression
 
 First we need to load gene expressions, gene scores, and pull together motif deviation scores (activity).
 
@@ -2053,6 +2054,15 @@ cisbp_dt <- fread(
 )[, .(TF_Name, Motif_ID)]
 setnames(cisbp_dt, c("gene", "motif_name"))
 
+# gene - similarity regression infered motifs
+infer_dt <- unique(fread(
+  file.path(
+    "results", "Archetypes",
+    sprintf("motif-archetypes-%s.dict", arc_id)
+  ), sep = "\t"
+)[source == "CisBP_I", .(gene, archetype_name)])
+setnames(infer_dt, c("gene", "motif_name"))
+
 # gene - correlation based archetype mapping
 archs_dt <- fread(file.path(
   "results", "Archetypes",
@@ -2068,6 +2078,7 @@ setnames(mort_dt, c("gene", "motif_name"))
 dr_dt <- rbindlist(list(
   "cisbp" = cisbp_dt,
   "dapseq" = dapseq_dt,
+  "similarityreg" = infer_dt,
   "archetype" = archs_dt,
   "orthology" = mort_dt
 ), idcol = "motif_assignment")
@@ -2118,29 +2129,48 @@ pdf(file.path(
 ), width = 6, height = 4)
 plot(dr_fit_all, quantities = TRUE, fill = "transparent")
 dev.off()
+
+# upset
+require(ComplexUpset)
+ups <- upset(
+  as.data.frame(dr_eu),
+  intersect = colnames(dr_eu),
+  sort_intersections_by = "cardinality",
+  width_ratio = 0.2
+)
+
+pdf(file.path(
+  fig_dir, "motif-assignment-upset.pdf"
+), width = 6, height = 4)
+plot(ups)
+dev.off()
 ```
 
 Next, subset the expression, accessibility and activity matrices to only include genes that are expressed and accessible.
 
-```{r}
-# consider only expressed and accessible genes
-dr_dt[, expressed := gene %in% rownames(exp_mt)]
-dr_dt[, accessible := gene %in% rownames(acc_mt)]
-dr_dt[, active := motif_name %in% rownames(chromvar_mat)]
+  ```{r}
+  # consider only expressed and accessible genes
+  dr_dt[, expressed := gene %in% rownames(exp_mt)]
+  dr_dt[, accessible := gene %in% rownames(acc_mt)]
+  dr_dt[, active := motif_name %in% rownames(chromvar_mat)]
 
-sprintf("Genes not expressed: %s", length(unique(dr_dt[expressed==FALSE]$gene)))
-sprintf("Genes not accessible: %s", length(unique(dr_dt[accessible==FALSE]$gene)))
-sprintf("Motifs not active: %s", length(unique(dr_dt[active==FALSE]$motif_name)))
+  sprintf("Genes not expressed: %s", length(unique(dr_dt[expressed==FALSE]$gene)))
+  sprintf("Genes not accessible: %s", length(unique(dr_dt[accessible==FALSE]$gene)))
+  sprintf("Motifs not active: %s", length(unique(dr_dt[active==FALSE]$motif_name)))
 
-dr_dt <- dr_dt[expressed & accessible & active]
-genes <- unique(dr_dt$gene)
-motifs <- unique(dr_dt$motif_name)
+  dr_dt <- dr_dt[expressed & accessible & active]
+  genes <- unique(dr_dt$gene)
+  motifs <- unique(dr_dt$motif_name)
 
-# subset matrices
-exp_tfs <- exp_mt[unname(genes), ]
-acc_tfs <- acc_mt[unname(genes), ]
-dev_tfs <- chromvar_mat[unname(motifs), ]
+  # subset matrices
+  exp_tfs <- exp_mt[unname(genes), ]
+  acc_tfs <- acc_mt[unname(genes), ]
+  dev_tfs <- chromvar_mat[unname(motifs), ]
 ```
+
+Genes not expressed: 51
+Genes not accessible: 24
+Motifs not active: 1
 
 Combine expression, accessibility and motif deviation scores with cell type metadata.
 
@@ -2258,7 +2288,13 @@ mta_gen_sum <- unique(
 )[,motif_assingnments:=paste(sort(unique(.SD$motif_assignment)),collapse="+"),gene]
 unique(mta_gen_sum[,.(gene,motif_assingnments)])[,.N,motif_assingnments][order(-N)]
 
-method_col <- c("archetype" = "#5ea3d3ff", "orthology" = "#fb5e4cff", "cisbp" = "#ffff6eff", "dapseq" = "#4cfb62ff")
+method_col <- c(
+  "archetype" = "#5ea3d3ff", 
+  "orthology" = "#fb5e4cff", 
+  "similarityreg" = "#bc80bd",
+  "cisbp" = "#ffff6eff", 
+  "dapseq" = "#4cfb62ff"
+)
 
 assgn <- "archetype+cisbp+dapseq+orthology"
 genes <- mta_gen_sum[motif_assingnments==asgn, gene]
@@ -2266,19 +2302,139 @@ motfs <- mta_gen_sum[motif_assingnments==asgn, motif_name]
 
 ```
 
+* calculate motif similarities
+
+```{r}
+genes <- unique(mta_gen_sum$gene)
+motfs <- unique(mta_gen_sum$motif_name)
+cat(sprintf("\n%s genes\n%s motifs", length(genes), length(motfs)))
+
+plot_genes <- unique(c(
+  gold[gene %in% genes]$gene,
+  genes[!genes %in% gold$gene]
+))
+
+sim_mat_list <- list()
+
+for (gn in plot_genes) {
+
+  # gene data
+  tf_dt <- mta_acc_exp_dt[gene == gn]
+  pt_dt <- tf_dt[,.N,.(motif_name, motif_assignment)]
+  pt_dt[, motif_assignment := factor(
+    motif_assignment,
+    levels = c("archetype", "orthology", "similarityreg", "cisbp", "dapseq")
+  )]
+  setorder(pt_dt, motif_assignment)
+
+  # similarity heatmap
+  similarity <- "PPM"
+  method <- "PCC"
+  sim_mat <- compare_motifs(
+    motifs = mta_pwm[unique(pt_dt$motif_name)],
+    use.type = similarity,
+    method = method,
+    normalise.scores = FALSE,
+    min.position.ic = 0,
+    min.mean.ic = 0,
+    nthreads = 0
+  )
+  
+  # ordering
+  if (nrow(sim_mat) > 1) {
+    hclust_method <- "complete"
+    ord <- rownames(sim_mat)
+    hc <- hclust(dist(sim_mat), method = hclust_method)
+    ord <- hc$labels[hc$order]
+    sim_mat <- sim_mat[ord, ord]
+  }
+  sim_mat_list[[gn]] <- sim_mat
+
+}
+
+# keep results in a data.table
+sim_dt <- rbindlist(lapply(
+  names(sim_mat_list), function(gn) {
+    x <- sim_mat_list[[gn]]
+    dt <- melt.data.table(
+      as.data.table(x, keep.rownames = "motif1"),
+      id.vars = "motif1",
+      variable.name = "motif2",
+      value.name = "motif_similarity"
+    )
+    dt <- merge.data.table(
+      dt,
+      unique(mta_gen_sum[gene == gn, .(motif1 = motif_name, motif1_assignment = motif_assignment)]),
+      all.x = TRUE,
+      by = "motif1",
+      sort = FALSE,
+      allow.cartesian = FALSE
+    )
+    dt <- merge.data.table(
+      dt,
+      unique(mta_gen_sum[gene == gn, .(motif2 = motif_name, motif2_assignment = motif_assignment)]),
+      all.x = TRUE,
+      by = "motif2",
+      sort = FALSE,
+      allow.cartesian = FALSE
+    )
+    dt[, gene := gn]
+  }
+))
+
+# get all assigned motif pairs per gene in a data table
+setcolorder(sim_dt, c("motif1", "motif1_assignment", "motif2", "motif2_assignment"))
+fwrite(
+  sim_dt,
+  file.path(mta_dir, "motif-assignment-combined-similarity.tsv.gz"),
+  sep = "\t", compress = "gzip"
+)
+
+# parse pairs of assigned motifs
+sim_pairs_dt <- copy(sim_dt)[motif1 != motif2]
+sim_pairs_dt[, motif_pair := paste0(sort(c(.SD$motif1, .SD$motif2)), collapse = "+"), .I]
+sim_pairs_dt[, motif_assignment_pair := paste0(sort(c(.SD$motif1_assignment, .SD$motif2_assignment)), collapse = "+"), .I]
+sim_pairs_dt <- unique(sim_pairs_dt[, .(gene, motif_pair, motif_assignment_pair, motif_similarity)])
+
+# order
+cats <- sim_pairs_dt[, median(motif_similarity), motif_assignment_pair][order(-V1)]$motif_assignment_pair
+sim_pairs_dt[, motif_assignment_pair := factor(motif_assignment_pair, levels = cats)]
+
+# plot distribution of similarity values
+gp_sim_dens <- ggplot(sim_pairs_dt, aes(motif_similarity, motif_assignment_pair)) +
+  geom_boxplot(fill = "#bababa")
+gp_sim_nums <- ggplot(sim_pairs_dt, aes(motif_assignment_pair)) +
+  geom_bar(fill = "#bababa", color = "#000000") +
+  coord_flip() +
+  scale_y_continuous(trans = "log10") +
+  geom_text(stat = "count", aes(label = ..count..), hjust = 1) +
+  theme(axis.text.y = element_blank(), axis.ticks.y = element_blank(), axis.title.y = element_blank())
+require(patchwork)
+gp_sim <- gp_sim_dens + gp_sim_nums + plot_layout(ncol = 2)
+ggsave(
+  file.path(fig_dir, "tf-motfis-similarity-box.pdf"),
+  gp_sim,
+  width = 14, height = 6
+)
+```
+
 * plot motif similarities.
 
 ```{r}
 require(ComplexHeatmap)
 
-sim_list <- list()
-
 for (assgn in c(
+  # assignment vs experiment
   "archetype+cisbp+dapseq+orthology",
+  "archetype+cisbp+orthology",
   "archetype+dapseq+orthology",
-  "archetype+cisbp+orthology"
+  "archetype+dapseq+similarityreg"
+  # different assignments
+#  "archetype+similarityreg",
+#  "orthology+similarityreg"
 )) {
   
+  # gene
   genes <- unique(mta_gen_sum[motif_assingnments==assgn, gene])
   motfs <- unique(mta_gen_sum[motif_assingnments==assgn, motif_name])
   cat(sprintf("%s: %s genes", assgn, length(genes)))
@@ -2288,16 +2444,9 @@ for (assgn in c(
     file.path(fig_dir, sprintf("tf-motfis-similarity-%s.pdf", assgn)), 
     height = 10, width = 12
   )
-  
-  plot_genes <- unique(c(
-    gold[gene %in% genes]$gene,
-    genes[!genes %in% gold$gene]
-  ))
-  
-  sim_mat_list <- list()
-  
-  for (gn in plot_genes) {
-    
+
+  for (gn in genes) {
+
     # gene annotation
     pf <- tfan[gene==gn]$pfam
     og <- tfan[gene==gn]$og
@@ -2305,33 +2454,19 @@ for (assgn in c(
     tf <- ifelse(cn!="", sprintf("%s (%s)", gn, cn), gn)
     tl <- sprintf("%s\nOG: %s\nPFAM: %s", tf, og, pf)
     cat("\n", tl, "\n")
-  
-    # data to plot
+
+    # gene data
     tf_dt <- mta_acc_exp_dt[gene == gn]
     pt_dt <- tf_dt[,.N,.(motif_name, motif_assignment)]
-    pt_dt[, motif_assignment := factor(motif_assignment, levels = c("archetype", "orthology", "cisbp", "dapseq"))]
+    pt_dt[, motif_assignment := factor(
+      motif_assignment,
+      levels = c("archetype", "orthology", "similarityreg", "cisbp", "dapseq")
+    )]
     setorder(pt_dt, motif_assignment)
-  
-    # similarity heatmap
-    similarity <- "PPM"
-    method <- "PCC"
-    sim_mat <- compare_motifs(
-      motifs = mta_pwm[unique(pt_dt$motif_name)],
-      use.type = similarity,
-      method = method,
-      normalise.scores = FALSE,
-      min.position.ic = 0,
-      min.mean.ic = 0,
-      nthreads = 0
-    )
     
-    # ordering
-    hclust_method <- "complete"
-    ord <- rownames(sim_mat)
-    hc <- hclust(dist(sim_mat), method = hclust_method)
-    ord <- hc$labels[hc$order]
-    sim_mat <- sim_mat[ord, ord]
-    
+    # similarities 
+    sim_mat <- sim_mat_list[[gn]]
+       
     # annotation
     ha_col = HeatmapAnnotation(
       method = pt_dt[match(rownames(sim_mat), motif_name)]$motif_assignment,
@@ -2340,27 +2475,10 @@ for (assgn in c(
     )
     ha_row = HeatmapAnnotation(
       method = pt_dt[match(rownames(sim_mat), motif_name)]$motif_assignment,
-      col = list(method =method_col),
+      col = list(method = method_col),
       which = "row", show_legend = FALSE, show_annotation_name = FALSE
     )
     
-    # motif logos
-    # dir.create(file.path(fig_dir, "tmp"), showWarnings = FALSE)
-    # motif_imgs <- c()
-    #for (mm in rownames(sim_mat)) {
-    #  mot <- ggseqlogo::ggseqlogo(mta_pwm[[mm]]@motif) + theme_void()
-    #  mot_fn <- file.path(fig_dir, "tmp", paste0(mm, ".png"))
-    #  mot_fn <- str_replace_all(mot_fn, "\\/", "_")
-    #  ggsave(mot_fn, height = 3, width = 5)
-    #  motif_imgs <- c(motif_imgs, mot_fn)
-    #}
-    #ha_mot = HeatmapAnnotation(
-    #  motif = anno_image(motif_imgs),
-    #  which = "row", 
-    #  show_legend = FALSE, show_annotation_name = FALSE, 
-    #  border = FALSE, 
-    #  width = unit(1, "in")
-    #)
     mlogs <- view_motifs(mta_pwm[rownames(sim_mat)])
     print(mlogs)
     
@@ -2387,90 +2505,34 @@ for (assgn in c(
       column_title_gp = gpar(fontsize = 16),
       top_annotation = ha_col,
       left_annotation = ha_row,
-      #right_annotation = ha_mot,
       cluster_rows = FALSE,
       cluster_columns = FALSE,
       border = FALSE,
-      width = unit(5, "in"), #ncol(mat)*unit(5, "mm"), 
-      height = unit(5, "in") #nrow(mat)*unit(5, "mm")),
+      width = unit(5, "in"),
+      height = unit(5, "in")
     )
     draw(hm)
-    sim_mat_list[[gn]] <- sim_mat
-  
+    
   }
   
   dev.off()
-  
-  # keep results in a list
-  motif_sims <- rbindlist(lapply(
-    names(sim_mat_list), function(gn) {
-      x <- sim_mat_list[[gn]]
-      dt <- melt.data.table(
-        as.data.table(x, keep.rownames = "motif1"),
-        id.vars = "motif1",
-        variable.name = "motif2",
-        value.name = "motif_similarity"
-      )
-      dt <- merge.data.table(
-        dt,
-        unique(mta_gen_sum[, .(motif1 = motif_name, motif1_assignment = motif_assignment)]),
-        all.x = TRUE,
-        by = "motif1",
-        sort = FALSE
-      )
-      dt <- merge.data.table(
-        dt,
-        unique(mta_gen_sum[, .(motif2 = motif_name, motif2_assignment = motif_assignment)]),
-        all.x = TRUE,
-        by = "motif2",
-        sort = FALSE
-      )
-      dt[, gene := gn]
-    }
-  ))[, method := assgn]
-  
-  sim_list[[assgn]] <- motif_sims
 
 }
-
-# pull together
-sim_dt <- rbindlist(sim_list)
-setcolorder(sim_dt, c("motif1", "motif1_assignment", "motif2", "motif2_assignment"))
-sim_dt <- sim_dt[motif1 != motif2]
-sim_dt[, motif_pair := paste0(sort(c(.SD$motif1, .SD$motif2)), collapse = "+"), .I]
-sim_dt[, motif_assignment_pair := paste0(sort(c(.SD$motif1_assignment, .SD$motif2_assignment)), collapse = "+"), .I]
-sim_dt <- unique(sim_dt[, .(gene, motif_pair, motif_assignment_pair, motif_similarity)])
-
-# order
-cats <- sim_dt[, median(motif_similarity), motif_assignment_pair][order(-V1)]$motif_assignment_pair
-sim_dt[, motif_assignment_pair := factor(motif_assignment_pair, levels = cats)]
-
-# plot distribution of similarity values
-gp_sim_dens <- ggplot(sim_dt, aes(motif_similarity, motif_assignment_pair)) +
-  geom_boxplot(fill = "#bababa")
-gp_sim_nums <- ggplot(sim_dt, aes(motif_assignment_pair)) +
-  geom_bar(fill = "#bababa", color = "#000000") +
-  coord_flip() +
-  theme(axis.text.y = element_blank(), axis.ticks.y = element_blank(), axis.title.y = element_blank())
-require(patchwork)
-gp_sim <- gp_sim_dens + gp_sim_nums + plot_layout(ncol = 2)
-ggsave(
-  file.path(fig_dir, "tf-motfis-similarity-box.pdf"),
-  gp_sim,
-  width = 14, height = 6
-)
+  
 ```
 
-Then we plot pairs of expression-activity scaterplots for each gene and it's direct and assigned motif.
+* plot pairs of expression-activity scaterplots
 
 ```{r}
-# where to save the plot
-# assgn <- "direct-vs-assigned"
-
 for (assgn in c(
+  # assignment vs experiment
   "archetype+cisbp+dapseq+orthology",
+  "archetype+cisbp+orthology",
   "archetype+dapseq+orthology",
-  "archetype+cisbp+orthology"
+  "archetype+dapseq+similarityreg"
+  # different assignments
+#  "archetype+similarityreg",
+#  "orthology+similarityreg"
 )) {
   
   genes <- unique(mta_gen_sum[motif_assingnments==assgn, gene])
@@ -2500,7 +2562,10 @@ for (assgn in c(
     # data to plot
     tf_dt <- mta_acc_exp_dt[gene == gn]
     pt_dt <- tf_dt[,.N,.(motif_name, motif_assignment)]
-    pt_dt[, motif_assignment := factor(motif_assignment, levels = c("archetype", "orthology", "cisbp", "dapseq"))]
+    pt_dt[, motif_assignment := factor(
+      motif_assignment, 
+      levels = c("archetype", "orthology", "similarityreg", "cisbp", "dapseq")
+    )]
     setorder(pt_dt, motif_assignment)
     nplots <- nrow(pt_dt)
     nspace <- 9 - nplots
@@ -3501,6 +3566,129 @@ fwrite(acc_exp_ct, file.path(
   "gene-expression-accessibility-archetype-motif-deviation-cell-type.tsv.gz"
 ), sep = "\t", compress = "gzip")
 
+```
+
+Shortlist candidates for experimental validation.
+
+```{r}
+# motifs assignment info
+dr_dt <- fread(file.path(mta_dir, "motif-assignment-combined.tsv.gz"), sep = "\t")
+
+# motif activity info
+# # # # I NEED TO UPDATE THIS TO INCLUDE ALL MOTIFS # # # #
+#acc_exp_ct <- fread(file.path(
+#  mta_dir, "gene-expression-accessibility-archetype-motif-deviation-cell-type.tsv.gz"
+#))
+#setnames(acc_exp_ct, "archetype_name", "motif_name")
+
+# assigned motifs similarities
+sim_dt <- fread(file.path(mta_dir, "motif-assignment-combined-similarity.tsv.gz"))
+
+
+# TF importane from GRNs
+grn_dt <- fread(file.path(
+  "results", "GRN", "networks", "cell_type",
+  "grn_tfs_info_cell_type_expression_fc_0.4_accessibility_access_0.4_chromvar_4.tsv.gz"
+))
+grn_gen_dt <- unique(grn_dt[, .(cell_type, stage, gene, expression_fc, expression_umifrac, gene_score)])
+grn_mot_dt <- unique(grn_dt[, .(cell_type, stage, gene, motif_name = motif, zscore)])
+
+# all TFs info
+tf_dt <- tfan[gene %in% rownames(exp_mt) & gene %in% rownames(acc_mt)]
+
+# add all TFs info to motif assignment table
+mot_dt <- merge.data.table(
+  dr_dt, tf_dt, by = "gene", 
+  all.x = TRUE, sort = FALSE
+)
+mot_dt[is.na(mot_dt)] <- ""
+
+# add GRN gene info
+mot_dt <- merge.data.table(
+  mot_dt, grn_gen_dt,
+  by = "gene",
+  all.x = TRUE, sort = FALSE, allow.cartesian = TRUE
+)
+
+# add GRN motif info
+mot_dt <- merge.data.table(
+  mot_dt, grn_mot_dt,
+  by = c("gene", "motif_name", "cell_type", "stage"),
+  all.x = TRUE, sort = FALSE
+)
+
+# order
+stopifnot(all(mot_dt[!is.na(cell_type)]$cell_type %in% cell_types))
+mot_dt[, cell_type := factor(cell_type, levels = cell_types)]
+mot_dt[, stage := factor(stage, levels = c("gastrula", "adult"))]
+
+# prioritize genes without dapseq
+mot_dt[, has_dapseq := "dapseq" %in% .SD$motif_assignment, .(gene)]
+mot_dt[, has_dapseq := factor(has_dapseq, levels = c(TRUE, FALSE))]
+
+# prioritize genes 
+# 1) high expression in gastrula cell types
+setorder(mot_dt, stage, cell_type, -has_dapseq, -expression_fc, -gene_score, zscore, na.last = TRUE)
+genes_1 <- unique(mot_dt[expression_fc > 2 & gene_score > 2 & zscore > 4 & stage == "gastrula"]$gene)
+# 2) high expression in neuronal cell types
+genes_2 <- unique(mot_dt[expression_fc > 2 & gene_score > 2 & zscore > 4 & grepl("neuron|cnidocyte", cell_type)]$gene)
+# 3) high zscore in any cell type
+genes_3 <- unique(mot_dt[expression_fc > 2 & gene_score > 2 & zscore > 4]$gene)
+length(genes_1)
+# 38
+length(setdiff(genes_2, genes_1))
+# 13
+length(setdiff(genes_3, c(genes_1, genes_2)))
+# 18
+gene_levels <- unique(c(genes_1, genes_2, genes_3))
+gene_levels <- c(gene_levels, setdiff(unique(mot_dt$gene), gene_levels))
+mot_dt[, gene := factor(gene, levels = unique(gene_levels))]
+setorder(mot_dt, gene, stage, cell_type, -expression_fc, -gene_score, zscore, na.last = TRUE)
+mot_dt[, rank := .GRP, .(gene)]
+
+# select top cell type per gene
+top_dt <- mot_dt[, .SD[1], .(gene, motif_name)]
+setcolorder(top_dt, c(
+  "rank", "gene", "gene_name", "common_name", "og", "pfam",
+  "motif_assignment", "motif_name", 
+  "cell_type", "stage", 
+  "expression_fc", "expression_umifrac", "gene_score", "zscore"
+))
+
+# keep track of the assigned motif
+mot_dt[, motif_assigned := unique(.SD[is.na(zscore)]$motif_assignment), .(gene)]
+
+# combine all similarity regression assigned motifs
+top_dt[motif_assignment == "similarityreg", motif_name := paste(unique(sort(.SD$motif_name)), collapse = ","), .(gene)]
+top_dt <- unique(top_dt)
+
+# combine all dapseq motifs
+top_dt[motif_assignment == "dapseq", motif_name := paste(unique(sort(.SD$motif_name)), collapse = ","), .(gene)]
+top_dt <- unique(top_dt)
+
+# combine all dapseq motifs
+top_dt[motif_assignment == "orthology", motif_name := paste(unique(sort(.SD$motif_name)), collapse = ","), .(gene)]
+top_dt <- unique(top_dt)
+
+# keep assigned zscore for each gene
+top_dt[, zscore := max(.SD$zscore, na.rm = TRUE), gene]
+top_dt[is.infinite(zscore), zscore := NA]
+top_dt <- unique(top_dt)
+
+# move motifs to columns
+# top_dt[, motif_assignment := paste("motif_", motif_assignment, sep = "")]
+top_dc <- dcast.data.table(
+  top_dt,
+  rank + gene ~ motif_assignment,
+  value.var = "motif_name"
+)
+
+# save
+fwrite(
+  top_dt,
+  file.path(mta_dir, "motif-assignment-combined-genes-candidates-info.tsv.gz"),
+  sep = "\t", compress = "gzip"
+)
 ```
 
 Plot per-TF scatterplots of expression vs activity (deviation Z score).
