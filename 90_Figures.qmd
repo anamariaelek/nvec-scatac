@@ -194,7 +194,7 @@ cell_type_rename <- c(
   "neuron_GATA_Islet_3" = "neuron_Pou4_FoxL2_3",
   "NPC$" = "NPC_1",
   "precursors_1" = "precursors_PGC",
-  "precursors_2" = "precursors_ ",
+  "precursors_2" = "precursors_endoNPC ",
   "precursors_3" = "precursors_NPC"
 )
 

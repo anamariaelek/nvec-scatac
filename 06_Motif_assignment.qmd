@@ -3411,6 +3411,9 @@ acc_mt <- readRDS(file.path(
     "results", "GeneScoreMatrix",
     "Matrix-Gene-Scores-SEACell-FC.rds"
 ))
+
+# DAPseq data
+dap_dt <- fread(file.path(dap_dir, "dapseq-results-summary-v6.tsv.gz"))
 ```
 
 Combine data
@@ -3573,6 +3576,7 @@ Shortlist candidates for experimental validation.
 ```{r}
 # motifs assignment info
 dr_dt <- fread(file.path(mta_dir, "motif-assignment-combined.tsv.gz"), sep = "\t")
+dr_dt <- dr_dt[gene %in% tfan$gene]
 
 # motif activity info
 # # # # I NEED TO UPDATE THIS TO INCLUDE ALL MOTIFS # # # #
@@ -3623,31 +3627,40 @@ mot_dt[, cell_type := factor(cell_type, levels = cell_types)]
 mot_dt[, stage := factor(stage, levels = c("gastrula", "adult"))]
 
 # prioritize genes without dapseq
-mot_dt[, has_dapseq := "dapseq" %in% .SD$motif_assignment, .(gene)]
+mot_dt[, has_dapseq := gene %in% dap_dt$gene]
+mot_dt[is.na(has_dapseq), has_dapseq := FALSE]
 mot_dt[, has_dapseq := factor(has_dapseq, levels = c(TRUE, FALSE))]
+mot_dt[, has_dapseq_success := gene %in% dap_dt[success == "success"]$gene]
+mot_dt[is.na(has_dapseq_success), has_dapseq_success := FALSE]
+mot_dt[, has_dapseq_success := factor(has_dapseq_success, levels = c(TRUE, FALSE))]
 
 # prioritize genes 
 # 1) high expression in gastrula cell types
 setorder(mot_dt, stage, cell_type, -has_dapseq, -expression_fc, -gene_score, zscore, na.last = TRUE)
-genes_1 <- unique(mot_dt[expression_fc > 2 & gene_score > 2 & zscore > 4 & stage == "gastrula"]$gene)
+genes_1 <- unique(mot_dt[expression_fc > 2 & gene_score > 2 & zscore > 4 & stage == "gastrula" & has_dapseq == FALSE]$gene)
 # 2) high expression in neuronal cell types
-genes_2 <- unique(mot_dt[expression_fc > 2 & gene_score > 2 & zscore > 4 & grepl("neuron|cnidocyte", cell_type)]$gene)
+genes_2 <- unique(mot_dt[expression_fc > 2 & gene_score > 2 & zscore > 4 & grepl("neuron|cnidocyte", cell_type) & has_dapseq == FALSE]$gene)
 # 3) high zscore in any cell type
-genes_3 <- unique(mot_dt[expression_fc > 2 & gene_score > 2 & zscore > 4]$gene)
+genes_3 <- unique(mot_dt[expression_fc > 2 & gene_score > 2 & zscore > 4 & has_dapseq == FALSE]$gene)
 length(genes_1)
-# 38
+# 30
 length(setdiff(genes_2, genes_1))
-# 13
+# 9
 length(setdiff(genes_3, c(genes_1, genes_2)))
-# 18
+# 15
 gene_levels <- unique(c(genes_1, genes_2, genes_3))
 gene_levels <- c(gene_levels, setdiff(unique(mot_dt$gene), gene_levels))
+gene_levels <- c(
+  setdiff(gene_levels, mot_dt[has_dapseq == TRUE]$gene),
+  unique(mot_dt[has_dapseq == TRUE]$gene)
+)
+stopifnot(all(mot_dt$gene %in% gene_levels))
 mot_dt[, gene := factor(gene, levels = unique(gene_levels))]
 setorder(mot_dt, gene, stage, cell_type, -expression_fc, -gene_score, zscore, na.last = TRUE)
 mot_dt[, rank := .GRP, .(gene)]
 
 # select top cell type per gene
-top_dt <- mot_dt[, .SD[1], .(gene, motif_name)]
+top_dt <- unique(mot_dt[, .SD[1], .(gene, motif_name)])
 setcolorder(top_dt, c(
   "rank", "gene", "gene_name", "common_name", "og", "pfam",
   "motif_assignment", "motif_name", 
@@ -3656,7 +3669,7 @@ setcolorder(top_dt, c(
 ))
 
 # keep track of the assigned motif
-mot_dt[, motif_assigned := unique(.SD[is.na(zscore)]$motif_assignment), .(gene)]
+top_dt[, motif_assigned := unique(.SD[!is.na(zscore)]$motif_assignment), .(gene, cell_type)]
 
 # combine all similarity regression assigned motifs
 top_dt[motif_assignment == "similarityreg", motif_name := paste(unique(sort(.SD$motif_name)), collapse = ","), .(gene)]
@@ -3676,16 +3689,38 @@ top_dt[is.infinite(zscore), zscore := NA]
 top_dt <- unique(top_dt)
 
 # move motifs to columns
-# top_dt[, motif_assignment := paste("motif_", motif_assignment, sep = "")]
+top_dt[, motif_assignment := paste("motif_", motif_assignment, sep = "")]
 top_dc <- dcast.data.table(
   top_dt,
   rank + gene ~ motif_assignment,
   value.var = "motif_name"
 )
+#setnames(
+#  top_dc,
+#  c("archetype", "dapseq", "cisbp", "similarityreg", "orthology"),
+#  c("motif_archetype", "motif_dapseq", "motif_cisbp", "motif_similarityreg", "motif_orthology")
+#)
+
+res_dt <- merge.data.table(
+  top_dc, unique(top_dt[, .(
+    rank, gene, gene_name, common_name, og, pfam, cell_type, stage,
+    expression_fc, expression_umifrac, gene_score, zscore,
+    has_dapseq, has_dapseq_success, motif_assigned
+  )]),
+  by = c("rank", "gene"),
+  all.x = TRUE, sort = FALSE
+)
+
+setcolorder(res_dt, c(
+  "rank", "gene", "gene_name", "common_name", "og", "pfam",
+  "motif_assigned", "has_dapseq", "has_dapseq_success",
+  "motif_dapseq", "motif_cisbp", "motif_archetype", "motif_orthology", "motif_similarityreg",
+  "cell_type", "stage", "expression_fc", "expression_umifrac", "gene_score", "zscore"
+))
 
 # save
 fwrite(
-  top_dt,
+  res_dt,
   file.path(mta_dir, "motif-assignment-combined-genes-candidates-info.tsv.gz"),
   sep = "\t", compress = "gzip"
 )
