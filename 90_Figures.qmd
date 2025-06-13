@@ -932,7 +932,7 @@ done
 # Figure 2
 
 ```{r}
-stage <- "adult"
+stage <- ""
 adult_pks_dir <- "~/cluster/aelek/proj/scATAC_nvec_v2/clustering/SEACells/Results/ArchRProj_Nvec_TSS4_frag200/ArchRProj/Promoters"
 gastr_pks_dir <- "~/cluster/aelek/proj/scATAC_nvec_gastrula/clustering/SEACells/Results/ArchRProj_Nvec_gastrula/ArchRProj/Peaks"
 ap_dir <- switch(
@@ -1411,7 +1411,7 @@ ggsave(
 ```{r}
 # peak classification data
 if (is.null(ap_dir)) {
-  class_peaks_adult <- fread(file.path(adult_pks_dir, "annotation_promoters_full.tsv"))
+  class_peaks_adult <- fread(file.path(adult_pks_dir, "annotation_promoters_full.tsv.gz"))
   setnames(class_peaks_adult, "peak", "peak_adult")
   class_peaks_adult <- merge.data.table(
     class_peaks_adult,
@@ -1419,7 +1419,7 @@ if (is.null(ap_dir)) {
     by = "peak_adult", all.x = TRUE
   )
   class_peaks_adult[, peak_adult := NULL]
-  class_peaks_gastr <- fread(file.path(gastr_pks_dir, "annotation_promoters_full.tsv"))
+  class_peaks_gastr <- fread(file.path(gastr_pks_dir, "annotation_promoters_full.tsv.gz"))
   setnames(class_peaks_gastr, "peak", "peak_gastrula")
   class_peaks_gastr <- merge.data.table(
     class_peaks_gastr,
@@ -1431,7 +1431,7 @@ if (is.null(ap_dir)) {
     gastrula = class_peaks_gastr, adult = class_peaks_adult
   ), use.names = TRUE, idcol = "stage")
 } else {
-  class_peaks <- fread(file.path(ap_dir, "annotation_promoters_full.tsv"))[, stage := stage]
+  class_peaks <- fread(file.path(ap_dir, "annotation_promoters_full.tsv.gz"))[, stage := stage]
 }
 class_peaks[grepl("AP", promoter), promoter := "AP"]
 class_peaks[, cell_type := str_replace_all(cell_type, "\\.", "_")]
@@ -3241,7 +3241,7 @@ rtracklayer::export.bed(
 After running phastCon/phyloP, load results.
 
 ```{r}
-con_dir <- file.path(ann_dir, "2023-nematostella_whole_genome_conservation")
+con_dir <- file.path("data", "2023-nematostella_whole_genome_conservation")
 class_stage_cols <- structure(
   rep(class_cols, each = 2),
   names = paste(rep(names(class_cols), each = 2), c("adult", "gastrula"))
@@ -3288,7 +3288,7 @@ phastc_list <- lapply(
       cons_gr <- makeGRangesFromDataFrame(cons_gr, keep.extra.columns = TRUE)
       maps_gr <- makeGRangesFromDataFrame(pks_map, keep.extra.columns = TRUE)
       maps_gr <- maps_gr[maps_gr$peak_gastrula != ""]
-      ovl <- findOverlaps(query = cons_gr, subject = maps_gr)
+      ovl <- findOverlaps(query = cons_gr, subject = maps_gr, minoverlap = 150)
       cons_gm <- cons_gr[queryHits(ovl)]
       cons_gm$peak <- maps_gr[subjectHits(ovl)]$peak_gastrula
       cons_gm <- as.data.table(cons_gm)[, width := NULL]
@@ -3318,8 +3318,8 @@ ape::nodelabels(tree_ape$node.label)
 dev.off()
 
 # types of CREs
-class_adult <- fread(file.path(adult_pks_dir, "annotation_promoters_full.tsv"))
-class_gastr <- fread(file.path(gastr_pks_dir, "annotation_promoters_full.tsv"))
+class_adult <- fread(file.path(adult_pks_dir, "annotation_promoters_full.tsv.gz"))
+class_gastr <- fread(file.path(gastr_pks_dir, "annotation_promoters_full.tsv.gz"))
 class_dt <- rbindlist(list(gastrula = class_gastr, adult = class_adult), idcol = "stage", use.names = TRUE)
 class_dt <- unique(class_dt[, .(seqnames, start, end, peak, promoter, stage)])
 # class_dt[grepl("AP", promoter), promoter := "AP"]
@@ -3380,9 +3380,147 @@ gp_ph <- ggplot(
   ) +
   geom_bar(stat = "identity", position = "dodge") +
   scale_fill_manual(values = evol_cols) +
-  scale_color_manual(values = structure(
-    colorspace::darken(ph_cols, 0.5), names = names(ph_cols)
-  )) +
+  scale_color_manual(
+    values = structure(colorspace::darken(ph_cols, 0.5), names = names(ph_cols)), 
+    # hide in legend
+    guide = "none"
+  ) +
+  scale_y_continuous(
+    expand = expansion(mult = c(0, 0.05))
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+    panel.grid.major.x = element_line(linewidth = 0.5),
+    legend.position = "right"
+  ) +
+  labs(x = "", y = "% of regions")
+
+# save
+ggsave(
+  file.path(fig_dir, "phylop_scores.pdf"),
+  gp_ph,
+  width = 7, height = 4
+)
+```
+
+Plot phyloP per cell type
+
+```{r}
+class_peaks_gr <- makeGRangesFromDataFrame(class_peaks, keep.extra.columns = TRUE)
+phastc_cre_gr <- makeGRangesFromDataFrame(phastc_dt, keep.extra.columns = TRUE)
+ovl <- findOverlaps(query = class_peaks_gr, subject = phastc_cre_gr, ignore.strand = TRUE, minoverlap = 200)
+
+ph_ct <- phastc_cre_gr[subjectHits(ovl)]
+pk_ct <- class_peaks_gr[queryHits(ovl)]
+pk_ct$phylop_score <- ph_ct$phylop_score
+pk_ct <- unique(as.data.table(pk_ct))
+
+pk_gp <- unique(pk_ct[, .(seqnames, start, end, stage, cell_type, peak, Log2FC, Log2FC_like, phylop_score)])
+setorder(pk_gp, seqnames, start, end, -phylop_score)
+pk_gp <- pk_gp[,  .SD[1], .(peak, stage, cell_type)]
+
+pk_gp[cell_type == "gastro_unknown", cell_type := "gastro"]
+
+all_cts <- unique(unname(unlist(sapply(
+  names(bct_cols), function(x) c(x, grep(x, names(ct_cols), value=TRUE))
+))))
+all_cts_cols <- c(bct_cols, ct_cols)[all_cts]
+stopifnot(all(pk_gp$cell_type %in% all_cts))
+pk_gp <- pk_gp[!is.na(cell_type)]
+pk_gp[, cell_type := factor(cell_type, levels = all_cts)]
+
+# binarize phyloP scores
+pk_gp[, pval := 10^ (-1 * abs(phylop_score))]
+pk_gp[, evol := "neutral"]
+pk_gp[phylop_score > 0 & pval < 0.001, evol := "slow-evolving"]
+pk_gp[phylop_score < 0 & pval < 0.001, evol := "acceleration"]
+pk_gp[, evol := factor(evol, levels = c("neutral", "acceleration", "slow-evolving"))]
+setorder(pk_gp, evol, cell_type)
+pk_gp[, evol := paste(cell_type, evol)]
+pk_gp[, evol2 := paste0(evol, "2")]
+pk_gp[, evol := factor(evol, levels = unique(pk_gp$evol))]
+
+# remove peaks with 0 phylop score
+# pk_gp <- pk_gp[phylop_score != 0]
+
+# filter cell type specific peaks
+filt <- FALSE
+if (filt) {
+  pk_gp <- pk_gp[(Log2FC>2 | Log2FC_like>2)]
+  suff <- "_filt"
+} else {
+  suff <- ""
+}
+
+# count peaks per cell type and evolution
+pk_bn <- pk_gp[, .N, .(cell_type, evol, evol2)]
+pk_bn[, perc := N / sum(N) * 100, cell_type]
+pk_bn[, label := sprintf("%.1f%%", perc)]
+
+evol_cols <- structure(c(
+  colorspace::darken(all_cts_cols, 0.4),
+  unname(all_cts_cols),
+  colorspace::lighten(all_cts_cols, 0.5)
+), names = c(
+  paste(names(all_cts_cols), "slow-evolving"),
+  paste(names(all_cts_cols), "neutral"),
+  paste(names(all_cts_cols), "acceleration")
+))
+
+# plot fraction of peaks with accel./slow evol as pie chart
+gp_pie <- ggplot(
+  pk_bn,
+  aes(x = "", y = perc, fill = evol)
+) +
+  geom_bar(stat = "identity", width = 1, color = "white") +
+  scale_fill_manual(values = evol_cols) +
+  coord_polar(theta = "y") +
+  facet_wrap(~ cell_type) +
+  theme_void() +
+  theme(
+    strip.text = element_text(size = 10, face = "bold"),
+    legend.position = "none"
+  ) +
+  labs(x = "", y = "")
+
+ggsave(
+  file.path(fig_dir, sprintf("phylop_scores_per_cell_type%s_pie.pdf", suff)),
+  gp_pie,
+  width = 10, height = 6
+)
+
+# plot fraction of peaks with accel./slow evol as stacked barplot
+pk_bn[, evol := factor(evol, levels = c(
+  paste(all_cts, "acceleration"),
+  paste(all_cts, "neutral"),
+  paste(all_cts, "slow-evolving")
+))]
+gp_pie <- ggplot(
+  pk_bn,
+  aes(x = perc, y = cell_type, fill = evol)
+) +
+  geom_bar(stat = "identity", width = 1, color = "white") +
+  scale_fill_manual(values = evol_cols) +
+  theme(legend.position = "none") +
+  labs(x = "% of peaks", y = "")
+
+ggsave(
+  file.path(fig_dir, sprintf("phylop_scores_per_cell_type%s_stack.pdf", suff)),
+  gp_pie,
+  width = 10, height = 6
+)
+
+# plot fraction of peaks with accel./slow evol as barplot
+gp_bar <- ggplot(
+    pk_bn[!grepl("neutral", evol)],
+    aes(cell_type, perc, fill = evol, color = cell_type)
+  ) +
+  geom_bar(stat = "identity", position = position_dodge(preserve = "single")) +
+  scale_fill_manual(values = evol_cols) +
+  scale_color_manual(
+    values = structure(colorspace::darken(all_cts_cols, 0.5), names = names(all_cts_cols)), 
+    guide = "none"
+  ) +
   scale_y_continuous(
     expand = expansion(mult = c(0, 0.05))
   ) +
@@ -3391,14 +3529,35 @@ gp_ph <- ggplot(
     panel.grid.major.x = element_line(linewidth = 0.5),
     legend.position = "none"
   ) +
-  labs(x = "", y = "% of regions")
-
-# save
+  labs(x = "", y = "% of peaks")
 ggsave(
-  file.path(fig_dir, "phylop_scores.pdf"),
-  gp_ph,
-  width = 4, height = 3
+  file.path(fig_dir, sprintf("phylop_scores_per_cell_type%s_evol.pdf", suff)),
+  gp_bar,
+  width = 7, height = 4
 )
+
+# plot distribution of phylop scores
+pk_box <- ggplot(
+   pk_gp,
+    aes(cell_type, phylop_score, fill = cell_type, color = cell_type)
+  ) +
+  geom_violin(width = 1.2, alpha = 0.2) +
+  ggbeeswarm::geom_quasirandom(size = 1, dodge.width = 0.9) +
+  #geom_boxplot(outlier.shape = NA) +
+  scale_fill_manual(values = all_cts_cols) +
+  scale_color_manual(values = all_cts_cols) +
+  theme(
+    legend.position = "none",
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+    panel.grid.major.x = element_line(linewidth = 0.5),
+  ) +
+  labs(x = "", y = "phyloP score")
+ggsave(
+  file.path(fig_dir, sprintf("phylop_scores_per_cell_type%s_dist.pdf", suff)),
+  pk_box,
+  width = 8, height = 5
+)
+
 ```
 
 Parse phastcon scores
@@ -3484,6 +3643,78 @@ ggsave(
   file.path(fig_dir, "phylop_phastcon_scores.pdf"),
   gp_phastc_ovl,
   width = 4, height = 3
+)
+```
+
+Plot phastCon scores per cell type
+
+```{r}
+ovl <- findOverlaps(query = class_peaks_gr, subject = phast_gr, ignore.strand = TRUE)
+ovl_gr <- phast_gr[subjectHits(ovl)]
+cls_gr <- class_peaks_gr[queryHits(ovl)]
+mcols(cls_gr)$score <- mcols(ovl_gr)$score
+ps_dt <- unique(as.data.table(cls_gr)[, c("gene", "umifrac", "mcfp") := NULL])
+
+# data to plot
+bin_vals <- function(x, w = 100, agg_fun = max) {
+  if (length(x) < w) {
+    return(agg_fun(x))
+  } else {
+    starts <- seq(1, w, by = 1)
+    ends <- starts + w
+    out <- c()
+    for (i in seq_along(starts)) {
+      if (ends[i] > length(x)) {
+        ends[i] <- length(x)
+      }
+      vals <- x[starts[i]:ends[i]]
+      out[i] <- agg_fun(vals)
+    }
+    return(out)
+  }
+}
+#cons_plot_dt <- ps_dt[, .(score = max(bin_vals(score, w=100, agg_fun=sum))), .(cell_type, peak, Log2FC, Log2FC_like, stage)]
+cons_plot_dt <- ps_dt[, .(score = max(score)), .(cell_type, peak, Log2FC, Log2FC_like, stage)]
+
+# order cell types
+cons_plot_dt[cell_type == "gastro_unknown", cell_type := "gastro"]
+stopifnot(all(cons_plot_dt$cell_type %in% all_cts))
+cons_plot_dt[, cell_type := factor(cell_type, levels = all_cts)]
+setorder(cons_plot_dt, cell_type, -score)
+
+# filter cell type specific peaks
+cons_plot_dt <-  cons_plot_dt[(Log2FC>2 | Log2FC_like>2)]
+
+# plot phastCon scores
+gp_phastc_ovl <- ggplot(
+    cons_plot_dt,
+    aes(cell_type, score, color = cell_type, fill = cell_type)
+  ) +
+  geom_violin(width = 1.2, alpha = 0.2) +
+  #ggbeeswarm::geom_quasirandom(size = 0.2, dodge.width = 0.9) +
+  #geom_boxplot(outlier.shape = NA) +
+  scale_y_continuous(
+    #trans = "log10"
+    #limits = c(0, 1), oob = scales::squish,
+    #breaks = c(0, 0.5, 1)
+  ) +
+  scale_fill_manual(values = all_cts_cols) +
+  scale_color_manual(values = structure(
+    colorspace::darken(all_cts_cols, 0.5),
+    names = names(all_cts_cols)
+  )) +
+  theme(
+    legend.position = "none",
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+    panel.grid.major.x = element_line(linewidth = 0.5),
+  ) +
+  labs(x = "", y = "phastCon")
+
+# save
+ggsave(
+  file.path(fig_dir, "phylop_phastcon_scores_cell_types_w100.pdf"),
+  gp_phastc_ovl,
+  width = 4, height = 4
 )
 ```
 
