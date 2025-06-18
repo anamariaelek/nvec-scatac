@@ -4730,7 +4730,6 @@ plot_dt[expression > exp_thrs & zscore > chr_thrs,
 Scatterplot
 
 ```{r}
-
 # plot
 gp_scat <- ggplot(
         plot_dt, aes(
@@ -4791,11 +4790,6 @@ ggsave(
 )
 ```
 
-Barplot
-
-```{r}
-
-```
 ## GRNs
 
 ```{r}
@@ -7577,14 +7571,19 @@ For peaks associated to expressed genes, compare their accessibility
 
 ```{r}
 # select peaks assigned to genes selected above
-peak_access_dt <- unique(peak_acc_dt[cell_type %in% cts])
-peak_access_dt[is.na(peak_access), peak_access := 0]
-peak_access_dt <- dcast.data.table(
-  peak_access_dt, peak + gene ~ cell_type, value.var = "peak_access", fill = 0
+peak_gene_access_dt <- unique(peak_acc_dt[cell_type %in% cts])
+peak_gene_access_dt[is.na(peak_access), peak_access := 0]
+peak_gene_access_dt <- dcast.data.table(
+  peak_gene_access_dt, peak + gene ~ cell_type, value.var = "peak_access", fill = 0
 )
 
-peak_access_dt <- merge.data.table(peak_access_dt, unique(gene_access_dt[,.(gene,category)]))
-peak_access_dt <- unique(peak_access_dt[, gene := NULL])
+peak_gene_access_dt <- merge.data.table(
+  peak_gene_access_dt, 
+  #unique(gene_access_dt[,.(gene,category)]) # all genes
+  #unique(gene_access_dt[category != "other"][,.(gene,category)]) # acessible genes
+  unique(gene_access_dt[category == "both"][,.(gene,category)]) # intersect genes
+)
+peak_access_dt <- unique(copy(peak_gene_access_dt)[, gene := NULL])
 setnames(peak_access_dt, "category", "category_gene")
 peak_access_dt[, .N, category_gene]
 
@@ -7595,7 +7594,7 @@ thrs_acc <- paste(min_thrs_acc, max_thrs_acc, sep = "_")
 if (min_thrs_acc == max_thrs_acc) thrs_acc <- min_thrs_acc
 peak_access_dt[, ratio := peak_access_dt[[cts[1]]] / peak_access_dt[[cts[2]]]]
 peak_access_dt[, category := "other"]
-peak_access_dt[peak_access_dt[[cts[1]]] > 1 & peak_access_dt[[cts[2]]] > 1, category := "both"]
+peak_access_dt[peak_access_dt[[cts[1]]] > 4 & peak_access_dt[[cts[2]]] > 4, category := "both"]
 peak_access_dt[ratio > 2 & peak_access_dt[[cts[1]]] > max_thrs_acc & peak_access_dt[[cts[2]]] < min_thrs_acc, category := cts[1]]
 peak_access_dt[ratio < 0.5 & peak_access_dt[[cts[2]]] > max_thrs_acc & peak_access_dt[[cts[1]]] < min_thrs_acc, category := cts[2]]
 peak_access_dt[, .N, category][order(-N)]
@@ -7691,7 +7690,7 @@ p2 <- plot(
   main = "peak accessibility"
 )
 pdf(
-  file.path(fig_dir, sprintf("fig4_peaks_access_%s_ovl.pdf", ctn)),
+  file.path(fig_dir, sprintf("fig4_peaks_access_%s_ovl_intersect_genes.pdf", ctn)),
   width = 4, height = 2
 )
 print(p1)
@@ -7699,7 +7698,75 @@ print(p2)
 dev.off()
 ```
 
-### Peaks overlap between retractor muscles
+Promoters/enhancers among peaks in the intersect or specific for MR or TR
+
+```{r}
+# add promoter annotation to peak categories
+peak_access_an_dt <- merge.data.table(
+  unique(peak_access_dt[, .(peak, category)]),
+  unique(peak_pro_dt[, .(peak, promoter)]),
+  by = "peak", all.x = FALSE
+)
+
+class_cols <- c(
+  "SP" = "#2166ac",
+  "CP" = "#053061",
+  "AP" = "#4393c3",
+  "NO" = "#319854"
+)
+
+peak_access_an_dt[promoter != "NO", promoter := "promoter"]
+peak_access_an_dt[promoter == "NO", promoter := "enhancer"]
+
+prom_cols <- c(
+  "promoter" = "#4d8cc4",
+  "enhancer"  = "#319854"
+)
+
+peak_access_an_sum <- peak_access_an_dt[,.N, .(category,promoter)][order(category,promoter)][, frac := N/sum(N), category]
+peak_access_an_sum[, category := factor(
+  category,
+  levels = c(
+    "muscle_tentacle_retractor",
+    "muscle_mesentery_retractor",
+    "both",
+    "other"
+  )
+)]
+# piechart for each category
+ggplot(peak_access_an_sum, aes(x = "", y = frac, fill = promoter)) +
+  geom_bar(width = 1, stat = "identity", color = "white") +
+  coord_polar(theta = "y") +
+  facet_wrap(~ category, ncol = 2) +
+  scale_fill_manual(values = prom_cols) +
+  theme_void() +
+  theme(legend.position = "bottom")
+ggsave(file.path(fig_dir, sprintf("fig4_peaks_promoters_enhancers_%s_accessible.pdf", ctn)), width = 6, height = 4)
+
+```
+
+How many genes that are shared ("both" category) don't share any peaks?
+
+```{r}  
+gene_peak_cat_dt <- merge.data.table(
+  peak_gene_access_dt[, .(gene, peak, gene_category=category)],
+  peak_access_dt[, .(peak, peak_category=category)],
+  by = "peak", all.x = TRUE
+)
+setorder(gene_peak_cat_dt, gene, peak)
+gene_peak_sum_dt <- unique(
+  unique(
+    gene_peak_cat_dt[,.(gene,gene_category,peak_category)]
+  )[,peak_categories := paste(sort(.SD$peak_category),collapse="+"),gene][, peak_category := NULL]
+)
+gene_peak_sum_dt[, .N, peak_categories][order(-N)]
+gene_peak_sum_dt[, exclusive_peak := FALSE]
+gene_peak_sum_dt[peak_categories %in% c("muscle_tentacle_retractor", "muscle_mesentery_retractor"), exclusive_peak := TRUE]
+gene_peak_sum_dt[, .N, exclusive_peak][order(-N)]
+
+```
+
+### Motif enrichment for peaks in overlap between retractor muscles
 
 Calculate motif enrichment in retractor muscles peaks that are:
 1) specific for TR vs MR
@@ -7995,6 +8062,155 @@ dev.off()
 #)
 #view_motifs(reverseComplement(enr_pwms[[x]]@motif))
 #dev.off()
+```
+
+#### Dotmap
+
+Dotmap of motif enrichment for muscle-enriched motifs.
+
+```{r}
+# load motif enrichment results
+enr_dt <- rbindlist(lapply(c(
+  #"results/Archetypes/motif-enrichment-cell-type-orthology-PPM-PCC-0.8-IC0.5-5bp-mona-q0.95.tsv.gz",
+  "results/Archetypes/motif-enrichment-cell-type-archetypes-PPM-PCC-0.8-IC0.5-5bp-mona-q0.95.tsv.gz"
+), function(x) fread(x)))
+
+# select significantly enriched motifs in retractor muscles
+top_mots <- unique(
+  enr_dt[grepl("retractor", cell_type) & padj < 0.01 & fc > 1.5]$motif
+)
+#msc_dt <- fread(
+#  file.path(mta_dir, "motif-enrichment-muscle-cell-types.tsv.gz")
+#)
+#top_mots <- unique(msc_dt[padj < 0.01 & fc > 1.5]$motif)
+print(length(top_mots))
+top_dt <- enr_dt[motif %in% top_mots]
+
+# group motifs by name
+top_dt[, motif_name := str_remove(motif, "ARCH\\d+_")]
+top_dt[motif_name == "", motif_name := motif]
+setorder(top_dt, -fc)
+top_mots <- unique(top_dt[grep("retractor", cell_type), .SD[1], motif_name]$motif)
+print(length(top_mots))
+top_dt <- top_dt[motif %in% top_mots]
+
+# motif to gene mapping
+mot2gene <- fread(file.path(
+    mta_dir, "motif-assignment-selected.tsv.gz"
+))
+mot2gene <- unique(mot2gene[, .(gene, gene_name, common_name, motif = archetype_name)])
+mot2gene[common_name != "", gene_name := common_name]
+top_dt <- merge.data.table(
+  top_dt, mot2gene, by = "motif", all.x = TRUE, sort = FALSE, allow.cartesian = TRUE
+)
+top_dt[!is.na(gene_name), motif_name := gene_name]
+top_dt[motif_name == "", motif_name := motif]
+setorder(top_dt, -fc)
+top_mots <- unique(top_dt[grep("retractor", cell_type), .SD[1], motif_name]$motif)
+print(length(top_mots))
+top_dt <- top_dt[motif %in% top_mots]
+
+# order cell types
+cell_types <- names(ct_cols)
+top_dt[cell_type == "neuronal_gastrula", cell_type := "neuronal"]
+stopifnot(all(top_dt$cell_type %in% cell_types))
+top_dt[, cell_type := factor(cell_type, levels = cell_types)]
+setorder(top_dt, cell_type, -padj)
+
+# manually fix motifs name
+if (file.exists(file.path(fig_dir, "fig4_muscle_motif_enrichment_names.tsv"))) {
+  # load file with nice motif names
+  mot_nm <- fread(
+    file.path(fig_dir, "fig4_muscle_motif_enrichment_names.tsv")
+  )
+} else {
+  # create motif names file if doesn't exist
+  fwrite(
+    unique(top_dt[, .(motif, motif_name)]),
+    sep = "\t",
+    file.path(fig_dir, "fig4_muscle_motif_enrichment_names.tsv")
+  )
+}
+# now add nice names as motif_name_clean column
+top_dt <- merge.data.table(
+  top_dt, mot_nm, by = c("motif", "motif_name"), all.x = TRUE, sort = FALSE, allow.cartesian = TRUE
+)
+top_dt[, motif_name := NULL]
+setnames(top_dt, "motif_name_clean", "motif_name")
+
+# group motifs by name
+setorder(top_dt, -fc)
+top_mots <- unique(top_dt[, .SD[1], motif_name]$motif)
+print(length(top_mots))
+top_dt <- top_dt[motif %in% top_mots]
+
+# motifs ordering
+top_dc <- dcast.data.table(
+  unique(top_dt[, .(motif_name, cell_type, padj)])[
+    order(-padj), .SD[1], .(motif_name, cell_type)],
+  motif_name ~ cell_type, value.var = "padj"
+)
+top_mt <- as.matrix(top_dc[, -1])
+rownames(top_mt) <- top_dc[[1]]
+top_mt[is.na(top_mt)] <- 0
+# order motifs by max enrich cell type
+#top_co <- apply(top_mt, 1, which.min)
+#top_mt_ord <- unlist(sapply(
+#  unique(top_co), function(x) {
+#    m <- top_mt[top_co == x, x]
+#    y <- order(m, decreasing = TRUE)
+#    names(m)[y]
+#  }
+#))
+# cluster motifs
+top_hc <- hclust(dist(top_mt))
+top_mt_ord <- rownames(top_mt)[top_hc$ord]
+
+# order
+plot_dt <- top_dt[motif_name %in% top_mt_ord]
+plot_dt[, motif_name := factor(motif_name, levels = rev(top_mt_ord))]
+setorder(plot_dt, -motif_name)
+
+# plot values
+plot_dt[, padj_scaled := -1 * log10(padj)]
+plot_dt[, padj_scaled := pmin(padj_scaled, 20)]
+plot_dt[, fc_scaled := pmin(fc, 8)]
+plot_dt[padj_scaled == 0, padj_scaled:=NA]
+
+# plot
+gp_mot_muscl <- ggplot(
+    plot_dt,
+    aes(motif_name, cell_type)
+  ) +
+  geom_point(
+    aes(size = padj_scaled, fill = fc_scaled),
+    shape = 21
+  ) +
+  scale_fill_gradientn(
+    name = "expression\nfold change",
+    breaks = c(0, 2, 4, 6, 8),
+    colours = c(
+      "gray99", "#ffd195", "orange", "orangered2",
+      "#a71414", "#68093d", "#470447"
+    )
+  ) +
+  scale_size_continuous(
+    name = "motif enrichment\n-log10 adj pval",
+    breaks = c(1, 10, 20),
+    range = c(0, 5)
+  ) +
+  theme(
+    panel.grid.major = element_line(linewidth = 0.25),
+    axis.text.y = element_text(size = 7),
+    axis.text.x = element_text(size = 7, angle = 90, vjust = 0.5, hjust = 1),
+    axis.title = element_blank()
+  )
+
+ggsave(
+  file.path(fig_dir, "fig4_muscle_motif_enrichment.pdf"),
+  gp_mot_muscl,
+  width = 14, height = 5 
+)
 ```
 
 #### Posterboys
