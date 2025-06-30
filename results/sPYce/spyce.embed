@@ -1,0 +1,27 @@
+mouse
+    genome_path
+        /home/anamaria/cluster/aelek/proj/scATAC_nvec_v2/cross-species/mmus/genome/mm9.fa
+    data_path
+        /home/anamaria/cluster/aelek/proj/scATAC_nvec_v2/Nematostella_scATAC/results/sPYce/inputs/mmus/matrix.h5ad
+    name
+        mouse
+    peak_path
+        /home/anamaria/cluster/aelek/proj/scATAC_nvec_v2/Nematostella_scATAC/results/sPYce/inputs/mmus/peaks.bed
+nematostella_gastrula
+    genome_path
+        /home/anamaria/cluster/aelek/proj/scATAC_nvec_v2/Nematostella_scATAC/genome/Nvec_vc1.1_gDNA.fasta
+    data_path
+        /home/anamaria/cluster/aelek/proj/scATAC_nvec_v2/Nematostella_scATAC/results/sPYce/inputs/nvec_gastrula/matrix.h5ad
+    name
+        nematostella_gastrula
+    peak_path
+        /home/anamaria/cluster/aelek/proj/scATAC_nvec_v2/Nematostella_scATAC/results/sPYce/inputs/nvec_gastrula/peaks.bed
+nematostella_adult
+    genome_path
+        /home/anamaria/cluster/aelek/proj/scATAC_nvec_v2/Nematostella_scATAC/genome/Nvec_vc1.1_gDNA.fasta
+    data_path
+        /home/anamaria/cluster/aelek/proj/scATAC_nvec_v2/Nematostella_scATAC/results/sPYce/inputs/nvec_adult/matrix.h5ad
+    name
+        nematostella_adult
+    peak_path
+        /home/anamaria/cluster/aelek/proj/scATAC_nvec_v2/Nematostella_scATAC/results/sPYce/inputs/nvec_adult/peaks.bed

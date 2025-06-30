@@ -64,6 +64,8 @@ results/Peaks/deeptools/
 results/Peaks/Matrix-Adult-Gastrula-Peaks-mapped-qnormalized.rds
 results/Peaks/Sum_Adult_Gastrula_Peaks_SEACell_qnorm.rds
 results/Peaks/matrix_normalized/
+results/sPYce/matrices/*mat.csv.gz
+results/sPYce/inputs
 results/Syntax/bins/
 results/Syntax/motif-hits-novl-PPM-PCC-0.8-IC0.5-5bp-mona-q-0.95.tsv.gz
 results/Syntax/motif-hits-all.bed.gz
