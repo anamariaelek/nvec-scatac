@@ -205,31 +205,31 @@ proj_gastr <- loadArchRProject(file.path(gastr_dir))
 
 # metadata
 meta_all <- fread(file.path(
-    "Results", "Clustering",
+    "results", "Clustering",
     "Annotation_Adult_Gastrula_SEACell.tsv"
 ))
 
 # SEACell aggregated peaks counts
 sum_clusters <- readRDS(file.path(
-    "Results", "Clustering",
+    "results", "Clustering",
     "Sum_Adult_Gastrula_Peaks_SEACell_qnorm.rds"
 ))
 
 # Cell type aggregated peaks counts
 sum_celltype <- readRDS(file.path(
-    "Results", "Clustering",
+    "results", "Clustering",
     "Sum_Adult_Gastrula_Peaks_cell_type_qnorm.rds"
 ))
 
 # SEACell footprint
 fp_clusters <- readRDS(file.path(
-    "Results", "Clustering",
+    "results", "Clustering",
     "Footprint_Adult_Gastrula_Peaks_SEACell_qnorm.rds"
 ))
 
 # Cell type footprint
 fp_celltype <- readRDS(file.path(
-    "Results", "Clustering",
+    "results", "Clustering",
     "Footprint_Adult_Gastrula_Peaks_cell_type_qnorm.rds"
 ))
 
@@ -1261,7 +1261,7 @@ fwrite(
 ATAC and RNA matrices with mapped metacells.
 
 ```{r}
-lvl <- "cell_type"
+lvl <- "metacell"
 exp <- "umifrac"
 id <- "genes_exp_FC2_acc_FC4_spearman"
 
@@ -1295,13 +1295,12 @@ colnames(exp_mt) <- map_dt$SEACell
 # peaks accessibility matrix
 if (lvl == "metacell") {
     acc_mt <- sum_clusters
-    idx_adult <- colnames(acc_mt) %in% proj_adult@cellColData$SEACell
-    idx_gastr <- colnames(acc_mt) %in% proj_gastr@cellColData$SEACell
+    idx_adult <- !grepl("SEACell", colnames(acc_mt))
+    idx_gastr <- grepl("SEACell", colnames(acc_mt))
 } else if (lvl == "cell_type") {
     acc_mt <- sum_celltype
     idx_adult <- grepl("adult", colnames(acc_mt))
     idx_gastr <- grepl("gastrula", colnames(acc_mt))
-    colnames(acc_mt) <- str_remove(colnames(acc_mt), "(adult|gastrula)__")
 }
 colnames(acc_mt)[idx_adult] <- paste0("adult_", colnames(acc_mt)[idx_adult])
 colnames(acc_mt)[idx_gastr] <- paste0("gastrula_", colnames(acc_mt)[idx_gastr])
@@ -1312,8 +1311,8 @@ acc_mt <- sweep(acc_mt, 2, colSums(acc_mt), "/")
 # peaks accessibility footprints matrix
 if (lvl == "metacell") {
     fpt_mt <- fp_clusters
-    idx_adult <- colnames(fpt_mt) %in% proj_adult@cellColData$SEACell
-    idx_gastr <- colnames(fpt_mt) %in% proj_gastr@cellColData$SEACell
+    idx_adult <- !grepl("SEACell", colnames(acc_mt))
+    idx_gastr <- grepl("SEACell", colnames(acc_mt))
 } else if (lvl == "cell_type") {
     fpt_mt <- fp_celltype
     idx_adult <- grepl("adult", colnames(fpt_mt))
@@ -1326,7 +1325,7 @@ colnames(fpt_mt)[idx_gastr] <- paste0("gastrula_", colnames(fpt_mt)[idx_gastr])
 # genes score matrix
 gsc_mt <- readRDS(
     file.path(
-        res_dir, lvl, sprintf("gene_scores_%s_%s.rds", lvl, exp)
+        res_dir, lvl, sprintf("gene_scores_%s.rds", lvl)
     )
 )
 if (lvl == "cell_type") {

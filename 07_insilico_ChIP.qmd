@@ -291,7 +291,8 @@ cor_mt <- cor_mt[, tfs]
 
 # peaks order
 pks <- rownames(cor_mt)
-pks <- unique(paste0("peak",sort(as.integer(str_extract(pks, "\\d+")))))
+pks <- unique(paste0("peak",sort(as.integer(str_extract(pks, "\\d+")))))s
+stopifnot(all(rownames(cor_mt) %in% pks))
 cor_mt <- cor_mt[pks,]
 
 # save
@@ -302,7 +303,7 @@ sum_clusters <- readRDS(file.path(
     "results", "Clustering",
     "Sum_Adult_Gastrula_Peaks_SEACell_qnorm.rds"
 ))
-stopifnot(all(pks %in% rownames(sum_clusters)))
+stopifnot(all(rownames(sum_clusters) %in% pks))
 acc_mt <- sum_clusters[pks, ]
 saveRDS(acc_mt, file.path(chp_dir, "peak_accessibility.rds"))
 

@@ -1,9 +1,12 @@
+Rplots.pdf
+__pycache__/
 .fuse_*
 .ipynb_checkpoints/
 *.nb.html
 98_DAPseq_primers.qmd
 99*
 annotation/DAPseq-*
+apps/trees/
 apps/*/data/
 apps/*/rsconnect/
 ArchRLogs
@@ -20,6 +23,7 @@ plots/Archetypes/norm/
 plots/Modules/modularization-ordered-*.pdf
 plots/Modules/modularization-global-FC*-ordered-*-subsampled.pdf
 plots/Peaks/deeptools/
+plots/sPYce/merged/
 results/Archetypes/motif-scores-archetypes*
 results/Archetypes/motif-scores-archetypes-PPM-PCC-0.8-IC0.5-5bp-mona.rds
 results/Archetypes/motif-scores-input-motifs*
@@ -66,6 +70,7 @@ results/Peaks/Sum_Adult_Gastrula_Peaks_SEACell_qnorm.rds
 results/Peaks/matrix_normalized/
 results/sPYce/matrices/*mat.csv.gz
 results/sPYce/inputs
+results/sPYce/merged/
 results/Syntax/bins/
 results/Syntax/motif-hits-novl-PPM-PCC-0.8-IC0.5-5bp-mona-q-0.95.tsv.gz
 results/Syntax/motif-hits-all.bed.gz
@@ -89,3 +94,10 @@ results/Syntax/q0.8-hits-enrich-assign-motifs-ovl-0.5
 results/Syntax/q0.9-hits-enrich-assign-motifs-ovl-0.5
 results/Syntax/q0.95-hits-enrich-assign-motifs-ovl-0.5*
 scripts/__pycache__/
+
+CisBP/pwms10/
+cell_metadata.txt
+data/Bra_1_macs_narrow_peaks.narrowPeak
+data/Bra_2_macs_narrow_peaks.narrowPeak
+data/PWMs/
+
