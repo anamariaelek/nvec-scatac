@@ -1,0 +1,37 @@
+default :
+  gene_annot_file: Nematostella_DToL_FINAL.tsv
+  tf_annot_file: Nematostella_DToL_TFs_FINAL.tsv
+  peaks_file: Peaks_mapped_FC_overlaps.rds
+  auc_file: gksvm_03.rds
+  act_exp_file: gene_expression_fc_chromVAR_cell_type_aggregated.rds
+  data_dir: Data
+scatac :
+  meta_file_sc: integrated_sc.tsv
+  meta_file_mc: integrated_mc.tsv
+  genescore_file_mc: Matrix-Gene-Scores-SEACell-FC.rds ##integrated_gene_scores.rds # SEACell level gene scores
+  umap_file_mc: integrated_UMAP.tsv # SEACEll UMAP coordinates
+  footprint_file_peaks: Footprint_Adult_Gastrula_Peaks_cell_type_qnorm.rds ##Footprint_integrated_peaks.rds # cell type level peak accessibility footprint
+  footprint_file_genes: Matrix-Gene-Scores-cell-type-FC.rds ##Footprint_integrated_cell_type.rds # cell type level gene accessibility footprint
+  sum_file_genes: Sum_integrated_cell_type.rds # cell type level gene accessibility sum
+  footprint_file_genes_broad: Footprint_integrated_broad_cell_type.rds # broad cell type level gene accessibility footprint
+  sum_file_genes_broad: Sum_integrated_broad_cell_type.rds # broad cell type level gene accessibility sum
+adult :
+  meta_file_sc: adult_sc.tsv
+  meta_file_mc: adult_mc.tsv
+  genescore_file_mc: adult_gene_scores.rds
+  umap_file_mc: adult_UMAP.tsv
+  footprint_file_peaks: Footprint_adult_peaks.rds
+  footprint_file_genes: Footprint_adult_cell_type.rds
+  sum_file_genes: Sum_adult_cell_type.rds
+  footprint_file_genes_broad: Footprint_adult_broad_cell_type.rds
+  sum_file_genes_broad: Sum_adult_broad_cell_type.rds
+gastrula :
+  meta_file_sc: gastrula_sc.tsv
+  meta_file_mc: gastrula_mc.tsv
+  genescore_file_mc: gastrula_gene_scores.rds
+  umap_file_mc: gastrula_UMAP.tsv
+  footprint_file_peaks: Footprint_gastrula_peaks.rds
+  footprint_file_genes: Footprint_gastrula_cell_type.rds
+  sum_file_genes: Sum_gastrula_cell_type.rds
+  footprint_file_genes_broad: Footprint_gastrula_broad_cell_type.rds
+  sum_file_genes_broad: Sum_gastrula_broad_cell_type.rds
