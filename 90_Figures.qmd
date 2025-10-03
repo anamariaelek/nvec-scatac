@@ -409,25 +409,24 @@ meta_all[, meta_all := factor(stage, levels = c("adult", "gastrula"))]
 setorder(meta_all, cell_type, stage)
 
 # gene scores
-gene_sco <- readRDS(file.path(
-  adult_dir, "Metacells", "cell_type", "gene_scores_cell_type.rds"
-))
+gene_sco <- readRDS("results/Metacells/cell_type/gene_scores_cell_type.rds")
 colnames(gene_sco) <- str_replace_all(colnames(gene_sco), "\\.", "_")
 colnames(gene_sco) <- str_replace_all(colnames(gene_sco), cell_type_rename)
 
 # peaks 
 adult_pks <- fread(
-  "Results/ArchRProj_Nvec_TSS4_frag200/ArchRProj/Promoters/scATAC_reduced_peaks_cell_type_assignment_filtered.tsv"
+  "ArchRProj_Nvec_TSS4_frag200/ArchRProj/Promoters/scATAC_reduced_peaks_cell_type_assignment_filtered.tsv.gz"
 )
 gastr_pks <- fread(
-  "../../../scATAC_nvec_gastrula/clustering/SEACells/Results/ArchRProj_Nvec_gastrula/ArchRProj/Peaks/scATAC_reduced_peaks_cell_type_assignment.tsv"
+  "ArchRProj_Nvec_gastrula/ArchRProj/Peaks/scATAC_reduced_peaks_cell_type_assignment.tsv.gz"
 )
 all_pks <- rbindlist(list(adult = adult_pks, gastrula = gastr_pks), use.names = TRUE, idcol = "stage")
 all_pks[, cell_type := str_replace_all(cell_type, "\\.", "_")]
 all_pks[, cell_type := str_replace_all(cell_type, cell_type_rename)]
 num_pks <- all_pks[, .N, .(stage, cell_type)]
-num_pks[, cell_type := paste(stage, cell_type, sep = "_")]
-num_pks <- num_pks[cell_type %in% colnames(gns_mat)]
+# num_pks[, cell_type := paste(stage, cell_type, sep = "_")]
+stopifnot(all(num_pks$cell_type %in% colnames(gene_sco)))
+num_pks <- num_pks[cell_type %in% colnames(gene_sco)]
 
 # subset genes
 adult_ids <- grep("adult", colnames(gene_sco))
@@ -836,6 +835,137 @@ ggsave(file.path(
 ```
 
 
+
+
+### Correlation with expression
+
+```{r}
+meta_all <- fread(file.path(
+  res_dir, "Clustering", "Annotation_Adult_Gastrula_SEACell.tsv"
+))
+stopifnot(all(meta_all$cell_type %in% cell_types))
+meta_all[, cell_type := factor(cell_type, levels = cell_types)]
+meta_all[, meta_all := factor(stage, levels = c("adult", "gastrula"))]
+setorder(meta_all, cell_type, stage)
+
+# gene scores
+gene_sco <- readRDS("results/Metacells/cell_type/gene_scores_cell_type.rds")
+colnames(gene_sco) <- str_replace_all(colnames(gene_sco), "\\.", "_")
+colnames(gene_sco) <- str_replace_all(colnames(gene_sco), cell_type_rename)
+
+# gene expression
+gene_exp <- readRDS("results/Metacells/cell_type/gene_expression_cell_type_fc.rds")
+colnames(gene_exp) <- str_replace_all(colnames(gene_exp), cell_type_rename)
+colnames(gene_exp) <- str_remove_all(colnames(gene_exp), "(adult|gastrula)_")
+colnames(gene_exp) <- str_replace_all(colnames(gene_exp), "\\.", "_")
+```
+
+
+```{r}
+map_dir <- "results/Metacells"
+id <- "genes_exp_FC2_acc_FC4_spearman"
+lvl <- "broad_cell_type"
+dist_dt <- fread(file.path(
+    map_dir, lvl, sprintf(
+        "data_expression_accessibility_%s.tsv.gz", id
+    )
+))
+dist_dt[, c("peak", "accessibility") := NULL]
+dist_dt <- unique(dist_dt)
+dist_dt <- dist_dt[!is.na(expression_fc) & !is.na(gene_score)]
+dist_dt <- dist_dt[expression_fc>0 & gene_score>0]
+
+# trim large values
+dist_dt[, expression_trim := pmin(expression_fc, 50)]
+dist_dt[, gene_score_trim := pmin(gene_score, 50)]
+
+# correlation
+cor_exp_sco <- cor(dist_dt$expression_trim, dist_dt$gene_score_trim, method = "spearman")
+
+# scatterplot
+cor_gp <- ggplot(dist_dt, aes(expression_trim, gene_score_trim)) +
+    geom_point(size = 0.5) +
+    geom_smooth(method = "lm", color = "black") +
+    labs(
+        x = "Gene expression",
+        y = "Gene score",
+        title = sprintf("Spearman correlation: %.3f", cor_exp_sco)
+    ) +
+    theme_bw() +
+    scale_x_log10(breaks = c(0.1, 1, 10), limits = c(0.05, 50), oob = squish) +
+    scale_y_log10(breaks = c(0.1, 1, 10), limits = c(0.05, 20), oob = squish) +
+    theme(
+        plot.title = element_text(hjust = 0.5, size = 10),
+        axis.text = element_text(size = 8),
+        axis.title = element_text(size = 8)
+    )
+ggsave(
+    file.path(fig_dir, "fig1_gene_expression_score_correlation.pdf"),
+    cor_gp,
+    width = 4, height = 4
+)
+
+# correlation values for all genes
+dist_dt[, gene_cor := cor(
+    expression_trim, gene_score_trim, method = "spearman"
+), by = gene]
+dist_cor_dt <- unique(dist_dt[, .(gene, gene_cor)])
+
+# plot distribution 
+dist_cor_gp <- ggplot(dist_cor_dt, aes(gene_cor)) +
+    geom_histogram(bins = 60, fill = "grey", color = "black") +
+    labs(
+        x = "Spearman correlation",
+        y = "Number of genes"
+    ) +
+    theme_bw() +
+    theme(
+        plot.title = element_text(hjust = 0.5, size = 10),
+        axis.text = element_text(size = 8),
+        axis.title = element_text(size = 8)
+    )
+ggsave(
+    file.path(fig_dir, "fig1_gene_expression_score_correlation_distribution.pdf"),
+    dist_cor_gp,
+    width = 4, height = 4
+)
+
+# save both plots together
+library(patchwork)
+combined_gp <- (cor_gp + dist_cor_gp) +
+    plot_layout(nrow = 1, guides = "collect") +
+    plot_annotation(
+        theme = theme(plot.title = element_text(hjust = 0.5, size = 12))
+    )
+ggsave(
+    file.path(fig_dir, "fig1_gene_expression_score_correlation_combined.pdf"),
+    combined_gp,
+    width = 6, height = 3
+)
+```
+
+Multiome
+
+```{bash}
+conda create -n scatac -c bioconda -c conda-forge python=3.8
+conda activate scatac
+conda install -c conda-forge -c bioconda anndata=0.8.0
+conda install -c conda-forge -c bioconda scanpy=1.9.1
+conda install -c conda-forge -c bioconda matplotlib=3.5.1
+```
+
+```{python}
+import os
+mult_dir="../clustering/SEACells/Results/Multiome/"
+atac_fn=os.path.join(mult_dir,"Nvec_Multiome_SEACell_ATAC.h5ad")
+rna_fn=os.path.join(mult_dir,"Nvec_Multiome_SEACell_RNA.h5ad")
+
+import anndata as ad
+atac=ad.read_h5ad(atac_fn)
+rna=ad.read_h5ad(rna_fn)
+
+
+```
 
 ## Coverage tracks
 
@@ -3560,6 +3690,82 @@ ggsave(
 
 ```
 
+For muscle sets of peaks
+
+```{r}
+pks_phc <- fread(file.path(con_dir, "phastcons.Nvec.phylop_per_peak.bed"), fill = TRUE)
+setnames(pks_phc, c("seqnames", "start", "end", "name", "score", "strand"))
+
+peaks_dir <- file.path("results", "Motifs", "streme", "muscle")
+pks_both <- fread(file.path(peaks_dir, "peaks_both.bed"))
+setnames(pks_both, c("seqnames", "start", "end", "name", "score", "strand"))
+pks_tr <- fread(file.path(peaks_dir, "peaks_muscle_TR.bed"))
+setnames(pks_tr, c("seqnames", "start", "end", "name", "score", "strand"))
+pks_mr <- fread(file.path(peaks_dir, "peaks_muscle_MR.bed"))
+setnames(pks_mr, c("seqnames", "start", "end", "name", "score", "strand"))
+
+pks_phc_gr <- makeGRangesFromDataFrame(pks_phc, keep.extra.columns = TRUE)
+pks_both_gr <- makeGRangesFromDataFrame(pks_both, keep.extra.columns = TRUE)
+pks_tr_gr <- makeGRangesFromDataFrame(pks_tr, keep.extra.columns = TRUE)
+pks_mr_gr <- makeGRangesFromDataFrame(pks_mr, keep.extra.columns = TRUE)
+
+ovl_both <- findOverlaps(pks_phc_gr, pks_both_gr, minoverlap = 50, ignore.strand = TRUE)
+ovl_tr <- findOverlaps(pks_phc_gr, pks_tr_gr, minoverlap = 50, ignore.strand = TRUE)
+ovl_mr <- findOverlaps(pks_phc_gr, pks_mr_gr, minoverlap = 50, ignore.strand = TRUE)
+
+pks_both_phc <- pks_both[subjectHits(ovl_both)]
+pks_tr_phc <- pks_tr[subjectHits(ovl_tr)]
+pks_mr_phc <- pks_mr[subjectHits(ovl_mr)]
+
+pks_both_phc$phastCon_score <- pks_phc_gr[queryHits(ovl_both)]$score
+pks_tr_phc$phastCon_score <- pks_phc_gr[queryHits(ovl_tr)]$score
+pks_mr_phc$phastCon_score <- pks_phc_gr[queryHits(ovl_mr)]$score
+
+setorder(pks_both_phc, -phastCon_score)
+setorder(pks_tr_phc, -phastCon_score)
+setorder(pks_mr_phc, -phastCon_score)
+
+pks_both_phc <- pks_both_phc[, .SD[1], .(seqnames, start, end)]
+pks_tr_phc <- pks_tr_phc[, .SD[1], .(seqnames, start, end)]
+pks_mr_phc <- pks_mr_phc[, .SD[1], .(seqnames, start, end)]
+
+pks_dt_rt <- rbindlist(list(
+  "both" = pks_both_phc,
+  "muscle_tentacle_retractor" = pks_tr_phc,
+  "muscle_mesentery_retractor" = pks_mr_phc
+), idcol = "set")
+
+pks_dt_rt[, phastCon_sign := sign(phastCon_score)]
+pks_dt_rt[, phastCon_sign := factor(phastCon_sign, levels = c("-1", "0", "1"))]
+
+pks_gg_rt <- ggplot(pks_dt_rt, aes(set, fill = set)) +
+  geom_bar(position = "dodge") +
+  facet_grid(~ phastCon_sign, scales = "free_y") +
+  scale_fill_manual(values = c(ct_cols, "both" = "#f9e655")) +
+  theme(
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+    legend.position = "none"
+  )
+
+ggsave(
+  file.path(fig_dir, "fig4_phastcon.pdf"),
+  pks_gg_rt,
+  height = 6, width = 3
+)
+
+setnames(pks_dt_rt, "phastCon_score", "phylop_score")
+pks_dt_rt[, pval := 10^ (-1 * abs(phylop_score))]
+pks_dt_rt[, evol := "neutral"]
+pks_dt_rt[phylop_score < 0 & pval < 0.001, evol := "slow-evolving"]
+pks_dt_rt[phylop_score > 0 & pval < 0.001, evol := "acceleration"]
+pks_dt_rt[, evol := factor(evol, levels = c("neutral", "acceleration", "slow-evolving"))]
+setorder(pks_dt_rt, evol, type)
+
+pks_dt_rt[, .N, ]
+
+
+```
+
 Parse phastcon scores
 
 ```{r}
@@ -4329,11 +4535,14 @@ pwms <- c(mta_pwm, mta_dap, arc_pwm[!names(arc_pwm) %in% names(mta_pwm)])
 # enrichments
 enr_list <- list()
 set.seed(1950)
-for (gs in c("gastrula", "adult", "both")) {
-  for (ps in c("gastrula", "adult", "both")) {
+#for (gs in c("gastrula", "adult", "both")) {
+#  for (ps in c("gastrula", "adult", "both")) {
 
-    ct <- sprintf("peaks_%s_genes_%s", ps, gs)
-    pks_dt <- dynm_acc_dt[gene_stage == gs & peak_stage == ps & promoter == "NO"]
+ps <- "gastrula"
+gs <- c("adult", "both")
+
+    ct <- sprintf("peaks_%s_genes_%s", ps, paste(gs, collapse="_"))
+    pks_dt <- dynm_acc_dt[gene_stage %in% gs & peak_stage %in% ps & promoter == "NO"]
     pks <- unique(pks_dt$peak)
     print(sprintf("%s peaks open in %s and assocaited to gene open in %s", length(pks), ps, gs))
       
@@ -4381,8 +4590,8 @@ for (gs in c("gastrula", "adult", "both")) {
       enr_list[[ct]] <- as.data.table(enr_dt, keep.rownames = "motif")
 
     }
-  }
-}
+#  }
+#}
 
 # combine results from all cell types
 enr_dt <- rbindlist(enr_list)
@@ -4399,7 +4608,7 @@ fwrite(
 )
 
 # significant results
-enr_top <- enr_dt[fc>1 & padj<0.01]
+enr_top <- enr_dt[fc>1 & padj<0.05]
 
 enr_fc <- dcast.data.table(enr_dt[motif %in% enr_top$motif][, .(motif, fc, padj, label)], motif~label, value.var="fc")
 enr_padj <- dcast.data.table(enr_dt[motif %in% enr_top$motif][, .(motif, fc, padj, label)], motif~label, value.var="padj")
@@ -4471,7 +4680,7 @@ rownames(mat_padj) <- rownames(sim_mat)
 mat_padj <- -1*log10(mat_padj)
 
 col_fun <- colorRamp2(
-  c(min(mat_fc, na.rm = TRUE), 0, max(mat_fc, na.rm = TRUE)),
+  c(pmin(-2, min(mat_fc, na.rm = TRUE)), 0, max(2, max(mat_fc, na.rm = TRUE))),
   c("#a6611a", "#f5f5f5", "#018571")
 )
 hm_enr <- Heatmap(
@@ -4481,10 +4690,10 @@ hm_enr <- Heatmap(
   width = unit(1, "null"),
   cell_fun = function(j, i, x, y, width, height, fill) {
     # Draw dots
-    scaled_size = pmin(mat_padj / 3, 1)  # cap
+    scaled_size = pmin(mat_padj / 3, 3)  # cap
     grid.circle(
       x = x, y = y,
-      r = unit(scaled_size[i, j], "snpc") * 0.05,  # adjust to control max radius
+      r = unit(scaled_size[i, j], "snpc") * 0.1,  # adjust to control max radius
       gp = gpar(fill = col_fun(mat_fc[i, j]), col = NA)
     )
     # Add significance stars
@@ -4523,11 +4732,27 @@ hm_enr <- Heatmap(
 # save heatmap
 pdf(
   file.path(fig_dir, "fig1_dynamic_peaks_adult_gastrula_motif_similarity_heatmap.pdf"),
-  width = 32, height = 24
+  width = 17, height = 12
 )
 draw(hm_sim + hm_enr)
 dev.off()
 
+
+# save table
+mat_dt <- data.table(motif = rownames(mat_fc))
+for (cn in colnames(mat_fc)) {
+  colname <- paste0("fc_", cn)
+  mat_dt[, I(colname) := mat_fc[,cn]]
+}
+for (cn in colnames(mat_padj)) {
+  colname <- paste0("minuslog10_padj_", cn)
+  mat_dt[, I(colname) := mat_fc[,cn]]
+}
+fwrite(
+  mat_dt,
+  file.path(fig_dir, "fig1_dynamic_peaks_adult_gastrula_motif_similarity.tsv"),
+  sep = "\t"
+)
 
 # save motif logos
 pdf(
@@ -4537,6 +4762,134 @@ pdf(
 view_motifs(enr_pwms[rownames(sim_mat)])
 dev.off()
 
+
+```
+
+```{r}
+selected_motifs <- c(
+"Usf3"       = "ARCH1570_Usf3",
+"Sox4/11/13" = "ARCH1164_/Sox4/Sox11_Sox13/...",
+"bHLH"       = "ARCH471_BHLHE22__NHLH1__Ptf...",
+"Tbx/Eomes"  = "ARCH1507_Eomes",
+"E2f"        = "ARCH1222_/E2f4_E2f6_E2f8/E2f7",
+"Alx"        = "ARCH227_Alx3/Alx4/Alx1_Emx1...",
+"Arid"       = "ARCH1447_Arid5b/Arid5a",
+"Pou3f3"     = "ARCH1214_POU3F3",
+"Nr2e3"      = "ARCH1411_Nr2e3",
+"Gata1/2/3"  = "ARCH1478_Gata3/Gata1/Gata2"
+)
+
+selected_motifs_sorted <- names(sort(mat_padj[selected_motifs,],decreasing=TRUE))
+names(selected_motifs_sorted) <- names(selected_motifs)[match(selected_motifs_sorted, selected_motifs)]
+
+mat_fc_selected <- mat_fc[selected_motifs_sorted,,drop=FALSE]
+mat_padj_selected <- mat_padj[selected_motifs_sorted,,drop=FALSE]
+sim_mat_selected <- sim_mat[selected_motifs_sorted,selected_motifs_sorted,drop=FALSE]
+
+rownames(mat_fc_selected) <- names(selected_motifs_sorted)
+rownames(mat_padj_selected) <- names(selected_motifs_sorted)
+rownames(sim_mat_selected) <- names(selected_motifs_sorted)
+
+# similarity heatmap
+col_vals <- c(0,0.5,1)  
+col <- colorRamp2(col_vals, c("#67a9cf", "#f7f7f7", "#ef8a62"))
+hm_sim <- ComplexHeatmap::Heatmap(
+  sim_mat_selected, name = "motif\nsimilarity",
+  width = unit(12, "null"),
+  col = col,
+  cluster_rows = FALSE, 
+  cluster_columns = FALSE,
+  border = TRUE,
+  show_row_names = TRUE,
+  show_column_names = FALSE,
+  row_names_side = "left",
+  row_names_gp = gpar(fontsize = 8),
+  column_names_gp = gpar(fontsize = 8),
+  row_names_max_width = max_text_width(
+      rownames(sim_mat), 
+      gp = gpar(fontsize = 8)
+  ),
+  column_names_max_height = max_text_width(
+      colnames(sim_mat), 
+      gp = gpar(fontsize = 8)
+  )
+)
+col_fun_selected <- colorRamp2(
+  c(-1.5, 0, 1.5),
+  c("#a6611a", "#f5f5f5", "#018571")
+)
+mat_fc_selected <- pmin(mat_fc_selected, 1.5)
+mat_fc_selected <- pmax(mat_fc_selected, -1.5)
+hm_enr <- Heatmap(
+  mat_fc_selected, name = "enrichment\nlog2FC",
+  col = col_fun_selected,
+  rect_gp = gpar(type = "none"),
+  width = unit(2, "null"),
+  cell_fun = function(j, i, x, y, width, height, fill) {
+    # Draw dots
+    scaled_size = pmin(mat_padj_selected / 3, 3)  # cap
+    grid.circle(
+      x = x, y = y,
+      r = unit(scaled_size[i, j], "snpc") * 0.2,  # adjust to control max radius
+      gp = gpar(fill = col_fun_selected(mat_fc_selected[i, j]), col = NA)
+    )
+    # Add significance stars
+    pval <- 10^(-mat_padj_selected[i, j])  # reverse -log10
+    signif_symbol <- ""
+    if (!is.na(pval)) {
+      if (pval < 0.01) {
+        signif_symbol <- "*"
+      }
+    }
+    
+    if (signif_symbol != "") {
+      grid.text(signif_symbol, x = x, y = y, gp = gpar(fontsize = 6))
+    }
+  },
+  border = TRUE,
+  cluster_rows = FALSE, 
+  cluster_columns = TRUE,
+  show_row_dend = FALSE,
+  show_column_dend = FALSE,
+  show_row_names = TRUE,
+  show_column_names = TRUE,
+  row_names_side = "right",
+  row_names_gp = gpar(fontsize = 8),
+  column_names_gp = gpar(fontsize = 8),
+  row_names_max_width = max_text_width(
+      rownames(sim_mat_selected), 
+      gp = gpar(fontsize = 8)
+  ),
+  column_names_max_height = max_text_width(
+      colnames(sim_mat_selected), 
+      gp = gpar(fontsize = 8)
+  )
+)
+
+# save heatmap
+pdf(
+  file.path(fig_dir, "fig1_dynamic_peaks_adult_gastrula_motif_similarity_heatmap_selected.pdf"),
+  width = 5, height = 4
+)
+draw(hm_sim + hm_enr)
+dev.off()
+
+# save motif logos
+stopifnot(all(selected_motifs_sorted %in% names(pwms)))
+enr_pwms_selected <- lapply(seq_along(selected_motifs_sorted), function(i) {
+  x <- selected_motifs_sorted[i]
+  n <- names(selected_motifs_sorted)[i]
+  pwm <- pwms[[x]]
+  pwm@name <- n
+  pwm
+})
+
+pdf(
+  file.path(fig_dir, "fig1_dynamic_peaks_adult_gastrula_motif_enrichment_logos_selected.pdf"),
+  width = 4, height = length(enr_pwms_selected) * 0.8
+)
+view_motifs(enr_pwms_selected)
+dev.off()
 
 ```
 
@@ -5069,15 +5422,15 @@ ggsave(
 ## GRNs
 
 ```{r}
-data_dir <- file.path(adult_dir, "insilicoChIP")
+grn_dir <- file.path(res_dir, "GRN", "networks")
 lvl <- "metacell"
 thrs <- 0.1
-itr <- "03"
 exp <- "umifrac"
+acc <- "access"
 id <- "genes_exp_FC2_acc_FC4_spearman"
 ```
 
-### Cell type POV
+### Cell type view
 
 For global network
 
@@ -5444,9 +5797,9 @@ if (!is.null(thr_q_exp)) {
 ggsave(grn_gp_fn, gp_grn_stats, height = 8, width = 12)
 ```
 
-TF view:
+### TF view
 
--   calculate for all TFs an "overlapping index" (N cell-specific targets / total targets)
+Calculate for all TFs an "overlapping index" (N cell-specific targets / total targets)
 
 ```{r}
 # grn_ntg <- unique(
@@ -5606,7 +5959,7 @@ ggsave(
 )
 ```
 
-- overlap index vs N of cell types
+Overlap index vs N of cell types
 
 ```{r}
 grn_comp <- fread(file.path(
@@ -5636,7 +5989,7 @@ ggsave(
 
 ```
 
-- show examples of target genes euler diagram for broad cell types (maybe GOs/pfam enrichments?)
+Show examples of target genes euler diagram for broad cell types (maybe GOs/pfam enrichments?)
 
 ```{r}
 require(eulerr)
@@ -5716,6 +6069,8 @@ for (g in unique(grn_comp[gene %in% dt$gene][order(diversity_index)]$gene)) {
 }
 dev.off()
 ```
+
+### Cartography
 
 Network cartography
 
@@ -5924,14 +6279,20 @@ dev.off()
 Plot top genes per GRN
 
 ```{r}
+# load nodes annotation
+data_dir <- file.path(res_dir, "GRN/networks/")
+nodes_ann <- fread(file.path(
+  data_dir, "broad_cell_type", 
+  "cartography_broad_cell_type_expression_fc_1.2_accessibility_access_0.4_chromvar_4.tsv"
+))
+
+# where to save plots
 pdf(file.path(
-  fig_dir, sprintf(
-    "GRN_top_genes_metrics_%s_%s_%s_%s_chromvar_%s.pdf",
-    exp, thr_exp, acc, thr_q_acc, chr_thrs
-  )
+  fig_dir, "grn_metrics_broad_cell_type_expression_fc_1.2_accessibility_access_0.4_chromvar_4.pdf"
 ), height = 8, width = 32)
 
-for (ct in unique(nodes_ann$cell_type_stage)) {
+#for (ct in unique(nodes_ann$cell_type_stage)) {
+ct = "cnidocyte"
 
   message(ct)
   plot_list <- lapply(c(
@@ -5941,11 +6302,10 @@ for (ct in unique(nodes_ann$cell_type_stage)) {
     "connectivity",
     "participation"
   ), function(i) {
-    nodes_dt <- copy(nodes_ann[cell_type_stage == ct])
-    nodes_dt[, cell_type := str_remove(ct, "_(adult|gastrula)")]
+    nodes_dt <- copy(nodes_ann[cell_type == ct])
     setnames(nodes_dt, i, "y")
     setorder(nodes_dt, -y)
-    nodes_dt <- nodes_dt[active_TF == TRUE]
+    #nodes_dt <- nodes_dt[active_TF == TRUE]
     nodes_dt[label == "", label := substr(og, 1, 25)]
     nodes_dt <- nodes_dt[1:pmin(.N, 30)]
     setorder(nodes_dt, y)
@@ -5992,19 +6352,26 @@ for (ct in unique(nodes_ann$cell_type_stage)) {
     plot_annotation(title = ct) & theme(legend.position = "bottom")
   print(gp_met)
 
-}
+#}
 dev.off()
 ```
+
+### Modules
 
 Compare modules in cell types
 
 ```{r}
+nodes_ann <- fread(file.path(
+  grn_dir, "broad_cell_type",
+  "cartography_broad_cell_type_expression_fc_0.4_accessibility_access_0.4_chromvar_4.tsv"
+))
+
 # how many modules per GRN?
-nodes_ann[,.N,.(cell_type_stage,module)][,.N,cell_type_stage]
+nodes_ann[,.N,.(cell_type,module)][,.N,cell_type]
 
 # overlap modules
-setorder(nodes_ann, cell_type_stage)
-nodes_ann[, module := paste0(cell_type_stage, "_M", module)]
+setorder(nodes_ann, cell_type)
+nodes_ann[, module := paste0(cell_type, "_M", module)]
 modules <- unique(nodes_ann$module)
 
 jacc_mt <- matrix(
@@ -6111,6 +6478,347 @@ pdf(file.path(
   )), width = 20, height = 18)
 print(hm_grn_mod)
 dev.off()
+```
+
+### Compare cell types
+
+Overlap of TFs between neuron and cnidocytes
+
+```{r}
+grns <- fread("results/GRN/networks/broad_cell_type/grn_genes_broad_cell_type_expression_fc_0.4_accessibility_access_0.4_chromvar_4.tsv.gz")
+
+cnido_grn <- grns[cell_type=="cnidocyte"]
+neuro_grn <- grns[cell_type=="neuron_Pou4_FoxL2"]
+
+# overlap of TFs between cnidocytes and neuron Pou4
+cnido_neuro_tfs <- intersect(cnido_grn$gene, neuro_grn$gene) # 34
+cnido_only_tfs <- setdiff(cnido_grn$gene, neuro_grn$gene) # 20
+neuro_only_tfs <- setdiff(neuro_grn$gene, cnido_grn$gene) # 57
+
+# plot euler diagram
+library(eulerr)
+euler_vals <- c(
+  "cnidocyte" = length(cnido_only_tfs),
+  "neuron_Pou4_FoxL2" = length(neuro_only_tfs),
+  "cnidocyte&neuron_Pou4_FoxL2" = length(cnido_neuro_tfs)
+)
+fit <- euler(euler_vals)
+p1 <- plot(
+  fit,
+  quantities = TRUE,
+  labels = list(font = 4),
+  fill = c(bct_cols, "cnidocyte&neuron_Pou4_FoxL2" = "purple")[names(euler_vals)]
+)
+pdf(file.path(
+  fig_dir, "GRN_cnido_neuro_TFs_euler.pdf"
+), height = 4, width = 6)
+print(p1)
+dev.off()
+
+cnido_neuro_tfs_dt <- data.table(
+  gene = c(cnido_neuro_tfs, cnido_only_tfs, neuro_only_tfs),
+  group = rep(
+    c("cnidocyte&neuron", "cnidocyte_only", "neuron_only"), 
+    c(length(cnido_neuro_tfs), length(cnido_only_tfs), length(neuro_only_tfs)
+  ))
+)
+cnido_neuro_tfs_dt <- merge.data.table(
+  cnido_neuro_tfs_dt,
+  tfan[, .(gene, common_name, gene_name, og)],
+  by = "gene", all.x = TRUE, sort = FALSE
+)
+fwrite(
+  cnido_neuro_tfs_dt, 
+  file.path(fig_dir, "GRN_cnido_neuro_Pou4_FoxL2_tfs.tsv"), 
+  sep = "\t"
+)
+```
+
+GO enrichment
+
+```{r}
+
+source("gene-set-analysis/gene-set-analysis.R")
+
+# load GO annotations
+go_annotations <- readRDS(file.path(ann_dir, "Nvec_ensembl.GO.rds"))
+
+# list for results
+gos_ls <- list()
+
+# enrichment for each group of TF targets
+for (grp in c("cnidocyte&neuron", "neuron_only", "cnidocyte_only")) {
+
+  # where to save results
+  gos_dir <- file.path("results", "GRN", "GO")
+  dir.create(gos_dir, recursive = TRUE, showWarnings = FALSE)
+
+  tfs <- cnido_neuro_tfs_dt[group == grp]$gene
+  cdts <- grns[cell_type %in% c("cnidocyte", "neuron_Pou4_FoxL2")]
+  gdts <- cdts[gene %in% tfs]
+
+  genes_fg <- unique(gdts$target_gene)
+  genes_bg <- unique(cdts$target_gene)
+  message(sprintf(
+      "%s target genes; %s background genes for %s",
+      length(genes_fg), length(genes_bg), grp
+  ))
+  if (all(genes_bg %in% genes_fg)) {
+    message("All target genes are background genes")
+    next
+  }
+  gos_en <- gsa_topgo_enrichment(
+      annotation = go_annotations,
+      genes_fg = genes_fg,
+      genes_bg = genes_bg,
+      output_prefix = file.path(gos_dir, sprintf("GO.%s.", grp)),
+      name_fg = grp,
+      ontologyset = c("BP", "MF", "CC"),
+      tg_test = "fisher",
+      tg_algorithm = "elim",
+      top_markers = 30,
+      nodesize = 10,
+      printfile = FALSE
+  )
+  gos_dt <- as.data.table(gos_en)
+  gos_ls[[grp]] <- gos_dt
+}
+
+gos_dt <- rbindlist(gos_ls, idcol = "group")
+fwrite(
+  gos_dt,
+  file.path("results", "GRN", "GO", "GO_enrichment.tsv.gz"), 
+  sep = "\t", compress = "gzip"
+)
+pvalthr <- 0.05
+fwrite(
+  gos_dt[pval_test<pvalthr],
+  file.path("results", "GRN", "GO", sprintf("GO_enrichment_pval_%s.tsv.gz", pvalthr)), 
+  sep = "\t", compress = "gzip"
+)
+
+```
+
+Where are those TFs in the hierarchy of TFs?
+
+For cnidocyte:
+
+```{r} 
+# Subset the GRN to cnidocyte TFs
+cnido_tfs_grn <- cnido_grn[target_gene %in% cnido_grn$gene]
+cnido_tfs_grn[, tf_type := ifelse(
+  gene %in% cnido_neuro_tfs, "cnidocyte & neuron", "cnidocyte_only"
+), by = .I]
+
+# Make labels
+name_dt <- unique(rbind(
+  cnido_tfs_grn[, .(id = gene, common = fifelse(common_name != "", common_name,
+                                      fifelse(gene_name != "", gene_name,
+                                      fifelse(og != "", og, gene))))],
+  cnido_tfs_grn[, .(id = target_gene, common = fifelse(target_common_name != "", target_common_name,
+                                            fifelse(target_gene_name != "", target_gene_name,
+                                            fifelse(og != "", og, target_gene))))]  
+))
+name_dt[, common := substr(common, 1, 12)]
+
+gene_cnido_list <- list()
+
+for (tf_g in unique(cnido_tfs_grn$gene)) {
+
+  tf_g_dt <- cnido_tfs_grn[
+    gene == tf_g | target_gene == tf_g, 
+    .(gene, target_gene, tf_type, expression_fc, target_expression_fc, zscore, in_silico_chip_score)
+  ]
+
+  # Build the graph with attributes
+  g <- graph_from_data_frame(
+    tf_g_dt, 
+    directed = TRUE
+  )
+
+  # Assign edge attributes (line width)
+  E(g)$in_silico_chip_score <- tf_g_dt$in_silico_chip_score
+
+  # Combine gene and target_gene expression_fc values into a node-wise summary
+  node_fc_dt <- unique(rbind(
+    tf_g_dt[, .(name = gene, expression_fc, zscore)],
+    tf_g_dt[, .(name = target_gene, expression_fc = target_expression_fc, zscore = 1)]
+  ))
+
+  # Match values to nodes
+  V(g)$expression_fc <- node_fc_dt[match(V(g)$name, node_fc_dt$name), expression_fc]
+  V(g)$zscore <- node_fc_dt[match(V(g)$name, node_fc_dt$name), zscore]
+
+  # Cap very high values
+  V(g)$expression_fc <- pmin(pmax(V(g)$expression_fc, 0), 6)
+  V(g)$zscore <- pmin(pmax(V(g)$zscore, 0.5), 30)
+
+  # Color by type of TF
+  V(g)$tf_type <- tf_g_dt[match(V(g)$name, tf_g_dt$gene), tf_type]
+  V(g)$tf_type[is.na(V(g)$tf_type)] <- "-"
+
+  # Map labels
+  V(g)$label <- name_dt[match(V(g)$name, name_dt$id), common]
+
+  gene_cnido_list[[tf_g]] <- ggraph(g, layout = 'tree') +
+    geom_edge_link(aes(width = in_silico_chip_score), color = "grey" ,
+                  arrow = arrow(length = unit(3, 'mm'), type = "open"),
+                  end_cap = circle(5, 'mm'), alpha = 0.8) +
+    geom_node_point(aes(size = zscore, fill = expression_fc, color = tf_type),
+                    shape = 21, stroke = 1.2) +
+    geom_node_text(aes(label = label), repel = TRUE, size = 3, vjust = 1.5) +
+    scale_fill_gradientn(
+      name = "expression\nfold change",
+      breaks = c(0, 2, 4, 6, 8),
+      colours = c(
+        "gray99", "#ffd195", "orange", "orangered2",
+        "#a71414", "#68093d", "#470447"
+      ),
+      limits = c(0, 6)
+    ) +
+    scale_color_manual(values = c(
+      "cnidocyte_only" = unname(bct_cols["cnidocyte"]),
+      "neuron_only" = unname(bct_cols["neuron_Pou4_FoxL2"]),
+      "cnidocyte & neuron" = "purple",
+      "-" = "white"
+    )) +
+    scale_edge_width(range = c(0.2, 2)) +
+    scale_size_continuous(range = c(2, 10)) +
+    theme_void() +
+    ggtitle(sprintf("Cnidocyte TF network for %s (%s)", name_dt[id==tf_g]$common, tf_g))
+
+}
+
+pdf(file.path(fig_dir, "GRN_cnido_TFs_hierarchy.pdf"), height = 12, width = 18)
+print(gene_cnido_list)
+dev.off()
+
+```
+
+For neurons:
+
+```{r} 
+# Subset the GRN to neuron TFs
+neuro_tfs_grn <- neuro_grn[target_gene %in% neuro_grn$gene]
+neuro_tfs_grn[, tf_type := ifelse(
+  gene %in% cnido_neuro_tfs, "cnidocyte & neuron", "neuron_only"
+), by = .I]
+
+# Make labels
+name_dt <- unique(rbind(
+  neuro_tfs_grn[, .(id = gene, common = fifelse(common_name != "", common_name,
+                                      fifelse(gene_name != "", gene_name,
+                                      fifelse(og != "", og, gene))))],
+  neuro_tfs_grn[, .(id = target_gene, common = fifelse(target_common_name != "", target_common_name,
+                                            fifelse(target_gene_name != "", target_gene_name,
+                                            fifelse(og != "", og, target_gene))))]  
+))
+name_dt[, common := substr(common, 1, 12)]
+
+gene_neuro_list <- list()
+
+for (tf_g in unique(neuro_tfs_grn$gene)) {
+
+  tf_g_dt <- neuro_tfs_grn[
+    gene == tf_g | target_gene == tf_g, 
+    .(gene, target_gene, tf_type, expression_fc, target_expression_fc, zscore, in_silico_chip_score)
+  ]
+
+  # Build the graph with attributes
+  g <- graph_from_data_frame(
+    tf_g_dt, 
+    directed = TRUE
+  )
+
+  # Assign edge attributes (line width)
+  E(g)$in_silico_chip_score <- tf_g_dt$in_silico_chip_score
+
+  # Combine gene and target_gene expression_fc values into a node-wise summary
+  node_fc_dt <- unique(rbind(
+    tf_g_dt[, .(name = gene, expression_fc, zscore)],
+    tf_g_dt[, .(name = target_gene, expression_fc = target_expression_fc, zscore = 1)]
+  ))
+
+  # Match values to nodes
+  V(g)$expression_fc <- node_fc_dt[match(V(g)$name, node_fc_dt$name), expression_fc]
+  V(g)$zscore <- node_fc_dt[match(V(g)$name, node_fc_dt$name), zscore]
+
+  # Cap very high values
+  V(g)$expression_fc <- pmin(pmax(V(g)$expression_fc, 0), 6)
+  V(g)$zscore <- pmin(pmax(V(g)$zscore, 0.5), 30)
+
+  # Color by type of TF
+  V(g)$tf_type <- tf_g_dt[match(V(g)$name, tf_g_dt$gene), tf_type]
+  V(g)$tf_type[is.na(V(g)$tf_type)] <- "-"
+
+  # Map labels
+  V(g)$label <- name_dt[match(V(g)$name, name_dt$id), common]
+
+  gene_neuro_list[[tf_g]] <- ggraph(g, layout = 'tree') +
+    geom_edge_link(aes(width = in_silico_chip_score), color = "grey" ,
+                  arrow = arrow(length = unit(3, 'mm'), type = "open"),
+                  end_cap = circle(5, 'mm'), alpha = 0.8) +
+    geom_node_point(aes(size = zscore, fill = expression_fc, color = tf_type),
+                    shape = 21, stroke = 1.2) +
+    geom_node_text(aes(label = label), repel = TRUE, size = 3, vjust = 1.5) +
+    scale_fill_gradientn(
+      name = "expression\nfold change",
+      breaks = c(0, 2, 4, 6, 8),
+      colours = c(
+        "gray99", "#ffd195", "orange", "orangered2",
+        "#a71414", "#68093d", "#470447"
+      ),
+      limits = c(0, 6)
+    ) +
+    scale_color_manual(values = c(
+      "cnidocyte_only" = unname(bct_cols["cnidocyte"]),
+      "neuron_only" = unname(bct_cols["neuron_Pou4_FoxL2"]),
+      "cnidocyte & neuron" = "purple",
+      "-" = "white"
+    )) +
+    scale_edge_width(range = c(0.2, 2)) +
+    scale_size_continuous(range = c(2, 10)) +
+    theme_void() +
+    ggtitle(sprintf("Neuron TF network for %s (%s)", name_dt[id==tf_g]$common, tf_g))
+
+}
+
+pdf(file.path(fig_dir, "GRN_neuro_TFs_hierarchy.pdf"), height = 12, width = 18)
+print(gene_neuro_list)
+dev.off()
+
+```
+
+Compare overlap of TF regulomes for shared TFs
+
+```{r}
+jaccs_all <- sapply(cnido_neuro_tfs, function(tf_g) {
+  cnido_targets <- cnido_grn[gene == tf_g, target_gene]
+  neuro_targets <- neuro_grn[gene == tf_g, target_gene]
+  length(intersect(cnido_targets, neuro_targets)) / length(union(cnido_targets, neuro_targets))
+})
+
+jaccs_tfs <- sapply(cnido_neuro_tfs, function(tf_g) {
+  cnido_targets <- cnido_grn[gene == tf_g & target_TF == TRUE, target_gene]
+  neuro_targets <- neuro_grn[gene == tf_g & target_TF == TRUE, target_gene]
+  length(intersect(cnido_targets, neuro_targets)) / length(union(cnido_targets, neuro_targets))
+})
+
+# boxplots
+jacc_dt <- data.table(
+  jacc = c(jaccs_all, jaccs_tfs),
+  type = rep(c("all", "TFs"), each = length(jaccs_all))
+)
+gp_jacc <- ggplot(jacc_dt, aes(type, jacc)) +
+  geom_boxplot() +
+  geom_jitter(width = 0.2) +
+  labs(x = "Type of targets", y = "Jaccard index") +
+  theme_minimal()
+
+# save 
+ggsave(file.path(
+  fig_dir, "GRN_cnido_neuro_Pou4_FoxL2_jaccard.pdf"
+), gp_jacc, height = 6, width = 8)
 ```
 
 # Figure 4
@@ -8525,26 +9233,36 @@ top_dt[, cell_type := factor(cell_type, levels = rev(cell_types_tree))]
 setorder(top_dt, cell_type, -padj)
 
 # manually fix motifs names
-if (file.exists(file.path(fig_dir, "fig4_muscle_motif_enrichment_names.tsv"))) {
+fn <- file.path(fig_dir, "fig4_muscle_motif_enrichment_names.tsv")
+fn <- file.path(fig_dir, "fig4_muscle_motif_enrichment_names_shortlist.tsv")
+if (file.exists(fn)) {
   # load file with nice motif names
-  mot_nm <- fread(
-    file.path(fig_dir, "fig4_muscle_motif_enrichment_names.tsv")
-  )
+  mot_nm <- fread(fn)
 } else {
   # create motif names file if doesn't exist
   fwrite(
     unique(top_dt[, .(motif, motif_name, motif_name_clean = str_trunc(motif_name, 30))]),
     sep = "\t",
-    file.path(fig_dir, "fig4_muscle_motif_enrichment_names.tsv")
+    fn
   )
 }
 
 # now add nice names as motif_name_clean column
+if (!"motif" %in% colnames(mot_nm)) mot_nm[, motif := motif_name]
+if (!"motif" %in% colnames(top_dt)) top_dt[, motif := motif_name]
+if (!"motif_name" %in% colnames(top_dt)) top_dt[, motif_name := motif]
+
+stopifnot(all(mot_nm$motif_name %in% top_dt$motif_name))
+
 top_dt <- merge.data.table(
-  top_dt, mot_nm, by = c("motif", "motif_name"), all.x = TRUE, sort = FALSE, allow.cartesian = TRUE
+  mot_nm, top_dt, 
+  by = c("motif_name", "group"), 
+  all.x = TRUE, all.y = FALSE,
+  sort = FALSE, 
+  allow.cartesian = TRUE
 )
 top_dt[, motif_name := NULL]
-setnames(top_dt, "motif_name_clean", "motif_name")
+setnames(top_dt, "nice_name", "motif_name")
 
 # group motifs by name
 setorder(top_dt, -fc)
@@ -8591,29 +9309,30 @@ gp_mot_muscl <- ggplot(
   ) +
   facet_grid(.~group, scales = "free_x", space = "free") +
   scale_fill_gradientn(
-    name = "expression\nfold change",
-    breaks = c(0, 2, 4, 6, 8),
+    name = "fold change",
+    breaks = c(0, 2, 4, 6),
+    limits = c(0, 6.5),
     colours = c(
       "gray99", "#ffd195", "orange", "orangered2",
       "#a71414", "#68093d", "#470447"
     )
   ) +
   scale_size_continuous(
-    name = "motif enrichment\n-log10 adj pval",
+    name = "-log10 adj pval",
     breaks = c(1, 10, 20),
-    range = c(0, 5)
+    range = c(0, 7)
   ) +
   theme(
     panel.grid.major = element_line(linewidth = 0.25),
-    axis.text.y = element_text(size = 7),
-    axis.text.x = element_text(size = 7, angle = 90, vjust = 0.5, hjust = 1),
+    axis.text.y = element_text(size = 10),
+    axis.text.x = element_text(size = 10, angle = 90, vjust = 0.5, hjust = 1),
     axis.title = element_blank()
   )
 
 ggsave(
-  file.path(fig_dir, "fig4_muscle_motif_enrichment.pdf"),
+  file.path(fig_dir, "fig4_muscle_motif_enrichment_figure.pdf"),
   gp_mot_muscl,
-  width = 14, height = 5 
+  width = 8, height = 7
 )
 
 # save table with motifs and assigned genes for inspection
@@ -9137,6 +9856,62 @@ ggsave(
 )
 ```
 
+- accessibilirty of TFs in retractor muscles
+
+```{r}
+# get genes accessiblity
+acc_fn <- "results/GeneScoreMatrix/Matrix-Gene-Scores-cell-type-FC.rds"
+acc_mt <- readRDS(acc_fn)
+acc_tf <- acc_mt[
+  intersect(rownames(acc_mt), tfan$gene), 
+  c("muscle_tentacle_retractor", "muscle_mesentery_retractor")
+]
+acc_dt <- as.data.table(as.matrix(acc_tf), keep.rownames = "gene")
+acc_dt <- merge.data.table(acc_dt, tfan, by = "gene", all.x = TRUE)
+acc_dt[, label := common_name]
+acc_dt[label == "", label := substr(gene_name, 1, 15)]
+acc_dt[label == "", label := substr(og, 1, 15)]
+acc_dt[label == "", label := substr(pfam, 1, 15)]
+acc_dt[label == "", label := gene]
+thrs <- 3
+acc_dt[muscle_tentacle_retractor < thrs & muscle_mesentery_retractor < thrs, label := ""]
+acc_dt[, set := "other"]
+acc_dt[muscle_tentacle_retractor > thrs & muscle_mesentery_retractor < thrs + 1, set := "muscle_tentacle_retractor"]
+acc_dt[muscle_tentacle_retractor < thrs + 1 & muscle_mesentery_retractor > thrs, set := "muscle_mesentery_retractor"]
+
+# scatterplot
+acc_gp <- ggplot(acc_dt, aes(muscle_tentacle_retractor, muscle_mesentery_retractor)) +
+  geom_point(aes(color = set)) +
+  geom_text_repel(
+    aes(label = label),
+    size = 3,
+    segment.size = 0.2,
+    segment.color = "gray50",
+    max.overlaps = 20
+  ) +
+  scale_x_continuous(
+    breaks = c(0, 5, 10),
+    limits = c(0, 10)
+  ) +
+  scale_y_continuous(
+    breaks = c(0, 5, 10),
+    limits = c(0, 10)
+  ) +
+  scale_color_manual(values = c(ct_cols, "other" = "gray50")) +
+  coord_fixed() +
+  labs(
+    x = "TR accessibility",
+    y = "MR accessibility"
+  ) +
+  theme(legend.position = "none")
+
+ggsave(
+  file.path(fig_dir, "fig4_accessibility.pdf"),
+  acc_gp,
+  height = 5, width = 5
+)
+
+```
 
 ### Peaks overlap between retractor muscles and related cell types
 

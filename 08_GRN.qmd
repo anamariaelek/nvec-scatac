@@ -95,7 +95,6 @@ map_dir <- "results/Metacells"
 chp_dir <- "results/insilicoChIP"
 grn_dir <- "results/GRN"
 dir.create(grn_dir, showWarnings = FALSE)
-dir.create(file.path(grn_res_dir), showWarnings = FALSE)
 fig_dir <- "plots/GRN"
 dir.create(fig_dir, showWarnings = FALSE)
 ann_dir <- "annotation"
@@ -1005,7 +1004,6 @@ fwrite(data_thrs, file.path(
 ```
 
 Parse expression and accessibility for TF-target gene pairs.
-
 ```{r}
 # global network
 grn_dt <- readRDS(file.path(
@@ -1210,6 +1208,12 @@ if (lvl == "cell_type") {
   stopifnot(all(exp_chromvar_dt$cell_type %in% broad_cell_types))
   exp_chromvar_dt[, cell_type := factor(cell_type, levels = broad_cell_types)]
 }
+
+fwrite(
+  exp_chromvar_dt, 
+  file.path(grn_dir, sprintf(
+    "chromVAR_%s.tsv.gz", lvl
+  )), sep = "\t")
 ```
 
 Load expression and accessibility data for base network, and combine with 
@@ -1246,7 +1250,7 @@ if (lvl == "cell_type") {
 setorder(gns_exp_acc_act_dt, cell_type, gene, target_gene)
 ```
 
- Save unfiltered GRNs per cell type
+Save unfiltered GRNs per cell type.
 
 ```{r}
 require(openxlsx)
@@ -1554,6 +1558,31 @@ grn_ct_dt <- fread(file.path(
 
 stopifnot(all(grn_ct_dt$cell_type %in% cell_type_lvl))
 grn_ct_dt[, cell_type := factor(cell_type, levels = cell_type_lvl)]
+
+# gene expression
+dist_dt <- fread(file.path(
+  map_dir, lvl, "data_expression_accessibility_genes_exp_FC2_acc_FC4_spearman.tsv.gz"
+))
+expr_dt <- unique(dist_dt[, .(gene, cell_type, expression_fc, expression_umifrac, gene_score)])
+
+# expression thresholds used for GRN filtering
+data_thrs <- fread(file.path(
+    grn_dir, sprintf(
+        "qthreshold_%s_expression_%s_accessibility_%s.tsv",
+        lvl, thr_q_exp, thr_q_acc
+    )
+))
+expr_dt <- merge.data.table(expr_dt, data_thrs, by = "cell_type", all.x = TRUE)
+expr_filt <- expr_dt[expression_fc > thr_exp_fc]
+accs_filt <- expr_dt[gene_score > thr_gene_score+0.01]
+
+# chromvar sccores
+exp_chromvar_dt <- fread( 
+  file.path(grn_dir, sprintf(
+    "chromVAR_%s.tsv.gz", lvl
+  ))
+)
+chrv_filt <- exp_chromvar_dt[, .(gene, cell_type, zscore)][zscore > chr_thrs]
 ```
 
 Per cell type
@@ -1716,6 +1745,203 @@ ggsave(
   gp_grn_ct, 
   height = 10, width = 6
 )
+
+```
+
+Number of TFs vs number of expressed genes per cell type
+
+```{r}
+expr_ct_dt <- merge.data.table(
+  expr_filt[, .(n_expr_genes=.N), cell_type],
+  expr_filt[gene %in% tfan$gene][, .(n_expr_tfs=.N), cell_type],
+  by = "cell_type", all.x = TRUE
+)
+
+accs_ct_dt <- merge.data.table(
+  accs_filt[, .(n_accs_genes=.N), cell_type],
+  accs_filt[gene %in% tfan$gene][, .(n_accs_tfs=.N), cell_type],
+  by = "cell_type", all.x = TRUE
+)
+
+actv_ct_dt <- unique(grn_ct_dt[, .(cell_type, gene)])[, .(n_active_tfs=.N), cell_type]
+
+chrv_ct_dt <- chrv_filt[, .(n_chrv_genes=.N), cell_type]
+
+n_tf_genes_dt <- merge.data.table(
+  expr_ct_dt, accs_ct_dt,
+  by = "cell_type", all.x = TRUE
+)
+n_tf_genes_dt <- merge.data.table(
+  n_tf_genes_dt, actv_ct_dt,
+  by = "cell_type", all.x = TRUE
+)
+n_tf_genes_dt <- merge.data.table(
+  n_tf_genes_dt, chrv_ct_dt,
+  by = "cell_type", all.x = TRUE
+)
+
+# EXPRESSION
+cor_gns <- cor.test(n_tf_genes_dt$n_active_tfs, n_tf_genes_dt$n_expr_genes)
+cp_tf_gen_num <- ggplot(
+        n_tf_genes_dt,
+        aes(n_expr_genes, n_active_tfs, fill = cell_type, color = cell_type)
+    ) +
+    geom_point(shape = 21, size = 2) +
+    geom_smooth(
+      aes(group = 1),
+      method = "lm", se = FALSE, color = "black", linetype = "dashed"
+    ) +
+    annotate(
+      "text", y = 90, x = 9000, 
+      label = sprintf(
+        "r = %.2f, p = %.2e", 
+        cor_gns$estimate, cor_gns$p.value
+      ),
+      size = 4, color = "black"
+    ) + 
+    scale_fill_manual(values = cts_cols, drop = TRUE) +
+    scale_color_manual(values = structure(
+      colorspace::darken(cts_cols, 0.5),
+      names = names(cts_cols)
+    )) +
+    theme(
+        legend.position = "none",
+        panel.grid.major.x = element_line(color = "grey", size = 0.5),
+        panel.grid.major.y = element_line(color = "grey", size = 0.5)
+    ) +
+    labs(x = "# expressed genes", y = "# active TFs")
+
+cor_tfs <- cor.test(n_tf_genes_dt$n_active_tfs, n_tf_genes_dt$n_expr_tfs)
+cp_tf_tf_num <- ggplot(
+        n_tf_genes_dt,
+        aes(n_expr_tfs, n_active_tfs, fill = cell_type, color = cell_type)
+    ) +
+    geom_point(shape = 21, size = 2) +
+    geom_smooth(
+      aes(group = 1),
+      method = "lm", se = FALSE, color = "black", linetype = "dashed"
+    ) +
+    annotate(
+      "text", y = 90, x = 300, 
+      label = sprintf(
+        "r = %.2f, p = %.2e", 
+        cor_tfs$estimate, cor_tfs$p.value
+      ),
+      size = 4, color = "black"
+    ) +
+    scale_fill_manual(values = cts_cols, drop = TRUE) +
+    scale_color_manual(values = structure(
+      colorspace::darken(cts_cols, 0.5),
+      names = names(cts_cols)
+    )) +
+    theme(
+        legend.position = "none",
+        panel.grid.major.x = element_line(color = "grey", size = 0.5),
+        panel.grid.major.y = element_line(color = "grey", size = 0.5)
+    ) +
+    labs(x = "# expressed TFs", y = "# active TFs")
+
+
+
+# ACCESSIBILITY
+cor_accs_gns <- cor.test(n_tf_genes_dt$n_active_tfs, n_tf_genes_dt$n_accs_genes)
+cp_tf_gen_accs_num <- ggplot(
+        n_tf_genes_dt,
+        aes(n_accs_genes, n_active_tfs, fill = cell_type, color = cell_type)
+    ) +
+    geom_point(shape = 21, size = 2) +
+    geom_smooth(
+      aes(group = 1),
+      method = "lm", se = FALSE, color = "black", linetype = "dashed"
+    ) +
+    annotate(
+      "text", y = 90, x = 9000, 
+      label = sprintf(
+        "r = %.2f, p = %.2e", 
+        cor_accs_gns$estimate, cor_accs_gns$p.value
+      ),
+      size = 4, color = "black"
+    ) +
+    scale_fill_manual(values = cts_cols, drop = TRUE) +
+    scale_color_manual(values = structure(
+      colorspace::darken(cts_cols, 0.5),
+      names = names(cts_cols)
+    )) +
+    theme(
+        legend.position = "none",
+        panel.grid.major.x = element_line(color = "grey", size = 0.5),
+        panel.grid.major.y = element_line(color = "grey", size = 0.5)
+    ) +
+    labs(x = "# accessible genes", y = "# active TFs")
+
+cor_accs_tfs <- cor.test(n_tf_genes_dt$n_active_tfs, n_tf_genes_dt$n_accs_tfs)
+cp_tf_tf_accs_num <- ggplot(
+        n_tf_genes_dt,
+        aes(n_accs_tfs, n_active_tfs, fill = cell_type, color = cell_type)
+    ) +
+    geom_point(shape = 21, size = 2) +
+    geom_smooth(
+      aes(group = 1),
+      method = "lm", se = FALSE, color = "black", linetype = "dashed"
+    ) +
+    annotate(
+      "text", y = 90, x = 350, 
+      label = sprintf(
+        "r = %.2f, p = %.2e", 
+        cor_accs_tfs$estimate, cor_accs_tfs$p.value
+      ),
+      size = 4, color = "black"
+    ) +
+    scale_fill_manual(values = cts_cols, drop = TRUE) +
+    scale_color_manual(values = structure(
+      colorspace::darken(cts_cols, 0.5),
+      names = names(cts_cols)
+    )) +
+    theme(
+        legend.position = "none",
+        panel.grid.major.x = element_line(color = "grey", size = 0.5),
+        panel.grid.major.y = element_line(color = "grey", size = 0.5)
+    ) +
+    labs(x = "# accessible TFs", y = "# active TFs")
+
+
+# CHROMVAR
+cor_chrv_gns <- cor.test(n_tf_genes_dt$n_active_tfs, n_tf_genes_dt$n_chrv_genes)
+cp_tf_chrv_num <- ggplot(
+        n_tf_genes_dt,
+        aes(n_chrv_genes, n_active_tfs, fill = cell_type, color = cell_type)
+    ) +
+    geom_point(shape = 21, size = 2) +
+    geom_smooth(
+      aes(group = 1),
+      method = "lm", se = FALSE, color = "black", linetype = "dashed"
+    ) +
+    annotate(
+      "text", y = 95, x = 60, 
+      label = sprintf(
+        "r = %.2f, p = %.2e", 
+        cor_chrv_gns$estimate, cor_chrv_gns$p.value
+      ),
+      size = 4, color = "black"
+    ) +
+    scale_fill_manual(values = cts_cols, drop = TRUE) +
+    scale_color_manual(values = structure(
+      colorspace::darken(cts_cols, 0.5),
+      names = names(cts_cols)
+    )) +
+    theme(
+        legend.position = "none",
+        panel.grid.major.x = element_line(color = "grey", size = 0.5),
+        panel.grid.major.y = element_line(color = "grey", size = 0.5)
+    ) +
+    labs(x = "# chromVAR TFs", y = "# active TFs")
+
+ggsave(
+  file.path(fig_dir, sprintf("grn_num_tfs_num_genes_%s.pdf", fn)), 
+  (plot_spacer() + cp_tf_chrv_num) / (cp_tf_gen_num + cp_tf_tf_num) / (cp_tf_gen_accs_num + cp_tf_tf_accs_num), 
+  height = 12, width = 8
+)
+
 ```
 
 Network metrics and cartography
@@ -1780,8 +2006,13 @@ nodes_ann <- merge.data.table(
   )])[, active_TF := TRUE],
   by = c("gene", "cell_type"), all = FALSE, sort = FALSE
 )
+
+# filter as in plot
+nodes_ann <- nodes_ann[expression_fc>1.4]
 nodes_ann[is.na(active_TF), active_TF := FALSE]
 nodes_ann <- nodes_ann[active_TF == TRUE]
+
+# add labels
 nodes_ann[, label := ""]
 nodes_ann[common_name != "", label := common_name]
 nodes_ann[label == "", label := gene_name]
@@ -1799,7 +2030,7 @@ pdf(file.path(
   fig_dir, sprintf(
     "top_genes_metrics_%s.pdf", fn
   )
-), height = 10, width = 30)
+), height = 8, width = 21)
 
 classes <- unique(nodes_ann$cell_type)
 classes <- c("cnidocyte", "neuron_GATA_Islet", "neuron_Pou4_FoxL2", "gland")

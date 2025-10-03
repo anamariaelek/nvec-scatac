@@ -1,0 +1,1770 @@
+---
+title: "Integration"
+output: html_notebook
+---
+
+Here we integrate adult and gastrula scATAC-seq datasets.
+
+# Setup
+
+```{r}
+library(data.table)
+library(stringr)
+library(ggplot2)
+library(ggnewscale)
+library(ggiraph)
+library(ggdendro)
+library(patchwork)
+library(openxlsx)
+library(dendextend)
+require(tidytree)
+require(ggtree)
+require(treeio)
+library(ggraph)
+library(igraph)
+library(tidygraph)
+library(loomR)
+library(BSgenome.jaNemVect1.1.DToL.Assembly)
+library(GenomicRanges)
+library(ArchR)
+library(metacell)
+library(ComplexHeatmap)
+source("../scatac_helper_functions.R")
+source("../../../metacell_downstream_functions/Downstream_functions.R")
+source("../../../metacell_downstream_functions/Tree_functions.R")
+source("../../../motif-analysis/mta_downstream_functions.R")
+theme_py <- theme_light() + theme(
+  panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank(),
+  panel.border = element_rect(colour = "black", fill = NA),
+  text = element_text(size = 20),
+  strip.placement = "outside",
+  strip.text = element_text(size = 20, color = "black"),
+  strip.background = element_rect(fill = "white")
+)
+theme_set(theme_py)
+blank_theme <- theme_minimal() + theme(
+  axis.title.x = element_blank(),
+  axis.title.y = element_blank(),
+  panel.border = element_blank(),
+  panel.grid = element_blank(),
+  axis.ticks = element_blank(),
+  text = element_text(size = 20)
+)
+```
+
+Data directories and colors
+
+```{r}
+gastr_dir <- file.path(
+  "/home/anamaria/cluster/aelek/proj/scATAC_nvec_gastrula/clustering/SEACells", 
+  "Results",
+  "ArchRProj_Nvec_gastrula", "ArchRProj"
+)
+proj_gastr <- loadArchRProject(gastr_dir)
+
+adult_dir <- file.path(
+  "/home/anamaria/cluster/aelek/proj/scATAC_nvec_v2/clustering/SEACells",
+  "Results", "ArchRProj_Nvec_TSS4_frag200", "ArchRProj"
+)
+proj_adult <- loadArchRProject(adult_dir)
+
+res_dir <- file.path("results")
+plot_dir <- file.path("plots", "Integration")
+dir.create(plot_dir, showWarnings = FALSE)
+data_dir <- file.path(res_dir, "Clustering")
+dir.create(data_dir, showWarnings = FALSE)
+
+# colors
+ct_cols <- c(
+  cnidocyte                  = "#ff42ff",
+  cnidocyte_gastrula         = "#f7abf7",
+  ecto_pharynx               = "#5bc0e8",
+  ectoderm                   = "#51a0be",
+  ecto_aboral                = "#045170",
+  EMS                        = "#bdf5bd",
+  EMS_ecto_boundary          = "#93dbce",
+  gastro_circular_muscle_1   = "#85c90e",
+  gastro_circular_muscle_2   = "#73b009",
+  gastro_parietal_muscle     = "#8ceb10",
+  gastro_IRF1_2              = "#c1eb05",
+  gastro_somatic_gonad       = "#bde314",
+  muscle_tentacle_retractor  = "#ffd700",
+  muscle_mesentery_retractor = "#f0e229",
+  digestive_filaments_1      = "#e33d3d",
+  digestive_filaments_2      = "#d10606",
+  digestive_filaments_3      = "#ad0303",
+  epidermis_1                = "#04ccd4",
+  epidermis_2                = "#16bacc",
+  precursors_PGC             = "#bebebe",
+  precursors_endoNPC         = "#8a8686",
+  precursors_NPC             = "#636363",
+  NPC_1                      = "#808d91",
+  NPC_2                      = "#758d92",
+  neuron_GATA_Islet_1        = "#0c82f7",
+  neuron_GATA_Islet_2        = "#1175f0",
+  neuron_Pou4_FoxL2_1        = "#101cde",
+  neuron_Pou4_FoxL2_2        = "#0b16bf",
+  neuron_Pou4_FoxL2_3        = "#2e39dd",
+  neuronal                   = "#063cb9",
+  gland                      = "#ff6f08",
+  gland_mucin                = "#ff8f12"
+)
+cell_types <- names(ct_cols)
+adult_cts <- c(
+  "cnidocyte",
+  "gastro_circular_muscle_1", 
+  "gastro_circular_muscle_2",
+  "gastro_parietal_muscle",
+  "gastro_IRF1_2",
+  "gastro_somatic_gonad",
+  "muscle_mesentery_retractor",
+  "muscle_tentacle_retractor",
+  "digestive_filaments_1",
+  "digestive_filaments_2",
+  "digestive_filaments_3",
+  "epidermis_1",
+  "epidermis_2",
+  "precursors_PGC",
+  "precursors_endoNPC",
+  "precursors_NPC",
+  "neuron_GATA_Islet_1",
+  "neuron_GATA_Islet_2",
+  "neuron_Pou4_FoxL2_1",
+  "neuron_Pou4_FoxL2_2",
+  "neuron_Pou4_FoxL2_3",
+  "gland"
+)
+gastr_cts <- c(setdiff(names(ct_cols), adult_cts))
+bct_cols <- toupper(c(
+  cnidocyte                 = "#FF42FF",
+  ecto                      = "#51a0be",
+  EMS                       = "#bdf5bd",
+  gastro_circular_muscle    = "#73b009",
+  gastro_parietal_muscle    = "#8ceb10",
+  gastro                    = "#85c90e",  
+  muscle                    = "#FFD700",
+  digestive_filaments       = "#e33d3d",
+  precursors                = "#BEBEBE",
+  NPC                       = "#808d91",
+  epidermis                 = "#04ccd4",
+  neuronal                  = "#063cb9",
+  neuron_GATA_Islet         = "#1175f0",
+  neuron_Pou4_FoxL2         = "#101cde",
+  gland                     = "#ff6f08"
+))
+bct_maps <- setDT(cbind.data.frame(
+  cell_type = names(ct_cols),
+  broad_cell_type = str_extract(names(ct_cols), paste(names(bct_cols), collapse = "|"))
+))
+all_cell_types <- unique(unlist(lapply(seq_len(nrow(bct_maps)), function(i) {
+  c(bct_maps[i, broad_cell_type], bct_maps[i, cell_type])
+})))
+cell_type_rename <- c(
+  "cnidocyte_precursors" = "NPC_2",
+  "^muscle_1" = "muscle_tentacle_retractor",
+  "^muscle_2" = "muscle_mesentery_retractor",
+  "adult_muscle_1" = "adult_muscle_tentacle_retractor",
+  "adult_muscle_2" = "adult_muscle_mesentery_retractor",
+  "gastro_unknown_1" = "gastro_IRF1_2",
+  "gastro_unknown_2" = "gastro_somatic_gonad",
+  "gland_mucous" = "gland",
+  "ectoderm_embryonic_oral" = "ecto_pharynx",
+  "ectoderm_embryonic$" = "ectoderm",
+  "ectoderm_embryonic_aboral" = "ecto_aboral",
+  "mesendoderm_embryonic" = "EMS",
+  "mesendoderm_ectoderm" = "EMS_ecto_boundary",
+  "neuron_GATA_Islet_3" = "neuron_Pou4_FoxL2_3",
+  "NPC$" = "NPC_1",
+  "precursors_1" = "precursors_PGC",
+  "precursors_2" = "precursors_endoNPC",
+  "precursors_3" = "precursors_NPC"
+)
+
+# adult gastrula colors
+stage_cols <- c("adult" = "#fdac44", "gastrula" = "#fde7ab", "both" = "#fed38d")
+
+# samples
+samples <- c(
+  # whole organism
+  "25m_PFA","50m_PFA",
+  "3_FixSor", "9_F6k", "10_F6k", "11_F5k", "12_F", "13_F", 
+  "16_FC", 
+  "20_Fn", "21_Fn", "22_Fn", "23_Fn", 
+  "24_Fn", 
+  "25_Fn", "26_Fn", "27_Fn",
+  # elav
+  "18_Elav", "19_Elav",
+  "28_Elav", "29_Elav", "30_Elav",
+  # multiome
+  "Multiome_07563AAD",
+  # gastrula
+  "G26_fx", "G26_fs"
+)
+
+# assign colors to samples
+sample_cols <- c(
+  # whole organism
+  hsv(h=c(0.08,0.1), s=1, v=1),
+  hsv(h=c(0.14,0.16,0.18,seq(0.2,0.45,length.out=3)), s=1, v=1),
+  hsv(h=0.5, s=1, v=1),
+  hsv(h=seq(0.55,0.7,length.out=4), s=1, v=1),
+  hsv(h=0.75, s=1, v=1),
+  hsv(h=seq(0.8,0.85,length.out = 3), s=1, v=1),
+  # elav
+  hsv(h=c(0.94,0.96), s=1, v=1),
+  hsv(h=c(0.98, 0.99, 1), s=1, v=1),
+  # multiome
+  "#4D4D4D",
+  # gastrula
+  "#ccff00", "#cc00ff"
+)
+sample_colors <- structure(sample_cols, names = samples)
+
+```
+
+# Mapping peaks and combining metadata
+
+Mapping between gastrula and adult peaks
+
+```{r}
+gastr_peaks <- fread(
+    file.path(gastr_dir, "Peaks", "Peaks-consensus-cell_type.bed")
+)
+adult_peaks <- fread(
+    file.path(adult_dir, "Peaks", "Peaks-consensus-cell_type.bed")
+)
+bed_cols <- c("seqnames", "start", "end", "peak", "score", "strand")
+setnames(gastr_peaks, bed_cols)
+setnames(adult_peaks, bed_cols)
+gastr_peaks_gr <- makeGRangesFromDataFrame(
+    gastr_peaks, keep.extra.columns = TRUE
+)
+adult_peaks_gr <- makeGRangesFromDataFrame(
+    adult_peaks, keep.extra.columns = TRUE
+)
+
+# overlaps between two sets of peaks
+ovl <- findOverlaps(
+    query = gastr_peaks_gr, subject = adult_peaks_gr,
+    minoverlap = 50
+)
+adult_peaks[, ovl := FALSE]
+adult_ovl <- adult_peaks_gr[unique(subjectHits(ovl))]$peak
+adult_peaks[peak %in% adult_ovl, ovl := TRUE]
+
+gastr_peaks[, ovl := FALSE]
+gastr_ovl <- gastr_peaks_gr[unique(queryHits(ovl))]$peak
+gastr_peaks[peak %in% gastr_ovl, ovl := TRUE]
+
+gastr_peaks[, .N, ovl][, perc := N / sum(N)][]
+#     ovl     N     perc
+#1:  TRUE 44331 0.640464
+#2: FALSE 24886 0.359536
+adult_peaks[, .N, ovl][, perc := N / sum(N)][]
+#     ovl     N     perc
+#1: FALSE 44020 0.501127
+#2:  TRUE 43822 0.498873
+
+# overlapping peaks
+ovl_pks <- adult_peaks_gr[subjectHits(ovl)]
+ovl_pks$peak_adult <- ovl_pks$peak
+ovl_pks$peak_gastrula <- gastr_peaks_gr[queryHits(ovl)]$peak
+
+# adult only peaks
+onl_adult <- adult_peaks_gr[
+    setdiff(seq_along(adult_peaks_gr), unique(subjectHits(ovl)))
+]
+onl_adult$peak_adult <- onl_adult$peak
+
+# gastrula only peaks
+onl_gastr <- gastr_peaks_gr[
+    setdiff(seq_along(gastr_peaks_gr), unique(queryHits(ovl)))
+]
+onl_gastr$peak_gastrula <- onl_gastr$peak
+
+# combine
+pks_all <- c(ovl_pks, onl_adult, onl_gastr)
+seqlevels(pks_all) <- as.character(unique(seqnames(adult_peaks_gr)))
+pks_all <- sort(pks_all)
+pks_dt <- as.data.table(pks_all)
+pks_dt[is.na(pks_dt)] <- ""
+pks_dt[, id := paste(seqnames, start, end, sep = "_")]
+pks_dt[, id := factor(id, levels = unique(pks_dt$id))]
+pks_dt[, peak := paste0("peak", as.integer(id))]
+
+fwrite(
+    pks_dt,
+    file.path(res_dir, "Peaks", "Peaks_cell_type_mapped.tsv"),
+    sep = "\t"
+)
+```
+
+Combine metadata
+
+```{r}
+# annotation
+meta_gastr <- as.data.table(
+    proj_gastr@cellColData, keep.rownames = "cell"
+)[, .(cell, nFrags, FRIP, TSSEnrichment, SEACell, cell_type, color)]
+meta_adult <- as.data.table(
+    proj_adult@cellColData, keep.rownames = "cell"
+)[, .(cell, nFrags, FRIP, TSSEnrichment, SEACell, cell_type, cell_type_color)]
+setnames(meta_adult, "cell_type_color", "color")
+meta_all <- rbindlist(list(
+    "adult" = meta_adult, "gastrula" =  meta_gastr
+), idcol = "stage")
+meta_all[, cell_type := str_replace_all(cell_type, "\\.", "_")]
+meta_all[, color := ct_cols[as.character(cell_type)]]
+meta_all[, cell_type := factor(cell_type, levels = names(ct_cols))]
+setorder(meta_all, cell_type)
+fwrite(meta_all, file.path(
+    data_dir,
+    "Annotation_Adult_Gastrula_SEACell.tsv"
+), sep = "\t")
+
+meta_all[, cell_type := factor(
+    cell_type, levels = sort(unique(meta_all$cell_type))
+)]
+setorder(meta_all, cell_type)
+meta_melt <- melt.data.table(
+    meta_all,
+    id.vars = c("stage", "SEACell", "cell_type"),
+    measure.vars = c("nFrags", "TSSEnrichment", "FRIP")
+)
+meta_melt[, cell_type := factor(
+    cell_type, levels = sort(unique(meta_melt$cell_type))
+)]
+setorder(meta_melt, cell_type)
+meta_melt[, SEACell := factor(
+    SEACell, levels = unique(meta_melt$SEACell)
+)]
+setorder(meta_melt, SEACell)
+gp_qc_gastr <- ggplot(
+      meta_melt[stage == "gastrula"],
+      aes(SEACell, value, fill = cell_type)
+    ) +
+    geom_violin(draw_quantiles = c(0.25, 0.5, 0.75), width = 1.4) +
+    facet_grid(variable ~ ., scales = "free_y", switch = "both") +
+    scale_fill_manual(values = ct_cols) +
+    theme(
+        legend.position = "bottom",
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+        axis.ticks.x = element_blank(),
+        axis.title.x = element_blank()
+    )
+gp_qc_adult <- ggplot(
+      meta_melt[stage == "adult"],
+      aes(SEACell, value, fill = cell_type)
+    ) +
+    geom_violin(draw_quantiles = c(0.25, 0.5, 0.75), width = 1.4) +
+    facet_grid(variable ~ ., scales = "free_y", switch = "both") +
+    scale_fill_manual(values = ct_cols) +
+    theme(
+        legend.position = "bottom",
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.x = element_text(
+            angle = 90, vjust = 0.5, hjust = 1, size = 3
+        ),
+        axis.ticks.x = element_blank(),
+        axis.title.x = element_blank()
+    )
+
+pdf(
+    file.path(plot_dir, "meta_qc.pdf"),
+    width = 45, height = 12
+)
+gp_qc_adult
+gp_qc_gastr
+dev.off()
+```
+
+Peak counts with unified set of peaks
+
+```{r}
+# peaks counts
+gastr_counts <- readRDS(
+    file.path(gastr_dir, "PeakMatrix", "Matrix-Peaks.rds")
+)
+adult_counts <- readRDS(
+    file.path(adult_dir, "PeakMatrix", "Matrix-Peaks.rds")
+)
+
+# mapped peaks
+pks_dt <- fread(file.path(res_dir, "Peaks", "Peaks_cell_type_mapped.tsv"))
+
+# metadata
+meta_all <- fread(file.path(
+    data_dir,
+    "Annotation_Adult_Gastrula_SEACell.tsv"
+))
+
+# map gastrula counts
+gastr_pks <- lapply(
+    rownames(gastr_counts),
+    function(p) pks_dt[peak_gastrula == p]$peak
+)
+gastr_pks_new <- unlist(gastr_pks)
+gastr_pks_old <- rep(
+    rownames(gastr_counts),
+    times = sapply(gastr_pks, length)
+)
+gastr_counts_map <- gastr_counts[gastr_pks_old, ]
+rownames(gastr_counts_map) <- gastr_pks_new
+
+# map adult counts
+adult_pks <- lapply(
+    rownames(adult_counts),
+    function(p) pks_dt[peak_adult == p]$peak
+)
+adult_pks_new <- unlist(adult_pks)
+adult_pks_old <- rep(
+    rownames(adult_counts),
+    times = sapply(adult_pks, length)
+)
+adult_counts_map <- adult_counts[adult_pks_old, ]
+rownames(adult_counts_map) <- adult_pks_new
+
+# save files
+saveRDS(
+    gastr_counts_map,
+    file.path(gastr_dir, "PeakMatrix", "Matrix-Peaks-mapped.rds")
+)
+saveRDS(
+    adult_counts_map,
+    file.path(radult_dir, "PeakMatrix", "Matrix-Peaks-mapped.rds")
+)
+```
+
+Combine peaks
+
+```{r}
+# metadata
+meta_all <- fread(file.path(
+    data_dir,
+    "Annotation_Adult_Gastrula_SEACell.tsv"
+))
+
+# counts
+adult_counts <- readRDS(file.path(
+    adult_dir, "PeakMatrix", "Matrix-Peaks-mapped.rds"
+))[, meta_all[stage == "adult"]$cell]
+gastr_counts <- readRDS(file.path(
+    gastr_dir, "PeakMatrix", "Matrix-Peaks-mapped.rds"
+))[, meta_all[stage == "gastrula"]$cell]
+
+# combine
+# adult_dt <- as.data.table(as.matrix(adult_counts), keep.rownames = "peak")
+# gastr_dt <- as.data.table(as.matrix(gastr_counts), keep.rownames = "peak")
+# count_dt <- merge.data.table(adult_dt, gastr_dt, by = "peak", all = TRUE)
+# count_dt[is.na(count_dt)] <- 0
+# peaks_mat <- as.matrix(count_dt[, -1])
+# peaks_mat <- as(peaks_mat, "dgCMatrix")
+# rownames(peaks_mat) <- count_dt[[1]]
+
+# combine
+adult_miss_pks <- setdiff(rownames(gastr_counts), rownames(adult_counts))
+adult_miss_mat <- matrix(0, nrow = length(adult_miss_pks), ncol = ncol(adult_counts), dimnames = list(adult_miss_pks, colnames(adult_counts)))
+adult_miss_mat <- as(adult_miss_mat, "dgCMatrix")
+adult_cont_mat <- rbind(adult_counts, adult_miss_mat)
+
+gastr_miss_pks <- setdiff(rownames(adult_counts), rownames(gastr_counts))
+gastr_miss_mat <- matrix(0, nrow = length(gastr_miss_pks), ncol = ncol(gastr_counts), dimnames = list(gastr_miss_pks, colnames(gastr_counts)))
+gastr_miss_mat <- as(gastr_miss_mat, "dgCMatrix")
+gastr_cont_mat <- rbind(gastr_counts, gastr_miss_mat)
+
+all_pks <- sort(intersect(rownames(adult_cont_mat), rownames(gastr_cont_mat)))
+uni_pks <- sort(unique(c(rownames(adult_cont_mat), rownames(gastr_cont_mat))))
+all.equal(all_pks, uni_pks)
+peaks_mat <- cbind(
+    adult_cont_mat[all_pks, ],
+    gastr_cont_mat[all_pks, ]
+)
+
+# save combined peaks matrix
+saveRDS(peaks_mat, file.path(
+    res_dir, "PeakMatrix", "Matrix-Adult-Gastrula-Peaks-mapped.rds"
+))
+
+rm(adult_dt)
+rm(gastr_dt)
+rm(count_dt)
+```
+
+```{r}
+# peaks counts
+gastr_counts <- readRDS(
+    file.path(gastr_dir, "PeakMatrix", "Matrix-Peaks.rds")
+)
+adult_counts <- readRDS(
+    file.path(adult_dir, "PeakMatrix", "Matrix-Peaks.rds")
+)
+
+# mapped counts
+adult_counts_map <- readRDS(file.path(
+    adult_dir, "PeakMatrix", "Matrix-Peaks-mapped.rds"
+))
+gastr_counts_map <- readRDS(file.path(
+    gastr_dir, "PeakMatrix", "Matrix-Peaks-mapped.rds"
+))
+
+# combined counts
+peaks_mat <- readRDS(file.path(
+    res_dir, "PeakMatrix", "Matrix-Adult-Gastrula-Peaks-mapped.rds"
+))
+
+# plot counts for individual peak
+pid <- "peak109"
+pid_a <- pks_dt[peak == pid]$peak_adult
+pid_g <- pks_dt[peak == pid]$peak_gastrula
+pdt_a <- data.table(
+    cell = colnames(adult_counts),
+    count = adult_counts[match(pid_a, rownames(adult_counts)), ]
+)
+pdt_a <- merge.data.table(
+    pdt_a, unique(meta_all[, .(cell, SEACell, cell_type, stage)]),
+    by = "cell"
+)
+pdt_g <- data.table(
+    cell = colnames(gastr_counts),
+    count = gastr_counts[match(pid_g, rownames(gastr_counts)), ]
+)
+pdt_g <- merge.data.table(
+    pdt_g, unique(meta_all[, .(cell, SEACell, cell_type, stage)]),
+    by = "cell"
+)
+pdt_c <- rbindlist(list(pdt_a, pdt_g))
+pdt_c[, cell_type := factor(cell_type, levels = names(ct_cols))]
+
+gp_pc <- ggplot(pdt_c[count > 0], aes(cell_type, count)) +
+    geom_boxplot(aes(color = cell_type), alpha = 0.5, outlier.color = NA) +
+    geom_jitter(aes(fill = cell_type, shape = stage), width = 0.2, height = 0.1) +
+    scale_color_manual(values = ct_cols) +
+    scale_fill_manual(values = ct_cols) +
+    scale_shape_manual(values = c("adult" = 21, "gastrula" = 24)) +
+    theme(
+        legend.position = "none",
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+        axis.ticks.x = element_blank(),
+        axis.title.x = element_blank()
+    ) +
+    labs(title = sprintf("adult %s; gastrula %s", pid_a, pid_g))
+
+
+# plot mapped counts for individual peak
+pdt_a <- data.table(
+    cell = colnames(adult_counts_map),
+    count = adult_counts_map[match(pid, rownames(adult_counts_map)), ]
+)
+pdt_a <- merge.data.table(
+    pdt_a, unique(meta_all[, .(cell, SEACell, cell_type, stage)]),
+    by = "cell"
+)
+pdt_g <- data.table(
+    cell = colnames(gastr_counts_map),
+    count = gastr_counts_map[match(pid, rownames(gastr_counts_map)), ]
+)
+pdt_g <- merge.data.table(
+    pdt_g, unique(meta_all[, .(cell, SEACell, cell_type, stage)]),
+    by = "cell"
+)
+pdt_c <- rbindlist(list(pdt_a, pdt_g))
+pdt_c[, cell_type := factor(cell_type, levels = names(ct_cols))]
+
+gp_pc_m <- ggplot(pdt_c[count > 0], aes(cell_type, count)) +
+    geom_boxplot(aes(color = cell_type), alpha = 0.5, outlier.color = NA) +
+    geom_jitter(aes(fill = cell_type, shape = stage), width = 0.2, height = 0.1) +
+    scale_color_manual(values = ct_cols) +
+    scale_fill_manual(values = ct_cols) +
+    scale_shape_manual(values = c("adult" = 21, "gastrula" = 24)) +
+    theme(
+        legend.position = "none",
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+        axis.ticks.x = element_blank(),
+        axis.title.x = element_blank()
+    ) +
+    labs(title = sprintf("%s", pid))
+    
+
+# plot combined counts for individual peak
+pdt_m <- data.table(
+    cell = colnames(peaks_mat),
+    count = peaks_mat[match(pid, rownames(peaks_mat)), ]
+)
+pdt_m <- merge.data.table(
+    pdt_m, unique(meta_all[, .(cell, SEACell, cell_type, stage)]),
+    by = "cell"
+)
+pdt_m[, cell_type := factor(cell_type, levels = names(ct_cols))]
+
+gp_pm <- ggplot(pdt_m[count > 0], aes(cell_type, count)) +
+    geom_boxplot(aes(color = cell_type), alpha = 0.5, outlier.color = NA) +
+    geom_jitter(aes(fill = cell_type, shape = stage), width = 0.2, height = 0.1) +
+    scale_color_manual(values = ct_cols) +
+    scale_fill_manual(values = ct_cols) +
+    scale_shape_manual(values = c("adult" = 21, "gastrula" = 24)) +
+    theme(
+        legend.position = "none",
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+        axis.ticks.x = element_blank(),
+        axis.title.x = element_blank()
+    ) +
+    labs(title = sprintf("%s", pid))
+
+# save plot
+pdf(
+    file.path(plot_dir, sprintf("cell_counts_%s.pdf", pid)),
+    width = 8, height = 5
+)
+gp_pc
+gp_pc_m
+gp_pm
+dev.off()
+
+```
+
+Inspect coverage correlation 
+
+```{r}
+peaks_mat <- readRDS(file.path(
+    res_dir, "PeakMatrix", "Matrix-Adult-Gastrula-Peaks-mapped.rds"
+))
+idx <- sapply(colnames(peaks_mat), function(cb) {
+    if (cb %in% rownames(proj_adult@cellColData)) {
+        "adult"
+    } else if (cb %in% rownames(proj_gastr@cellColData)) {
+        "gastrula"
+    }
+})
+idx <- unlist(idx)
+cov_list <- tapply(names(idx), idx, function(x) {
+    data.table(
+        peak = rownames(peaks_mat),
+        count = Matrix::rowMeans(peaks_mat[, x])
+    )
+})
+names(cov_list) <- unique(idx)
+cov_dt <- rbindlist(cov_list, idcol = "dataset")
+cov_dt <- cov_dt[, count := mean(count), .(peak, dataset)]
+cov_dt <- unique(cov_dt)
+cov_dc <- dcast.data.table(cov_dt, peak ~ dataset, value.var = "count")
+gp_cov <- ggplot(cov_dc, aes(adult, gastrula)) +
+    geom_point(alpha = 0.2) +
+    geom_abline() +
+    coord_fixed() +
+    scale_x_continuous(trans = "log10", breaks = c(0, 0.001, 0.01, 0.1, 1)) +
+    scale_y_continuous(trans = "log10", breaks = c(0, 0.001, 0.01, 0.1, 1))
+ggsave(
+    file.path(plot_dir, "peaks_mean_counts_correlation.pdf"),
+    width = 6, height = 6
+)
+```
+
+Quantile normalize peaks matrix
+
+```{r}
+require(preprocessCore)
+peaks_mat <- readRDS(file.path(
+    res_dir, "PeakMatrix", "Matrix-Adult-Gastrula-Peaks-mapped.rds"
+))
+peaks_norm_mat <- normalize.quantiles(as.matrix(peaks_mat))
+peaks_norm_mat <- as(peaks_norm_mat, "dgCMatrix")
+rownames(peaks_norm_mat) <- rownames(peaks_mat)
+colnames(peaks_norm_mat) <- colnames(peaks_mat)
+saveRDS(peaks_norm_mat, file.path(
+    res_dir, "PeakMatrix",
+    "Matrix-Adult-Gastrula-Peaks-mapped-qnormalized.rds"
+))
+```
+
+Inspect coverage correlation after normalization
+
+```{r}
+peaks_norm_mat <- readRDS(file.path(
+    res_dir, "PeakMatrix",
+    "Matrix-Adult-Gastrula-Peaks-mapped-qnormalized.rds"
+))
+idx <- sapply(colnames(peaks_norm_mat), function(cb) {
+    if (cb %in% rownames(proj_adult@cellColData)) {
+        "adult"
+    } else if (cb %in% rownames(proj_gastr@cellColData)) {
+        "gastrula"
+    }
+})
+idx <- unlist(idx)
+cov_list <- tapply(names(idx), idx, function(x) {
+    data.table(
+        peak = rownames(peaks_norm_mat),
+        count = Matrix::rowMeans(peaks_norm_mat[, x])
+    )
+})
+names(cov_list) <- unique(idx)
+cov_dt <- rbindlist(cov_list, idcol = "dataset")
+cov_dt <- cov_dt[, count := mean(count), .(peak, dataset)]
+cov_dt <- unique(cov_dt)
+cov_dc <- dcast.data.table(cov_dt, peak ~ dataset, value.var = "count")
+gp_cov <- ggplot(cov_dc, aes(adult, gastrula)) +
+    geom_point(alpha = 0.2) +
+    geom_abline() +
+    coord_fixed() +
+    scale_x_continuous(
+        trans = "log10",
+        breaks = c(0.0001, 0.001, 0.01, 0.1, 1)
+    ) +
+    scale_y_continuous(
+        trans = "log10",
+        breaks = c(0.0001, 0.001, 0.01, 0.1, 1)
+    )
+ggsave(
+    file.path(plot_dir, "peaks_mean_counts_qnormalized_correlation.pdf"),
+    width = 6, height = 6
+)
+```
+
+Aggregate per SEACell
+
+```{r}
+# peaks counts
+peaks_mat <- readRDS(file.path(
+    adult_dir, "PeakMatrix", "Matrix-Adult-Gastrula-Peaks-mapped.rds"
+))
+peaks_norm_mat <- readRDS(file.path(
+    res_dir, "PeakMatrix",
+    "Matrix-Adult-Gastrula-Peaks-mapped-qnormalized.rds"
+))
+
+# metadata
+meta_all <- fread(file.path(
+    data_dir,
+    "Annotation_Adult_Gastrula_SEACell.tsv"
+))
+
+# aggregate
+clusters_vector <- structure(meta_all$SEACell, names = meta_all$cell)
+clusters_vector <- clusters_vector[colnames(peaks_norm_mat)]
+fp_clusters <- accessibility_footprint(peaks_norm_mat, clusters_vector)
+saveRDS(
+    fp_clusters,
+    file.path(
+        data_dir,
+        "Footprint_Adult_Gastrula_Peaks_SEACell_qnorm.rds"
+    )
+)
+
+# sum
+sum_clusters <- accessibility_summary(peaks_norm_mat, clusters_vector)
+sum_clusters <- unique(sum_clusters)
+saveRDS(
+    sum_clusters,
+    file.path(
+        data_dir,
+        "Sum_Adult_Gastrula_Peaks_SEACell_qnorm.rds"
+    )
+)
+
+
+# adult peak counts
+adult_counts <- readRDS(file.path(
+    adult_dir, "PeakMatrix", "Matrix-Peaks-mapped.rds"
+))[, meta_all[stage == "adult"]$cell]
+clusters_vector <- structure(meta_all$SEACell, names = meta_all$cell)
+clusters_vector <- clusters_vector[colnames(adult_counts)]
+fp_clusters <- accessibility_footprint(adult_counts, clusters_vector)
+saveRDS(
+    fp_clusters,
+    file.path(
+        data_dir,
+        "Footprint_Adult_Peaks_SEACell.rds"
+    )
+)
+
+# gastrula peak counts
+gastr_counts <- readRDS(file.path(
+    gastr_dir, "PeakMatrix", "Matrix-Peaks-mapped.rds"
+))[, meta_all[stage == "gastrula"]$cell]
+clusters_vector <- structure(meta_all$SEACell, names = meta_all$cell)
+clusters_vector <- clusters_vector[colnames(gastr_counts)]
+fp_clusters <- accessibility_footprint(gastr_counts, clusters_vector)
+saveRDS(
+    fp_clusters,
+    file.path(
+        data_dir,
+        "Footprint_Gastrula_Peaks_SEACell.rds"
+    )
+)
+
+```
+
+Aggregate per cell type
+
+```{r}
+# peaks counts
+peaks_mat <- readRDS(file.path(
+    res_dir, "PeakMatrix", "Matrix-Adult-Gastrula-Peaks-mapped.rds"
+))
+peaks_norm_mat <- readRDS(file.path(
+    res_dir, "PeakMatrix",
+    "Matrix-Adult-Gastrula-Peaks-mapped-qnormalized.rds"
+))
+
+# metadata
+meta_all <- fread(file.path(
+    data_dir,
+    "Annotation_Adult_Gastrula_SEACell.tsv"
+))
+
+# aggregate
+clusters_vector <- structure(
+    paste(meta_all$stage, meta_all$cell_type, sep = "__"),
+    names = meta_all$cell
+)
+clusters_vector <- clusters_vector[colnames(peaks_norm_mat)]
+fp_clusters <- accessibility_footprint(peaks_norm_mat, clusters_vector)
+saveRDS(
+    fp_clusters,
+    file.path(
+        data_dir,
+        "Footprint_Adult_Gastrula_Peaks_cell_type_qnorm.rds"
+    )
+)
+
+sum_clusters <- accessibility_summary(peaks_norm_mat, clusters_vector)
+sum_clusters <- unique(sum_clusters)
+saveRDS(
+    sum_clusters,
+    file.path(
+        data_dir,
+        "Sum_Adult_Gastrula_Peaks_cell_type_qnorm.rds"
+    )
+)
+
+
+# adult peak counts
+adult_counts <- readRDS(file.path(
+    adult_dir, "PeakMatrix", "Matrix-Peaks-mapped.rds"
+))[, meta_all[stage == "adult"]$cell]
+clusters_vector <- structure(
+    meta_all$cell_type,
+    names = meta_all$cell
+)
+clusters_vector <- clusters_vector[colnames(adult_counts)]
+fp_clusters <- accessibility_footprint(adult_counts, clusters_vector)
+saveRDS(
+    fp_clusters,
+    file.path(
+        data_dir,
+        "Footprint_Adult_Peaks_cell_type.rds"
+    )
+)
+
+# gastrula peak counts
+gastr_counts <- readRDS(file.path(
+    gastr_dir, "PeakMatrix", "Matrix-Peaks-mapped.rds"
+))[, meta_all[stage == "gastrula"]$cell]
+clusters_vector <- structure(
+    meta_all$cell_type,
+    names = meta_all$cell
+)
+clusters_vector <- clusters_vector[colnames(gastr_counts)]
+fp_clusters <- accessibility_footprint(gastr_counts, clusters_vector)
+saveRDS(
+    fp_clusters,
+    file.path(
+        data_dir,
+        "Footprint_Gastrula_Peaks_cell_type.rds"
+    )
+)
+```
+
+# Clustering and integrated 2D projection
+
+Load data for clustering
+
+```{r}
+# aggregated footprint
+qnorm <- TRUE
+fp_clusters <- readRDS(file.path(
+    data_dir, "Footprint_Adult_Gastrula_Peaks_SEACell_qnorm.rds"
+))
+
+# metadata
+meta_all <- fread(file.path(
+    data_dir, "Annotation_Adult_Gastrula_SEACell.tsv"
+))
+
+```
+
+Peaks max FC
+
+```{r}
+# max peak fotprints distribution
+top_fc_adult <- apply(
+    fp_clusters[, colnames(fp_clusters) %in% proj_adult$SEACell], 1, max
+)
+top_fc_gastr <- apply(
+    fp_clusters[, colnames(fp_clusters) %in% proj_gastr$SEACell], 1, max
+)
+top_fc <- apply(fp_clusters, 1, max)
+top_fc_dt <- data.table(
+    peak = rownames(fp_clusters),
+    adult = top_fc_adult,
+    gastrula = top_fc_gastr,
+    top_fc
+)
+top_fc_md <- melt.data.table(
+    top_fc_dt[, .(peak, adult, gastrula)],
+    id.vars = "peak"
+)
+gp_top_fc <- ggplot(top_fc_md, aes(value)) +
+    geom_histogram(color = "white") +
+    scale_x_continuous() +
+    labs(x = "max FC per peak") +
+    facet_grid(. ~ variable, scales = "free_x")
+ggsave(
+    file.path(plot_dir, "max_fc_norm_peaks.pdf"),
+    width = 8, height = 4
+)
+```
+
+Select peaks based on max FC
+
+```{r}
+# top peak footprints
+fc_thrs <- NA
+adult_ids <- which(colnames(fp_clusters) %in% proj_adult@cellColData$SEACell)
+gastr_ids <- which(colnames(fp_clusters) %in% proj_gastr@cellColData$SEACell)
+fc_thrs_adult <- round(
+    quantile(apply(fp_clusters[, adult_ids], 1, max), 0.95)
+)
+# 6 for intersect peaks; 5 for union
+fc_thrs_gastr <- round(
+    quantile(apply(fp_clusters[, gastr_ids], 1, max), 0.95)
+)
+# 4 for intersect peaks; 3 for union
+thrs <- sprintf("FC%s_gastrula_FC%s_adult", fc_thrs_gastr, fc_thrs_adult)
+if (qnorm) thrs <- sprintf("%s_qnorm", thrs)
+feats <- names(which(apply(
+    fp_clusters, 1, function(x) {
+        (max(x[adult_ids]) > fc_thrs_adult) |
+        (max(x[gastr_ids]) > fc_thrs_gastr)
+    }
+)))
+sum(rownames(fp_clusters) %in% feats)
+mean(rownames(fp_clusters) %in% feats)
+
+gp_top_fc_cor <- ggplot(
+        top_fc_dt, aes(
+            adult, gastrula,
+            color = peak %in% feats
+        )
+    ) +
+    geom_point(alpha = 0.2) +
+    geom_abline() +
+    coord_fixed() +
+    scale_x_continuous(trans = "log10") +
+    scale_y_continuous(trans = "log10") +
+    scale_color_manual(
+        values = c("FALSE" = "grey", "TRUE" = "red"),
+        name = thrs
+    ) +
+    theme(legend.position = "bottom") +
+    labs(title = sprintf("%s peaks", nrow(top_fc_dt[peak %in% feats])))
+ggsave(
+    file.path(
+        plot_dir,
+        sprintf("max_fc_peaks_correlation_%s.pdf", thrs)
+    ),
+    width = 5, height = 5
+)
+```
+
+Select peaks based on variability
+
+```{r eval = FALSE}
+# peaks footprints variance
+var_adult <- apply(
+    fp_clusters[, colnames(fp_clusters) %in% proj_adult$SEACell], 1, var
+)
+var_gastr <- apply(
+    fp_clusters[, colnames(fp_clusters) %in% proj_gastr$SEACell], 1, var
+)
+var_fc <- apply(fp_clusters, 1, var)
+var_fc_dt <- data.table(
+    peak = rownames(fp_clusters),
+    adult = var_adult,
+    gastrula = var_gastr,
+    var_fc
+)
+var_fc_md <- melt.data.table(
+    var_fc_dt[, .(peak, adult, gastrula)],
+    id.vars = "peak"
+)
+gp_var_fc <- ggplot(var_fc_md, aes(value)) +
+    geom_histogram(color = "white") +
+    scale_x_continuous(trans = "log10") +
+    labs(x = "variance per peak") +
+    facet_grid(. ~ variable, scales = "free_x")
+ggsave(
+    file.path(plot_dir, "var_fc_peaks.pdf"),
+    width = 8, height = 4
+)
+
+# variable peak footprints
+var_thrs <- 0.1
+thrs <- sprintf("var_%s", var_thrs)
+feats <- names(which(apply(fp_clusters, 1, var) > var_thrs))
+sum(rownames(fp_clusters) %in% feats)
+mean(rownames(fp_clusters) %in% feats)
+
+gp_top_fc_cor <- ggplot(
+        var_fc_dt,
+        aes(adult, gastrula, color = var_fc > var_thrs)
+    ) +
+    geom_point(alpha = 0.2) +
+    geom_abline() +
+    coord_fixed() +
+    scale_x_continuous(trans = "log10") +
+    scale_y_continuous(trans = "log10") +
+    scale_color_manual(
+        values = c("FALSE" = "grey", "TRUE" = "red"),
+        name = sprintf("var > %s", var_thrs)
+    ) +
+    theme(legend.position = "bottom") +
+    labs(title = sprintf("%s peaks", nrow(var_fc_dt[var_fc > var_thrs])))
+ggsave(
+    file.path(
+        plot_dir,
+        sprintf("var_fc_peaks_correlation_var%s.pdf", var_thrs)
+    ),
+    width = 5, height = 5
+)
+```
+
+Select peaks using DESeq2 LTR test
+
+```{r eval = FALSE}
+require(DESeq2)
+
+# mildly preselect peaks to make things easier
+sum_cl <- sum_clusters[
+    apply(sum_clusters, 1, function(x) sort(x, decreasing = FALSE)[500]) > 0,
+]
+
+# prepare metadata
+sum_dt <- unique(meta_all[, .(SEACell, stage, cell_type, color)])
+setnames(sum_dt, "cell_type", "celltype")
+sum_dt[grep("ectoderm", celltype), celltype := "ectoderm"]
+sum_dt[grep("mesendoderm", celltype), celltype := "mesendoderm"]
+sum_dt[grep("cnidocyte", celltype), celltype := "cnidocyte"]
+sum_dt[grep("muscle", celltype), celltype := "muscle"]
+sum_dt[grep("gastro", celltype), celltype := "gastroderm"]
+sum_dt[grep("epidermis", celltype), celltype := "epidermis"]
+sum_dt[grep("digestive_filaments", celltype), celltype := "digestive_filaments"]
+sum_dt[grep("neuron", celltype), celltype := "neuron"]
+sum_dt[grep("gland", celltype), celltype := "gland"]
+sum_dt[grep("precursors", celltype), celltype := "precursors"]
+sum_dt[, .N, celltype][order(celltype)]
+sum_df <- sum_dt[, -1]
+class(sum_df) <- "data.frame"
+rownames(sum_df) <- sum_dt[[1]]
+sum_df <- sum_df[colnames(sum_clusters), ]
+
+# DESeq2
+dds <- DESeqDataSetFromMatrix(
+  countData = sum_cl + 1,
+  colData = sum_df,
+  design = ~ stage + celltype
+)
+dds <- DESeq(dds, test = "LRT", reduced = ~ 1)
+saveRDS(dds, file.path(
+    data_dir, "dds_peaks_mat_peaks_adult_gastrula_broad.rds"
+))
+dds_res <- results(dds)
+dds_qval <- p.adjust(dds_res$padj, method = "fdr")
+names(dds_qval) <- rownames(dds_res)
+qval_thr <- 1e-5
+feats <- names(which(dds_qval < qval_thr))
+thrs <- sprintf("dds_qval_%s", qval_thr)
+
+gp_top_fc_cor <- ggplot(
+        top_fc_dt,
+        aes(adult, gastrula, color = peak %in% feats)
+    ) +
+    geom_point(alpha = 0.2) +
+    geom_abline() +
+    coord_fixed() +
+    scale_x_continuous(trans = "log10") +
+    scale_y_continuous(trans = "log10") +
+    scale_color_manual(
+        values = c("FALSE" = "grey", "TRUE" = "red"),
+        name = sprintf("qval < %s", qval_thr)
+    ) +
+    theme(legend.position = "bottom") +
+    labs(title = sprintf("%s peaks", nrow(top_fc_dt[peak %in% feats])))
+ggsave(
+    file.path(
+        plot_dir,
+        sprintf("max_fc_peaks_correlation_dds_broad.pdf")
+    ),
+    width = 5, height = 5
+)
+```
+
+```{r}
+# selected features
+feats_select <- intersect(feats, rownames(fp_clusters))
+
+# subset matrices
+table_fp <- fp_clusters[feats_select, ]
+```
+
+## Tree based clustering
+
+```{r}
+# dmatrix <- dist(t(table_fp))
+dmatrix <- tgstat::tgs_dist(t(table_fp))
+# saveRDS(
+#     dmatrix,
+#     file.path(
+#         data_dir,
+#         sprintf("dist_mat_peaks_adult_gastrula_%s.RDS", thrs)
+#     )
+# )
+
+# hierarchical clustering
+hc <- hclust(dmatrix)
+# saveRDS(
+#     hc,
+#     file.path(
+#         data_dir,
+#         sprintf("hclust_peaks_adult_gastrula_tree_%s.RDS", thrs)
+#     )
+# )
+
+# NJ clustering
+require(ape)
+njoin <- nj(dmatrix)
+# saveRDS(
+#     njoin,
+#     file.path(
+#         data_dir,
+#         sprintf("NJ_peaks_adult_gastrula_tree_%s.RDS", thrs)
+#     )
+# )
+```
+
+```{r}
+# dmatrix <- readRDS(
+#     file.path(
+#         data_dir,
+#         sprintf("dist_mat_peaks_adult_gastrula_%s.RDS", thrs)
+#     )
+# )
+# hc <- readRDS(
+#     file.path(
+#         data_dir,
+#         sprintf("hclust_peaks_adult_gastrula_tree_%s.RDS", thrs)
+#     )
+# )
+# njoin <- readRDS(
+#     file.path(
+#         data_dir,
+#         sprintf("NJ_peaks_adult_gastrula_tree_%s.RDS", thrs)
+#     )
+# )
+```
+
+Plot NJ cell type tree
+
+```{r}
+# NJ tree
+# tree <- readRDS(
+#     file.path(
+#         data_dir,
+#         sprintf("NJ_peaks_adult_gastrula_tree_%s.RDS", thrs)
+#     )
+# )
+tree <- njoin
+tips <- tree$tip.label
+tips <- paste(meta_all[match(tips, SEACell)]$cell_type, tips)
+tree$tip.label <- tips
+meta_all[, label := paste(cell_type, SEACell)]
+tree <- groupOTU(
+    tree,
+    sapply(
+        unique(meta_all$cell_type),
+        function(ct) meta_all[cell_type == ct]$label,
+        USE.NAMES = TRUE,
+        simplify = FALSE
+    )
+)
+gt <- ggtree(tree, aes(color = group), ladderize = FALSE) +
+  scale_color_manual(values = ct_cols) +
+  theme_tree2() +
+  theme(
+    axis.text = element_blank(),
+    legend.position = "none"
+  )
+gt_lin <- gt +
+    geom_tiplab(size = 2) +
+    theme_tree2() +
+    theme(legend.position = "none")
+ggsave(file.path(
+    plot_dir,
+    sprintf("NJ_peaks_adult_gastrula_tree_%s.pdf", thrs)
+), height = 46, width = 12)
+gt_cir <- gt + layout_inward_circular(xlim = 80)
+ggsave(file.path(
+    plot_dir,
+    sprintf(
+        "NJ_peaks_adult_gastrula_tree_%s_circular.pdf",
+        thrs
+    )
+), height = 24, width = 24)
+```
+
+Plot hclust cell type tree
+
+```{r eval=FALSE}
+# hclust tree
+tree <- readRDS(file.path(
+    data_dir, sprintf("hclust_peaks_adult_gastrula_tree_%s.RDS", thrs)
+))
+tree <- as.phylo(tree)
+
+tips <- tree$tip.label
+tips <- paste(meta_all[match(tips, SEACell)]$cell_type, tips)
+tree$tip.label <- tips
+
+meta_all[, label := paste(cell_type, SEACell)]
+tree <- groupOTU(
+    tree,
+    sapply(
+        unique(meta_all$cell_type),
+        function(ct) meta_all[cell_type == ct]$label,
+        USE.NAMES = TRUE,
+        simplify = FALSE
+    )
+)
+
+gt <- ggtree(tree, aes(color = group), ladderize = FALSE) +
+  scale_color_manual(values = ct_cols) +
+  theme_tree2() +
+  theme(
+    axis.text = element_blank(),
+    legend.position = "bottom"
+  )
+gt_lin <- gt +
+    geom_tiplab(size = 2) +
+    theme_tree2() +
+    scale_x_continuous(expand = c(0, 100)) +
+    theme(legend.position = "none")
+ggsave(file.path(plot_dir, sprintf(
+    "hclust_peaks_adult_gastrula_tree_%s.pdf", thrs
+)), height = 46, width = 12)
+gt_cir <- gt + layout_inward_circular(xlim = 200)
+ggsave(file.path(plot_dir, sprintf(
+    "hclust_peaks_adult_gastrula_tree_%s_circular.pdf", thrs
+)), height = 24, width = 24)
+```
+
+## 2D projection
+
+UMAP
+
+```{r}
+require(uwot)
+set.seed(1950)
+
+# UAMP
+sca_umap <- uwot::umap(
+  t(table_fp),
+  n_neighbors = 35,
+  metric = "cosine",
+  spread = 1,
+  min_dist = 0.4,
+  local_connectivity = 1,
+  repulsion_strength = 1
+)
+
+sca_umap_dt <- as.data.table(sca_umap, keep.rownames = "SEACell")
+setnames(sca_umap_dt, c("SEACell", "UMAP1", "UMAP2"))
+sca_umap_dt <- merge.data.table(
+  sca_umap_dt,
+  unique(meta_all[, .(stage, SEACell, cell_type, color)]),
+  by = "SEACell", all.x = TRUE, sort = FALSE
+)
+sca_umap_dt[cell_type == "gland_mucous", cell_type := "gland"]
+sca_umap_dt[cell_type == "mesendoderm_ectoderm", cell_type := "mesendoderm_oral"]
+fwrite(sca_umap_dt, file.path(
+    data_dir, sprintf("SEACells_adult_gastrula_UMAP_%s.tsv", thrs)
+))
+
+sca_umap_dt <- fread( file.path(data_dir, sprintf("SEACells_adult_gastrula_UMAP_%s.tsv", thrs)))
+
+# rename cell types
+sca_umap_dt[, cell_type := str_replace_all(cell_type, cell_type_rename)]
+
+# plot
+gp_umap <- ggplot(
+        sca_umap_dt,
+        aes(UMAP1, UMAP2, shape = stage, color = stage, fill = cell_type)
+    ) +
+    geom_point(
+        data = sca_umap_dt[stage == "adult"], inherit.aes = TRUE, alpha = 0.9
+    ) +
+    geom_point(
+        data = sca_umap_dt[stage == "gastrula"], inherit.aes = TRUE
+    ) +
+    scale_fill_manual(
+        values = ct_cols
+    ) +
+    scale_shape_manual(
+        values = c("adult" = 21, "gastrula" = 24)
+    ) +
+    scale_color_manual(
+        values = c("adult" = "#383838", "gastrula" = "#000000")
+    ) +
+    coord_fixed() +
+    guides(
+        fill = guide_legend(override.aes = list(size = 5, shape = 21)),
+        shape = guide_legend(override.aes = list(size = 5))
+    )
+ggsave(
+    file.path(
+        plot_dir, sprintf("UMAP_SEACells_adult_gastrula_%s.pdf", thrs)
+    ),
+    width = 12, height = 6
+)
+```
+
+Calculate relative coordinates for single cells 
+
+```{r}
+# dim reductions single cells unintegrated
+umap_adult_sc <- fread(file.path(dirname(adult_dir), "X_umap.cells.csv"), header = TRUE)
+setnames(umap_adult_sc, c("Cell", "UMAP1_sc", "UMAP2_sc"))
+umap_gastr_sc <- fread(file.path(dirname(gastr_dir), "X_umap.cells.csv"), header = TRUE)
+setnames(umap_gastr_sc, c("Cell", "UMAP1_sc", "UMAP2_sc"))
+
+# dim reductions SEACells unintegrated
+umap_adult_mc <- fread(file.path(dirname(adult_dir), "X_umap.seacells.csv"), header = TRUE)[,1:3]
+setnames(umap_adult_mc, c("SEACell", "UMAP1_mc", "UMAP2_mc"))
+umap_gastr_mc <- fread(file.path(dirname(gastr_dir), "X_umap.seacells.csv"), header = TRUE)[,2:4]
+setnames(umap_gastr_mc, c("SEACell", "UMAP1_mc", "UMAP2_mc"))
+
+# dim reductions SEACells integrated
+thrs <- "FC3_gastrula_FC5_adult_qnorm"
+fn <- sprintf("SEACells_adult_gastrula_UMAP_%s.tsv", thrs)
+umap_mc <- fread(file.path(data_dir, fn))
+
+# combine uintegrated coordinates for single cells and seacells
+umap_sc <- merge.data.table(
+  rbindlist(list(umap_adult_sc, umap_gastr_sc)),
+  annc[, .(Cell, SEACell)],
+  by = "Cell"
+)
+umap_sc_mc <- merge.data.table(
+  rbindlist(list(umap_adult_mc, umap_gastr_mc)),
+  umap_sc,
+  by = "SEACell"
+)
+# calculate coordinates shift of single cells relative to SEACells
+umap_sc_mc[, UMAP1_diff := UMAP1_sc - UMAP1_mc]
+umap_sc_mc[, UMAP2_diff := UMAP2_sc - UMAP2_mc]
+
+# add coordinates shift of single cells to integrated SEACells coordinates
+umap_sc_mc <- merge.data.table(umap_sc_mc, umap_mc, by = "SEACell")
+setnames(umap_sc_mc, c("UMAP1", "UMAP2"), c("UMAP1_mc_int", "UMAP2_mc_int"))
+umap_sc_mc[, UMAP1 := UMAP1_mc_int + UMAP1_diff]
+umap_sc_mc[, UMAP2 := UMAP2_mc_int + UMAP2_diff]
+umap_sc <- umap_sc_mc[, .(Cell, UMAP1, UMAP2, stage, cell_type, color)]
+
+# rename cell types
+umap_sc[, cell_type := str_replace_all(cell_type, cell_type_rename)]
+
+# save
+fwrite(
+  umap_sc,
+  file.path(data_dir, str_replace(fn, "SEACells", "Single cells")),
+  sep = "\t"
+)
+
+# plot
+gp_umap <- ggplot(
+        umap_sc,
+        aes(UMAP1, UMAP2, shape = stage, color = cell_type)
+    ) +
+    geom_point(
+        data = umap_sc[stage == "adult"], inherit.aes = TRUE, alpha = 0.9
+    ) +
+    geom_point(
+        data = umap_sc[stage == "gastrula"], inherit.aes = TRUE
+    ) +
+    scale_color_manual(
+        values = ct_cols
+    ) +
+    scale_shape_manual(
+        values = c("adult" = 16, "gastrula" = 17)
+    ) +
+    coord_fixed() +
+    guides(
+        fill = guide_legend(override.aes = list(size = 5, shape = 21)),
+        shape = guide_legend(override.aes = list(size = 5))
+    )
+ggsave(
+    file.path(
+        plot_dir, sprintf("UMAP_single_cell_adult_gastrula_%s.pdf", thrs)
+    ),
+    width = 12, height = 6
+)
+```
+
+# Data for shiny app
+
+Results directories.
+
+```{r}
+require(loomR)
+require(ArchR)
+source("../scatac_helper_functions.R")
+shiny_dir <- "../../../scATAC_nvec_v2/nvec-scatac-shiny/Data/"
+```
+
+Load data for single cell and SEACells.
+
+```{r}
+# single cell  matrix
+adult_mat_sc <- readRDS(file.path(adult_dir, "GeneScoreMatrix", "Matrix-Gene-Scores-Dist-Var-Weighted-50kb.rds"))
+gastr_mat_sc <- readRDS(file.path(gastr_dir, "GeneScoreMatrix", "Matrix-Gene-Scores-Dist-Var-Weighted-50kb.rds"))
+
+# SEACell matrix
+adult_mat_mc <- readRDS(file.path(dirname(adult_dir), "Data_filtered", "Footprint_SEACell.rds"))
+gastr_mat_mc <- readRDS(file.path(dirname(gastr_dir), "Data", "Footprint_SEACell.rds"))
+
+# subset to the same set of genes
+gns_sc <- intersect(rownames(adult_mat_sc), rownames(gastr_mat_sc))
+gns_mc <- intersect(rownames(adult_mat_mc), rownames(gastr_mat_mc))
+gns <- intersect(gns_mc, gns_sc) 
+gs_mat_sc <- cbind(adult_mat_sc[gns, ], gastr_mat_sc[gns, ])
+gs_mat_mc <- cbind(adult_mat_mc[gns, ], gastr_mat_mc[gns, ])
+
+# SEACell annotation
+adult_annc <- as.data.table(proj_adult@cellColData)
+gastr_annc <- as.data.table(proj_gastr@cellColData)
+cols <- intersect(colnames(adult_annc), colnames(gastr_annc))
+annc <- rbindlist(list(
+  adult = adult_annc[, ..cols], 
+  gastrula = gastr_annc[, ..cols]
+), use.names = TRUE, idcol = "stage")
+
+# order cell types
+annc[, cell_type := str_replace_all(cell_type, cell_type_rename)]
+annc[cell_type=="cnidocyte" & stage=="gastrula", cell_type:="cnidocyte_gastrula"]
+annc[cell_type=="gland" & stage=="gastrula", cell_type:="gland_mucin"]
+annc[, cell_type := factor(cell_type, levels = cell_types)]
+setorder(annc, "cell_type", "SEACell")
+
+# add colors and broad cell types
+annc[, c("color", "cell_type_color", "broad_cell_type", "broad_cell_type_color") := NULL]
+annc[, cell_type_color := ct_cols[cell_type]]
+annc <- merge.data.table(annc, bct_maps, by="cell_type", all.x = TRUE, sort = FALSE)
+annc[, broad_cell_type_color := bct_cols[broad_cell_type]]
+annc[, Sample_color := sample_colors[Sample]]
+
+# SEACell annotations
+mcols <- c("SEACell", "cell_type", "cell_type_color", "broad_cell_type", "broad_cell_type_color")
+ann <- unique(annc[, ..mcols])
+SEACellColData <- copy(ann)
+class(SEACellColData) <- "data.frame"
+rownames(SEACellColData) <- SEACellColData$SEACell
+
+# single cell annotations
+mcols <- c("Cell","SEACell", "cell_type", "cell_type_color", "broad_cell_type", "broad_cell_type_color","stage","Sample","Sample_color","TSSEnrichment","ReadsInTSS","ReadsInPromoter","PromoterRatio","PassQC","NucleosomeRatio","nMultiFrags","nMonoFrags","nFrags","nDiFrags","DoubletScore","DoubletEnrichment")
+cellColData <- annc[, ..mcols]
+class(cellColData) <- "data.frame"
+rownames(cellColData) <- cellColData$Cell
+
+# subset for common cells and SEACells, and order 
+cells <- intersect(rownames(cellColData),colnames(gs_mat_sc))
+if (length(cells) != ncol(gs_mat_sc) | length(cells) != nrow(cellColData))
+  message("I will subset cells (", length(cells), " of ", max(ncol(gs_mat_sc), nrow(cellColData)),")")
+gs_mat_sc <- gs_mat_sc[,cells]
+cellColData <- cellColData[cells,]
+SEACells <- intersect(rownames(SEACellColData),colnames(gs_mat_mc))
+if (length(SEACells) != ncol(gs_mat_mc) | length(SEACells) != nrow(SEACellColData))
+  message("I will subset SEACells")
+gs_mat_mc <- gs_mat_mc[,SEACells]
+SEACellColData <- SEACellColData[SEACells,]
+
+# save
+saveRDS(gs_mat_mc, file.path(shiny_dir, sprintf("%s_gene_scores.rds", id)))
+fwrite(SEACellColData, file.path(shiny_dir, sprintf("%s_mc.tsv", id)), sep = "\t")
+fwrite(cellColData, file.path(shiny_dir, sprintf("%s_sc.tsv", id)), sep = "\t")
+
+# UMAP
+umap_sc <- fread(file.path(data_dir, "Single cells_adult_gastrula_UMAP_FC3_gastrula_FC5_adult_qnorm.tsv"))[,1:3]
+umap_mc <- fread(file.path(data_dir, "SEACells_adult_gastrula_UMAP_FC3_gastrula_FC5_adult_qnorm.tsv"))[,1:3]
+fwrite(umap_mc, file.path(shiny_dir, sprintf("%s_UMAP.tsv", id), sep = "\t"))
+
+# convert
+class(umap_sc) <- "data.frame"
+rownames(umap_sc) <- umap_sc$Cell
+umap_sc <- umap_sc[cells,2:3]
+class(umap_mc) <- "data.frame"
+rownames(umap_mc) <- umap_mc$SEACell
+umap_mc <- umap_mc[SEACells,2:3]
+
+# gene annotations
+tfann <- fread("../annotation/tfs.Nvec.tsv",header=TRUE)
+gene_ann <- fread("../annotation/Nvec_annotation_v3_2020-10-23_DToL_names",header=TRUE)
+setnames(gene_ann,colnames(gene_ann)[1:3],c("gene","pfam","name"))
+gene_ann <- rbindlist(list(
+    gene_ann[,1:3],
+    data.table(gene = rownames(gs_mat_sc)[!rownames(gs_mat_sc) %in% gene_ann$gene])[,pfam:=""][,name:=""]
+))
+class(gene_ann) <- "data.frame"
+rownames(gene_ann) <- gene_ann$gene
+geneData <- gene_ann[rownames(gs_mat_sc),]
+```
+
+Save loom files.
+
+```{r}
+id <- "integrated"
+
+# save loom file for single cells
+loom_file <- file.path(shiny_dir, sprintf("%s_sc.loom",id))
+loomR::create(
+    filename = loom_file, 
+    data = t(gs_mat_sc), 
+    cell.attrs = as.list(cellColData), 
+    gene.attrs = as.list(geneData), 
+    do.transpose = FALSE
+)
+
+lfile <- loomR::connect(loom_file, mode="r+")
+lfile$add.graph.matrix(mat = as.matrix(umap_sc), MARGIN = 1, name = "UMAP")
+lfile$close_all()
+
+fwrite(as.data.table(cellColData), str_replace(loom_file, "loom", "tsv"), sep = "\t")
+
+# save loom file for SEACells
+loom_file <- file.path(shiny_dir, sprintf("%s_mc.loom",id))
+loomR::create(
+    filename = loom_file, 
+    data = t(gs_mat_mc), 
+    cell.attrs = as.list(SEACellColData), 
+    gene.attrs = as.list(geneData), 
+    do.transpose = FALSE
+)
+lfile <- loomR::connect(loom_file, mode="r+")
+lfile$add.graph.matrix(mat=as.matrix(umap_mc), MARGIN = 1, name = "UMAP")
+lfile$close_all()
+```
+
+Save metacell-like footprints and fraction of accessible cells.
+
+```{r}
+id <- "integrated"
+for (x in c("cell_type","broad_cell_type")) {
+  clusters_vector <- structure(cellColData[,x], names=cellColData$Cell)
+  clusters_vector <- clusters_vector[colnames(gs_mat_sc)]
+  fp_clusters <- accessibility_footprint(gs_mat_sc, clusters_vector)
+  saveRDS(fp_clusters, file.path(shiny_dir, sprintf("Footprint_%s_%s.rds",id,x)))
+  sum_clusters <- accessibility_summary(gs_mat_sc, clusters_vector, sum)
+  saveRDS(sum_clusters, file.path(shiny_dir, sprintf("Sum_%s_%s.rds",id,x)))
+}
+```
+
+# Marker peaks
+
+Load data for clustering
+
+```{r}
+# metadata
+meta_all <- fread(file.path(
+    data_dir, "Annotation_Adult_Gastrula_SEACell.tsv"
+))
+
+# peaks based seacells clustering
+# fc_thrs_gastr <- 4
+# fc_thrs_adult <- 6
+```
+
+Peaks in SEACells heatmap
+
+```{r}
+# seacell aggregated footprint
+fp_clusters <- readRDS(file.path(
+    data_dir, "Footprint_Adult_Gastrula_Peaks_SEACell_qnorm.rds"
+))
+
+# subset peaks
+adult_ids <- which(colnames(fp_clusters) %in% proj_adult@cellColData$SEACell)
+gastr_ids <- which(colnames(fp_clusters) %in% proj_gastr@cellColData$SEACell)
+feats <- names(which(apply(
+    fp_clusters, 1, function(x) {
+        (max(x[adult_ids]) > fc_thrs_adult) | # 8
+        (max(x[gastr_ids]) > fc_thrs_gastr)   # 5
+    }
+)))
+pks_mat <- fp_clusters[feats, ]
+
+# order seacells
+pks_mat <- pks_mat[, unique(meta_all$SEACell)]
+
+# order peaks
+pks_mat <- pks_mat[
+    order(apply(pks_mat, 1, which.max)),
+]
+
+# plot
+require(ComplexHeatmap)
+
+col_vec_pks <- c("#ffffff", "#fddbc7", "#ef8a62", "#b2182b", "#520c52")
+col_vec_pks <- c("#ffffff", "#e2ece2", "#7bccc4", "#43a2ca", "#0868ac")
+col_fun_pks <- circlize::colorRamp2(
+    seq(0, quantile(pks_mat, 0.99), length.out = length(col_vec_pks)),
+    col_vec_pks
+)
+
+meta_ann <- unique(meta_all[, .(SEACell, cell_type, stage)])
+col_ann <- HeatmapAnnotation(
+  which = "column",
+  "cell type" = as.character(
+    meta_ann[
+      match(colnames(pks_mat), SEACell)
+    ]$cell_type
+  ),
+  "stage" = as.character(
+    meta_ann[
+      match(colnames(pks_mat), SEACell)
+    ]$stage
+  ),
+  col = list(
+    "cell type" = ct_cols,
+    "stage" = c("adult" = "#f1cc65", "gastrula" = "#b229d4")
+  )
+)
+
+row_ann <- HeatmapAnnotation(
+  which = "row",
+  "cell type" = as.character(
+    meta_ann[
+      match(colnames(pks_mat)[apply(pks_mat, 1, which.max)], SEACell)
+    ]$cell_type
+  ),
+  col = list("cell type" = ct_cols),
+  show_legend = FALSE
+)
+
+hm_pks_fp <- Heatmap(
+  pks_mat, name = "FC",
+  col = col_fun_pks,
+  border = TRUE, use_raster = TRUE,
+  cluster_rows = FALSE, cluster_columns = FALSE,
+  show_row_dend = FALSE, show_column_dend = FALSE,
+  show_row_names = FALSE, show_column_names = FALSE,
+  bottom_annotation = col_ann, left_annotation = row_ann,
+  row_title = sprintf("%i marker peaks", nrow(pks_mat))
+)
+
+pdf(
+    file.path(plot_dir, "Adult_gastrula_SEACell_marker_peaks_fp.pdf"),
+    width = 8, height = 10
+)
+print(hm_pks_fp)
+dev.off()
+```
+
+Peaks in cell types heatmap
+
+```{r}
+# cell type aggregated footprint
+fp_clusters <- readRDS(file.path(
+    data_dir, "Footprint_Adult_Gastrula_Peaks_cell_type_qnorm.rds"
+))
+
+# subset peaks
+adult_ids <- grep("adult", colnames(fp_clusters))
+gastr_ids <- grep("gastrula", colnames(fp_clusters))
+feats <- names(which(apply(
+    fp_clusters, 1, function(x) {
+        (max(x[adult_ids]) > 2) |
+        (max(x[gastr_ids]) > 2)
+    }
+)))
+pks_mat <- fp_clusters[feats, ]
+
+# order cell types
+ct_order <- unique(paste(meta_all$stage, meta_all$cell_type, sep = "__"))
+all(ct_order %in% colnames(pks_mat))
+all(colnames(pks_mat) %in% ct_order)
+pks_mat <- pks_mat[, ct_order]
+
+# order peaks
+pks_mat <- pks_mat[
+    order(apply(pks_mat, 1, which.max)),
+]
+
+# plot
+require(ComplexHeatmap)
+# pks_mat <- pks_mat^2
+
+col_vec_pks <- c("#ffffff", "#fddbc7", "#ef8a62", "#b2182b", "#520c52")
+col_vec_pks <- c("#ffffff", "#e2ece2", "#7bccc4", "#43a2ca", "#0868ac")
+col_fun_pks <- circlize::colorRamp2(
+    seq(0, quantile(pks_mat, 0.99), length.out = length(col_vec_pks)),
+    col_vec_pks
+)
+
+meta_ann <- unique(meta_all[, .(cell_type, stage)])
+col_ann <- HeatmapAnnotation(
+  which = "column",
+  "cell type" = str_remove(colnames(pks_mat), "(adult|gastrula)__"),
+  "stage" = str_extract(colnames(pks_mat), "(adult|gastrula)"),
+  col = list(
+    "cell type" = ct_cols,
+    "stage" = c("adult" = "#f1cc65", "gastrula" = "#b229d4")
+  )
+)
+
+row_ann <- HeatmapAnnotation(
+  which = "row",
+  "cell type" = as.character(
+      str_remove(colnames(pks_mat), "(adult|gastrula)__")[
+        apply(pks_mat, 1, which.max)
+      ]
+  ),
+  col = list("cell type" = ct_cols),
+  show_legend = FALSE
+)
+
+hm_pks_fp <- Heatmap(
+  pks_mat, name = "FC^2",
+  col = col_fun_pks,
+  border = TRUE, use_raster = TRUE,
+  cluster_rows = FALSE, cluster_columns = FALSE,
+  show_row_dend = FALSE, show_column_dend = FALSE,
+  show_row_names = FALSE, show_column_names = FALSE,
+  bottom_annotation = col_ann, left_annotation = row_ann,
+  row_title = sprintf("%i marker peaks", nrow(pks_mat))
+)
+
+pdf(
+    file.path(plot_dir, "Adult_gastrula_cell_type_marker_peaks_fp.pdf"),
+    width = 8, height = 10
+)
+print(hm_pks_fp)
+dev.off()
+```

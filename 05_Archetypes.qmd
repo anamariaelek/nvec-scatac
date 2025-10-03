@@ -1635,7 +1635,7 @@ Compare enrichment in specific peaks for archetypes and motifs.
 
 ```{r}
 arc_dt <- fread(
-  file.path(arc_dir, sprintf("motif-enrichment-cell-type-archetypes-%s.tsv", arc_id))
+  file.path(arc_dir, sprintf("motif-enrichment-cell-type-archetypes-%s-mona-q0.98.tsv.gz", arc_id))
 )
 mta_dt <- fread(
   file.path(arc_dir, "motif-enrichment-cell-type-input-motifs.tsv")
@@ -1838,6 +1838,129 @@ ggsave(
   file.path(fig_dir, "motifs-enrichment-dotplot-archetype.pdf"),
   gp_enr_mta + gp_enr_arc + plot_layout(guides = "collect"),
   width = 20, height = 86, limitsize = FALSE
+)
+```
+
+Only plot archetypes enrichment for SFig.
+
+```{r}
+arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
+arc_dt <- fread(
+  file.path(arc_dir, sprintf("motif-enrichment-cell-type-archetypes-%s-mona-q0.98.tsv.gz", arc_id))
+)
+dict <- fread(file.path(
+  arc_dir, sprintf("motif-archetypes-%s.dict", arc_id)
+))
+
+# subset archetypes
+sig_arc <- unique(arc_dt[(padj < 0.00001 & fc > 2)]$motif)
+length(sig_arc)
+top_enr_sig <- arc_dt[motif %in% sig_arc]
+
+# transform p value for plotting
+top_enr_sig[, padj_scaled := -1 * log10(padj)]
+
+# scale values for plotting
+top_enr_sig[, padj_scaled := pmin(padj_scaled, 60)]
+top_enr_sig[, fc_scaled := pmin(fc, 6)]
+
+# order cell types
+top_enr_sig[cell_type == "neuronal_gastrula", cell_type := "neuronal"]
+stopifnot(all(top_enr_sig$cell_type %in% cell_types))
+top_enr_sig[, cell_type := factor(cell_type, levels = cell_types)]
+
+# select representative motifa
+top_enr_sig[, motif_name := str_remove(motif, "ARCH\\d+_")]
+setorder(top_enr_sig, motif_name, -padj_scaled)
+top_enr_mots <- top_enr_sig[, .SD[1], .(motif_name)]$motif
+top_enr_sig <- top_enr_sig[motif %in% top_enr_mots]
+
+# construct more informative motif names
+dict_nms <- unique(dict[,.(motif=archetype_name, name=tf_cisbp_name)])[name!=""]
+dict_nms[, name := paste(sort(unique(.SD$name)), collapse = "/"), motif]
+dict_nms <- unique(dict_nms)
+top_enr_sig <- merge.data.table(
+  top_enr_sig, dict_nms, 
+  by = "motif", all.x = TRUE, sort = FALSE
+)
+top_enr_sig[is.na(name), name := str_remove(motif, "ARCH\\d+_")]
+
+# cluster archetypes
+top_arc_fc <- dcast.data.table(
+  unique(top_enr_sig[, .(motif, cell_type, padj_scaled)]), 
+  motif ~ cell_type, value.var = "padj_scaled"
+)
+top_arc_fc[is.na(top_arc_fc)] <- 0
+top_arc_fc_mat <- as.matrix(top_arc_fc[, -1])
+rownames(top_arc_fc_mat) <- top_arc_fc[[1]]
+hc <- hclust(dist(top_arc_fc_mat))
+top_arc_ord <- rownames(top_arc_fc_mat)[hc$order]
+mo <- order(apply(top_arc_fc_mat, 1, which.max))
+top_arc_ord <- rownames(top_arc_fc_mat)[mo]
+
+# order motifs
+top_enr_sig[, motif := factor(motif, levels = top_arc_ord)]
+setorder(top_enr_sig, motif)
+top_enr_sig[, name := factor(name, levels = unique(top_enr_sig$name))]
+
+# plot archetypes
+gp_enr <- ggplot(
+    top_enr_sig,
+    aes(cell_type, name)
+  ) +
+  geom_point(
+    aes(size = padj_scaled, color = fc_scaled)
+  ) +
+  scale_color_gradientn(
+    name = "enrichmnet\nfold change",
+    breaks = c(0, 2, 4, 6),
+    limits = c(0, 6),
+    colours = c(
+      "white", "#fee5d9", "#fcae91", "#fb6a4a", "#de2d26", "#a50f15", "#7a0105"
+    )
+  ) +
+  scale_size_continuous(
+    name = "-log10 adj pval",
+    breaks = c(0, 20, 40, 60),
+    range = c(0, 2)
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 3),
+    axis.text.y = element_text(size = 3),
+    panel.grid.major = element_blank()
+  )
+
+# add source meta
+source_dt <- unique(dict[, .(motif=archetype_name, source=source)])
+source_enr_dt <- merge.data.table(
+  top_enr_sig, source_dt,
+  by = "motif", all.x = TRUE, sort = FALSE, allow.cartesian = TRUE
+)
+source_enr_dt <- unique(source_enr_dt[, .(motif, motif_name, name, source)])
+source_enr_dt[grepl("CisBP", source), source := "CisBP"]
+
+# plot motif sources
+gp_src <- ggplot(
+    source_enr_dt,
+    aes(source, name, fill = source)
+  ) +
+  geom_tile() +
+  scale_fill_manual(values = c(
+    "CisBP" = "#377eb8",
+    "Homer_denovo" = "#e41a1c",
+    "Homer_known" = "#ff7f00"
+  )) +
+  theme(
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 3),
+    axis.text.y = element_text(size = 3),
+    panel.grid.major = element_blank()
+  )
+
+# save plot
+ggsave(
+  file.path("plots", "Figures", "figS4-motifs-enrichment-dotplot-archetype.pdf"),
+  gp_enr + gp_src + plot_layout(guides = "collect", widths = c(8, 1)),
+  width = 12, height = 14, limitsize = FALSE
 )
 ```
 
