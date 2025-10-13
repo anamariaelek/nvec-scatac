@@ -1,0 +1,737 @@
+---
+title: "ChromBPNet"
+format: html
+---
+
+## Setup
+
+Load enviroment
+
+```{bash}
+# source /staging/leuven/stg_00002/lcb/nkemp/software/anaconda3/etc/profile.d/conda.sh
+conda activate chrombpnet
+# module load cuDNN/8.7.0.84-CUDA-11.8.0 
+module load cuDNN/8.2.1.32-CUDA-11.3.1
+```
+
+Set variables
+
+```{bash}
+wdir=/staging/leuven/stg_00002/lcb/aelek/chrombpnet_nvec/
+genome=/staging/leuven/stg_00002/lcb/aelek/data_nvec/Nvec_vc1.1_gDNA.fasta
+peaks=/staging/leuven/stg_00002/lcb/aelek/data_nvec/Peaks_cell_type_mapped_250bp.bed
+chromsizes=/staging/leuven/stg_00002/lcb/aelek/data_nvec/Nvec_vc1.1_gDNA.chrom.sizes
+```
+
+### Prepare fragment files
+
+Prepare per-cell type unshifted files from input bam files in scATAC clustering analysis, `09_Figures.Rmd`, section `Group files`
+
+### Generate splits (train, test, validate)
+
+```{bash}
+mkdir -p ${wdir}/data/splits
+chrombpnet prep splits \
+    -c ${chromsizes} \
+    -tcr NC_064035.1 \
+    -vcr NC_064034.1 \
+    -op ${wdir}/data/splits
+```
+
+Inspect peaks
+
+```{r}
+library(data.table)
+library(GenomicRanges)
+library(rjson)
+
+# files
+peaks_fn <- "data/Peaks_cell_type_mapped_250bp.bed"
+splits_fn <- "data/splits.json"
+
+# load peaks
+peaks <- fread(peaks_fn, select = c(1:4, 10))
+setnames(peaks, c("seqnames", "start", "end", "peak", "summit"))
+
+# load splits
+splits <- fromJSON(file=splits_fn)
+
+# split peaks
+splits_peaks <- rbindlist(sapply(names(splits), function(st) {
+    chr = splits[[st]]
+    peaks[seqnames %in% chr]
+}, simplify=FALSE, USE.NAMES=TRUE), idcol="split")
+
+splits_peaks[,.N,split]
+setcolorder(splits_peaks, c("seqnames", "start", "end", "peak", "summit", "split"))
+
+# check how many peaks will be outside chr ranges when extended from summit
+
+```
+
+### Select GC-matched non peak regions
+
+Since the genome we dealt with are much smaller, I adjusted the stride when creating non-peak (negatives) for training both bias model and chrombpnet model. In my case, I have used 50 or 100, but here when you subsample for using in the model, you may want to make sure that they are well-represented genome-wide.
+
+```{bash}
+inlen=500
+
+chrombpnet prep nonpeaks \
+    -g ${genome} \
+    -p ${peaks} \
+    -c ${chromsizes} \
+    -st 100 \
+    -il ${inlen} \
+    -npr 2 \
+    -fl ${wdir}/data/splits.json \
+    -o ${wdir}/data/nvec_${inlen}
+
+```
+
+### Train bias model
+
+First make sure that using default parameters works
+
+```{bash}
+bias_name=neuron_Pou4_FoxL2_2
+chrombpnet bias pipeline \
+    -ibam /staging/leuven/stg_00002/lcb/aelek/data_nvec/GroupBam/${bias_name}.bam \
+    -d "ATAC" \
+    -g ${genome} \
+    -c ${chromsizes} \
+    -p ${peaks} \
+    -n ${wdir}/data/nvec_negatives.bed \
+    -fl ${wdir}/data/splits.json \
+    -b 0.5 \
+    -o ${wdir}/bias_model/${bias_name}_default \
+    > logs/chrombpnet_bias_pipeline_${bias_name}_default.log 2>&1 &
+```
+
+You will encounter a AT-rich bias instead of GC Tn5 bias you will see from tutorial. And while training bias model, you want to use the population that is most abundant, and use that bias model to regress across all cell types. 
+
+```{bash}
+bias_name=neuron_Pou4_FoxL2_2
+
+inlen=1000
+outlen=800
+
+chrombpnet bias pipeline \
+    -ibam /staging/leuven/stg_00002/lcb/aelek/data_nvec/GroupBam/${bias_name}.bam \
+    -d "ATAC" \
+    -g ${genome} \
+    -c ${chromsizes} \
+    -p ${peaks} \
+    -n ${wdir}/data/nvec_1000_negatives.bed \
+    -fl ${wdir}/data/splits.json \
+    -b 0.5 \
+    --inputlen ${inlen} \
+    --outputlen ${outlen} \
+    -o ${wdir}/bias_model/${bias_name}_inputlen_${inlen}_outputlen_${outlen} \
+    > logs/chrombpnet_bias_pipeline_${bias_name}_inputlen_${inlen}_outputlen_${outlen}.log 2>&1 &
+
+```
+
+### Inspect bias model
+
+```{python}
+import pandas as pd
+import matplotlib.pyplot as plt
+
+dir='/staging/leuven/stg_00002/lcb/aelek/chrombpnet_nvec/'
+bias_name='neuron_Pou4_FoxL2_2_default'
+bias_name='neuron_Pou4_FoxL2_2_inputlen_1000_outputlen_500'
+bias_dir=dir+'bias_model/'+bias_name+'/'
+
+# Load train and validation loss per epoch
+loss_dt=pd.read_csv(bias_dir+'logs/bias.log')
+
+# Plot loss per epoch
+fig, axes = plt.subplots(1, 3, figsize=(12, 4))
+
+# Plotting logcount_predictions_loss and val_logcount_predictions_loss
+axes[0].plot(loss_dt["epoch"], loss_dt["logcount_predictions_loss"], label="Training")
+axes[0].plot(loss_dt["epoch"], loss_dt["val_logcount_predictions_loss"], label="Validation")
+axes[0].set_title("Log Count Predictions Loss")
+axes[0].set_xlabel("Epoch")
+axes[0].set_ylabel("Loss")
+axes[0].legend()
+axes[0].grid(True)
+
+# Plotting logits_profile_predictions_loss and val_logits_profile_predictions_loss
+axes[1].plot(loss_dt["epoch"], loss_dt["logits_profile_predictions_loss"], label="Training")
+axes[1].plot(loss_dt["epoch"], loss_dt["val_logits_profile_predictions_loss"], label="Validation")
+axes[1].set_title("Logits Profile Predictions Loss")
+axes[1].set_xlabel("Epoch")
+axes[1].set_ylabel("Loss")
+axes[1].legend()
+axes[1].grid(True)
+
+# Plotting loss and val_loss
+axes[2].plot(loss_dt["epoch"], loss_dt["loss"], label="Training")
+axes[2].plot(loss_dt["epoch"], loss_dt["val_loss"], label="Validation")
+axes[2].set_title("Total Loss")
+axes[2].set_xlabel("Epoch")
+axes[2].set_ylabel("Loss")
+axes[2].legend()
+axes[2].grid(True)
+
+plt.tight_layout()
+plt.savefig(bias_dir+'logs/bias.pdf')
+
+plt.show()
+```
+
+### Train a bias-factorized ChromBPNet model
+
+First again try with default parameters.
+
+```{bash}
+# cell type to train the model for
+name=neuron_Pou4_FoxL2_2
+
+# bias model to use
+bias_name=neuron_Pou4_FoxL2_2
+
+# model training
+chrombpnet pipeline \
+    -ibam /staging/leuven/stg_00002/lcb/aelek/data_nvec/GroupBam/${name}.bam \
+    -d "ATAC" \
+    -g ${genome} \
+    -c ${chromsizes} \
+    -p ${peaks} \
+    -n ${wdir}/data/nvec_negatives.bed \
+    -fl ${wdir}/data/splits.json \
+    -b ${wdir}/bias_model/${bias_name}_default/models/bias.h5 \
+    -o ${wdir}/chrombpnet_model/${name}_default \
+    > logs/chrombpnet_pipeline_${name}_default.log 2>&1 &
+
+```
+
+Changing the size of the filter length for the input convolution layer helps a lot with small genome for chrombpnet model (I have tried 9 bp) 
+
+```{bash}
+# cell type to train the model for
+name=neuron_Pou4_FoxL2_2
+
+# bias model to use
+bias_name=neuron_Pou4_FoxL2_2
+inlen=1000
+outlen=800
+
+# model training
+chrombpnet pipeline \
+    -ibam /staging/leuven/stg_00002/lcb/aelek/data_nvec/GroupBam/${name}.bam \
+    -d "ATAC" \
+    -g ${genome} \
+    -c ${chromsizes} \
+    -p ${peaks} \
+    -n ${wdir}/data/nvec_1000_negatives.bed \
+    -fl ${wdir}/data/splits.json \
+    -b ${wdir}/bias_model/${bias_name}/models/bias.h5 \
+    --inputlen ${inlen} \
+    --outputlen ${outlen} \
+    -o ${wdir}/chrombpnet_model/${name}_inputlen_${inlen}_outputlen_${outlen} \
+    > logs/chrombpnet_pipeline_${name}_inputlen_${inlen}_outputlen_${outlen}.log 2>&1 &
+    
+```
+
+Run from CL
+
+```{bash}
+cd scripts
+bias_name=neuron_Pou4_FoxL2_2
+# running
+name=digestive_filaments_1
+name="gastro_circular_muscle_1"
+name="gastro_parietal_muscle"
+name="gastro_unknown_2"
+name="gland"
+name="precursors_1"
+name="precursors_2"
+name="precursors_3"
+name="gastro_circular_muscle_2"
+input_len=500
+output_len=250
+sbatch chrombpnet_train.sh ${name} ${bias_name} -i ${input_len} -o ${output_len}
+```
+
+## Predictions
+
+```{bash}
+cd scripts
+
+name=cnidocyte
+
+input_len=500
+output_len=250
+model_file=/staging/leuven/stg_00002/lcb/aelek/chrombpnet_nvec/chrombpnet_model/${name}_inputlen_${input_len}_outputlen_${output_len}/models/chrombpnet_nobias.h5
+bigwig_file=/staging/leuven/stg_00002/lcb/aelek/data_nvec/GroupBigWigs/cell_type/${name}.bw
+sbatch chrombpnet_predict.sh ${model_file} ${bigwig_file}
+
+input_len=1000
+output_len=800
+model_file=/staging/leuven/stg_00002/lcb/aelek/chrombpnet_nvec/chrombpnet_model/${name}_inputlen_${input_len}_outputlen_${output_len}/models/chrombpnet_nobias.h5
+bigwig_file=/staging/leuven/stg_00002/lcb/aelek/data_nvec/GroupBigWigs/cell_type/${name}.bw
+sbatch chrombpnet_predict.sh ${model_file} ${bigwig_file}
+```
+
+Inspect predictions accurracy
+
+```{python}
+import h5py
+import numpy as np
+
+name='cnidocyte'
+input_len=500
+output_len=250
+
+
+```
+
+## TF Modisco
+```{bash}
+cd scripts
+
+#NAME=neuron_GATA_Islet_1
+#NAME=muscle_1
+#NAME=neuron_Pou4_FoxL2_2
+#NAME=epidermis_1
+#INPUT_LEN=1000
+#OUTPUT_LEN=800
+#MODEL_DIR=/staging/leuven/stg_00002/lcb/aelek/chrombpnet_nvec/chrombpnet_model/${NAME}_inputlen_${INPUT_LEN}_outputlen_${OUTPUT_LEN}
+#MODEL_HEAD=profile
+#
+#sbatch chrombpnet_tfmodisco.sh ${NAME} ${MODEL_DIR}/motifs/${NAME}_${MODEL_HEAD} \
+#    -s ${MODEL_DIR}/predictions/${NAME}.${MODEL_HEAD}_sequences.npz \
+#    -a ${MODEL_DIR}/predictions/${NAME}.${MODEL_HEAD}_attributions.npz \
+#    -w 250 -z 10
+
+
+NAME=neuron_GATA_Islet_1
+NAME=muscle_1
+NAME=neuron_Pou4_FoxL2_2
+NAME=epidermis_1
+NAME="cnidocyte"
+INPUT_LEN=500
+OUTPUT_LEN=250
+MODEL_DIR=/staging/leuven/stg_00002/lcb/aelek/chrombpnet_nvec/chrombpnet_model/${NAME}_inputlen_${INPUT_LEN}_outputlen_${OUTPUT_LEN}
+MODEL_HEAD=profile
+sbatch chrombpnet_tfmodisco.sh ${NAME} ${MODEL_DIR}/motifs/${NAME}_${MODEL_HEAD} \
+    -i ${MODEL_DIR}/predictions/${NAME}.${MODEL_HEAD}_scores.h5 \
+    -w 250 -z 10
+	
+```
+
+## TF Modisco results
+
+Parse TF Modisco outputs to save trimmed patterns.
+
+```{bash}
+source /staging/leuven/stg_00002/lcb/sdewin/Programs/anaconda3/etc/profile.d/conda.sh
+conda activate tfmodsico-lite
+
+wdir=/staging/leuven/stg_00002/lcb/aelek/chrombpnet_nvec/
+cell_types_adult="cnidocyte gastro_circular_muscle_1 gastro_circular_muscle_2 gastro_parietal_muscle gastro_unknown_1 gastro_unknown_2 muscle_1 muscle_2 digestive_filaments_1 digestive_filaments_2 digestive_filaments_3 epidermis_1 epidermis_2 precursors_1 precursors_2 precursors_3 neuron_GATA_Islet_1 neuron_GATA_Islet_2 neuron_Pou4_FoxL2_1 neuron_Pou4_FoxL2_2 neuron_Pou4_FoxL2_3 gland"
+cell_types_gastrula="ectoderm EMS ecto_aboral ecto_pharynx EMS_ecto_boundary cnidocyte_gastrula gland_mucin neuronal NPC"
+
+# iterate over cell types
+for name in $cell_types_gastrula;
+do
+    echo
+    echo $name
+    echo
+    infile=${wdir}/chrombpnet_model/${name}_inputlen_500_outputlen_250/motifs/${name}_profile.modisco_results.h5
+    outfile=${wdir}/chrombpnet_model/${name}_inputlen_500_outputlen_250/motifs/${name}_profile_pos_patterns.txt
+    # check that input file exists
+    if [ ! -f ${infile} ]; then
+        echo "Input file "${infile}" not found"
+    # check that output file doesn't exist
+    elif [ -f ${outfile} ]; then
+        echo "Output file "${outfile}" already exists"
+    else
+      python parse_tfmodisco_results.py $name
+    fi
+done
+```
+
+Below is the code we run with `parse_tfmodisco_results.py`
+
+```{bash}
+source /staging/leuven/stg_00002/lcb/sdewin/Programs/anaconda3/etc/profile.d/conda.sh
+conda activate tfmodsico-lite
+```
+
+Helper functions
+
+```{python}
+import h5py
+import numpy as np
+import pandas as pd
+import modiscolite as modisco
+
+# Helper function to trim by IC
+def trim_pattern_by_ic(
+    pattern: np.ndarray,
+    min_v: float,
+    background: list = [0.27, 0.23, 0.23, 0.27],
+    pseudocount: float = 0.5,
+    return_positions: bool = False
+) -> np.ndarray:
+    ic = modisco.util.compute_per_position_ic(
+        ppm=pattern,
+        background=background,
+        pseudocount=pseudocount
+    )
+    _ = np.nan_to_num(ic, copy=False, nan=0.0)
+    v = (abs(pattern) * ic[:, None]).max(1)
+    v = (v - v.min()) / (v.max() - v.min())
+    start_idx = min(np.where(np.diff((v > min_v) * 1))[0])
+    end_idx = max(np.where(np.diff((v > min_v) * 1))[0]) + 1
+    if return_positions:
+        return pattern[start_idx:end_idx, :], start_idx, end_idx
+    else:
+        return pattern[start_idx:end_idx, :]
+
+# Function to load TF modisco reuslts and trim by IC
+def read_patterns_from_h5(h5_file_path, min_ic_threshold=0.1):
+    """
+    Reads and trims patterns from an HDF5 file.
+    
+    Parameters:
+        h5_file_path (str): Path to the HDF5 file.
+        min_ic_threshold (float): Minimum IC threshold for trimming.
+    
+    Returns:
+        dict: A dictionary containing the trimmed patterns.
+    """
+    patterns = {}
+    contributions = {}
+    hypothetical_contributions = {}
+    with h5py.File(h5_file_path, 'r') as f:
+        if 'pos_patterns' in f:
+            pattern_group = f['pos_patterns']
+            for pattern_name in pattern_group:
+                pattern = pattern_group[pattern_name]['sequence'][:]
+                new_pattern_name = "pos_"+pattern_name
+                # Trim by IC
+                trimmed_positions = trim_pattern_by_ic(pattern, min_ic_threshold, return_positions=True)
+                trimmed_pattern = trimmed_positions[0]
+                patterns[new_pattern_name] = trimmed_pattern
+                # Contribution scores
+                start_idx = trimmed_positions[1]
+                end_idx = trimmed_positions[2]
+                contrib_scores = pattern_group[pattern_name]['contrib_scores'][start_idx:end_idx]
+                contributions[new_pattern_name] = contrib_scores
+                hypothetical_contrib_scores = pattern_group[pattern_name]['hypothetical_contribs'][start_idx:end_idx]
+                hypothetical_contributions[new_pattern_name] = hypothetical_contrib_scores
+        if 'neg_patterns' in f:
+            pattern_group = f['neg_patterns']
+            for pattern_name in pattern_group:
+                pattern = pattern_group[pattern_name]['sequence'][:]
+                new_pattern_name = "neg_"+pattern_name
+                # Trim by IC
+                trimmed_positions = trim_pattern_by_ic(pattern, min_ic_threshold, return_positions=True)
+                trimmed_pattern = trimmed_positions[0]
+                patterns[new_pattern_name] = trimmed_pattern
+                # Contribution scores
+                start_idx = trimmed_positions[1]
+                end_idx = trimmed_positions[2]
+                contrib_scores = pattern_group[pattern_name]['contrib_scores'][start_idx:end_idx]
+                contributions[new_pattern_name] = contrib_scores
+                hypothetical_contrib_scores = pattern_group[pattern_name]['hypothetical_contribs'][start_idx:end_idx]
+                hypothetical_contributions[new_pattern_name] = hypothetical_contrib_scores
+    patterns_dict = {
+        'patterns': patterns,
+        'contributions': contributions,
+        'hypothetical_contributions': hypothetical_contributions
+    }
+    return patterns_dict
+
+# Function to save patterns to text
+def write_patterns_to_txt(patterns, txt_file_path,):
+    """
+    Writes patterns to a txt file.
+    
+    Parameters:
+        patterns (dict): A dictionary containing the patterns.
+        txt_file_path (str): Path to the txt file
+    """
+    # Save patterns
+    f = open(txt_file_path, 'w')
+    # Save names
+    nms_file_path = txt_file_path.replace(".txt", ".names")
+    n = open(nms_file_path, 'w')
+    for pattern_name, pattern_matrix in patterns.items():
+        pd.DataFrame(pattern_matrix).to_csv(f, sep="\t", header=False, index=False)
+        f.write("\n")
+        n.write(f'{pattern_name}\n')
+    f.close()
+    n.close()
+
+```
+
+TF Modisco results to load
+
+```{python}
+# Path to TF modisco results
+name="muscle_1"
+name="neuron_GATA_Islet_1"
+name="neuron_Pou4_FoxL2_2"
+name="cnidocyte"
+name="epidermis_1"
+input_len=1000
+output_len=800
+model_dir="chrombpnet_model/"+name+"_inputlen_"+str(input_len)+"_outputlen_"+str(output_len)+"/"
+model_head="profile"
+modisco_res=model_dir+"motifs/"+name+"_"+model_head+".modisco_results.h5"
+```
+
+Load patterns, trim by IC and save as txt files.
+
+```{python}
+# Read and trim both positive and negative patterns
+patterns = read_patterns_from_h5(modisco_res, min_ic_threshold=0.1)
+
+# Save patterns to text
+for group in ['pos_pattern', 'neg_pattern']:
+    # select patterns that have key starting with 'pos_pattern'
+    patterns_ = {k: v for k, v in patterns['patterns'].items() if k.startswith(group)}
+    if len(patterns_) > 0:
+        print(f"Writing {len(patterns_)} {group} patterns to txt file")
+        write_patterns_to_txt(
+            patterns = patterns_,
+            txt_file_path = model_dir+"motifs/"+name+"_"+model_head+f"_{group}s.txt"
+        )
+
+# Contributioin scores
+contributions = {}
+hypothetical_contributions = {}
+for pattern_name, pattern_matrix in patterns['patterns'].items():
+    contrib_scores = patterns['contributions'][pattern_name]
+    hyp_contrib_scores = patterns['hypothetical_contributions'][pattern_name]
+    contributions[pattern_name] = contrib_scores
+    hypothetical_contributions[pattern_name] = hyp_contrib_scores
+
+# Max contribution scores per pattern
+max_contributions = {pattern_name: abs(contrib_scores).max() * np.sign(contrib_scores.mean()) for pattern_name, contrib_scores in contributions.items()}
+
+# Save contribution scores to table
+pd.DataFrame(
+    max_contributions.items(),
+    columns=['pattern', name]
+).to_csv(
+    model_dir+"motifs/"+name+"_"+model_head+'_pattern_to_task_contribution.tsv',
+    sep="\t",
+    index=False
+)
+```
+
+## Combine results from multiple cell type models
+
+```{bash}
+conda activate chrombpnet
+```
+
+```{r}
+cell_types_adult <- c(
+  "cnidocyte",
+  "gastro_circular_muscle_1",
+  "gastro_circular_muscle_2",
+  "gastro_parietal_muscle",
+  "gastro_unknown_1",
+  "gastro_unknown_2",
+  "muscle_1",
+  "muscle_2",
+  "digestive_filaments_1",
+  "digestive_filaments_2",
+  "digestive_filaments_3",
+  "epidermis_1",
+  "epidermis_2",
+  "precursors_1",
+  "precursors_2",
+  "precursors_3",
+  "neuron_GATA_Islet_1",
+  "neuron_GATA_Islet_2",
+  "neuron_Pou4_FoxL2_1",
+  "neuron_Pou4_FoxL2_2",
+  "neuron_Pou4_FoxL2_3",
+  "gland"
+)
+cell_types_gastrula <- c(
+  "ectoderm",
+  "EMS",
+  "ecto_aboral",
+  "ecto_pharynx",
+  "EMS_ecto_boundary",
+  "cnidocyte_gastrula",
+  "gland_mucin",
+  "neuronal",
+  "NPC"
+)
+
+model_head <- "profile"
+
+models <- c(cell_types_adult, cell_types_gastrula)
+in_len <- 500
+out_len <- 250
+
+res_dir <- "results"
+fig_dir <- "figures"
+dir.create(res_dir, showWarnings = FALSE)
+dir.create(fig_dir, showWarnings = FALSE)
+```
+
+Load data
+
+```{r}
+library(data.table)
+library(stringr)
+library(universalmotif)
+
+# where are the results
+models_dirs <- sapply(models, function(name) {
+  file.path(
+    "chrombpnet_model/", 
+    sprintf("%s_inputlen_%s_outputlen_%s", name, in_len, out_len),
+    "motifs/"
+  )
+}, USE.NAMES = TRUE)
+
+# patterns to cell type topic contributions
+pattern_dt <- rbindlist(lapply(models, function(name) {
+  print(name)
+  # where are the results
+  tfmodisco_dir <- models_dirs[name]
+  # patterns contribution file
+  pattern_fn <- file.path(tfmodisco_dir, sprintf("%s_profile_pattern_to_task_contribution.tsv", name))
+  # load contributions matrix
+  tryCatch({
+    pattern_dt <- fread(pattern_fn)
+    pattern_dt <- melt.data.table(pattern_dt, id.vars = "pattern", variable.name = "cell_type", value.name = "contribution")
+    pattern_dt[, pattern := sprintf("%s_%s", name, pattern)][]
+  }, error = function(e) {
+    message("Error reading ", pattern_fn)
+    NULL
+  })
+}))
+
+# save
+fwrite(pattern_dt, file.path(res_dir, "profile_pattern_to_task_contribution.tsv"), sep = "\t")
+
+# only keep models for which we have contributions
+models <- as.character(unique(pattern_dt$cell_type))
+
+# load patterns (motifs)
+pattern_list <- sapply(models, function(name) {
+  # where are the results
+  tfmodisco_dir <- models_dirs[name]
+  # motif files
+  pats_pos_fns <- file.path(tfmodisco_dir, sprintf("%s_profile_pos_patterns.txt", name))
+  pats_neg_fns <- file.path(tfmodisco_dir, sprintf("%s_profile_neg_patterns.txt", name))
+  # load motifs
+  pats_pos <- tryCatch(universalmotif::read_matrix(pats_pos_fns, positions = "rows", headers = FALSE), error = function(e) NULL)
+  pats_neg <- tryCatch(universalmotif::read_matrix(pats_neg_fns, positions = "rows", headers = FALSE), error = function(e) NULL)
+  if (!is.null(pats_pos)) {
+    message(name, " positive patterns")
+    names(pats_pos) <- fread(str_replace(pats_pos_fns, "txt", "names"), header = FALSE)[[1]]
+    pats_pos_list <- sapply(names(pats_pos), function(x) {
+      m <- pats_pos[[x]]
+      m@name <- sprintf("%s_%s", name, x)
+      m
+    }, simplify = FALSE, USE.NAMES = TRUE)
+  } else {
+    pats_pos_list <- list()
+  }
+  if (!is.null(pats_neg)) {
+    message(name, " negative patterns")
+    names(pats_neg) <- fread(str_replace(pats_neg_fns, "txt", "names"), header = FALSE)[[1]]
+    pats_neg_list <- sapply(names(pats_neg), function(x) {
+      m <- pats_neg[[x]]
+      m@name <- sprintf("%s_%s", name, x)
+      m
+    }, simplify = FALSE, USE.NAMES = TRUE)
+  } else {
+    pats_neg_list <- list()
+  }
+  list("positive_patterns" = pats_pos_list, "negative_patterns" = pats_neg_list)
+  
+}, USE.NAMES = TRUE, simplify = FALSE)
+
+# save
+saveRDS(pattern_list, file.path(res_dir, "patterns_motifs.rds"))
+```
+
+Cluster patterns
+
+```{r}
+library(data.table)
+library(stringr)
+library(universalmotif)
+library(ComplexHeatmap)
+library(ggplot2)
+library(ggseqlogo)
+
+source("../scripts/mta_downstream_functions.R")
+
+pattern_dt <- fread(file.path(res_dir, "profile_pattern_to_task_contribution.tsv"), sep = "\t")
+pattern_list <- readRDS(file.path(res_dir, "patterns_motifs.rds"))
+
+pats_pos_list <- unlist(lapply(pattern_list, function(x) x[["positive_patterns"]]), recursive = FALSE)
+names(pats_pos_list) <- sapply(pats_pos_list, function(x) x@name)
+universalmotif::write_matrix(pats_pos_list, file.path(res_dir, "profile_pos_patterns.txt"), overwrite=TRUE)
+writeLines(names(pats_pos_list), file.path(res_dir, "profile_pos_patterns.names"))
+pats_neg_list <- unlist(lapply(pattern_list, function(x) x[["negative_patterns"]]), recursive = FALSE)
+names(pats_neg_list) <- sapply(pats_neg_list, function(x) x@name)
+universalmotif::write_matrix(pats_neg_list, file.path(res_dir, "profile_neg_patterns.txt"), overwrite=TRUE)
+writeLines(names(pats_neg_list), file.path(res_dir, "profile_neg_patterns.names"))
+
+pats_list <- c(pats_pos_list, pats_neg_list)
+
+
+# remove motifs shorter than 3bp
+short_pats <- which(sapply(pats_list, function(m) dim(m@motif)[2])<3)
+pats_list <- pats_list[!names(pats_list) %in% names(short_pats)]
+
+# cluster and merge positive patterns
+merge_pats_list <- mta_merge_motifs_by_similarity(
+  motifs = pats_list,
+	matrix_class = "PWM",
+	threshold = 0.7,
+	dist_method = "WPCC",
+	clus_method = "hclust",
+	min_overlap = 5,
+	eps_dbscan = 1,
+	do_heatmap = TRUE
+)
+
+# how many motifs per cluster
+clust_dt <- as.data.table(merge_pats_list$clusters)
+setnames(clust_dt, "motif", "pattern")
+clust_dt[, .N, cluster][order(-N)]
+fwrite(clust_dt, file.path(res_dir, "patterns_clust.tsv"), sep="\t")
+
+# save similarity matrix
+sim_mat <- merge_pats_list$matrix
+saveRDS(sim_mat, file.path(res_dir, "patterns_similarity_matrix.rds"))
+
+# save heatmap
+pdf(file.path(fig_dir, "hm_clustering_patterns.pdf"), width=8, height=6)
+merge_pats_list$matrix_hm
+dev.off()
+
+# plot logos
+mots <- pats_list[clust_dt$pattern]
+pdf(file.path(fig_dir, "hm_clustering_patterns_motifs.pdf"), width = 12, height = 4)
+for (i in seq_along(mots)) {
+  m <- mots[[i]]
+  tryCatch({
+    gg_mot <- ggplot() + ggseqlogo::geom_logo(
+        m@motif, seq_type = "dna", col_scheme = "nucleotide"
+      ) + 
+      labs(title = sprintf("%s; cluster %s", m@name, clust_dt[pattern==m@name]$cluster)) +
+      theme_logo()
+    print(gg_mot)
+ }, error = function(e) warning(e))
+}
+dev.off()
+```
