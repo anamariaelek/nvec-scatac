@@ -3,41 +3,13 @@ library(data.table)
 library(ggplot2)
 library(ggseqlogo)
 library(plotly)
+library(stringr)
 library(universalmotif)
 library(htmlwidgets)
 library(knitr)
 library(kableExtra)
 
-
-bcts <- c(
-    "cnidocyte", "cnidocyte_gastrula", "digestive_filaments",
-    "ecto", "EMS", "epidermis", "gastro_circular_muscle",
-    "gastro_parietal_muscle", "gastro", "gland_mucin", "gland",
-    "muscle", "neuronal", "neuron_GATA_Islet", "neuron_Pou4_FoxL2",
-    "NPC", "precursors"
-)
-
-bct_cols <- c(
-    "cnidocyte"                 = "#ff42ff",
-    "cnidocyte_gastrula"        = "#f7abf7",
-    "ecto"                      = "#51a0be",
-    "EMS"                       = "#bdf5bd",
-    "gastro_circular_muscle"    = "#73b009",
-    "gastro_parietal_muscle"    = "#8ceb10",
-    "gastro"                    = "#85c90e",
-    "muscle"                    = "#ffd700",
-    "digestive_filaments"       = "#e33d3d",
-    "precursors"                = "#bebebe",
-    "NPC"                       = "#808d91",
-    "epidermis"                 = "#04ccd4",
-    "neuron_GATA_Islet"         = "#1175f0",
-    "neuron_Pou4_FoxL2"         = "#101cde",
-    "neuronal"                  = "#063cb9",
-    "gland"                     = "#ff6f08",
-    "gland_mucin"               = "#ff8f12"
-)
-bcts <- names(bct_cols)
-
+# Cell types
 ct_cols <- c(
   "cnidocyte"                  = "#ff42ff",
   "cnidocyte_gastrula"         = "#f7abf7",
@@ -74,31 +46,63 @@ ct_cols <- c(
 )
 cts <- names(ct_cols)
 
+# UI
 ui <- fluidPage(
   titlePanel("Motif Co-occurrence Enrichment"),
   sidebarLayout(
     sidebarPanel(
-      width = 3,
-      radioButtons(
-        "lvl",
-        "Select peaks for which to show enrichmnet:",
-        choices = c(
-          "Cell type peaks" = "cell_type", 
-          "Differential cell type peaks" = "cell_type_differential"
-        ),
-        selected = "cell_type"
+      fluidRow(
+        HTML("This app allows to explore motif pairs co-occurrence in cell type specific peaks."),
+        br(),
+        HTML("It might take a few minutes to start, because loading counts for all the motif pairs in all peaks is slow. I am terribly sorry about that."),
+        br(),
+        HTML("Below you can set the thresholds to filter peaks in which to summarize the motif pairs occurences."),
+        br(),
+        HTML("Press 'Load peaks' to apply the filters. This might take a few moments."),
+        br(),
+        HTML("The table with number of peaks and motifs per cell type will be displayed below."),
+        br(),
+        HTML("Then you can check enriched motif pairs on the right."),
+        br()
       ),
-      HTML("<b>Suggested parameters:</b><br><br>"),
-      HTML("<em>Cell type peaks</em><br>"),
-      HTML("Number of peaks with motif pair: 100<br>"),
-      HTML("Fraction of peaks with motif pair: 0.02<br>"),
-      HTML("Pair co-occurence enrichment: 1<br><br>"),
-      HTML("<em>Differential cell type peaks</em><br>"),
-      HTML("Number of peaks with motif pair: 10<br>"),
-      HTML("Fraction of peaks with motif pair: 0.02<br>"),
-      HTML("Pair co-occurence enrichment: 1.5<br><br>"),
-      HTML("<b>Number of peaks:</b><br><br>"),
-      uiOutput("peaks_info")
+      # Filter input peaks by cell type specificity
+      br(),
+      fluidRow(
+        numericInput(
+          "peak_log2fc", "Peak cell type Log2FC threshold",
+          min = 0, max = 10, value = 1, step = 0.1
+        ),
+        HTML("To select all accessible peaks, set this to 0."),
+        HTML("To select differential cell type specific peaks, set this to a value greater than 1."),
+        br(), br(),
+        numericInput(
+          "peak_fdr", "Peak cell type FDR threshold",
+          min = 0, max = 1, value = 1, step = 0.1
+        ),
+        HTML("To select all accessible peaks, set this to 1."),
+        HTML("To select differential cell type specific peaks, set this to a lower value."),
+        br(), br(),
+        # Filter input motifs by cell type specificity
+        numericInput(
+          "motif_log2fc", "Motif cell type Log2FC threshold",
+          min = 0, max = 10, value = 1, step = 0.1
+        ),
+        HTML("To select all motifs, set this to 0."),
+        HTML("To select cell type enriched motifs, set this to a value greater than 1."),
+        br(), br(),
+        numericInput(
+          "motif_padj", "Motif cell type FDR threshold",
+          min = 0, max = 10, value = 0.05, step = 0.1
+        ),
+        HTML("To select all motifs, set this to 1."),
+        HTML("To select cell type enriched motifs, set this to a lower value."),
+        br(), br(),
+        actionButton("reload_peaks", "Load peaks"),
+        br(),
+      ),
+      fluidRow(
+        uiOutput("peaks_info")
+      )
     ),
     mainPanel = mainPanel(
       tabsetPanel(
@@ -107,26 +111,34 @@ ui <- fluidPage(
           br(),
           fluidRow(
             column(2,
+              # Select cell types
+              selectInput(
+                "cell_type",
+                "Cell type enriched motif pairs",
+                choices = cts,
+                selected = "cnidocyte"
+              )
+            ),
+            column(2,
+              # Filter peaks by number of motif pairs
               numericInput(
                 "pair_count",
                 "Number of peaks with motif pair",
                 min = 0, max = 1e10, value = 100, step = 1)
             ),
             column(2,
+              # Filter peaks by fraction of motif pairs
               numericInput(
                 "pair_frac",
                 "Fraction of peaks with motif pair",
-                min = 0, max = 1, value = 0.02, step = 0.01)
-            ), 
-            column(2,
-              numericInput(
-                "pair_enr",
-                "Pair co-occurence enrichment",
-                min = 0, max = 10, value = 1, step = 0.01)
+                min = 0, max = 1, value = 0.05, step = 0.01)
             )
           ),
           fluidRow(
-            column(2,
+            column(8,
+              HTML("Press 'Load heatmap' to filter and cluster motif pairs in selected cell type."),
+              HTML("This might take a few moments."),
+              br(), br(),
               actionButton("reload_button_heatmap", "Load heatmap"),
               br(), br()
             )
@@ -135,41 +147,17 @@ ui <- fluidPage(
             column(6,
               h4("Motif pair co-occurrence heatmap:"),
               HTML("Click on a heatmap cell to see motif pair details."),
-              plotlyOutput("enrich_heatmap", height = "1000px")
+              plotlyOutput("enrich_heatmap", height = "800px"),
+              h4("Cell type co-occurence:"),
+              htmlOutput("motif_pair_info")
             ),
             column(6,
-              h4("Selected motif pair:"),
-              plotOutput("heatmap_barplot", height = "400px"),
-              br(),
-              plotOutput("motif1_hm_logo", height = "100px"),
-              uiOutput("motif1_hm_info"),
-              plotOutput("motif2_hm_logo", height = "100px"),
-              uiOutput("motif2_hm_info"),
-              h4("Cell type co-occurence enrichment:"),
-              uiOutput("heatmap_row_table")
-            )
-          )
-        ),
-        tabPanel(
-          "Cell type motif pairs",
-          br(),
-          fluidRow(
-            column(7,
-              selectInput("cell_type", "Select cell type:", choices = cts),
-              actionButton("reload_button", "Load data"),
-              br(), br(),
-              HTML("Click on a point to see motif pair details."),
-              plotlyOutput("plot", height = "800px"),
-              uiOutput("motif_pair_info")
-            ),
-            column(5,
               br(),
               plotOutput("motif1_logo", height = "100px"),
               uiOutput("motif1_info"),
               plotOutput("motif2_logo", height = "100px"),
               uiOutput("motif2_info"),
-              br(),
-              plotOutput("enr_bars", height = "500px")
+              plotOutput("motif_pair_bar", height = "500px")
             )
           )
         )
@@ -184,170 +172,132 @@ server <- function(input, output, session) {
   q <- 0.95
   arc_id <- "PPM-PCC-0.8-IC0.5-5bp"
   dat_dir <- "data"
-  
-  # Load peaks
-  pks_dt <- reactive({
-    fread(file.path(dat_dir, input$lvl, sprintf("Peaks_per_%s_mapped.tsv.gz", input$lvl)))
-  })
-  # Load enrichment data across cell types
-  mta_enr_cts <- reactive({
-    mta_enr_cts <- readRDS(
-      file.path(dat_dir, input$lvl, "motif-co-occurrences-enrichment.rds")
+
+  # Load per cell type peaks
+  pks_dt <- readRDS(file.path(
+    dat_dir, "peaks-per-cell-type-annotation.rds"
+  ))
+
+  # Load motifs cell type enrichment
+  mta_enr_dt <- readRDS(file.path(
+    dat_dir, sprintf(
+      "motif-enrichment-cell-type-%s-mona-q-%s-enr.rds",
+      arc_id, q
     )
-    if (input$lvl %in% c("cell_type", "cell_type_differential")) {
-      mta_enr_cts[, cell_type := factor(cell_type, levels = cts)]
-    } else if (input$lvl == "broad_cell_type") {
-      mta_enr_cts[, cell_type := factor(cell_type, levels = bcts)]
+  ))
+
+  # Load data for co-occurence of motifs assigned to TFs
+  mta_pair_novl_gen <- readRDS(file.path(
+    dat_dir, sprintf(
+      "motif-co-occurrences-nonovl-%s-mona-q-%s-TFs.rds",
+      arc_id, q
+    )
+  ))
+
+  # Reactive variables
+  rv_mt <- reactiveValues(
+    enr_mts = NULL, # motifs enriched in cell types
+    pks_sig = NULL, # peaks enriched in cell types
+    cts_num = NULL, # peak and motif counts in cell types
+    mtd_cnt = NULL # motif pairs counts in cell types
+  )
+
+  observeEvent(input$reload_peaks, {
+    print(sprintf(
+      "Filtering peaks: Log2FC >= %.2f & FDR <= %.2f",
+      input$peak_log2fc, input$peak_fdr
+    ))
+    
+    # Filter enriched peaks
+    pks_sig <- pks_dt[
+      Log2FC >= input$peak_log2fc &
+      FDR <= input$peak_fdr
+    ]
+    rv_mt$pks_sig <- pks_sig
+
+    # Count peaks
+    pks_num <- pks_sig[, .(n_peaks = .N), cell_type]
+    if (nrow(pks_sig) > 0) {
+
+      # Filter enriched motifs
+      mta_enr_sig <-  mta_enr_dt[
+        padj < input$motif_padj &
+        log2(fc) > input$motif_log2fc
+      ]
+      rv_mt$enr_mts <- mta_enr_sig
+
+      # Count number of motifs
+      mta_num <- mta_enr_sig[, .(n_motifs = .N), cell_type]
+      
+      # Per cell type counts
+      cts_num <- merge.data.table(pks_num, mta_num, by = "cell_type")
+      setorder(cts_num, -n_peaks)
+      rv_mt$cts_num <- cts_num
+
+      # Subset motif occurence data for enriched motifs
+      mta_pair_novl_enr <- mta_pair_novl_gen[
+        motif1 %in% mta_enr_sig$motif |
+        motif2 %in% mta_enr_sig$motif
+      ]
+
+      # Subset motif occurence data for hits in significant peaks
+      mta_pair_novl_pks <- merge.data.table(
+        mta_pair_novl_enr, pks_sig, by = "peak",
+        all = FALSE, allow.cartesian = TRUE
+      )
+
+      # Count motif pairs in significan peaks per cell type
+      mta_pair_novl_sig <- mta_pair_novl_pks[, .(count_peak_pair = .N), .(
+        cell_type,
+        motif1, motif2,
+        gene_motif1, gene_motif2,
+        gene_name_motif1, gene_name_motif2,
+        tf_family_motif1, tf_family_motif2
+      )]
+
+      # Add number of significant peaks and motifs
+      mdt_cnt <- merge.data.table(
+        mta_pair_novl_sig, cts_num, by = "cell_type"
+      )
+      mdt_cnt[, frac_peak_pair := count_peak_pair / n_peaks, by = 1:nrow(mdt_cnt)]
+
+      # add motif pair column
+      mdt_cnt[, motif_pair := sprintf(
+        "%s + %s", motif1, motif2
+      ), by = 1:nrow(mdt_cnt)]
+      mdt_cnt[, gene_pair := sprintf(
+        "%s + %s", gene_motif1, gene_motif2
+      ), by = 1:nrow(mdt_cnt)]
+      mdt_cnt[, gene_name_pair := sprintf(
+        "%s + %s", gene_name_motif1, gene_name_motif2
+      ), by = 1:nrow(mdt_cnt)]
+
+      # factor cell types
+      mdt_cnt[, cell_type := factor(cell_type, levels = cts)]
+      rv_mt$mtd_cnt <- unique(mdt_cnt)
+
     }
+
   })
 
   # Table with peaks info
   output$peaks_info <- renderUI({
-    pks_dt <- unique(pks_dt()[, .(peak, cell_type)])
-    pks_dt <- pks_dt[, .("number of peaks" = .N), cell_type]
-    setorder(pks_dt, -`number of peaks`)
-    if (nrow(pks_dt) == 0) return(NULL)
-    pks_dt <- kable(pks_dt, format = "html", col.names = NULL) %>%
+    req(!is.null(rv_mt$cts_num))
+    cts_dt <- unique(rv_mt$cts_num)
+    setnames(
+      cts_dt,
+      c("cell_type", "n_peaks", "n_motifs"),
+      c("Cell type", "Number of peaks", "Number of motifs")
+    )
+    if (nrow(cts_dt) == 0) return(NULL)
+    cts_dt <- kable(cts_dt, format = "html") %>%
       kable_styling("striped", full_width = TRUE)
-    HTML(pks_dt)
+    HTML(cts_dt)
   })
 
   # Load motif PWM data
   mta_pwm <- read_meme(file.path(dat_dir, "motif-archetypes-all.meme"))
   names(mta_pwm) <- sapply(mta_pwm, function(m) m@name)
-
-  # # # # # # # # # # #
-  #     Enrichment    #
-  # # # # # # # # # # #
-
-  # Reactive value to store data
-  rv <- reactiveValues(
-    mta_enr_gp = NULL,
-    mta_pwm = NULL,
-    mta_enr_gen = NULL
-  )
-  
-  # Reload data when button is clicked
-  observeEvent(input$reload_button, {
-    req(input$cell_type)
-
-    mta_enr_gen <- mta_enr_cts()[cell_type == input$cell_type]
-
-    # Filter and store data
-    rv$mta_enr_gen <- mta_enr_gen
-    rv$mta_enr_gp <- mta_enr_gen[frac_peak_pair > 0.01]
-  })
-  
-  # Plot limits helper
-  plot_limits_center <- function(x, center = 0) {
-    xmax <- max(abs(x) - center)
-    c(-xmax, xmax)
-  }
-  
-  # Render Plotly plot
-  output$plot <- renderPlotly({
-    req(rv$mta_enr_gp)
-    gp_enr <- ggplot(rv$mta_enr_gp, aes(count_peak_pair, log_enrichment)) +
-      geom_point(aes(color = motifs_similarity, text = gene_pair)) +
-      scale_x_continuous(trans = "log10") +
-      scale_y_continuous(limits = plot_limits_center) +
-      scale_color_viridis_c() +
-      labs(
-        x = "Co-occurrence peaks",
-        y = "Co-occurrence enrichment (log2)",
-        color = "Motifs\nsimilarity"
-      ) +
-      theme_minimal()
-    ggplotly(gp_enr, tooltip = "text")
-  })
-  
-  # Render motif logos
-  output$motif1_logo <- renderPlot({
-    event_data <- event_data("plotly_click")
-    req(event_data, rv$mta_enr_gp)
-    selected <- rv$mta_enr_gp[event_data$pointNumber + 1]
-    ggseqlogo(mta_pwm[[selected$motif1]]@motif) + theme_void()
-  })
-  
-  output$motif2_logo <- renderPlot({
-    event_data <- event_data("plotly_click")
-    req(event_data, rv$mta_enr_gp)
-    selected <- rv$mta_enr_gp[event_data$pointNumber + 1]
-    ggseqlogo(mta_pwm[[selected$motif2]]@motif) + theme_void()
-  })
-  
-  # Render detailed tables
-  output$motif1_info <- renderUI({
-    event_data <- event_data("plotly_click")
-    req(event_data, rv$mta_enr_gp, rv$mta_enr_gen)
-    selected <- rv$mta_enr_gp[event_data$pointNumber + 1]
-    motif1_info <- rv$mta_enr_gen[
-      motif1 == selected$motif1 & motif2 == selected$motif2, .(
-        motif1, count_peak_motif1, frac_peak_motif1,
-        gene_motif1, gene_name_motif1, tf_family_motif1
-      )
-    ]
-    if (nrow(motif1_info) == 0) return(NULL)
-    motif1_table <- kable(t(motif1_info), format = "html", col.names = NULL) %>%
-      kable_styling("striped", full_width = TRUE)
-    HTML(motif1_table)
-  })
-
-  output$motif2_info <- renderUI({
-    event_data <- event_data("plotly_click")
-    req(event_data, rv$mta_enr_gp, rv$mta_enr_gen)
-    selected <- rv$mta_enr_gp[event_data$pointNumber + 1]
-    motif2_info <- rv$mta_enr_gen[
-      motif1 == selected$motif1 & motif2 == selected$motif2, .(
-        motif2, count_peak_motif2, frac_peak_motif2,
-        gene_motif2, gene_name_motif2, tf_family_motif2
-      )
-    ]
-    if (nrow(motif2_info) == 0) return(NULL)
-    motif2_table <- kable(t(motif2_info), format = "html", col.names = NULL) %>%
-      kable_styling("striped", full_width = TRUE)
-    HTML(motif2_table)
-  })
-
-  output$motif_pair_info <- renderUI({
-    event_data <- event_data("plotly_click")
-    req(event_data, rv$mta_enr_gp, rv$mta_enr_gen)
-    selected <- rv$mta_enr_gp[event_data$pointNumber + 1]
-    pair_info <- rv$mta_enr_gen[
-      motif1 == selected$motif1 & motif2 == selected$motif2, .(
-        motif1, motif2, gene_pair, count_peak_pair, frac_peak_pair, log_enrichment, motifs_similarity
-      )
-    ]
-    if (nrow(pair_info) == 0) return(NULL)
-    pair_table <- kable(t(pair_info), format = "html") %>%
-      kable_styling("striped", full_width = TRUE)
-    tagList(
-      h4("Selected Motif Pair"),
-      HTML(pair_table)
-    )
-  })
-  
-  # Render enrichment accross cell types
-  output$enr_bars <- renderPlot({
-    event_data <- event_data("plotly_click")
-    req(event_data, rv$mta_enr_gp, rv$mta_enr_gen)
-    selected <- rv$mta_enr_gp[event_data$pointNumber + 1]
-    sel_mta_enr_cts <- mta_enr_cts()[motif1 == selected$motif1 & motif2 == selected$motif2]
-    ggplot(sel_mta_enr_cts, aes(cell_type, log_enrichment, fill = cell_type)) + 
-      geom_bar(stat = "identity", color = "black") +
-      scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
-      scale_fill_manual(values = c(ct_cols, bct_cols)) +
-      labs(
-        x = "Cell type",
-        y = "Enrichment (log2)",
-        title = "Motif pair enrichment across cell types"
-      ) +
-      theme_minimal() +
-      theme(
-        axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
-        legend.position = "none"
-      )
-  })
 
   # # # # ## # # # #
   #     Heatmap    #
@@ -355,217 +305,258 @@ server <- function(input, output, session) {
 
   # Filter motifs pairs to plot as heatmap
   rv_hm <- reactiveValues(
-    enr_mts = NULL,
-    mta_enr_gp = NULL
+    enr_mts = NULL, # vector of selected enriched motif pairs
+    mtd_cnt = NULL # table with enriched motif pairs
   )
-  observeEvent(input$reload_button_heatmap, {
-    
-    # Select motif pairs
-    enr_mts <- unique(
-      mta_enr_cts()[
-        frac_peak_pair > input$pair_frac &
-        enrichment > input$pair_enr &
-        count_peak_pair > input$pair_count
-      ]$motif_pair
-    )
-    rv_hm$enr_mts <- enr_mts
+  observeEvent(
+    ignoreInit = TRUE,
+    list(input$reload_peaks, input$reload_button_heatmap),
+    {
+      rv_hm$enr_mts <- NULL
+      rv_hm$mtd_cnt <- NULL
+      req(!is.null(rv_mt$mtd_cnt))
 
-    # Subset data
-    mta_enr_gp <- mta_enr_cts()[motif_pair %in% enr_mts]
-        
-    # Order pairs
-    stopifnot(all(mta_enr_gp$cell_type %in% cts))
-    mta_enr_gp[, cell_type := factor(cell_type, levels = cts)]
-    mta_enr_gp[order(motif_pair, -enrichment), max_enr_ct := as.integer(.SD[1]$cell_type), motif_pair]
-    setorder(mta_enr_gp, max_enr_ct, -enrichment, motif_pair)
-    mta_enr_gp[, motif_pair := factor(motif_pair, levels = unique(mta_enr_gp$motif_pair))]
-    mta_enr_gp[, gene_pair := factor(gene_pair, levels = unique(mta_enr_gp$gene_pair))]
+      print(sprintf(
+        "Selecting motif pairs in %s: fraction >= %.2f & count <= %.2f",
+        input$cell_type, input$pair_frac, input$pair_count
+      ))
 
-    # Ranges for plotting
-    mta_enr_gp[, log_enrichment_trimmed := log_enrichment]
-    mta_enr_gp[, log_enrichment_trimmed := pmax(log_enrichment_trimmed, 0)]
-    mta_enr_gp[, log_enrichment_trimmed := pmin(log_enrichment_trimmed, 2)]
+      # Select motif pairs
+      mts <- rv_mt$enr_mts[cell_type == input$cell_type]$motif
+      enr_mts <- unique(
+        rv_mt$mtd_cnt[
+          cell_type == input$cell_type &
+          frac_peak_pair > input$pair_frac &
+          count_peak_pair > input$pair_count &
+          (motif1 %in% mts | motif2 %in% mts)
+        ]$motif_pair
+      )
+      rv_hm$enr_mts <- enr_mts
 
-    rv_hm$mta_enr_gp <- mta_enr_gp
-    
-  })
+      # Subset data for selected motifs
+      mtd_cnt <- rv_mt$mtd_cnt[motif_pair %in% enr_mts]
+          
+      # Order cell types
+      stopifnot(all(mtd_cnt$cell_type %in% cts))
+      mtd_cnt[, cell_type := factor(
+        cell_type, levels = intersect(cts, unique(mtd_cnt$cell_type))
+      )]
+      print(sprintf("There are %d motif pairs", length(unique(mtd_cnt$motif_pair))))
+
+      # Cluster motif pairs
+      if (nrow(mtd_cnt) > 2) {
+        print(sprintf("Clustering motif pairs"))
+        tryCatch({
+          mdt_dc <- dcast.data.table(
+            unique(mtd_cnt[, .(motif_pair, cell_type, frac_peak_pair)]),
+            motif_pair ~ cell_type, value.var = "frac_peak_pair"
+          )
+          mdt_mt <- as.matrix(mdt_dc[, -1])
+          rownames(mdt_mt) <- mdt_dc[[1]]
+          hclust_res <- stats::hclust(dist(
+            mdt_mt, method = "manhattan"
+          ), method = "ward.D2")
+          motif_pair_lvl <- rownames(mdt_mt)[hclust_res$order]
+          mtd_cnt[, motif_pair := factor(motif_pair, levels = motif_pair_lvl)]
+        }, error = function(e) {
+          message(e)
+          mtd_cnt[, motif_pair := factor(motif_pair)]
+        })
+        mtd_cnt[, motif_pair_idx := as.integer(motif_pair)]
+        setorder(mtd_cnt, motif_pair_idx)
+        #print(head(unique(mtd_cnt[, .(gene_name_pair, motif_pair_idx)])))
+        #print("...")
+        #print(tail(unique(mtd_cnt[, .(gene_name_pair, motif_pair_idx)])))
+        rv_hm$mtd_cnt <- mtd_cnt
+        print(sprintf("Selected %d motif pairs", length(unique(mtd_cnt$motif_pair))))
+      }
+    }
+  )
 
 
   # Plot heatmap
-  col_vec <- c("#4d4d4d", "#e0e0e0", "#b2182b")
-  output$enrich_heatmap <- renderPlot({
-    req(!is.null(rv_hm$mta_enr_gp))
-    ggplot(rv_hm$mta_enr_gp, aes(cell_type, gene_pair, fill = log_enrichment_trimmed)) +
-      geom_tile() +
-      scale_fill_gradient2(
-        low = col_vec[1], mid = col_vec[2], high = col_vec[3], midpoint = 1
+  output$enrich_heatmap <- renderPlotly({
+    req(!is.null(rv_hm$mtd_cnt))
+    print(sprintf("Ploting heatmap"))
+    hm_gp <- ggplot(
+        rv_hm$mtd_cnt,
+        aes(
+          cell_type, motif_pair,
+          fill = frac_peak_pair, text = gene_name_pair
+        )
       ) +
-      theme_minimal() +
-      theme(
-        axis.text.x = element_text(angle = 90, hjust = 1),
-        axis.text.y = element_blank(),
-        axis.ticks.y = element_blank()
+      geom_tile() +
+      scale_fill_gradientn(
+        colours = c("#edf8b1", "#7fcdbb", "#2c7fb8", "#225ea8", "#081d58", "#000b29"), 
+        na.value = "#edf8b1"
       ) +
       labs(
-        y = sprintf("%s motif pairs", length(unique(rv_hm$mta_enr_gp$gene_pair))),
+        x = "cell type peaks",
+        y = sprintf(
+          "%s motif pairs present in > %.0f%% peaks", 
+          length(unique(rv_hm$mtd_cnt$motif_pair)),
+          input$pair_frac * 100
+        ),
+        fill = "fraction of \ncell type peaks\nwith both motifs"
+      ) +
+      theme(
+        plot.background = element_rect(fill = "white"),
+        panel.background = element_rect(fill = "white"),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 10),
+        axis.title = element_text(size = 10),
+        legend.title = element_text(size = 10),
+        legend.text = element_text(size = 10),
+        legend.position = "right"
       )
-  })
-output$enrich_heatmap <- renderPlotly({
-  req(!is.null(rv_hm$mta_enr_gp))
-
-  # color vector and corresponding positions
-  col_vec <- c("#4d4d4d", "#e0e0e0", "#b2182b")
-  positions <- c(0, 0.5, 1)
-
-  # Normalize the actual values to the range [0, 1]
-  actual_values <- rv_hm$mta_enr_gp$log_enrichment_trimmed
-  z_min <- min(actual_values)
-  z_max <- max(actual_values)
-  normalized_positions <- (actual_values - z_min) / (z_max - z_min)
-  colorscale <- lapply(seq_along(normalized_positions), function(i) list(normalized_positions[i], col_vec[i]))
-
-  # Prepare data for plotly heatmap
-  heatmap_data <- rv_hm$mta_enr_gp
-  heatmap_data[, cell_type := factor(cell_type, levels = cts)]
-  heatmap_data[, gene_pair := factor(gene_pair, levels = unique(heatmap_data$gene_pair))]
-  p <- plot_ly(
-    data = heatmap_data,
-    x = ~cell_type,
-    y = ~gene_pair,
-    z = ~log_enrichment_trimmed,
-    type = "heatmap",
-    colorscale = colorscale, # Map colors to actual values
-    zmin = z_min, # Ensure Plotly knows the actual z-range
-    zmax = z_max,
-    #colorscale = list(c(0, 0.5, 1), col_vec),
-    colorbar = list(title = "Log2\nco-occurence\nenrichment"),
-    source = "heatmap_click"
-  ) %>%
-    layout(
-      xaxis = list(
-        title = sprintf("%s cell types", length(unique(heatmap_data$cell_type))),
-        tickangle = -90
-      ),
-      yaxis = list(
-        title = sprintf("%s motif pairs", length(unique(heatmap_data$gene_pair))),
-        showticklabels = FALSE
-      )
-    )
     
+    # Make interactive plot
+    p <- ggplotly(hm_gp, tooltip = "text")
+
     # Register the click event
     event_register(p, "plotly_click")
+    p
   })
 
-  # Add reactive value for selected heatmap row
-  rv_hm_selected <- reactiveValues(selected_row = NULL)
-
-  # Capture heatmap click event
-  observe({
-    heatmap_event <- event_data("plotly_click", source = "heatmap_click")
-    req(heatmap_event, rv_hm$mta_enr_gp)
-    
-    # Extract selected row (gene_pair)
-    clicked_gene_pair <- rv_hm$mta_enr_gp$gene_pair[heatmap_event$pointNumber + 1]
-    rv_hm_selected$selected_row <- clicked_gene_pair
+  
+  # Render motif logos
+  output$motif1_logo <- renderPlot({
+    event_data <- event_data("plotly_click")
+    req(event_data, rv_hm$mtd_cnt)
+    selected_row <- as.integer(event_data$pointNumber[[1]][1] + 1)
+    selected <- rv_hm$mtd_cnt[motif_pair_idx == selected_row][1]
+    print(sprintf("selected_row: %s", selected_row))
+    tryCatch({
+      ggseqlogo(mta_pwm[[selected$motif1]]@motif) + theme_void()
+    }, error = function(e) {
+      message(e)
+      ggplot() + theme_void()
+    })
   })
   
-  # Render barplot for selected row
-  output$heatmap_barplot <- renderPlot({
-    req(rv_hm_selected$selected_row, rv_hm$mta_enr_gp)
-    
-    # Selected data
-    selected_data <- rv_hm$mta_enr_gp[gene_pair == rv_hm_selected$selected_row]
-    
-    # Add 0s for missing cell types
-    all_combinations <- CJ(
-      gene_pair = unique(selected_data$gene_pair),
-      cell_type = unique(selected_data$cell_type)
-    )
+  output$motif2_logo <- renderPlot({
+    event_data <- event_data("plotly_click")
+    req(event_data, rv_hm$mtd_cnt)
+    selected_row <- as.integer(event_data$pointNumber[[1]][1] + 1)
+    selected <- rv_hm$mtd_cnt[motif_pair_idx == selected_row][1]
+    tryCatch({
+      ggseqlogo(mta_pwm[[selected$motif2]]@motif) + theme_void()
+    }, error = function(e) {
+      message(e)
+      ggplot() + theme_void()
+    })
+  })
+  
+  # Render detailed tables
+  output$motif1_info <- renderUI({
+    event_data <- event_data("plotly_click")
+    req(event_data, rv_hm$mtd_cnt)
+    selected_row <- as.integer(event_data$pointNumber[[1]][1] + 1)
+    selected <- rv_hm$mtd_cnt[motif_pair_idx == selected_row][1]
+    motif1_info <- rv_hm$mtd_cnt[
+      motif1 == selected$motif1 & motif2 == selected$motif2 & cell_type == input$cell_type, .(
+        motif1, gene_motif1, gene_name_motif1, tf_family_motif1
+      )
+    ]
+    if (nrow(motif1_info) == 0) {
+      return(NULL)
+    } else {
+      print(motif1_info)
+      motif1_table <- kable(t(motif1_info), format = "html", col.names = NULL) %>%
+        kable_styling("striped", full_width = TRUE)
+      HTML(motif1_table)
+    }
+  })
+  
+  output$motif2_info <- renderUI({
+    event_data <- event_data("plotly_click")
+    req(event_data, rv_hm$mtd_cnt)
+    selected_row <- as.integer(event_data$pointNumber[[1]][1] + 1)
+    selected <- rv_hm$mtd_cnt[motif_pair_idx == selected_row][1]
+    motif2_info <- rv_hm$mtd_cnt[
+      motif1 == selected$motif1 & motif2 == selected$motif2 & cell_type == input$cell_type, .(
+        motif2, gene_motif2, gene_name_motif2, tf_family_motif2
+      )
+    ]
+    if (nrow(motif2_info) == 0) {
+      return(NULL)
+    } else {
+      print(motif2_info)
+      motif2_table <- kable(t(motif2_info), format = "html", col.names = NULL) %>%
+        kable_styling("striped", full_width = TRUE)
+      HTML(motif2_table)
+    }
+  })
 
-    # Join with the original data.table
-    selected_data <- merge(
-      selected_data,
-      all_combinations,
-      by = c("gene_pair", "cell_type"),
-      all = TRUE
-    )
-    selected_data[is.na(enrichment), enrichment := 0]
+  pair_info <- reactive({
+    event_data <- event_data("plotly_click")
+    req(event_data, rv_hm$mtd_cnt)
+    selected_row <- as.integer(event_data$pointNumber[[1]][1] + 1)
+    selected <- rv_hm$mtd_cnt[motif_pair_idx == selected_row][1]
+    pair_info <- rv_hm$mtd_cnt[
+      motif1 == selected$motif1 & motif2 == selected$motif2, .(
+        cell_type, count_peak_pair, frac_peak_pair
+      )
+    ]
+    setorder(pair_info, -frac_peak_pair)
+    pair_info
+  })
 
-    # Plot
-    ggplot(selected_data, aes(cell_type, enrichment, fill = cell_type)) +
-      geom_bar(stat = "identity", color = "black") +
+  
+  output$motif_pair_bar <- renderPlot({
+    req(event_data("plotly_click"))
+    dt <- pair_info()
+    dt[, cell_type := factor(
+      cell_type, levels = intersect(cts, unique(dt$cell_type))
+    )]
+    dt <- melt.data.table(
+      dt, 
+      measure.vars = c("count_peak_pair", "frac_peak_pair"),
+      variable.name = "count_type", value.name = "count"
+    )
+    ggplot(dt, aes(cell_type, count, fill = cell_type)) +
+      geom_bar(stat = "identity") +
+      scale_fill_manual(values = ct_cols) +
       scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
-      scale_fill_manual(values = c(ct_cols, bct_cols)) +
-      labs(
-        x = "Cell type",
-        y = "Enrichment (log2)",
-        title = rv_hm_selected$selected_row
+      facet_grid(
+        count_type ~ ., 
+        scales = "free_y", 
+        switch = "y",
+        labeller = labeller(count_type = c(
+          "count_peak_pair" = "Peak count",
+          "frac_peak_pair" = "Peak fraction"
+        ))
       ) +
-      theme_minimal() +
+      labs(y = "Count of peaks\nwith motif pair") +
       theme(
-        axis.text.x = element_text(angle = 90, hjust = 1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", fill = NA),
+        axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 12),
+        axis.text.y = element_text(size = 12),
+        strip.text = element_text(size = 12),
+        strip.background = element_blank(),
+        strip.placement = "outside",
+        axis.ticks.x = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
         legend.position = "none"
       )
   })
-
-  # Render motif logos
-  output$motif1_hm_logo <- renderPlot({
-    event_data <- event_data("plotly_click", source = "heatmap_click")
-    req(rv_hm_selected$selected_row, rv_hm$mta_enr_gp)
-    selected <- rv_hm$mta_enr_gp[event_data$pointNumber + 1]
-    ggseqlogo(mta_pwm[[selected$motif1]]@motif) + theme_void()
-  })
   
-  output$motif2_hm_logo <- renderPlot({
-    event_data <- event_data("plotly_click", source = "heatmap_click")
-    req(rv_hm_selected$selected_row, rv_hm$mta_enr_gp)
-    selected <- rv_hm$mta_enr_gp[event_data$pointNumber + 1]
-    ggseqlogo(mta_pwm[[selected$motif2]]@motif) + theme_void()
-  })
-
-  # Render motif tables
-  output$motif1_hm_info <- renderUI({
-    event_data <- event_data("plotly_click", source = "heatmap_click")
-    req(event_data, rv_hm$mta_enr_gp)
-    selected <- rv_hm$mta_enr_gp[event_data$pointNumber + 1]
-    motif1_info <- unique(selected[, .(
-      motif1, gene_motif1, gene_name_motif1, tf_family_motif1
-    )])
-    if (nrow(motif1_info) == 0) return(NULL)
-    motif1_table <- kable(t(motif1_info), format = "html", col.names = NULL) %>%
-      kable_styling("striped", full_width = TRUE)
-    HTML(motif1_table)
-  })
-
-  output$motif2_hm_info <- renderUI({
-    event_data <- event_data("plotly_click", source = "heatmap_click")
-    req(event_data, rv_hm$mta_enr_gp)
-    selected <- rv_hm$mta_enr_gp[event_data$pointNumber + 1]
-    motif2_info <- unique(selected[, .(
-      motif2, gene_motif2, gene_name_motif2, tf_family_motif2
-    )])
-    if (nrow(motif2_info) == 0) return(NULL)
-    motif2_table <- kable(t(motif2_info), format = "html", col.names = NULL) %>%
-      kable_styling("striped", full_width = TRUE)
-    HTML(motif2_table)
-  })
-
-  # Render table for selected row
-  output$heatmap_row_table <- renderUI({
-    req(rv_hm_selected$selected_row, rv_hm$mta_enr_gp)
-    
-    selected_table <- rv_hm$mta_enr_gp[gene_pair == rv_hm_selected$selected_row, .(
-      cell_type, enrichment, frac_peak_pair, count_peak_pair, motifs_similarity
-    )]
-    setorder(selected_table, -enrichment)
-    if (nrow(selected_table) == 0) return(NULL)
-    
-    HTML(
-      kable(selected_table, format = "html", row.names = FALSE) %>%
+  output$motif_pair_info <- renderUI({
+    req(event_data("plotly_click"))
+    if (nrow(pair_info()) == 0) {
+      return(NULL)
+    } else {
+      pair_table <- kable(pair_info(), format = "html") %>%
         kable_styling("striped", full_width = TRUE)
-    )
+      tagList(
+        HTML(pair_table)
+      )
+    }
   })
-
 
 }
 

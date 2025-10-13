@@ -4,7 +4,28 @@ This repository contains code for downstream analysis of _Nemtostella vectensis_
  
 ![image](img/header.png)
 
-# Code Overview
+## Table of Contents
+
+- [Code](#code)
+  - [Data Processing & Clustering](#data-processing--clustering)
+  - [Peak Analysis](#peak-analysis)
+  - [Motif Analysis](#motif-analysis)
+  - [Gene Regulatory Networks](#gene-regulatory-networks)
+  - [Advanced Analyses](#advanced-analyses)
+  - [Visualization & Documentation](#visualization--documentation)
+  - [Utility Functions](#utility-functions)
+  - [Specialized Functions](#specialized-functions)
+  - [Interactive Applications](#interactive-applications)
+  - [Processing Scripts](#processing-scripts)
+- [Data Files](#data-files)
+  - [Annotations and Genomes](#annotations-and-genomes)
+  - [Results](#results)
+    - [Cell Type Annotations](#cell-type-annotations)
+    - [Motifs](#motifs)
+    - [Mapping of Motifs to TFs](#mapping-of-motifs-to-tfs)
+    - [Gene Regulatory Networks (GRNs)](#gene-regulatory-networks-grns)
+
+# Code
 
 The code is organized into numbered notebooks and scripts that follow a logical progression from data processing to downstream analyses.
 
@@ -77,9 +98,8 @@ The code is organized into numbered notebooks and scripts that follow a logical 
 - `metacell_downstream_functions/` - Metacell analysis functions
 
 ### Interactive Applications
-- `apps/scatac_atlas/` - Shiny app for interactive data exploration
-- `apps/motif_syntax/` - Motif syntax visualization app
-- `apps/trees/` - Phylogenetic tree visualization
+- `apps/scatac_atlas/` - Chromatin accessibility atlas app ([link](https://sebelab.crg.eu/nematostella-cis-regulatory-atlas/))
+- `apps/motif_syntax/` - Motif co-occurrence visualization app ([link](https://sebelab.crg.eu/motif-syntax/))
 
 ### Processing Scripts
 - `scripts/` - Various shell and R scripts for:
