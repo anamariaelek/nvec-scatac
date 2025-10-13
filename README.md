@@ -55,7 +55,7 @@ The code is organized into numbered notebooks and scripts that follow a logical 
 12. `12_chromBPNet.qmd` - chromBPNet models
     - Training bias model and cell type-specific chromBPNet models
 
-13. `13_crested_trained.ipynb`, `14_crested_eval.ipynb`, `15_crested_explain.ipynb` - crested model
+13. `13_CREsted_trained.ipynb`, `14_CREsted_eval.ipynb`, `15_CREsted_explain.ipynb` - crested model
       - Training, evaluation, and interpretation of crested models
 
 14. `16_sPyce.ipynb` - cross-species scATAC integration
@@ -146,6 +146,3 @@ The analysis generates the following key resources listed below.
   - `grn_tfs_(cell_type|broad_cell_type)*` - GRNs linking TFs to target TFs 
   - `grn_tfs_info_*` - information about TFs in the GRNs (no links)
 
-### Models
-
-TBA
