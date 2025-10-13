@@ -21,6 +21,7 @@ This repository contains code for downstream analysis of _Nemtostella vectensis_
   - [Annotations and Genomes](#annotations-and-genomes)
   - [Results](#results)
     - [Cell Type Annotations](#cell-type-annotations)
+    - [Peaks](#peaks)
     - [Motifs](#motifs)
     - [Mapping of Motifs to TFs](#mapping-of-motifs-to-tfs)
     - [Gene Regulatory Networks (GRNs)](#gene-regulatory-networks-grns)
