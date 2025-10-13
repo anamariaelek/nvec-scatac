@@ -6,7 +6,7 @@ mouse
     name
         mouse
     peak_path
-        /home/anamaria/cluster/aelek/proj/scATAC_nvec_v2/Nematostella_scATAC/results/sPYce/inputs/mmus/peaks.bed
+        /home/anamaria/cluster/aelek/proj/scATAC_nvec_v2/Nematostella_scATAC/results/sPYce/inputs/mmus/peaks_250bp.bed
 nematostella_gastrula
     genome_path
         /home/anamaria/cluster/aelek/proj/scATAC_nvec_v2/Nematostella_scATAC/genome/Nvec_vc1.1_gDNA.fasta
