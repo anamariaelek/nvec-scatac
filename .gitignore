@@ -73,6 +73,7 @@ results/Modules/PFAM/ics-hclust/results
 results/Motifs/homer/
 results/Motifs/streme/*/*fasta
 results/Motifs/streme/*/*/*log
+results/PeakMatrix/
 results/Peaks/annotaton_promoters_adult.rds
 results/Peaks/annotaton_promoters_gastrula.rds
 results/Peaks/deeptools/
