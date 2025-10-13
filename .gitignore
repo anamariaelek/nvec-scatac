@@ -48,6 +48,9 @@ results/chromBPNet/bias_model
 results/chromBPNet/chrombpnet_model
 results/Clustering/Footprint_Adult_Gastrula_Peaks_SEACell_qnorm.rds
 results/Clustering/Sum_Adult_Gastrula_Peaks_SEACell_qnorm.rds
+results/CREsted/bw*
+results/CREsted/models
+results/CREsted/modisco
 results/GeneScoreMatrix/Matrix-Gene-Scores-SEACell-FC.rds
 results/GRN/networks/*/*.tsv
 results/GRN/networks/*/*.xlsx

@@ -52,6 +52,15 @@ The code is organized into numbered notebooks and scripts that follow a logical 
     - gkm-SVM classifiers for cell type prediction from sequence
     - Comprehensive Python notebook with 68 cells for model training/evaluation
 
+12. `12_chromBPNet.qmd` - chromBPNet models
+    - Training bias model and cell type-specific chromBPNet models
+
+13. `13_crested_trained.ipynb`, `14_crested_eval.ipynb`, `15_crested_explain.ipynb` - crested model
+      - Training, evaluation, and interpretation of crested models
+
+14. `16_sPyce.ipynb` - cross-species scATAC integration
+      - Integration with mouse data
+
 ### Visualization & Documentation
  `90_Figures.qmd` - Figure generation for publication
  `90_Genome_browser.ipynb` - Genome browser track preparation
