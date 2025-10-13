@@ -140,6 +140,16 @@ The analysis generates the following key resources listed below.
 
 - UMAP coordinates for metacells: `results/Clustering/SEACells_adult_gastrula_UMAP_FC3_gastrula_FC5_adult_qnorm.tsv`
 
+### Peaks
+
+- All peaks in adult and gastrula: `results/Peaks/Peaks_cell_type_mapped.bed`
+
+- Filtered peaks assigned to cell types: `results/Peaks/Peaks_cell_type_mapped_cell_type_assignment.tsv.gz`
+
+- Filtered peaks assigned to genes: `results/Peaks/Peaks_cell_type_mapped_gene_assignment_coaccess.tsv.gz`
+
+- Filtered peaks assigned to cell types and genes, and classified as promoters (CP, SP, AP) or non-promoters (NO): `results/Peaks/Peaks_cell_type_mapped_cell_type_and_gene_assignment_coaccess.tsv.gz`
+
 ### Motifs
 
 - Archetype motifs PWMs: `results/Archetypes/motif-archetypes-PPM-PCC-0.8-IC0.5-5bp-pwms.*` 
