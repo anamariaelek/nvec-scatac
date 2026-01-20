@@ -153,11 +153,13 @@ The analysis generates the following key resources listed below.
 
 ### Motifs
 
-- Archetype motifs PWMs: `results/Archetypes/motif-archetypes-PPM-PCC-0.8-IC0.5-5bp-pwms.*` 
+- Archetype motifs PWMs: 
+   - 1,727 motifs used in the downstream analysis: `results/Archetypes/motif-archetypes-PPM-PCC-0.8-IC0.5-5bp-pwms.*`   
+   - 1,292 motifs generated using the more stringent minimum motif length filtering: `results/Archetypes/motif-archetypes-PPM-PCC-0.8-IC0.5-8bp-pwms.*`
 
 - Dictionary mapping input motifs to archetypes: `results/Archetypes/motif-archetypes-PPM-PCC-0.8-IC0.5-5bp.dict`
 
-- Archetype motif enrichments in cell types: `results/Archetypes/motif-enrichment-cell-type-archetypes-PPM-PCC-0.8-IC0.5-8bp-mona-*`
+- Archetype motif enrichments in cell types: `results/Archetypes/motif-enrichment-cell-type-archetypes-PPM-PCC-0.8-IC0.5-5bp-mona-*`
 
 ### Mapping of Motifs to TFs
 
